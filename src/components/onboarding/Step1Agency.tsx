@@ -358,7 +358,6 @@ export function Step1Agency({ data, onChange }: Step1AgencyProps) {
                 <HeroCover
                   clientName="Propopad Inc."
                   proposalTitle="Brand Evolution & Digital Growth Strategy"
-                  subtitle="A comprehensive approach to repositioning your brand and accelerating digital presence across all channels."
                   date={new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                 />
               </div>
