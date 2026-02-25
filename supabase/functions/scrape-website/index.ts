@@ -98,6 +98,7 @@ serve(async (req) => {
     }
 
     // Logo detection — ONLY use transparent-capable formats (SVG, PNG)
+    // Only look in the header area (first 5000 chars) to avoid content images
     const urlObj = new URL(targetUrl);
     const resolveUrl = (u: string) => {
       if (!u) return '';
@@ -107,30 +108,39 @@ serve(async (req) => {
       return urlObj.origin + '/' + u;
     };
 
+    // Extract header region for logo search (between <header> tags, or first 5000 chars)
+    const headerMatch = html.match(/<header[\s\S]*?<\/header>/i);
+    const headerHtml = headerMatch ? headerMatch[0] : html.slice(0, 5000);
+
     const logoImgPatterns = [
-      /<img[^>]*(?:class|alt|id)=["'][^"']*logo[^"']*["'][^>]*src=["']([^"']+)["']/gi,
+      // img with "logo" in src path
       /<img[^>]*src=["']([^"']*logo[^"']*)["']/gi,
-      /<(?:a|div|span|header)[^>]*class=["'][^"']*logo[^"']*["'][^>]*>[\s\S]*?<img[^>]*src=["']([^"']+)["']/gi,
+      // img inside element with logo class/id (only direct children, no greedy matching)
+      /<(?:a|div|span)[^>]*(?:class|id)=["'][^"']*\blogo\b[^"']*["'][^>]*>\s*<img[^>]*src=["']([^"']+)["']/gi,
     ];
 
     let bestLogo: string | null = null;
 
     for (const pattern of logoImgPatterns) {
-      const matches = [...html.matchAll(pattern)];
+      const matches = [...headerHtml.matchAll(pattern)];
       for (const m of matches) {
-        const src = m[1];
+        const src = m[1] || m[2];
         if (!src) continue;
         const resolved = resolveUrl(src);
-        if (resolved.match(/\.svg(\?|$)/i)) {
+        // Only accept SVG or PNG
+        if (resolved.match(/\.svg(\?|$|&)/i)) {
           bestLogo = resolved;
           break;
         }
-        if (!bestLogo && resolved.match(/\.png(\?|$)/i)) {
-          bestLogo = resolved;
+        if (!bestLogo && resolved.match(/\.png(\?|$|&)/i)) {
+          // Additional check: skip if URL looks like a content/hero image (very long hash paths without "logo")
+          const urlLower = resolved.toLowerCase();
+          if (urlLower.includes('logo') || urlLower.includes('brand') || urlLower.includes('icon')) {
+            bestLogo = resolved;
+          }
         }
-        // Skip JPEG/GIF/WebP — not transparent
       }
-      if (bestLogo?.match(/\.svg(\?|$)/i)) break;
+      if (bestLogo?.match(/\.svg(\?|$|&)/i)) break;
     }
 
     // Check for SVG/PNG favicon as fallback
@@ -138,11 +148,11 @@ serve(async (req) => {
       const iconLinks = [...html.matchAll(/<link[^>]*rel=["'](?:icon|apple-touch-icon|shortcut icon)["'][^>]*href=["']([^"']+)["'][^>]*/gi)];
       for (const m of iconLinks) {
         const href = resolveUrl(m[1]);
-        if (href.match(/\.svg(\?|$)/i)) {
+        if (href.match(/\.svg(\?|$|&)/i)) {
           bestLogo = href;
           break;
         }
-        if (!bestLogo && href.match(/\.png(\?|$)/i)) {
+        if (!bestLogo && href.match(/\.png(\?|$|&)/i)) {
           const sizeMatch = m[0].match(/sizes=["'](\d+)/i);
           if (sizeMatch && parseInt(sizeMatch[1]) >= 128) {
             bestLogo = href;
@@ -153,7 +163,8 @@ serve(async (req) => {
 
     // Do NOT fall back to og:image — it's almost never transparent
     if (bestLogo) {
-      result.logo_url = bestLogo;
+      // Clean up HTML entities in URL
+      result.logo_url = bestLogo.replace(/&amp;/g, '&');
     }
 
     // Theme color (brand color)
