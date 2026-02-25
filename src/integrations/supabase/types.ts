@@ -42,6 +42,7 @@ export type Database = {
           scraped_data: Json | null
           secondary_color: string | null
           state: string | null
+          tagline: string | null
           website: string | null
           zip: string | null
         }
@@ -72,6 +73,7 @@ export type Database = {
           scraped_data?: Json | null
           secondary_color?: string | null
           state?: string | null
+          tagline?: string | null
           website?: string | null
           zip?: string | null
         }
@@ -102,6 +104,7 @@ export type Database = {
           scraped_data?: Json | null
           secondary_color?: string | null
           state?: string | null
+          tagline?: string | null
           website?: string | null
           zip?: string | null
         }
