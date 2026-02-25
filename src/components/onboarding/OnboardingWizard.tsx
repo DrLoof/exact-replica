@@ -12,6 +12,8 @@ import { Step7Proposal } from './Step7Proposal';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getDefaultModulesForGroup } from '@/lib/defaultModules';
+import type { ModuleData } from './Step3Modules';
 
 export function OnboardingWizard() {
   const navigate = useNavigate();
@@ -25,6 +27,8 @@ export function OnboardingWizard() {
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   // Step 3: Selected modules
   const [selectedModules, setSelectedModules] = useState<Record<string, boolean>>({});
+  // Step 3: Module overrides (edits to name/desc/price)
+  const [moduleOverrides, setModuleOverrides] = useState<Record<string, Partial<ModuleData>>>({});
   // Step 5: Pricing data
   const [pricingData, setPricingData] = useState<any>({});
   // Group name lookup
@@ -146,7 +150,12 @@ export function OnboardingWizard() {
             if (!groupId) return [];
 
             return getDefaultModulesForGroup(groupName)
-              .filter((_, i) => selectedModules[`${groupName}-${i}`] !== false)
+              .map((defaultMod, i) => {
+                const key = `${groupName}-${i}`;
+                const override = moduleOverrides[key] || {};
+                return { ...defaultMod, ...override, key };
+              })
+              .filter((mod) => selectedModules[mod.key] !== false)
               .map((mod, i) => ({
                 agency_id: agency.id,
                 group_id: groupId,
@@ -326,7 +335,7 @@ export function OnboardingWizard() {
         <div className="mx-auto max-w-4xl">
           {step === 1 && <Step1Agency data={agencyData} onChange={setAgencyData} />}
           {step === 2 && <Step2Groups selectedGroups={selectedGroups} onChange={setSelectedGroups} moduleCounts={Object.fromEntries(Object.entries(groupNameMap).map(([id, name]) => [name, getDefaultModulesForGroup(name).length]))} />}
-          {step === 3 && <Step3Modules selectedGroupNames={selectedGroupNames} selectedModules={selectedModules} onChange={setSelectedModules} />}
+          {step === 3 && <Step3Modules selectedGroupNames={selectedGroupNames} selectedModules={selectedModules} moduleOverrides={moduleOverrides} currencySymbol={pricingData.currency_symbol || '$'} onChange={setSelectedModules} onOverride={setModuleOverrides} />}
           {step === 4 && <Step4Bundles />}
           {step === 5 && <Step5Pricing data={pricingData} onChange={setPricingData} />}
           {step === 6 && <Step6Profile />}
@@ -370,48 +379,4 @@ export function OnboardingWizard() {
   );
 }
 
-// Helper: default modules per group (matches Step3Modules)
-function getDefaultModulesForGroup(groupName: string) {
-  const defaults: Record<string, { name: string; shortDesc: string; pricingModel: string; price: number }[]> = {
-    'Brand & Creative': [
-      { name: 'Brand Identity System', shortDesc: 'Logo, typography, color palette, and brand guidelines', pricingModel: 'fixed', price: 8500 },
-      { name: 'Brand Messaging & Voice', shortDesc: 'Brand positioning, messaging framework, and tone of voice', pricingModel: 'fixed', price: 4500 },
-      { name: 'Graphic Design Retainer', shortDesc: 'Ongoing design support for marketing materials', pricingModel: 'monthly', price: 2500 },
-    ],
-    'Website & Digital': [
-      { name: 'Website Design & Development', shortDesc: 'Custom website design, development, and launch', pricingModel: 'fixed', price: 15000 },
-      { name: 'Website Copywriting', shortDesc: 'Conversion-focused copy for all website pages', pricingModel: 'fixed', price: 3500 },
-      { name: 'Website Maintenance', shortDesc: 'Ongoing updates, security, and hosting management', pricingModel: 'monthly', price: 800 },
-    ],
-    'Content & Copywriting': [
-      { name: 'Content Strategy', shortDesc: 'Audience research, content pillars, and editorial calendar', pricingModel: 'fixed', price: 5000 },
-      { name: 'Blog Writing', shortDesc: 'SEO-optimized blog posts with keyword research', pricingModel: 'monthly', price: 2000 },
-      { name: 'Email Copywriting', shortDesc: 'Email sequences, campaigns, and newsletter content', pricingModel: 'fixed', price: 3000 },
-    ],
-    'SEO & Organic Growth': [
-      { name: 'SEO Strategy & Implementation', shortDesc: 'Technical SEO, on-page optimization, and link building', pricingModel: 'monthly', price: 3500 },
-      { name: 'Technical SEO Audit', shortDesc: 'Comprehensive site audit with actionable recommendations', pricingModel: 'fixed', price: 2500 },
-    ],
-    'Paid Advertising': [
-      { name: 'Paid Search (PPC)', shortDesc: 'Google Ads management with keyword strategy', pricingModel: 'monthly', price: 3000 },
-      { name: 'Paid Social Advertising', shortDesc: 'Meta, LinkedIn, and TikTok ad campaigns', pricingModel: 'monthly', price: 2500 },
-      { name: 'Landing Page Design', shortDesc: 'High-converting landing pages for campaigns', pricingModel: 'fixed', price: 3500 },
-    ],
-    'Social Media': [
-      { name: 'Social Media Management', shortDesc: 'Content creation, scheduling, and community management', pricingModel: 'monthly', price: 3000 },
-      { name: 'Short-Form Video', shortDesc: 'Reels, TikToks, and YouTube Shorts production', pricingModel: 'monthly', price: 2500 },
-    ],
-    'Email Marketing': [
-      { name: 'Email Marketing Strategy', shortDesc: 'Full email strategy with segmentation and automation', pricingModel: 'fixed', price: 4000 },
-      { name: 'Email Automation', shortDesc: 'Automated sequences for nurture, onboarding, and retention', pricingModel: 'fixed', price: 3500 },
-    ],
-    'Analytics & Data': [
-      { name: 'Analytics Setup', shortDesc: 'GA4, Tag Manager, and conversion tracking implementation', pricingModel: 'fixed', price: 2500 },
-      { name: 'Conversion Rate Optimization', shortDesc: 'A/B testing, user research, and funnel optimization', pricingModel: 'monthly', price: 3000 },
-    ],
-    'Marketing Strategy': [
-      { name: 'Marketing Strategy & Consulting', shortDesc: 'Strategic planning, market analysis, and growth roadmap', pricingModel: 'fixed', price: 8000 },
-    ],
-  };
-  return defaults[groupName] || [];
-}
+// getDefaultModulesForGroup is now imported from @/lib/defaultModules
