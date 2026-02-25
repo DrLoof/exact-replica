@@ -344,7 +344,7 @@ export function Step1Agency({ data, onChange }: Step1AgencyProps) {
         <div className="sticky top-8 overflow-hidden rounded-2xl border border-border shadow-lg">
           <BrandProvider brand={{
             agencyName: (data.name || 'Your Agency').toUpperCase(),
-            agencyFullName: data.name || 'Your Agency',
+            agencyFullName: (data.name || 'Your Agency').split(/\s+/).slice(0, 3).join(' '),
             primaryColor: data.brand_color || '#fc956e',
             darkColor: '#0A0A0A',
             logoUrl: data.logo_url || null,
