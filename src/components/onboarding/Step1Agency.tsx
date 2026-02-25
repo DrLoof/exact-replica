@@ -47,6 +47,7 @@ export function Step1Agency({ data, onChange }: Step1AgencyProps) {
         brand_color: result.brand_color,
         logo_url: result.logo_url,
         tagline: result.tagline,
+        address: result.address,
       };
 
       const filled = new Set<string>();
@@ -58,7 +59,7 @@ export function Step1Agency({ data, onChange }: Step1AgencyProps) {
       updatedData.detected_colors = result.detected_colors || [];
 
       // Fields that should always be overwritten by autofill (even if they have a default value)
-      const alwaysOverwrite = new Set(['name', 'tagline', 'brand_color', 'logo_url']);
+      const alwaysOverwrite = new Set(['name', 'tagline', 'brand_color', 'logo_url', 'address']);
 
       for (const [field, value] of Object.entries(fieldMap)) {
         if (value && (alwaysOverwrite.has(field) || !data[field])) {
@@ -71,7 +72,7 @@ export function Step1Agency({ data, onChange }: Step1AgencyProps) {
       }
 
       const count = filled.size;
-      toast.success(`Found ${count} of 6 fields from your website`);
+      toast.success(`Found ${count} of 7 fields from your website`);
 
       // Auto-fade badges after 4 seconds
       setTimeout(() => setAutoFilledFields(new Set()), 4000);
@@ -235,7 +236,10 @@ export function Step1Agency({ data, onChange }: Step1AgencyProps) {
 
           {/* Address */}
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Address</label>
+            <label className="mb-1.5 flex items-center text-sm font-medium text-foreground">
+              Address
+              <AutoFilledBadge field="address" />
+            </label>
             <textarea
               placeholder="123 Main St, Suite 100&#10;New York, NY 10001"
               value={data.address || ''}
