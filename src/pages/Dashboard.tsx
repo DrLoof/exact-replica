@@ -4,6 +4,7 @@ import { mockProposals, mockActivityFeed } from '@/lib/mockData';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { ProposalStatus } from '@/types';
+import { useAuth } from '@/hooks/useAuth';
 
 const statusConfig: Record<ProposalStatus, { label: string; className: string }> = {
   draft: { label: 'Draft', className: 'bg-status-draft/15 text-status-draft' },
@@ -30,6 +31,8 @@ function getGreeting() {
 }
 
 export default function Dashboard() {
+  const { userProfile } = useAuth();
+  const firstName = userProfile?.full_name?.split(' ')[0] || 'there';
   const stats = [
     { label: 'Total Proposals', value: '47', sub: 'All time', icon: FileText, color: 'border-brand' },
     { label: 'Active Proposals', value: '8', sub: 'Sent & viewed', icon: Send, color: 'border-status-info' },
@@ -42,7 +45,7 @@ export default function Dashboard() {
       {/* Greeting */}
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{getGreeting()}, John</h1>
+          <h1 className="text-2xl font-bold text-foreground">{getGreeting()}, {firstName}</h1>
           <p className="mt-1 text-sm text-muted-foreground">Here's what's happening with your proposals</p>
         </div>
         <Link

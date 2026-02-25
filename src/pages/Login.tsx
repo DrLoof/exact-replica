@@ -1,10 +1,31 @@
 import { Sparkles } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export default function Login() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      navigate('/dashboard');
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="flex min-h-screen">
-      {/* Left panel */}
       <div className="flex flex-1 flex-col justify-center px-8 py-12 sm:px-16 lg:px-24">
         <div className="mx-auto w-full max-w-sm">
           <div className="mb-8 flex items-center gap-2.5">
@@ -17,12 +38,15 @@ export default function Login() {
           <h1 className="font-display text-2xl font-bold text-foreground">Welcome back</h1>
           <p className="mt-2 text-sm text-muted-foreground">Sign in to your account to continue</p>
 
-          <form className="mt-8 space-y-4" onSubmit={(e) => e.preventDefault()}>
+          <form className="mt-8 space-y-4" onSubmit={handleLogin}>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-foreground">Email</label>
               <input
                 type="email"
                 placeholder="you@agency.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
                 className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
               />
             </div>
@@ -31,22 +55,19 @@ export default function Login() {
               <input
                 type="password"
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
                 className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
               />
             </div>
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                <input type="checkbox" className="rounded border-border" />
-                Remember me
-              </label>
-              <a href="#" className="text-sm text-brand hover:text-brand-hover">Forgot password?</a>
-            </div>
-            <Link
-              to="/dashboard"
-              className="block w-full rounded-lg bg-brand py-2.5 text-center text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover"
+            <button
+              type="submit"
+              disabled={loading}
+              className="block w-full rounded-lg bg-brand py-2.5 text-center text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover disabled:opacity-50"
             >
-              Sign in
-            </Link>
+              {loading ? 'Signing in...' : 'Sign in'}
+            </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
@@ -56,7 +77,6 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Right panel - brand */}
       <div className="hidden flex-1 items-center justify-center bg-brand lg:flex">
         <div className="max-w-md px-12 text-center">
           <Sparkles className="mx-auto mb-6 h-12 w-12 text-primary-foreground/80" />

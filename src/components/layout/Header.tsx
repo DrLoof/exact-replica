@@ -1,11 +1,14 @@
+import { useAuth } from '@/hooks/useAuth';
 import { Bell, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function Header() {
+  const { agency } = useAuth();
+
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-background/80 px-8 backdrop-blur-sm">
       <div>
-        <h2 className="text-sm font-medium text-muted-foreground">Victory Creative</h2>
+        <h2 className="text-sm font-medium text-muted-foreground">{agency?.name || 'My Agency'}</h2>
       </div>
       <div className="flex items-center gap-3">
         <Link
