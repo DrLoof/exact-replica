@@ -65,23 +65,11 @@ export function HeroCover({
           className="flex items-center gap-3"
         >
           {brand.logoUrl ? (
-            <>
-              <img
-                src={brand.logoUrl}
-                alt={brand.agencyName}
-                className="h-10 w-auto object-contain"
-              />
-              <span
-                className="tracking-[0.2em] uppercase"
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  color: brand.darkColor,
-                }}
-              >
-                {brand.agencyName}
-              </span>
-            </>
+            <img
+              src={brand.logoUrl}
+              alt={brand.agencyName}
+              className="h-10 w-auto object-contain"
+            />
           ) : (
             <span
               className="tracking-[0.15em] uppercase"
