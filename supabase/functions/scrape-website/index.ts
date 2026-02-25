@@ -3,7 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 serve(async (req) => {
@@ -45,14 +45,40 @@ serve(async (req) => {
     // Extract data from HTML
     const result: Record<string, any> = {};
 
-    // Title / Agency Name
+    // Title / Agency Name - extract and clean thoroughly
     const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
     if (titleMatch) {
       let title = titleMatch[1].trim();
-      // Clean common suffixes
-      title = title.replace(/\s*[-|–—]\s*(Home|Homepage|Welcome).*$/i, "").trim();
+      // Remove common suffixes/prefixes with separators
+      title = title.replace(/\s*[-|–—:·•]\s*(Home|Homepage|Welcome|Start|Startsida|Hem|Accueil|Inicio|Startseite).*$/i, "").trim();
       title = title.replace(/\s*[-|–—]\s*$/i, "").trim();
+
+      // If title has a separator, try to extract the brand name (usually the shorter/last part)
+      const separators = [' - ', ' | ', ' – ', ' — ', ' · '];
+      for (const sep of separators) {
+        if (title.includes(sep)) {
+          const parts = title.split(sep).map(p => p.trim()).filter(Boolean);
+          // The brand name is typically the shortest part or the last part
+          // Heuristic: pick the part that looks most like a company name (shorter, fewer common words)
+          if (parts.length >= 2) {
+            // Sort by length, prefer shorter as brand name
+            const sorted = [...parts].sort((a, b) => a.length - b.length);
+            // If the shortest part is under 60 chars, use it as the name
+            title = sorted[0].length < 60 ? sorted[0] : parts[parts.length - 1];
+          }
+          break;
+        }
+      }
+      
       result.name = title;
+    }
+
+    // OG site_name (often the cleanest brand name)
+    const ogSiteNameMatch = html.match(/<meta[^>]*property=["']og:site_name["'][^>]*content=["']([^"']+)["']/i)
+      || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:site_name["']/i);
+    if (ogSiteNameMatch) {
+      // og:site_name is usually the cleanest brand name, prefer it
+      result.name = ogSiteNameMatch[1].trim();
     }
 
     // Meta description (tagline)
@@ -60,6 +86,15 @@ serve(async (req) => {
       || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']description["']/i);
     if (descMatch) {
       result.tagline = descMatch[1].trim().slice(0, 200);
+    }
+
+    // OG title as fallback for name
+    if (!result.name) {
+      const ogTitleMatch = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i)
+        || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:title["']/i);
+      if (ogTitleMatch) {
+        result.name = ogTitleMatch[1].trim();
+      }
     }
 
     // OG Image (logo candidate)
@@ -107,18 +142,74 @@ serve(async (req) => {
       result.phone = phoneMatch[1].trim();
     }
 
+    // Detect language from html lang attribute or content
+    const langMatch = html.match(/<html[^>]*\slang=["']([^"']+)["']/i);
+    const detectedLang = langMatch ? langMatch[1].split('-')[0].toLowerCase() : null;
+    const isNonEnglish = detectedLang && detectedLang !== 'en';
+
+    // Simple translation for common non-English text in name/tagline
+    // For non-English sites, try to clean up the name and provide a translated tagline hint
+    if (isNonEnglish) {
+      result.detected_language = detectedLang;
+      
+      // If og:description is available in English, prefer it
+      const ogDescMatch = html.match(/<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']+)["']/i)
+        || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:description["']/i);
+      if (ogDescMatch) {
+        // Sometimes og:description is more concise
+        const ogDesc = ogDescMatch[1].trim();
+        if (ogDesc.length < (result.tagline?.length || Infinity)) {
+          result.tagline = ogDesc;
+        }
+      }
+
+      // Use Google Translate API (free tier, no key needed for small requests)
+      try {
+        const textsToTranslate: string[] = [];
+        const fieldKeys: string[] = [];
+
+        if (result.tagline) {
+          textsToTranslate.push(result.tagline);
+          fieldKeys.push('tagline');
+        }
+        // Only translate name if it looks like a sentence (>3 words), not a brand name
+        if (result.name && result.name.split(/\s+/).length > 3) {
+          textsToTranslate.push(result.name);
+          fieldKeys.push('name');
+        }
+
+        if (textsToTranslate.length > 0) {
+          const translateUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${detectedLang}&tl=en&dt=t&q=${encodeURIComponent(textsToTranslate.join('\n||||\n'))}`;
+          const transResp = await fetch(translateUrl);
+          if (transResp.ok) {
+            const transData = await transResp.json();
+            const translatedText = transData[0]?.map((s: any) => s[0]).join('') || '';
+            const translatedParts = translatedText.split('\n||||\n');
+            
+            for (let i = 0; i < fieldKeys.length; i++) {
+              if (translatedParts[i]) {
+                result[fieldKeys[i]] = translatedParts[i].trim();
+              }
+            }
+          }
+        }
+      } catch (_) {
+        // Translation failed, keep original text
+      }
+    }
+
     // Detect service keywords for auto-selecting groups in Step 2
     const lowerHtml = html.toLowerCase();
     const serviceKeywords: Record<string, string[]> = {
-      "Brand & Creative": ["branding", "brand identity", "logo design", "visual identity", "creative"],
-      "Website & Digital": ["web design", "website", "web development", "ui/ux", "digital"],
-      "Content & Copywriting": ["content", "copywriting", "blog", "editorial", "content marketing"],
-      "SEO & Organic Growth": ["seo", "search engine", "organic", "search optimization"],
-      "Paid Advertising": ["ppc", "google ads", "paid media", "advertising", "paid search", "paid social"],
-      "Social Media": ["social media", "instagram", "tiktok", "social management"],
-      "Email Marketing": ["email marketing", "newsletter", "email automation", "email campaign"],
-      "Analytics & Data": ["analytics", "data", "conversion", "tracking", "reporting"],
-      "Marketing Strategy": ["strategy", "consulting", "marketing strategy", "growth strategy"],
+      "Brand & Creative": ["branding", "brand identity", "logo design", "visual identity", "creative", "varumärke", "marque", "marca"],
+      "Website & Digital": ["web design", "website", "web development", "ui/ux", "digital", "webbdesign", "webbplats", "webbutveckling"],
+      "Content & Copywriting": ["content", "copywriting", "blog", "editorial", "content marketing", "innehåll", "contenu"],
+      "SEO & Organic Growth": ["seo", "search engine", "organic", "search optimization", "sökmotoroptimering"],
+      "Paid Advertising": ["ppc", "google ads", "paid media", "advertising", "paid search", "paid social", "annonsering", "publicité"],
+      "Social Media": ["social media", "instagram", "tiktok", "social management", "sociala medier", "réseaux sociaux"],
+      "Email Marketing": ["email marketing", "newsletter", "email automation", "email campaign", "e-postmarknadsföring"],
+      "Analytics & Data": ["analytics", "data", "conversion", "tracking", "reporting", "analys", "analyse"],
+      "Marketing Strategy": ["strategy", "consulting", "marketing strategy", "growth strategy", "strategi", "stratégie"],
     };
 
     const detectedServices: string[] = [];
