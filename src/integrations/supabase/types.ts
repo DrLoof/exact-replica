@@ -290,6 +290,64 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          agency_id: string | null
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string | null
+          proposal_id: string | null
+          title: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          agency_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string | null
+          proposal_id?: string | null
+          title: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          agency_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string | null
+          proposal_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_templates: {
         Row: {
           agency_id: string | null
@@ -417,6 +475,47 @@ export type Database = {
           },
           {
             foreignKeyName: "proposal_services_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_shares: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          proposal_id: string | null
+          recipient_email: string | null
+          share_id: string
+          share_type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          proposal_id?: string | null
+          recipient_email?: string | null
+          share_id: string
+          share_type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          proposal_id?: string | null
+          recipient_email?: string | null
+          share_id?: string
+          share_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_shares_proposal_id_fkey"
             columns: ["proposal_id"]
             isOneToOne: false
             referencedRelation: "proposals"
