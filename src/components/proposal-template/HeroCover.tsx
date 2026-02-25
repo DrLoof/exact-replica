@@ -65,34 +65,36 @@ export function HeroCover({
           className="flex items-center gap-3"
         >
           {brand.logoUrl ? (
-            <img
-              src={brand.logoUrl}
-              alt={brand.agencyName}
-              className="h-10 w-auto object-contain"
-            />
-          ) : (
-            <div
-              className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: brand.darkColor }}
-            >
+            <>
+              <img
+                src={brand.logoUrl}
+                alt={brand.agencyName}
+                className="h-10 w-auto object-contain"
+              />
               <span
-                className="text-white tracking-tighter"
-                style={{ fontSize: "11px", fontWeight: 700 }}
+                className="tracking-[0.2em] uppercase"
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  color: brand.darkColor,
+                }}
               >
-                {brand.logoInitial}
+                {brand.agencyName}
               </span>
-            </div>
+            </>
+          ) : (
+            <span
+              className="tracking-[0.15em] uppercase"
+              style={{
+                fontSize: "18px",
+                fontWeight: 700,
+                color: brand.darkColor,
+                letterSpacing: "0.08em",
+              }}
+            >
+              {brand.agencyFullName}
+            </span>
           )}
-          <span
-            className="tracking-[0.2em] uppercase"
-            style={{
-              fontSize: "13px",
-              fontWeight: 600,
-              color: brand.darkColor,
-            }}
-          >
-            {brand.agencyName}
-          </span>
         </motion.div>
         {proposalNumber && (
           <motion.span
