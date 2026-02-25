@@ -122,9 +122,10 @@ export function OnboardingWizard() {
             brand_color: agencyData.brand_color || '#fc956e',
             logo_url: agencyData.logo_url || null,
             address_line1: agencyData.address || null,
+            tagline: agencyData.tagline || null,
             scraped_data: agencyData.scraped_data || null,
             onboarding_step: nextStep,
-          }).eq('id', agency.id);
+          } as any).eq('id', agency.id);
           break;
 
         case 2:
