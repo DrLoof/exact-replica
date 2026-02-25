@@ -1,8 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
-import { Calendar, ChevronDown, Check, Clock, AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Layers } from 'lucide-react';
+import {
+  BrandProvider,
+  HeroCover,
+  SectionHeader,
+  TextContent,
+  HighlightPanel,
+  BundleCard,
+  ServiceCard,
+  PricingSummary,
+  TimelineStep,
+  TermsSection,
+  WhyUsCard,
+  TestimonialCard,
+  SignatureBlock,
+  PageWrapper,
+} from '@/components/proposal-template';
 
 export default function PublicProposal() {
   const { shareId } = useParams<{ shareId: string }>();
@@ -15,13 +30,14 @@ export default function PublicProposal() {
   const [differentiators, setDifferentiators] = useState<any[]>([]);
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [termsClauses, setTermsClauses] = useState<any[]>([]);
+  const [timelinePhases, setTimelinePhases] = useState<any[]>([]);
+  const [paymentTemplates, setPaymentTemplates] = useState<any[]>([]);
 
   useEffect(() => {
     if (shareId) loadProposal();
   }, [shareId]);
 
   const loadProposal = async () => {
-    // Look up share
     const { data: share } = await supabase
       .from('proposal_shares')
       .select('*')
@@ -32,12 +48,10 @@ export default function PublicProposal() {
     if (!share) { setExpired(true); setLoading(false); return; }
     if (share.expires_at && new Date(share.expires_at) < new Date()) { setExpired(true); setLoading(false); return; }
 
-    // Load proposal
     const { data: prop } = await supabase.from('proposals').select('*').eq('id', share.proposal_id).single();
     if (!prop) { setExpired(true); setLoading(false); return; }
     setProposal(prop);
 
-    // Track view & mark as viewed
     if (prop.status === 'sent') {
       await supabase.from('proposals').update({ status: 'viewed', viewed_at: new Date().toISOString() }).eq('id', prop.id);
     }
@@ -47,14 +61,15 @@ export default function PublicProposal() {
       user_agent: navigator.userAgent,
     });
 
-    // Load related data in parallel
-    const [agencyRes, clientRes, svcRes, diffRes, testRes, termsRes] = await Promise.all([
+    const [agencyRes, clientRes, svcRes, diffRes, testRes, termsRes, phasesRes, ptRes] = await Promise.all([
       prop.agency_id ? supabase.from('agencies').select('*').eq('id', prop.agency_id).single() : { data: null },
       prop.client_id ? supabase.from('clients').select('*').eq('id', prop.client_id).single() : { data: null },
-      supabase.from('proposal_services').select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, icon)').eq('proposal_id', prop.id).order('display_order'),
+      supabase.from('proposal_services').select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, icon, service_type)').eq('proposal_id', prop.id).order('display_order'),
       prop.agency_id ? supabase.from('differentiators').select('*').eq('agency_id', prop.agency_id).order('display_order') : { data: [] },
       prop.agency_id ? supabase.from('testimonials').select('*').eq('agency_id', prop.agency_id).order('created_at', { ascending: false }) : { data: [] },
       prop.agency_id ? supabase.from('terms_clauses').select('*').eq('agency_id', prop.agency_id).order('display_order') : { data: [] },
+      prop.agency_id ? supabase.from('timeline_phases').select('*').eq('agency_id', prop.agency_id).order('display_order') : { data: [] },
+      prop.agency_id ? supabase.from('payment_templates').select('*').eq('agency_id', prop.agency_id).eq('is_default', true).limit(1) : { data: [] },
     ]);
 
     setAgency(agencyRes.data);
@@ -63,259 +78,352 @@ export default function PublicProposal() {
     setDifferentiators(diffRes.data || []);
     setTestimonials(testRes.data || []);
     setTermsClauses(termsRes.data || []);
+    setTimelinePhases(phasesRes.data || []);
+    setPaymentTemplates(ptRes.data || []);
     setLoading(false);
   };
 
-  const getPrice = (s: any) => s.price_override ?? s.module?.price_fixed ?? s.module?.price_monthly ?? s.module?.price_hourly ?? 0;
-  const suffix = (m: string | null) => m === 'monthly' ? '/mo' : m === 'hourly' ? '/hr' : '';
-  const currencySymbol = agency?.currency_symbol || '$';
-
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#fc956e] border-t-transparent" />
       </div>
     );
   }
 
   if (expired) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="text-center">
-          <AlertTriangle className="mx-auto h-12 w-12 text-status-warning" />
-          <h1 className="mt-4 font-display text-2xl font-bold text-foreground">Proposal Expired</h1>
-          <p className="mt-2 text-sm text-muted-foreground">This proposal link is no longer active. Please contact the agency for an updated version.</p>
+          <AlertTriangle className="mx-auto h-12 w-12 text-[#f59e0b]" />
+          <h1 className="mt-4 text-2xl font-bold text-[#0A0A0A]" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Proposal Expired</h1>
+          <p className="mt-2 text-sm text-[#888]">This proposal link is no longer active. Please contact the agency for an updated version.</p>
         </div>
       </div>
     );
   }
 
-  const fixedSvcs = services.filter(s => s.module?.pricing_model === 'fixed');
-  const monthlySvcs = services.filter(s => s.module?.pricing_model === 'monthly');
-  const isMixed = fixedSvcs.length > 0 && monthlySvcs.length > 0;
+  const brandColor = agency?.brand_color || '#fc956e';
+  const darkColor = agency?.dark_color || '#0A0A0A';
+  const currencySymbol = agency?.currency_symbol || '$';
+
+  const brandData = {
+    agencyName: agency?.name?.toUpperCase() || 'AGENCY',
+    agencyFullName: agency?.name || 'Your Agency',
+    primaryColor: brandColor,
+    darkColor,
+    logoUrl: agency?.logo_url || null,
+    logoInitial: (agency?.name || 'A').charAt(0).toUpperCase(),
+    contactEmail: agency?.email || '',
+    contactWebsite: agency?.website || '',
+    contactPhone: agency?.phone || '',
+    currency: currencySymbol,
+  };
+
+  const getPrice = (s: any) => s.price_override ?? s.module?.price_fixed ?? s.module?.price_monthly ?? s.module?.price_hourly ?? 0;
+  const formatPrice = (n: number) => `${currencySymbol}${n.toLocaleString()}`;
+
+  // Build pricing items
+  const pricingItems = services.map((s: any) => {
+    const model = s.module?.pricing_model || 'fixed';
+    const price = getPrice(s);
+    const suffix = model === 'monthly' ? '/mo' : model === 'hourly' ? '/hr' : '';
+    return {
+      service: s.module?.name || 'Service',
+      price: `${formatPrice(price)}${suffix}`,
+      note: s.module?.short_description || undefined,
+      model: model as any,
+      isAddon: s.is_addon || s.module?.service_type === 'addon',
+      isBundled: !!s.bundle_id,
+    };
+  });
+
+  // Total display
+  const totalFixed = services.filter((s: any) => s.module?.pricing_model === 'fixed').reduce((sum: number, s: any) => sum + getPrice(s), 0);
+  const totalMonthly = services.filter((s: any) => s.module?.pricing_model === 'monthly').reduce((sum: number, s: any) => sum + getPrice(s), 0);
+  const totalHourly = services.filter((s: any) => s.module?.pricing_model === 'hourly').reduce((sum: number, s: any) => sum + getPrice(s), 0);
+
+  let totalStr = '';
+  const parts: string[] = [];
+  if (totalFixed > 0) parts.push(formatPrice(totalFixed));
+  if (totalMonthly > 0) parts.push(`${formatPrice(totalMonthly)}/mo`);
+  if (totalHourly > 0) parts.push(`${formatPrice(totalHourly)}/hr est.`);
+  totalStr = parts.join(' + ') || formatPrice(0);
+
+  const totalBreakdown = parts.length > 1
+    ? `${totalFixed > 0 ? `${formatPrice(totalFixed)} project fees` : ''}${totalFixed > 0 && totalMonthly > 0 ? ' + ' : ''}${totalMonthly > 0 ? `${formatPrice(totalMonthly)}/mo ongoing retainer` : ''}`
+    : undefined;
+
+  // Payment terms
+  const defaultPT = paymentTemplates[0];
+  const paymentTerms = defaultPT?.milestones
+    ? (defaultPT.milestones as any[]).map((m: any) => ({
+        label: m.label,
+        amount: totalFixed > 0 ? formatPrice(Math.round(totalFixed * (m.percentage / 100))) : undefined,
+      }))
+    : undefined;
+
+  const validUntil = proposal.validity_days
+    ? new Date(new Date(proposal.created_at).getTime() + proposal.validity_days * 86400000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    : undefined;
+
+  // Bundle savings
+  const bundleSavings = (proposal.bundle_savings ?? 0) > 0
+    ? {
+        bundleName: 'Package',
+        individualTotal: formatPrice((proposal.grand_total || 0) + (proposal.bundle_savings || 0)),
+        bundlePrice: formatPrice(proposal.grand_total || 0),
+        savings: `Save ${formatPrice(proposal.bundle_savings || 0)}`,
+      }
+    : undefined;
+
+  // Timeline phases from proposal or agency defaults
+  const phases = proposal.phases && Array.isArray(proposal.phases) && proposal.phases.length > 0
+    ? proposal.phases as any[]
+    : timelinePhases;
+
+  // Featured testimonial (first one)
+  const featuredTestimonial = testimonials[0];
+  const otherTestimonials = testimonials.slice(1, 4);
+
+  const proposalDate = new Date(proposal.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  // Highlight panel for executive summary
+  const summaryHighlights = [
+    { label: 'Services', value: `${services.length} modules` },
+    { label: 'Timeline', value: proposal.estimated_duration || `~${phases.length * 2} weeks` },
+    { label: 'Investment', value: totalStr, accent: true },
+  ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Brand Bar */}
-      <div className="h-1.5 w-full" style={{ backgroundColor: agency?.brand_color || 'hsl(18, 96%, 71%)' }} />
+    <BrandProvider brand={brandData}>
+      <div className="min-h-screen bg-white">
+        {/* Section 1: Cover */}
+        <HeroCover
+          proposalTitle={proposal.title || `Proposal for ${client?.company_name || 'Client'}`}
+          subtitle={proposal.subtitle || undefined}
+          clientName={client?.company_name || 'Client'}
+          date={proposalDate}
+          proposalNumber={proposal.reference_number}
+        />
 
-      <div className="mx-auto max-w-[800px] px-6 py-10 space-y-10">
-        {/* Cover */}
-        <div className="rounded-2xl border border-border bg-card p-10 text-center">
-          {agency?.logo_url && <img src={agency.logo_url} alt="" className="mx-auto mb-6 h-12 object-contain" />}
-          <h1 className="font-display text-3xl font-bold text-foreground">{proposal.title || 'Proposal'}</h1>
-          {proposal.subtitle && <p className="mt-2 text-lg text-muted-foreground">{proposal.subtitle}</p>}
-          <div className="mt-6 flex items-center justify-center gap-6 text-sm text-muted-foreground">
-            <span>Prepared for <strong className="text-foreground">{client?.company_name || 'Client'}</strong></span>
-            <span>•</span>
-            <span>{new Date(proposal.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-          </div>
-        </div>
-
-        {/* Executive Summary */}
+        {/* Section 2: Executive Summary */}
         {proposal.executive_summary && (
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h2 className="mb-3 font-display text-lg font-bold text-foreground">Executive Summary</h2>
-            <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap">{proposal.executive_summary}</p>
-          </div>
+          <PageWrapper pageNumber="02">
+            <SectionHeader
+              number="01"
+              title="Executive Summary"
+              subtitle="An overview of our recommended approach and expected outcomes."
+            />
+            <div className="mb-10">
+              <TextContent>{proposal.executive_summary}</TextContent>
+            </div>
+            <HighlightPanel items={summaryHighlights} variant="accent" />
+          </PageWrapper>
         )}
 
-        {/* Scope of Services */}
+        {/* Section 3: Scope of Services */}
         {services.length > 0 && (
-          <div>
-            <h2 className="mb-4 font-display text-lg font-bold text-foreground">Scope of Services</h2>
-            <div className="space-y-4">
-              {services.map((svc) => (
-                <div key={svc.id} className="rounded-xl border border-border bg-card p-5">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h4 className="text-sm font-semibold text-foreground">{svc.module?.name || 'Service'}</h4>
-                      <p className="mt-1 text-xs text-muted-foreground">{svc.module?.description || svc.module?.short_description || ''}</p>
-                    </div>
-                    <span className="text-sm font-bold tabular-nums text-foreground">
-                      {currencySymbol}{getPrice(svc).toLocaleString()}{suffix(svc.module?.pricing_model)}
-                    </span>
-                  </div>
-                  {svc.module?.deliverables?.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {svc.module.deliverables.map((d: string, i: number) => (
-                        <span key={i} className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] text-muted-foreground">{d}</span>
-                      ))}
-                    </div>
-                  )}
-                </div>
+          <PageWrapper pageNumber="03">
+            <SectionHeader
+              number="02"
+              title="Scope of Services"
+              subtitle="Each service is designed to work independently or as part of the complete strategy."
+            />
+
+            {/* Bundle card if there are bundled services */}
+            {services.some((s: any) => s.bundle_id) && bundleSavings && (
+              <div className="mb-8">
+                <BundleCard
+                  name="Service Package"
+                  tagline="Combined services for maximum impact"
+                  includedServices={services.filter((s: any) => s.bundle_id).map((s: any) => s.module?.name || 'Service')}
+                  bundlePrice={bundleSavings.bundlePrice}
+                  individualPrice={bundleSavings.individualTotal}
+                  savings={bundleSavings.savings}
+                  brandColor={brandColor}
+                />
+              </div>
+            )}
+
+            {/* Service cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {services.map((svc: any, idx: number) => (
+                <ServiceCard
+                  key={svc.id}
+                  icon={<Layers size={22} />}
+                  name={svc.module?.name || 'Service'}
+                  price={formatPrice(getPrice(svc))}
+                  pricingModel={svc.module?.pricing_model || 'fixed'}
+                  description={svc.module?.description || svc.module?.short_description || ''}
+                  deliverables={svc.module?.deliverables || []}
+                  isAddon={svc.is_addon || svc.module?.service_type === 'addon'}
+                  delay={idx * 0.08}
+                />
               ))}
             </div>
-          </div>
+          </PageWrapper>
         )}
 
-        {/* Timeline */}
-        {proposal.project_start_date && (
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h2 className="mb-3 font-display text-lg font-bold text-foreground">Timeline</h2>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <Calendar className="h-4 w-4" />
-              <span>Start: <strong className="text-foreground">{new Date(proposal.project_start_date).toLocaleDateString()}</strong></span>
-              {proposal.estimated_duration && (
-                <>
-                  <span>•</span>
-                  <span>Duration: <strong className="text-foreground">{proposal.estimated_duration}</strong></span>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Investment */}
-        <div className="rounded-xl border border-border bg-card p-6">
-          <h2 className="mb-4 font-display text-lg font-bold text-foreground">Investment</h2>
-          {isMixed ? (
-            <>
-              {fixedSvcs.length > 0 && (
-                <div className="mb-4">
-                  <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground mb-2">Project Fees</p>
-                  {fixedSvcs.map(s => (
-                    <div key={s.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                      <span className="text-sm text-foreground">{s.module?.name}</span>
-                      <span className="text-sm font-semibold tabular-nums text-foreground">{currencySymbol}{getPrice(s).toLocaleString()}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {monthlySvcs.length > 0 && (
-                <div className="mb-4">
-                  <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground mb-2">Monthly Retainers</p>
-                  {monthlySvcs.map(s => (
-                    <div key={s.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                      <span className="text-sm text-foreground">{s.module?.name}</span>
-                      <span className="text-sm font-semibold tabular-nums text-foreground">{currencySymbol}{getPrice(s).toLocaleString()}/mo</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="mb-4">
-              {services.map(s => (
-                <div key={s.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                  <span className="text-sm text-foreground">{s.module?.name}</span>
-                  <span className="text-sm font-semibold tabular-nums text-foreground">{currencySymbol}{getPrice(s).toLocaleString()}{suffix(s.module?.pricing_model)}</span>
-                </div>
+        {/* Section 4: Timeline */}
+        {phases.length > 0 && (
+          <PageWrapper pageNumber="04">
+            <SectionHeader
+              number="03"
+              title="Timeline"
+              subtitle="A phased approach ensuring quality delivery at every stage."
+            />
+            <HighlightPanel
+              items={[
+                { label: 'Start Date', value: proposal.project_start_date ? new Date(proposal.project_start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD' },
+                { label: 'Phases', value: `${phases.length} stages` },
+                { label: 'Est. Duration', value: proposal.estimated_duration || `~${phases.length * 2} weeks`, accent: true },
+              ]}
+              variant="default"
+            />
+            <div className="mt-10">
+              {phases.map((phase: any, idx: number) => (
+                <TimelineStep
+                  key={idx}
+                  number={idx + 1}
+                  name={phase.name}
+                  duration={phase.duration || phase.default_duration || '2 weeks'}
+                  description={phase.description}
+                  isLast={idx === phases.length - 1}
+                  delay={idx * 0.1}
+                />
               ))}
             </div>
-          )}
-          {(proposal.bundle_savings ?? 0) > 0 && (
-            <div className="flex items-center justify-between py-2 text-status-success">
-              <span className="text-sm font-medium">Bundle Savings</span>
-              <span className="text-sm font-semibold tabular-nums">-{currencySymbol}{(proposal.bundle_savings || 0).toLocaleString()}</span>
-            </div>
-          )}
-          <div className="mt-2 flex items-center justify-between border-t-2 pt-3" style={{ borderColor: agency?.brand_color || 'hsl(18, 96%, 71%)' }}>
-            <span className="text-base font-bold text-foreground">Total Investment</span>
-            <span className="font-display text-xl font-bold tabular-nums text-foreground">
-              {(proposal.total_fixed ?? 0) > 0 && `${currencySymbol}${(proposal.total_fixed || 0).toLocaleString()}`}
-              {(proposal.total_fixed ?? 0) > 0 && (proposal.total_monthly ?? 0) > 0 && ' + '}
-              {(proposal.total_monthly ?? 0) > 0 && `${currencySymbol}${(proposal.total_monthly || 0).toLocaleString()}/mo`}
-              {(proposal.total_fixed ?? 0) === 0 && (proposal.total_monthly ?? 0) === 0 && `${currencySymbol}0`}
-            </span>
-          </div>
-        </div>
-
-        {/* Why Us */}
-        {differentiators.length > 0 && (
-          <div>
-            <h2 className="mb-4 font-display text-lg font-bold text-foreground">Why {agency?.name || 'Us'}</h2>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {differentiators.map((d) => (
-                <div key={d.id} className="rounded-xl border border-border bg-card p-4">
-                  <p className="text-sm font-semibold text-foreground">{d.title}</p>
-                  {d.description && <p className="mt-1 text-xs text-muted-foreground">{d.description}</p>}
-                  {d.stat_value && (
-                    <div className="mt-2">
-                      <span className="font-display text-lg font-bold" style={{ color: agency?.brand_color }}>{d.stat_value}</span>
-                      {d.stat_label && <span className="ml-1 text-xs text-muted-foreground">{d.stat_label}</span>}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+          </PageWrapper>
         )}
 
-        {/* Testimonials */}
-        {testimonials.length > 0 && (
-          <div>
-            <h2 className="mb-4 font-display text-lg font-bold text-foreground">What Our Clients Say</h2>
-            <div className="space-y-4">
-              {testimonials.slice(0, 3).map((t) => (
-                <div key={t.id} className="rounded-xl border border-border bg-card p-5">
-                  <p className="text-sm italic text-foreground">"{t.quote}"</p>
-                  <div className="mt-3 flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-primary-foreground" style={{ backgroundColor: agency?.brand_color || 'hsl(18, 96%, 71%)' }}>
-                      {t.client_name?.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-foreground">{t.client_name}</p>
-                      <p className="text-[10px] text-muted-foreground">{t.client_title}{t.client_company ? `, ${t.client_company}` : ''}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* Section 5: Investment */}
+        {services.length > 0 && (
+          <PageWrapper pageNumber="05">
+            <SectionHeader
+              number="04"
+              title="Investment"
+              subtitle="Transparent pricing for every phase of the engagement."
+            />
+            <PricingSummary
+              items={pricingItems}
+              total={totalStr}
+              totalBreakdown={totalBreakdown}
+              paymentTerms={paymentTerms}
+              validUntil={validUntil}
+              bundleSavings={bundleSavings}
+              brandColor={brandColor}
+            />
+          </PageWrapper>
         )}
 
-        {/* Terms */}
+        {/* Section 6: Terms & Conditions */}
         {termsClauses.length > 0 && (
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h2 className="mb-4 font-display text-lg font-bold text-foreground">Terms & Conditions</h2>
-            <div className="space-y-3">
-              {termsClauses.map((clause) => (
-                <details key={clause.id} className="group">
-                  <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-foreground">
-                    {clause.title}
-                    <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
-                  </summary>
-                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{clause.content}</p>
-                </details>
-              ))}
+          <PageWrapper pageNumber="06">
+            <SectionHeader
+              number="05"
+              title="Terms & Conditions"
+              subtitle="The legal framework governing our engagement."
+            />
+            <HighlightPanel
+              items={[
+                { label: 'Validity', value: `${proposal.validity_days || 30} days` },
+                { label: 'Revisions', value: `${proposal.revision_rounds ?? 2} rounds` },
+                { label: 'Notice Period', value: proposal.notice_period || '30 days' },
+              ]}
+              variant="dark"
+            />
+            <div className="mt-10">
+              <TermsSection clauses={termsClauses.map((c: any) => ({ title: c.title, content: c.content }))} />
             </div>
-          </div>
+          </PageWrapper>
         )}
 
-        {/* Signature */}
-        <div className="rounded-xl border border-border bg-card p-6">
-          <h2 className="mb-4 font-display text-lg font-bold text-foreground">Agreement</h2>
-          <div className="grid grid-cols-2 gap-8">
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground mb-3">Agency</p>
-              <p className="text-sm font-semibold text-foreground">{agency?.name}</p>
-              {agency?.email && <p className="text-xs text-muted-foreground">{agency.email}</p>}
-              <div className="mt-6 h-16 rounded-lg border-2 border-dashed border-border flex items-center justify-center">
-                <p className="text-xs text-muted-foreground">Signature</p>
-              </div>
-              <p className="mt-2 text-xs text-muted-foreground">Date: _______________</p>
+        {/* Section 7: Why Us */}
+        {differentiators.length > 0 && (
+          <PageWrapper pageNumber="07">
+            <SectionHeader
+              number="06"
+              title={`Why ${agency?.name || 'Us'}`}
+              subtitle="What sets us apart and drives results for our clients."
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {differentiators.map((d: any, idx: number) => (
+                <WhyUsCard
+                  key={d.id}
+                  title={d.title}
+                  description={d.description || ''}
+                  statValue={d.stat_value}
+                  statLabel={d.stat_label}
+                  icon={d.icon}
+                  delay={idx * 0.08}
+                />
+              ))}
             </div>
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground mb-3">Client</p>
-              <p className="text-sm font-semibold text-foreground">{client?.company_name}</p>
-              {client?.contact_name && <p className="text-xs text-muted-foreground">{client.contact_name}</p>}
-              <div className="mt-6 h-16 rounded-lg border-2 border-dashed border-border flex items-center justify-center">
-                <p className="text-xs text-muted-foreground">Signature</p>
+          </PageWrapper>
+        )}
+
+        {/* Section 8: Testimonials */}
+        {testimonials.length > 0 && (
+          <PageWrapper pageNumber="08">
+            <SectionHeader
+              number="07"
+              title="What Our Clients Say"
+              subtitle="Real results from real partnerships."
+            />
+            {featuredTestimonial && (
+              <div className="mb-8">
+                <TestimonialCard
+                  clientName={featuredTestimonial.client_name}
+                  clientTitle={featuredTestimonial.client_title}
+                  clientCompany={featuredTestimonial.client_company}
+                  quote={featuredTestimonial.quote}
+                  metricValue={featuredTestimonial.metric_value}
+                  metricLabel={featuredTestimonial.metric_label}
+                  avatarUrl={featuredTestimonial.avatar_url}
+                  featured
+                />
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">Date: _______________</p>
-            </div>
-          </div>
-          <p className="mt-6 text-center text-xs text-muted-foreground">
-            Valid for {proposal.validity_days || 30} days from {new Date(proposal.created_at).toLocaleDateString()}
-          </p>
-        </div>
+            )}
+            {otherTestimonials.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {otherTestimonials.map((t: any, idx: number) => (
+                  <TestimonialCard
+                    key={t.id}
+                    clientName={t.client_name}
+                    clientTitle={t.client_title}
+                    clientCompany={t.client_company}
+                    quote={t.quote}
+                    metricValue={t.metric_value}
+                    metricLabel={t.metric_label}
+                    avatarUrl={t.avatar_url}
+                    delay={idx * 0.1}
+                  />
+                ))}
+              </div>
+            )}
+          </PageWrapper>
+        )}
+
+        {/* Section 9: Signature */}
+        <PageWrapper pageNumber="09">
+          <SignatureBlock
+            client={{
+              role: 'Client',
+              companyName: client?.company_name || 'Client',
+              personName: client?.contact_name || undefined,
+              title: client?.contact_title || undefined,
+            }}
+          />
+        </PageWrapper>
 
         {/* Footer */}
-        <div className="text-center py-4">
-          <p className="text-xs text-muted-foreground">Powered by <span className="font-semibold">Propopad</span></p>
+        <div className="text-center py-6 bg-white">
+          <p className="text-[#CCC]" style={{ fontSize: "12px", fontFamily: "'Space Grotesk', sans-serif" }}>
+            Powered by <span style={{ fontWeight: 600 }}>Propopad</span>
+          </p>
         </div>
       </div>
-    </div>
+    </BrandProvider>
   );
 }
