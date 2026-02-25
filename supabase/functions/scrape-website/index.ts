@@ -97,7 +97,7 @@ serve(async (req) => {
       }
     }
 
-    // Logo detection — prefer transparent logos (SVG, then PNG with logo-like src)
+    // Logo detection — ONLY use transparent-capable formats (SVG, PNG)
     const urlObj = new URL(targetUrl);
     const resolveUrl = (u: string) => {
       if (!u) return '';
@@ -107,15 +107,10 @@ serve(async (req) => {
       return urlObj.origin + '/' + u;
     };
 
-    // 1. Look for SVG or PNG images whose src/href contains "logo" (most likely transparent)
     const logoImgPatterns = [
-      // <img> tags with "logo" in src or class/alt
       /<img[^>]*(?:class|alt|id)=["'][^"']*logo[^"']*["'][^>]*src=["']([^"']+)["']/gi,
       /<img[^>]*src=["']([^"']*logo[^"']*)["']/gi,
-      // <a> or <div> with logo class containing <img>
       /<(?:a|div|span|header)[^>]*class=["'][^"']*logo[^"']*["'][^>]*>[\s\S]*?<img[^>]*src=["']([^"']+)["']/gi,
-      // SVG use/image or inline SVG in logo containers
-      /<(?:a|div|span|header)[^>]*class=["'][^"']*logo[^"']*["'][^>]*>[\s\S]*?<svg/gi,
     ];
 
     let bestLogo: string | null = null;
@@ -126,7 +121,6 @@ serve(async (req) => {
         const src = m[1];
         if (!src) continue;
         const resolved = resolveUrl(src);
-        // Prefer SVG first, then PNG, skip JPEG/GIF (rarely transparent)
         if (resolved.match(/\.svg(\?|$)/i)) {
           bestLogo = resolved;
           break;
@@ -134,15 +128,13 @@ serve(async (req) => {
         if (!bestLogo && resolved.match(/\.png(\?|$)/i)) {
           bestLogo = resolved;
         }
-        if (!bestLogo) {
-          bestLogo = resolved; // any format as last resort
-        }
+        // Skip JPEG/GIF/WebP — not transparent
       }
-      if (bestLogo?.match(/\.svg(\?|$)/i)) break; // SVG found, stop searching
+      if (bestLogo?.match(/\.svg(\?|$)/i)) break;
     }
 
-    // 2. Check for <link rel="icon"> with SVG or large PNG
-    if (!bestLogo || !bestLogo.match(/\.svg(\?|$)/i)) {
+    // Check for SVG/PNG favicon as fallback
+    if (!bestLogo) {
       const iconLinks = [...html.matchAll(/<link[^>]*rel=["'](?:icon|apple-touch-icon|shortcut icon)["'][^>]*href=["']([^"']+)["'][^>]*/gi)];
       for (const m of iconLinks) {
         const href = resolveUrl(m[1]);
@@ -150,9 +142,7 @@ serve(async (req) => {
           bestLogo = href;
           break;
         }
-        // Only use favicon PNG if we have nothing better
         if (!bestLogo && href.match(/\.png(\?|$)/i)) {
-          // Check for size hints — prefer larger icons
           const sizeMatch = m[0].match(/sizes=["'](\d+)/i);
           if (sizeMatch && parseInt(sizeMatch[1]) >= 128) {
             bestLogo = href;
@@ -161,15 +151,7 @@ serve(async (req) => {
       }
     }
 
-    // 3. Fallback to OG Image (usually not transparent, but better than nothing)
-    if (!bestLogo) {
-      const ogImageMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)
-        || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
-      if (ogImageMatch) {
-        bestLogo = resolveUrl(ogImageMatch[1]);
-      }
-    }
-
+    // Do NOT fall back to og:image — it's almost never transparent
     if (bestLogo) {
       result.logo_url = bestLogo;
     }

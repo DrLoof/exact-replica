@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Sparkles, Loader2, Globe, CheckCircle2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Sparkles, Loader2, Globe, CheckCircle2, Upload, X, Image } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -14,6 +14,40 @@ interface Step1AgencyProps {
 export function Step1Agency({ data, onChange }: Step1AgencyProps) {
   const [scanning, setScanning] = useState(false);
   const [autoFilledFields, setAutoFilledFields] = useState<Set<string>>(new Set());
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Only allow transparent-capable formats
+    const allowed = ['image/png', 'image/svg+xml', 'image/webp'];
+    if (!allowed.includes(file.type)) {
+      toast.error('Please upload a PNG, SVG, or WebP file for best results');
+      return;
+    }
+
+    setUploading(true);
+    const ext = file.name.split('.').pop();
+    const path = `logos/${Date.now()}.${ext}`;
+
+    const { error } = await supabase.storage.from('agency-logos').upload(path, file, { upsert: true });
+    if (error) {
+      toast.error('Failed to upload logo');
+      setUploading(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage.from('agency-logos').getPublicUrl(path);
+    onChange({ ...data, logo_url: urlData.publicUrl });
+    toast.success('Logo uploaded');
+    setUploading(false);
+  };
+
+  const removeLogo = () => {
+    onChange({ ...data, logo_url: '' });
+  };
 
   const update = (field: string, value: string) => {
     onChange({ ...data, [field]: value });
@@ -186,39 +220,91 @@ export function Step1Agency({ data, onChange }: Step1AgencyProps) {
             </div>
           </div>
 
-          {/* Brand Color */}
-          <div>
-            <label className="mb-1.5 flex items-center text-sm font-medium text-foreground">
-              Brand Color
-              <AutoFilledBadge field="brand_color" />
-            </label>
-            <div className="flex items-center gap-3">
-              <input
-                type="color"
-                value={data.brand_color || '#fc956e'}
-                onChange={(e) => update('brand_color', e.target.value)}
-                className="h-10 w-10 cursor-pointer rounded-lg border border-border"
-              />
-              <div className="flex gap-2">
-                {(data.detected_colors?.length > 0
-                  ? data.detected_colors
-                  : ['#fc956e', '#3B82F6', '#8B5CF6', '#22C55E', '#F59E0B', '#1A1A1A']
-                ).map((c: string) => (
-                  <button
-                    key={c}
-                    onClick={() => update('brand_color', c)}
-                    className={cn(
-                      'h-8 w-8 rounded-full border-2 transition-transform hover:scale-110',
-                      (data.brand_color || '#fc956e') === c ? 'border-foreground scale-110' : 'border-transparent'
-                    )}
-                    style={{ backgroundColor: c }}
-                  />
-                ))}
+          {/* Brand Color & Logo */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Brand Color */}
+            <div>
+              <label className="mb-1.5 flex items-center text-sm font-medium text-foreground">
+                Brand Color
+                <AutoFilledBadge field="brand_color" />
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={data.brand_color || '#fc956e'}
+                  onChange={(e) => update('brand_color', e.target.value)}
+                  className="h-10 w-10 cursor-pointer rounded-lg border border-border"
+                />
+                <div className="flex flex-wrap gap-2">
+                  {(data.detected_colors?.length > 0
+                    ? data.detected_colors
+                    : ['#fc956e', '#3B82F6', '#8B5CF6', '#22C55E', '#F59E0B', '#1A1A1A']
+                  ).map((c: string) => (
+                    <button
+                      key={c}
+                      onClick={() => update('brand_color', c)}
+                      className={cn(
+                        'h-8 w-8 rounded-full border-2 transition-transform hover:scale-110',
+                        (data.brand_color || '#fc956e') === c ? 'border-foreground scale-110' : 'border-transparent'
+                      )}
+                      style={{ backgroundColor: c }}
+                    />
+                  ))}
+                </div>
               </div>
+              {data.detected_colors?.length > 0 && (
+                <p className="mt-1 text-[10px] text-muted-foreground">Colors detected from your website</p>
+              )}
             </div>
-            {data.detected_colors?.length > 0 && (
-              <p className="mt-1 text-[10px] text-muted-foreground">Colors detected from your website</p>
-            )}
+
+            {/* Logo Upload */}
+            <div>
+              <label className="mb-1.5 flex items-center text-sm font-medium text-foreground">
+                Logo
+                <AutoFilledBadge field="logo_url" />
+              </label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".png,.svg,.webp,image/png,image/svg+xml,image/webp"
+                onChange={handleLogoUpload}
+                className="hidden"
+              />
+              {data.logo_url ? (
+                <div className="flex items-center gap-3">
+                  <div className="relative h-14 w-14 rounded-xl border border-border bg-muted/50 p-1.5">
+                    <img src={data.logo_url} alt="Logo" className="h-full w-full object-contain" />
+                    <button
+                      onClick={removeLogo}
+                      className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-sm"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Replace
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex h-14 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-muted/30 text-sm text-muted-foreground transition-colors hover:border-brand hover:text-foreground"
+                >
+                  {uploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4" />
+                      Upload PNG or SVG
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Tagline */}
