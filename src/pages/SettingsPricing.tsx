@@ -3,8 +3,10 @@ import { AppShell } from '@/components/layout/AppShell';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, ChevronDown, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, ChevronDown, Plus, Trash2, Pencil, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
+interface ClauseForm { id?: string; title: string; content: string; }
 
 export default function SettingsPricing() {
   const { agency } = useAuth();
@@ -18,6 +20,9 @@ export default function SettingsPricing() {
 
   const [clauses, setClauses] = useState<any[]>([]);
   const [loadingClauses, setLoadingClauses] = useState(true);
+  const [showClauseModal, setShowClauseModal] = useState(false);
+  const [clauseForm, setClauseForm] = useState<ClauseForm>({ title: '', content: '' });
+  const [savingClause, setSavingClause] = useState(false);
 
   useEffect(() => {
     if (agency) {
@@ -57,6 +62,25 @@ export default function SettingsPricing() {
     await supabase.from('terms_clauses').delete().eq('id', id);
     setClauses(prev => prev.filter(c => c.id !== id));
     toast.success('Clause removed');
+  };
+
+  const openClauseCreate = () => { setClauseForm({ title: '', content: '' }); setShowClauseModal(true); };
+  const openClauseEdit = (c: any) => { setClauseForm({ id: c.id, title: c.title, content: c.content }); setShowClauseModal(true); };
+
+  const handleClauseSave = async () => {
+    if (!agency || !clauseForm.title.trim() || !clauseForm.content.trim()) return;
+    setSavingClause(true);
+    const payload = { agency_id: agency.id, title: clauseForm.title.trim(), content: clauseForm.content.trim(), display_order: clauseForm.id ? undefined : clauses.length };
+    if (clauseForm.id) {
+      const { error } = await supabase.from('terms_clauses').update(payload).eq('id', clauseForm.id);
+      if (error) toast.error('Failed to update'); else toast.success('Clause updated');
+    } else {
+      const { error } = await supabase.from('terms_clauses').insert(payload);
+      if (error) toast.error('Failed to create'); else toast.success('Clause added');
+    }
+    setShowClauseModal(false);
+    setSavingClause(false);
+    loadClauses();
   };
 
   return (
@@ -113,7 +137,9 @@ export default function SettingsPricing() {
         <div className="rounded-xl border border-border bg-card p-6">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">Terms & Conditions Clauses</h2>
-            <span className="text-xs text-muted-foreground">{clauses.length} clauses</span>
+            <button onClick={openClauseCreate} className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-foreground hover:bg-muted">
+              <Plus className="h-3.5 w-3.5" /> Add Clause
+            </button>
           </div>
           {loadingClauses ? (
             <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-12 animate-pulse rounded-lg bg-muted" />)}</div>
@@ -126,6 +152,9 @@ export default function SettingsPricing() {
                   <summary className="flex cursor-pointer items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50">
                     <span className="text-sm font-medium text-foreground">{clause.title}</span>
                     <div className="flex items-center gap-2">
+                      <button onClick={(e) => { e.preventDefault(); openClauseEdit(clause); }} className="text-muted-foreground hover:text-foreground">
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
                       <button onClick={(e) => { e.preventDefault(); deleteClause(clause.id); }} className="text-muted-foreground hover:text-destructive">
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -141,6 +170,37 @@ export default function SettingsPricing() {
           )}
         </div>
       </div>
+
+      {/* Clause Modal */}
+      {showClauseModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 backdrop-blur-sm" onClick={() => setShowClauseModal(false)}>
+          <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display text-lg font-bold text-foreground">{clauseForm.id ? 'Edit Clause' : 'Add Clause'}</h3>
+              <button onClick={() => setShowClauseModal(false)} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Title *</label>
+                <input value={clauseForm.title} onChange={e => setClauseForm(p => ({ ...p, title: e.target.value }))}
+                  placeholder="e.g. Payment Terms" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Content *</label>
+                <textarea value={clauseForm.content} onChange={e => setClauseForm(p => ({ ...p, content: e.target.value }))}
+                  rows={6} placeholder="Legal text for this clause..." className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
+              </div>
+            </div>
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button onClick={() => setShowClauseModal(false)} className="rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground hover:text-foreground">Cancel</button>
+              <button onClick={handleClauseSave} disabled={savingClause || !clauseForm.title.trim() || !clauseForm.content.trim()}
+                className="flex items-center gap-2 rounded-lg bg-brand px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-hover disabled:opacity-50">
+                <Save className="h-4 w-4" /> {savingClause ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AppShell>
   );
 }
