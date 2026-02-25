@@ -563,6 +563,39 @@ function ShareModal({ proposal, client, onClose, onStatusUpdate }: {
     setGenerating(false);
   };
 
+  const sendViaEmail = async () => {
+    // Generate link first if needed
+    let url = shareUrl;
+    if (!url) {
+      setGenerating(true);
+      const shareId = crypto.randomUUID().replace(/-/g, '').slice(0, 12);
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + (proposal.validity_days || 30));
+      const { error } = await supabase.from('proposal_shares').insert({
+        proposal_id: proposal.id,
+        share_id: shareId,
+        share_type: 'email',
+        recipient_email: client?.contact_email || null,
+        expires_at: expiresAt.toISOString(),
+      });
+      if (error) { toast.error('Failed to generate link'); setGenerating(false); return; }
+      url = `${window.location.origin}/p/${shareId}`;
+      setShareUrl(url);
+      if (proposal.status === 'draft') {
+        await supabase.from('proposals').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', proposal.id);
+        onStatusUpdate('sent');
+      }
+      setGenerating(false);
+    }
+
+    const subject = encodeURIComponent(`${proposal.title || 'Proposal'} — ${proposal.reference_number}`);
+    const body = encodeURIComponent(
+      `Hi${client?.contact_name ? ' ' + client.contact_name : ''},\n\nPlease find your proposal here:\n${url}\n\nLooking forward to hearing from you.\n\nBest regards`
+    );
+    const to = client?.contact_email || '';
+    window.open(`mailto:${to}?subject=${subject}&body=${body}`, '_self');
+  };
+
   const copyLink = async () => {
     if (!shareUrl) return;
     await navigator.clipboard.writeText(shareUrl);
@@ -585,12 +618,12 @@ function ShareModal({ proposal, client, onClose, onStatusUpdate }: {
               <p className="text-xs text-muted-foreground">Print or save as PDF</p>
             </div>
           </button>
-          <button onClick={() => window.print()} className="flex w-full items-center gap-4 rounded-xl border border-border p-4 transition-all hover:border-brand/30 hover:shadow-sm">
+          <button onClick={sendViaEmail} disabled={generating} className="flex w-full items-center gap-4 rounded-xl border border-border p-4 transition-all hover:border-brand/30 hover:shadow-sm disabled:opacity-50">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
               <Send className="h-5 w-5 text-accent-foreground" />
             </div>
             <div className="text-left">
-              <p className="text-sm font-semibold text-foreground">Send via Email</p>
+              <p className="text-sm font-semibold text-foreground">{generating ? 'Preparing...' : 'Send via Email'}</p>
               <p className="text-xs text-muted-foreground">Send to {client?.contact_email || 'client'}</p>
             </div>
           </button>
