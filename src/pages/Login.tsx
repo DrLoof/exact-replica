@@ -1,0 +1,73 @@
+import { Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+export default function Login() {
+  return (
+    <div className="flex min-h-screen">
+      {/* Left panel */}
+      <div className="flex flex-1 flex-col justify-center px-8 py-12 sm:px-16 lg:px-24">
+        <div className="mx-auto w-full max-w-sm">
+          <div className="mb-8 flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand">
+              <Sparkles className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <span className="font-display text-xl font-bold text-foreground">Propopad</span>
+          </div>
+
+          <h1 className="font-display text-2xl font-bold text-foreground">Welcome back</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Sign in to your account to continue</p>
+
+          <form className="mt-8 space-y-4" onSubmit={(e) => e.preventDefault()}>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-foreground">Email</label>
+              <input
+                type="email"
+                placeholder="you@agency.com"
+                className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-foreground">Password</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                <input type="checkbox" className="rounded border-border" />
+                Remember me
+              </label>
+              <a href="#" className="text-sm text-brand hover:text-brand-hover">Forgot password?</a>
+            </div>
+            <Link
+              to="/dashboard"
+              className="block w-full rounded-lg bg-brand py-2.5 text-center text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover"
+            >
+              Sign in
+            </Link>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            Don't have an account?{' '}
+            <Link to="/signup" className="font-medium text-brand hover:text-brand-hover">Sign up</Link>
+          </p>
+        </div>
+      </div>
+
+      {/* Right panel - brand */}
+      <div className="hidden flex-1 items-center justify-center bg-brand lg:flex">
+        <div className="max-w-md px-12 text-center">
+          <Sparkles className="mx-auto mb-6 h-12 w-12 text-primary-foreground/80" />
+          <h2 className="font-display text-3xl font-bold text-primary-foreground">
+            Beautiful proposals that win clients
+          </h2>
+          <p className="mt-4 text-primary-foreground/80">
+            Create stunning, branded proposals in minutes. Track views, get signatures, and close deals faster.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
