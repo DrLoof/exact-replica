@@ -3,6 +3,8 @@ import { Sparkles, Loader2, Globe, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { BrandProvider } from '@/components/proposal-template/BrandTheme';
+import { HeroCover } from '@/components/proposal-template/HeroCover';
 
 interface Step1AgencyProps {
   data: any;
@@ -254,30 +256,26 @@ export function Step1Agency({ data, onChange }: Step1AgencyProps) {
       {/* Live Preview */}
       <div className="hidden lg:block">
         <div className="sticky top-8 overflow-hidden rounded-2xl border border-border shadow-lg">
-          <div
-            className="flex h-[420px] flex-col items-center justify-center p-8 transition-colors duration-500"
-            style={{ backgroundColor: data.brand_color || '#fc956e' }}
-          >
-            {data.logo_url ? (
-              <img src={data.logo_url} alt="Logo" className="mb-6 h-16 w-16 rounded-2xl bg-white/20 object-contain p-2" />
-            ) : (
-              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20">
-                <Sparkles className="h-8 w-8 text-white" />
-              </div>
-            )}
-            <h3 className="text-center font-display text-xl font-bold text-white">
-              {data.name || 'Your Agency'}
-            </h3>
-            {data.tagline && (
-              <p className="mt-1 text-center text-xs text-white/60">{data.tagline}</p>
-            )}
-            <p className="mt-4 text-center text-sm text-white/70">
-              Proposal for Client Name
-            </p>
-            <div className="mt-8 text-center text-xs text-white/50">
-              {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+          <BrandProvider brand={{
+            agencyName: (data.name || 'Your Agency').toUpperCase(),
+            agencyFullName: data.name || 'Your Agency',
+            primaryColor: data.brand_color || '#fc956e',
+            darkColor: '#0A0A0A',
+            logoUrl: data.logo_url || null,
+            logoInitial: (data.name || 'A').charAt(0).toUpperCase(),
+            contactEmail: data.email || '',
+            contactWebsite: data.website || '',
+            contactPhone: data.phone || '',
+          }}>
+            <div className="pointer-events-none" style={{ transform: 'scale(0.52)', transformOrigin: 'top left', width: '192.3%', height: '0', paddingBottom: '130%' }}>
+              <HeroCover
+                clientName="Client Name"
+                proposalTitle="Project Proposal"
+                subtitle={data.tagline || 'Your next great project starts here'}
+                date={new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              />
             </div>
-          </div>
+          </BrandProvider>
           <div className="bg-card p-4 text-center text-xs text-muted-foreground">
             Live proposal cover preview
           </div>
