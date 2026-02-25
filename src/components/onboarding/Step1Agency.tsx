@@ -269,9 +269,9 @@ export function Step1Agency({ data, onChange }: Step1AgencyProps) {
           }}>
             <div className="pointer-events-none" style={{ transform: 'scale(0.52)', transformOrigin: 'top left', width: '192.3%', height: '0', paddingBottom: '130%' }}>
               <HeroCover
-                clientName="Client Name"
-                proposalTitle="Project Proposal"
-                subtitle={data.tagline || 'Your next great project starts here'}
+                clientName="Propopad Inc."
+                proposalTitle="Brand Evolution & Digital Growth Strategy"
+                subtitle="A comprehensive approach to repositioning your brand and accelerating digital presence across all channels."
                 date={new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
               />
             </div>
