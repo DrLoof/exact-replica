@@ -353,13 +353,15 @@ export function Step1Agency({ data, onChange }: Step1AgencyProps) {
             contactWebsite: data.website || '',
             contactPhone: data.phone || '',
           }}>
-            <div className="pointer-events-none" style={{ transform: 'scale(0.52)', transformOrigin: 'top left', width: '192.3%', height: '0', paddingBottom: '130%' }}>
-              <HeroCover
-                clientName="Propopad Inc."
-                proposalTitle="Brand Evolution & Digital Growth Strategy"
-                subtitle="A comprehensive approach to repositioning your brand and accelerating digital presence across all channels."
-                date={new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-              />
+            <div className="pointer-events-none overflow-hidden" style={{ height: '480px' }}>
+              <div style={{ transform: 'scale(0.5)', transformOrigin: 'top left', width: '200%' }}>
+                <HeroCover
+                  clientName="Propopad Inc."
+                  proposalTitle="Brand Evolution & Digital Growth Strategy"
+                  subtitle="A comprehensive approach to repositioning your brand and accelerating digital presence across all channels."
+                  date={new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                />
+              </div>
             </div>
           </BrandProvider>
           <div className="bg-card p-4 text-center text-xs text-muted-foreground">
