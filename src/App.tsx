@@ -17,6 +17,8 @@ import Settings from "./pages/Settings";
 import SettingsAgency from "./pages/SettingsAgency";
 import SettingsBranding from "./pages/SettingsBranding";
 import SettingsPricing from "./pages/SettingsPricing";
+import SettingsTestimonials from "./pages/SettingsTestimonials";
+import SettingsDifferentiators from "./pages/SettingsDifferentiators";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Onboarding from "./pages/Onboarding";
@@ -48,6 +50,8 @@ const App = () => (
             <Route path="/settings/agency" element={<ProtectedRoute><SettingsAgency /></ProtectedRoute>} />
             <Route path="/settings/branding" element={<ProtectedRoute><SettingsBranding /></ProtectedRoute>} />
             <Route path="/settings/pricing" element={<ProtectedRoute><SettingsPricing /></ProtectedRoute>} />
+            <Route path="/settings/testimonials" element={<ProtectedRoute><SettingsTestimonials /></ProtectedRoute>} />
+            <Route path="/settings/differentiators" element={<ProtectedRoute><SettingsDifferentiators /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
