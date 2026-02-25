@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Proposals from "./pages/Proposals";
+import ProposalNew from "./pages/ProposalNew";
 import Clients from "./pages/Clients";
 import Services from "./pages/Services";
 import Bundles from "./pages/Bundles";
@@ -32,7 +33,7 @@ const App = () => (
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/proposals" element={<ProtectedRoute><Proposals /></ProtectedRoute>} />
-            <Route path="/proposals/new" element={<ProtectedRoute><Proposals /></ProtectedRoute>} />
+            <Route path="/proposals/new" element={<ProtectedRoute><ProposalNew /></ProtectedRoute>} />
             <Route path="/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
             <Route path="/services" element={<ProtectedRoute><Services /></ProtectedRoute>} />
             <Route path="/bundles" element={<ProtectedRoute><Bundles /></ProtectedRoute>} />
