@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Proposals from "./pages/Proposals";
 import ProposalNew from "./pages/ProposalNew";
 import ProposalEditor from "./pages/ProposalEditor";
+import PublicProposal from "./pages/PublicProposal";
 import Clients from "./pages/Clients";
 import Services from "./pages/Services";
 import Bundles from "./pages/Bundles";
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/p/:shareId" element={<PublicProposal />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/proposals" element={<ProtectedRoute><Proposals /></ProtectedRoute>} />
             <Route path="/proposals/new" element={<ProtectedRoute><ProposalNew /></ProtectedRoute>} />

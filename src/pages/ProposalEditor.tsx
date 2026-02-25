@@ -84,6 +84,7 @@ export default function ProposalEditor() {
   const [showShareModal, setShowShareModal] = useState(false);
 
   const currencySymbol = agency?.currency_symbol || '$';
+  const baseUrl = window.location.origin;
 
   useEffect(() => {
     if (id) loadProposal();
@@ -539,49 +540,126 @@ export default function ProposalEditor() {
 
       {/* Share Modal */}
       {showShareModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 backdrop-blur-sm" onClick={() => setShowShareModal(false)}>
-          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl" onClick={e => e.stopPropagation()}>
-            <h3 className="font-display text-lg font-bold text-foreground mb-4">Share Proposal</h3>
-            <div className="space-y-3">
-              <button className="flex w-full items-center gap-4 rounded-xl border border-border p-4 transition-all hover:border-brand/30 hover:shadow-sm">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                  <Download className="h-5 w-5 text-accent-foreground" />
-                </div>
-                <div className="text-left">
-                  <p className="text-sm font-semibold text-foreground">Download PDF</p>
-                  <p className="text-xs text-muted-foreground">Export as PDF document</p>
-                </div>
-              </button>
-              <button className="flex w-full items-center gap-4 rounded-xl border border-border p-4 transition-all hover:border-brand/30 hover:shadow-sm">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                  <Send className="h-5 w-5 text-accent-foreground" />
-                </div>
-                <div className="text-left">
-                  <p className="text-sm font-semibold text-foreground">Send via Email</p>
-                  <p className="text-xs text-muted-foreground">Send to {client?.contact_email || 'client'}</p>
-                </div>
-              </button>
-              <button className="flex w-full items-center gap-4 rounded-xl border border-border p-4 transition-all hover:border-brand/30 hover:shadow-sm">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                  <LinkIcon className="h-5 w-5 text-accent-foreground" />
-                </div>
-                <div className="text-left">
-                  <p className="text-sm font-semibold text-foreground">Copy Link</p>
-                  <p className="text-xs text-muted-foreground">Generate a shareable URL</p>
-                </div>
-              </button>
-            </div>
-            <button onClick={() => setShowShareModal(false)} className="mt-4 w-full rounded-lg border border-border py-2 text-sm text-muted-foreground hover:text-foreground">
-              Cancel
-            </button>
-          </div>
-        </div>
+        <ShareModal
+          proposal={proposal}
+          client={client}
+          onClose={() => setShowShareModal(false)}
+          onStatusUpdate={(status) => setProposal(prev => prev ? { ...prev, status } : prev)}
+        />
       )}
     </div>
   );
 }
 
-// Section wrapper with hover toolbar
+// Share Modal Component
+function ShareModal({ proposal, client, onClose, onStatusUpdate }: {
+  proposal: ProposalData; client: any; onClose: () => void; onStatusUpdate: (status: string) => void;
+}) {
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const generateShareLink = async () => {
+    setGenerating(true);
+    const shareId = crypto.randomUUID().replace(/-/g, '').slice(0, 12);
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + (proposal.validity_days || 30));
+
+    const { error } = await supabase.from('proposal_shares').insert({
+      proposal_id: proposal.id,
+      share_id: shareId,
+      share_type: 'link',
+      expires_at: expiresAt.toISOString(),
+    });
+
+    if (error) {
+      toast.error('Failed to generate link');
+    } else {
+      const url = `${window.location.origin}/p/${shareId}`;
+      setShareUrl(url);
+      // Mark as sent if draft
+      if (proposal.status === 'draft') {
+        await supabase.from('proposals').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', proposal.id);
+        onStatusUpdate('sent');
+      }
+    }
+    setGenerating(false);
+  };
+
+  const copyLink = async () => {
+    if (!shareUrl) return;
+    await navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    toast.success('Link copied to clipboard');
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handlePdf = () => {
+    window.print();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 backdrop-blur-sm print:hidden" onClick={onClose}>
+      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+        <h3 className="font-display text-lg font-bold text-foreground mb-4">Share Proposal</h3>
+        <div className="space-y-3">
+          <button onClick={handlePdf} className="flex w-full items-center gap-4 rounded-xl border border-border p-4 transition-all hover:border-brand/30 hover:shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+              <Download className="h-5 w-5 text-accent-foreground" />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-semibold text-foreground">Download PDF</p>
+              <p className="text-xs text-muted-foreground">Print or save as PDF</p>
+            </div>
+          </button>
+          <button onClick={handlePdf} className="flex w-full items-center gap-4 rounded-xl border border-border p-4 transition-all hover:border-brand/30 hover:shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+              <Send className="h-5 w-5 text-accent-foreground" />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-semibold text-foreground">Send via Email</p>
+              <p className="text-xs text-muted-foreground">Send to {client?.contact_email || 'client'}</p>
+            </div>
+          </button>
+
+          {shareUrl ? (
+            <div className="rounded-xl border border-brand/30 bg-accent/50 p-4">
+              <p className="text-xs font-medium text-foreground mb-2">Share Link</p>
+              <div className="flex items-center gap-2">
+                <input readOnly value={shareUrl} className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground font-mono" />
+                <button onClick={copyLink} className="rounded-lg bg-brand px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-brand-hover">
+                  {copied ? '✓ Copied' : 'Copy'}
+                </button>
+              </div>
+              <p className="mt-2 text-[10px] text-muted-foreground">
+                Active until {new Date(Date.now() + (proposal.validity_days || 30) * 86400000).toLocaleDateString()}
+              </p>
+            </div>
+          ) : (
+            <button
+              onClick={generateShareLink}
+              disabled={generating}
+              className="flex w-full items-center gap-4 rounded-xl border border-border p-4 transition-all hover:border-brand/30 hover:shadow-sm disabled:opacity-50"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+                <LinkIcon className="h-5 w-5 text-accent-foreground" />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-semibold text-foreground">{generating ? 'Generating...' : 'Copy Link'}</p>
+                <p className="text-xs text-muted-foreground">Generate a shareable URL</p>
+              </div>
+            </button>
+          )}
+        </div>
+        <button onClick={onClose} className="mt-4 w-full rounded-lg border border-border py-2 text-sm text-muted-foreground hover:text-foreground">
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
 function SectionWrapper({ idx, hidden, onToggle, label, children }: {
   idx: number; hidden: boolean; onToggle: (idx: number) => void; label: string; children: React.ReactNode;
 }) {

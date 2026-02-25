@@ -139,3 +139,15 @@
     font-variant-numeric: tabular-nums;
   }
 }
+
+/* Print styles for PDF export */
+@media print {
+  body { background: white !important; }
+  .print\\:hidden, nav, aside, header, .sticky { display: none !important; }
+  .group:hover > .absolute { display: none !important; }
+  .pl-60 { padding-left: 0 !important; }
+  .mx-auto { max-width: 100% !important; }
+  details { break-inside: avoid; }
+  details[open] summary ~ * { display: block !important; }
+  .rounded-xl, .rounded-2xl { break-inside: avoid; }
+}
