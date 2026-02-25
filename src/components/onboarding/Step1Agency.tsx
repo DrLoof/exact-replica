@@ -57,8 +57,11 @@ export function Step1Agency({ data, onChange }: Step1AgencyProps) {
       updatedData.detected_services = result.detected_services || [];
       updatedData.detected_colors = result.detected_colors || [];
 
+      // Fields that should always be overwritten by autofill (even if they have a default value)
+      const alwaysOverwrite = new Set(['name', 'tagline', 'brand_color', 'logo_url']);
+
       for (const [field, value] of Object.entries(fieldMap)) {
-        if (value && !data[field]) {
+        if (value && (alwaysOverwrite.has(field) || !data[field])) {
           await new Promise((r) => setTimeout(r, 300)); // Stagger animation
           updatedData[field] = value;
           filled.add(field);
