@@ -28,7 +28,7 @@ export default function Signup() {
       toast.error(error.message);
     } else {
       toast.success('Account created! Redirecting...');
-      navigate('/dashboard');
+      navigate('/onboarding');
     }
     setLoading(false);
   };

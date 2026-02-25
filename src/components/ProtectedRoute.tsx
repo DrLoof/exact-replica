@@ -2,7 +2,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { session, loading } = useAuth();
+  const { session, agency, loading } = useAuth();
 
   if (loading) {
     return (
@@ -14,6 +14,11 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (!session) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Redirect to onboarding if not complete
+  if (agency && !agency.onboarding_complete) {
+    return <Navigate to="/onboarding" replace />;
   }
 
   return <>{children}</>;
