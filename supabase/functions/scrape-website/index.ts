@@ -142,7 +142,49 @@ serve(async (req) => {
       result.phone = phoneMatch[1].trim();
     }
 
-    // Detect language from html lang attribute or content
+    // Address - try JSON-LD structured data first
+    const jsonLdMatches = html.match(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
+    if (jsonLdMatches) {
+      for (const match of jsonLdMatches) {
+        try {
+          const jsonStr = match.replace(/<script[^>]*>/i, '').replace(/<\/script>/i, '').trim();
+          const ld = JSON.parse(jsonStr);
+          const obj = Array.isArray(ld) ? ld[0] : ld;
+          const addr = obj?.address || obj?.location?.address;
+          if (addr) {
+            const parts = [
+              addr.streetAddress,
+              [addr.addressLocality, addr.addressRegion, addr.postalCode].filter(Boolean).join(', '),
+              addr.addressCountry,
+            ].filter(Boolean);
+            if (parts.length > 0) {
+              result.address = parts.join('\n');
+            }
+          }
+        } catch (_) { /* invalid JSON-LD */ }
+      }
+    }
+
+    // Fallback: try to find address in common HTML patterns
+    if (!result.address) {
+      const addressMatch = html.match(/<address[^>]*>([\s\S]*?)<\/address>/i);
+      if (addressMatch) {
+        const addrText = addressMatch[1]
+          .replace(/<br\s*\/?>/gi, '\n')
+          .replace(/<[^>]+>/g, '')
+          .replace(/&amp;/g, '&')
+          .replace(/&nbsp;/g, ' ')
+          .trim()
+          .split('\n')
+          .map(l => l.trim())
+          .filter(Boolean)
+          .join('\n');
+        if (addrText.length > 5 && addrText.length < 300) {
+          result.address = addrText;
+        }
+      }
+    }
+
     const langMatch = html.match(/<html[^>]*\slang=["']([^"']+)["']/i);
     const detectedLang = langMatch ? langMatch[1].split('-')[0].toLowerCase() : null;
     const isNonEnglish = detectedLang && detectedLang !== 'en';
