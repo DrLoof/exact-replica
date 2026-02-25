@@ -25,9 +25,12 @@ export default function ProposalNew() {
   const [newContactEmail, setNewContactEmail] = useState('');
   const [showClientDropdown, setShowClientDropdown] = useState(false);
 
-  // Zone 2: Services
-  const [selectedModuleIds, setSelectedModuleIds] = useState<Set<string>>(new Set());
-  const [selectedBundleId, setSelectedBundleId] = useState<string | null>(null);
+  // Zone 2: Services - pre-fill from query params
+  const [selectedModuleIds, setSelectedModuleIds] = useState<Set<string>>(() => {
+    const servicesParam = searchParams.get('services');
+    return servicesParam ? new Set(servicesParam.split(',').filter(Boolean)) : new Set();
+  });
+  const [selectedBundleId, setSelectedBundleId] = useState<string | null>(() => searchParams.get('bundle'));
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [priceOverrides, setPriceOverrides] = useState<Record<string, number>>({});
 
