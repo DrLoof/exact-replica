@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface Step2GroupsProps {
   selectedGroups: string[];
   onChange: (groups: string[]) => void;
+  moduleCounts?: Record<string, number>;
 }
 
 interface ServiceGroup {
@@ -17,19 +18,7 @@ interface ServiceGroup {
   display_order: number;
 }
 
-const moduleCounts: Record<string, number> = {
-  'Brand & Creative': 3,
-  'Website & Digital': 3,
-  'Content & Copywriting': 3,
-  'SEO & Organic Growth': 2,
-  'Paid Advertising': 3,
-  'Social Media': 2,
-  'Email Marketing': 2,
-  'Analytics & Data': 2,
-  'Marketing Strategy': 1,
-};
-
-export function Step2Groups({ selectedGroups, onChange }: Step2GroupsProps) {
+export function Step2Groups({ selectedGroups, onChange, moduleCounts = {} }: Step2GroupsProps) {
   const [groups, setGroups] = useState<ServiceGroup[]>([]);
 
   useEffect(() => {

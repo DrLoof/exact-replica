@@ -325,7 +325,7 @@ export function OnboardingWizard() {
       <div className="flex-1 overflow-auto px-6 py-8 sm:px-12 lg:px-20">
         <div className="mx-auto max-w-4xl">
           {step === 1 && <Step1Agency data={agencyData} onChange={setAgencyData} />}
-          {step === 2 && <Step2Groups selectedGroups={selectedGroups} onChange={setSelectedGroups} />}
+          {step === 2 && <Step2Groups selectedGroups={selectedGroups} onChange={setSelectedGroups} moduleCounts={Object.fromEntries(Object.entries(groupNameMap).map(([id, name]) => [name, getDefaultModulesForGroup(name).length]))} />}
           {step === 3 && <Step3Modules selectedGroupNames={selectedGroupNames} selectedModules={selectedModules} onChange={setSelectedModules} />}
           {step === 4 && <Step4Bundles />}
           {step === 5 && <Step5Pricing data={pricingData} onChange={setPricingData} />}
