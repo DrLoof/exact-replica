@@ -68,7 +68,7 @@ export function HeroCover({
             <img
               src={brand.logoUrl}
               alt={brand.agencyName}
-              className="h-16 w-auto object-contain"
+              className="h-32 w-auto object-contain"
             />
           ) : (
             <span
