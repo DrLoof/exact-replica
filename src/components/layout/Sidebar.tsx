@@ -1,9 +1,10 @@
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, Users, Layers, Package,
   Building2, Palette, Receipt, UserPlus, LogOut, Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 
 const mainNav = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
@@ -22,6 +23,17 @@ const settingsNav = [
 
 export function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { userProfile, agency, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
+
+  const initials = userProfile?.full_name
+    ? userProfile.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
+    : '??';
 
   return (
     <aside className="fixed left-0 top-0 z-30 flex h-screen w-60 flex-col border-r border-border bg-surface-sidebar">
@@ -94,13 +106,13 @@ export function Sidebar() {
       {/* User */}
       <div className="flex items-center gap-3 border-t border-border px-4 py-3">
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-xs font-semibold text-primary-foreground">
-          JD
+          {initials}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="truncate text-sm font-medium text-foreground">John Doe</p>
-          <p className="truncate text-xs text-muted-foreground">john@agency.com</p>
+          <p className="truncate text-sm font-medium text-foreground">{userProfile?.full_name || 'User'}</p>
+          <p className="truncate text-xs text-muted-foreground">{userProfile?.email}</p>
         </div>
-        <button className="text-muted-foreground hover:text-foreground">
+        <button onClick={handleSignOut} className="text-muted-foreground hover:text-foreground">
           <LogOut className="h-4 w-4" />
         </button>
       </div>
