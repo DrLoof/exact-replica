@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { AppShell } from '@/components/layout/AppShell';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Search, MoreHorizontal, FileText, Copy, Trash2, Send, Eye } from 'lucide-react';
+import { Plus, Search, MoreHorizontal, FileText, Copy, Trash2, Send, Eye, LayoutList, Columns3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useProposals } from '@/hooks/useAgencyData';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
+import { FollowUpModal } from '@/components/proposals/FollowUpModal';
 
 const statusConfig: Record<string, { label: string; className: string }> = {
   draft: { label: 'Draft', className: 'bg-status-draft/15 text-status-draft' },
@@ -19,6 +20,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 };
 
 const filters = ['all', 'draft', 'sent', 'viewed', 'accepted', 'declined'] as const;
+const kanbanColumns = ['draft', 'sent', 'viewed', 'accepted', 'declined'] as const;
 
 export default function Proposals() {
   const { agency, userProfile } = useAuth();
@@ -28,6 +30,8 @@ export default function Proposals() {
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'pipeline'>('list');
+  const [followUpProposal, setFollowUpProposal] = useState<any>(null);
   const currencySymbol = agency?.currency_symbol || '$';
 
   const filtered = proposals.filter((p: any) => {
@@ -66,7 +70,6 @@ export default function Proposals() {
 
     if (error) { toast.error('Failed to duplicate'); return; }
 
-    // Copy services
     const { data: svcs } = await supabase.from('proposal_services').select('*').eq('proposal_id', p.id);
     if (svcs?.length) {
       await supabase.from('proposal_services').insert(
@@ -88,6 +91,18 @@ export default function Proposals() {
     toast.success('Proposal deleted');
   };
 
+  const handleStatusDrop = async (proposalId: string, newStatus: string) => {
+    const updates: any = { status: newStatus };
+    if (newStatus === 'accepted') updates.accepted_at = new Date().toISOString();
+    if (newStatus === 'declined') updates.declined_at = new Date().toISOString();
+    if (newStatus === 'sent' && !proposals.find((p: any) => p.id === proposalId)?.sent_at) {
+      updates.sent_at = new Date().toISOString();
+    }
+    await supabase.from('proposals').update(updates).eq('id', proposalId);
+    queryClient.invalidateQueries({ queryKey: ['proposals'] });
+    toast.success(`Status updated to ${statusConfig[newStatus]?.label || newStatus}`);
+  };
+
   const timeAgo = (date: string) => {
     if (!date) return '';
     const days = Math.floor((Date.now() - new Date(date).getTime()) / 86400000);
@@ -100,30 +115,126 @@ export default function Proposals() {
     <AppShell>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Proposals</h1>
-        <Link to="/proposals/new" className="flex items-center gap-2 rounded-lg bg-brand px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover">
-          <Plus className="h-4 w-4" /> New Proposal
-        </Link>
+        <div className="flex items-center gap-3">
+          {/* View toggle */}
+          <div className="flex items-center rounded-lg border border-border bg-card">
+            <button
+              onClick={() => setViewMode('list')}
+              className={cn('flex items-center gap-1.5 rounded-l-lg px-3 py-2 text-sm transition-colors',
+                viewMode === 'list' ? 'bg-muted font-medium text-foreground' : 'text-muted-foreground hover:text-foreground')}
+            >
+              <LayoutList className="h-3.5 w-3.5" /> List
+            </button>
+            <button
+              onClick={() => setViewMode('pipeline')}
+              className={cn('flex items-center gap-1.5 rounded-r-lg px-3 py-2 text-sm transition-colors',
+                viewMode === 'pipeline' ? 'bg-muted font-medium text-foreground' : 'text-muted-foreground hover:text-foreground')}
+            >
+              <Columns3 className="h-3.5 w-3.5" /> Pipeline
+            </button>
+          </div>
+          <Link to="/proposals/new" className="flex items-center gap-2 rounded-lg bg-brand px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover">
+            <Plus className="h-4 w-4" /> New Proposal
+          </Link>
+        </div>
       </div>
 
-      <div className="mb-6 flex items-center gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input type="text" placeholder="Search proposals..." value={search} onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-border bg-card py-2 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
+      {/* Search + Filters (list view only) */}
+      {viewMode === 'list' && (
+        <div className="mb-6 flex items-center gap-3">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input type="text" placeholder="Search proposals..." value={search} onChange={(e) => setSearch(e.target.value)}
+              className="w-full rounded-lg border border-border bg-card py-2 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
+          </div>
+          <div className="flex items-center gap-1.5">
+            {filters.map((f) => (
+              <button key={f} onClick={() => setActiveFilter(f)}
+                className={cn('rounded-lg px-3 py-2 text-sm transition-colors', activeFilter === f
+                  ? 'border border-border bg-card font-medium text-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground')}>
+                {f === 'all' ? 'All' : statusConfig[f]?.label || f}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          {filters.map((f) => (
-            <button key={f} onClick={() => setActiveFilter(f)}
-              className={cn('rounded-lg px-3 py-2 text-sm transition-colors', activeFilter === f
-                ? 'border border-border bg-card font-medium text-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground')}>
-              {f === 'all' ? 'All' : statusConfig[f]?.label || f}
-            </button>
-          ))}
+      )}
+
+      {/* Pipeline search */}
+      {viewMode === 'pipeline' && (
+        <div className="mb-4">
+          <div className="relative max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input type="text" placeholder="Search proposals..." value={search} onChange={(e) => setSearch(e.target.value)}
+              className="w-full rounded-lg border border-border bg-card py-2 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
+          </div>
         </div>
-      </div>
+      )}
 
       {isLoading ? (
         <div className="space-y-2">{[1, 2, 3, 4].map(i => <div key={i} className="h-16 animate-pulse rounded-xl border border-border bg-card" />)}</div>
+      ) : viewMode === 'pipeline' ? (
+        /* Pipeline / Kanban View */
+        <div className="flex gap-4 overflow-x-auto pb-4">
+          {kanbanColumns.map((col) => {
+            const sc = statusConfig[col];
+            const columnProposals = (search ? filtered : proposals).filter((p: any) => p.status === col);
+            const totalValue = columnProposals.reduce((sum: number, p: any) => sum + (p.grand_total || 0), 0);
+            return (
+              <div
+                key={col}
+                className="min-w-[240px] flex-1 rounded-xl border border-border bg-muted/30 p-3"
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const id = e.dataTransfer.getData('proposalId');
+                  if (id) handleStatusDrop(id, col);
+                }}
+              >
+                {/* Column header */}
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className={cn('rounded-full px-2 py-0.5 text-xs font-medium', sc.className)}>{sc.label}</span>
+                    <span className="text-xs text-muted-foreground">{columnProposals.length}</span>
+                  </div>
+                  <span className="text-xs font-medium tabular-nums text-muted-foreground">
+                    {currencySymbol}{totalValue.toLocaleString()}
+                  </span>
+                </div>
+
+                {/* Cards */}
+                <div className="space-y-2">
+                  {columnProposals.map((p: any) => {
+                    const daysInStage = Math.floor((Date.now() - new Date(p.updated_at || p.created_at).getTime()) / 86400000);
+                    return (
+                      <div
+                        key={p.id}
+                        draggable
+                        onDragStart={(e) => e.dataTransfer.setData('proposalId', p.id)}
+                        className="cursor-grab rounded-lg border border-border bg-card p-3 shadow-sm transition-shadow hover:shadow-md active:cursor-grabbing"
+                      >
+                        <Link to={`/proposals/${p.id}`} className="block">
+                          <p className="text-sm font-medium text-foreground truncate">{p.client?.company_name || 'Unknown'}</p>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">{p.title || 'Untitled'}</p>
+                          <div className="mt-2 flex items-center justify-between">
+                            <span className="text-sm font-semibold tabular-nums text-foreground">
+                              {currencySymbol}{(p.grand_total || 0).toLocaleString()}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">{daysInStage}d</span>
+                          </div>
+                        </Link>
+                      </div>
+                    );
+                  })}
+                  {columnProposals.length === 0 && (
+                    <div className="rounded-lg border border-dashed border-border p-4 text-center">
+                      <p className="text-xs text-muted-foreground">No proposals</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border bg-card p-16 text-center">
           <FileText className="mx-auto h-8 w-8 text-muted-foreground" />
@@ -207,7 +318,7 @@ export default function Proposals() {
                                 <Copy className="h-3.5 w-3.5" /> Duplicate
                               </button>
                               {(p.status === 'sent' || p.status === 'viewed') && (
-                                <button onClick={() => { setOpenMenu(null); navigate(`/proposals/${p.id}`); }}
+                                <button onClick={() => { setOpenMenu(null); setFollowUpProposal(p); }}
                                   className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted">
                                   <Send className="h-3.5 w-3.5" /> Follow Up
                                 </button>
@@ -227,6 +338,16 @@ export default function Proposals() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {/* Follow Up Modal */}
+      {followUpProposal && (
+        <FollowUpModal
+          proposal={followUpProposal}
+          agency={agency}
+          userProfile={userProfile}
+          onClose={() => setFollowUpProposal(null)}
+        />
       )}
     </AppShell>
   );

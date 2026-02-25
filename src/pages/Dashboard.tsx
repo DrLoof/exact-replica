@@ -4,7 +4,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
-import { useProposals, useDashboardStats, useBundles, useClients } from '@/hooks/useAgencyData';
+import { useProposals, useDashboardStats, useBundles, useClients, useServiceModules } from '@/hooks/useAgencyData';
 
 const statusConfig: Record<string, { label: string; className: string }> = {
   draft: { label: 'Draft', className: 'bg-status-draft/15 text-status-draft' },
@@ -28,6 +28,7 @@ export default function Dashboard() {
   const { data: stats } = useDashboardStats();
   const { data: bundles = [] } = useBundles();
   const { data: clients = [] } = useClients();
+  const { data: modules = [] } = useServiceModules();
   const navigate = useNavigate();
   const firstName = userProfile?.full_name?.split(' ')[0] || 'there';
   const currencySymbol = agency?.currency_symbol || '$';
@@ -35,6 +36,7 @@ export default function Dashboard() {
   const [showBundlePicker, setShowBundlePicker] = useState(false);
   const [showClientPicker, setShowClientPicker] = useState(false);
   const [clientSearch, setClientSearch] = useState('');
+  const [selectedServiceIds, setSelectedServiceIds] = useState<Set<string>>(new Set());
 
   const recentProposals = proposals.slice(0, 5);
 
@@ -48,6 +50,19 @@ export default function Dashboard() {
   const filteredClients = clientSearch
     ? clients.filter((c: any) => c.company_name.toLowerCase().includes(clientSearch.toLowerCase())).slice(0, 5)
     : clients.slice(0, 5);
+
+  const toggleService = (id: string) => {
+    setSelectedServiceIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const handleCreateFromServices = () => {
+    const ids = Array.from(selectedServiceIds).join(',');
+    navigate(`/proposals/new?services=${ids}`);
+  };
 
   return (
     <AppShell>
@@ -133,6 +148,41 @@ export default function Dashboard() {
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Service Quick Select */}
+      {modules.length > 0 && (
+        <div className="mb-8">
+          <h2 className="mb-4 font-display text-lg font-semibold text-foreground">Quick Select Services</h2>
+          <div className="flex flex-wrap gap-2">
+            {modules.slice(0, 12).map((m: any) => {
+              const isSelected = selectedServiceIds.has(m.id);
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => toggleService(m.id)}
+                  className={cn(
+                    'rounded-full border px-3 py-1.5 text-xs font-medium transition-all',
+                    isSelected
+                      ? 'border-brand bg-brand/10 text-brand'
+                      : 'border-border bg-card text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground'
+                  )}
+                >
+                  {m.name}
+                </button>
+              );
+            })}
+          </div>
+          {selectedServiceIds.size > 0 && (
+            <button
+              onClick={handleCreateFromServices}
+              className="mt-3 flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-hover transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Create proposal with {selectedServiceIds.size} service{selectedServiceIds.size > 1 ? 's' : ''}
+            </button>
+          )}
         </div>
       )}
 
