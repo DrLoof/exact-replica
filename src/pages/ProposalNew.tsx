@@ -411,12 +411,25 @@ export default function ProposalNew() {
                       onChange={(e) => setNewContactName(e.target.value)}
                       className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none"
                     />
-                    <input
-                      placeholder="Client Website URL"
-                      value={newClientWebsite}
-                      onChange={(e) => setNewClientWebsite(e.target.value)}
-                      className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none"
-                    />
+                    <div className="relative">
+                      <input
+                        placeholder="Client Website URL"
+                        value={newClientWebsite}
+                        onChange={(e) => setNewClientWebsite(e.target.value)}
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 pr-20 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none"
+                      />
+                      {newClientWebsite.trim() && (
+                        <button
+                          type="button"
+                          onClick={handleAutoFill}
+                          disabled={scraping}
+                          className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1 rounded-md bg-brand/10 px-2 py-1 text-[10px] font-medium text-brand hover:bg-brand/20 disabled:opacity-50"
+                        >
+                          {scraping ? <Loader2 className="h-3 w-3 animate-spin" /> : <Globe className="h-3 w-3" />}
+                          {scraping ? 'Scanning...' : 'Auto-fill'}
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <button
                     onClick={() => setShowClientContext(!showClientContext)}
