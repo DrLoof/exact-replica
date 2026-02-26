@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Search, X, Check, ChevronDown, ChevronUp, CalendarDays, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -43,6 +43,46 @@ export default function ProposalNew() {
   });
 
   const [saving, setSaving] = useState(false);
+
+  // Pre-fill client from query param
+  const prefilledClientId = searchParams.get('client');
+  const repeatMode = searchParams.get('repeat') === 'true';
+
+  useEffect(() => {
+    if (prefilledClientId && clients.length > 0 && !selectedClient) {
+      const found = clients.find((c: any) => c.id === prefilledClientId);
+      if (found) {
+        setSelectedClient(found);
+        // If repeat mode, load services from client's most recent proposal
+        if (repeatMode) {
+          loadLastProposalServices(prefilledClientId);
+        }
+      }
+    }
+  }, [prefilledClientId, clients.length]);
+
+  const loadLastProposalServices = async (clientId: string) => {
+    const { data: lastProposal } = await supabase
+      .from('proposals')
+      .select('id')
+      .eq('client_id', clientId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    if (!lastProposal) return;
+    const { data: svcData } = await supabase
+      .from('proposal_services')
+      .select('module_id, price_override')
+      .eq('proposal_id', lastProposal.id);
+    if (svcData && svcData.length > 0) {
+      const ids = new Set(svcData.filter((s: any) => s.module_id).map((s: any) => s.module_id as string));
+      setSelectedModuleIds(ids);
+      const overrides: Record<string, number> = {};
+      svcData.forEach((s: any) => { if (s.module_id && s.price_override != null) overrides[s.module_id] = s.price_override; });
+      if (Object.keys(overrides).length > 0) setPriceOverrides(overrides);
+      toast.success(`Pre-filled ${ids.size} services from last proposal`);
+    }
+  };
 
   // Client search filtering
   const filteredClients = clientSearch.length > 0
