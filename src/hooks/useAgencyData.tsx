@@ -92,7 +92,26 @@ export function useBundles() {
   });
 }
 
+export function useTimelinePhases() {
+  const { agency } = useAuth();
+  return useQuery({
+    queryKey: ['timeline_phases', agency?.id],
+    queryFn: async () => {
+      if (!agency?.id) return [];
+      const { data, error } = await supabase
+        .from('timeline_phases')
+        .select('*')
+        .eq('agency_id', agency.id)
+        .order('display_order');
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!agency?.id,
+  });
+}
+
 export function useDashboardStats() {
+  // ... keep existing code
   const { agency } = useAuth();
   return useQuery({
     queryKey: ['dashboard_stats', agency?.id],
