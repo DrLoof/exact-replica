@@ -130,7 +130,7 @@ export default function ProposalNew() {
   const getModulePrice = (m: any) => priceOverrides[m.id] ?? m.price_fixed ?? m.price_monthly ?? m.price_hourly ?? 0;
   const priceSuffix: Record<string, string> = { fixed: '', monthly: '/mo', hourly: '/hr' };
 
-  const handleBuild = async () => {
+  const createProposal = async (navigateToEditor: boolean) => {
     if (!agency || !canBuild) return;
     setSaving(true);
 
@@ -191,14 +191,21 @@ export default function ProposalNew() {
       // Update counter
       await supabase.from('agencies').update({ proposal_counter: counter }).eq('id', agency.id);
 
-      toast.success('Proposal created!');
-      navigate(`/proposals/${proposal.id}`);
+      toast.success(navigateToEditor ? 'Proposal created!' : 'Draft saved!');
+      if (navigateToEditor) {
+        navigate(`/proposals/${proposal.id}`);
+      } else {
+        navigate('/proposals');
+      }
     } catch (e: any) {
       console.error(e);
-      toast.error('Failed to create proposal');
+      toast.error('Failed to save proposal');
     }
     setSaving(false);
   };
+
+  const handleBuild = () => createProposal(true);
+  const handleSaveDraft = () => createProposal(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -210,10 +217,11 @@ export default function ProposalNew() {
         <h1 className="font-display text-base font-semibold text-foreground">New Proposal</h1>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => { /* save draft */ }}
-            className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
+            onClick={handleSaveDraft}
+            disabled={saving || !hasClient}
+            className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-50"
           >
-            Save as Draft
+            {saving ? 'Saving...' : 'Save as Draft'}
           </button>
           <button
             onClick={handleBuild}

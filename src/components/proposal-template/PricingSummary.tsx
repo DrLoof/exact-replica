@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "motion/react";
 
 type PricingModel = "fixed" | "monthly" | "hourly" | "per_unit";
@@ -40,6 +40,7 @@ interface PricingSummaryProps {
   validUntil?: string;
   bundleSavings?: BundleSavings;
   brandColor?: string;
+  onPriceEdit?: (index: number, newPrice: number) => void;
 }
 
 const GROUP_CONFIG: Record<PricingModel, { label: string; sublabel: string; order: number }> = {
@@ -77,6 +78,40 @@ function autoGroupItems(items: PricingItem[]): PricingGroup[] {
     });
 }
 
+function EditablePrice({ price, onEdit }: { price: string; onEdit?: (newPrice: number) => void }) {
+  const [editing, setEditing] = useState(false);
+  const numericValue = parseFloat(price.replace(/[^0-9.-]/g, ''));
+
+  if (!onEdit) {
+    return <span className="text-[#0A0A0A] shrink-0 ml-4" style={{ fontSize: "16px", fontWeight: 600 }}>{price}</span>;
+  }
+
+  if (editing) {
+    return (
+      <input
+        autoFocus
+        type="number"
+        defaultValue={numericValue}
+        onBlur={(e) => { setEditing(false); const v = parseFloat(e.target.value); if (!isNaN(v)) onEdit(v); }}
+        onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditing(false); }}
+        className="w-28 rounded border border-[#DDD] bg-white px-2 py-1 text-right text-[15px] font-semibold text-[#0A0A0A] outline-none focus:border-[#fc956e] print:hidden"
+        style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+      />
+    );
+  }
+
+  return (
+    <span
+      onClick={() => setEditing(true)}
+      className="text-[#0A0A0A] shrink-0 ml-4 cursor-pointer hover:underline hover:decoration-dashed hover:underline-offset-4 print:no-underline"
+      style={{ fontSize: "16px", fontWeight: 600 }}
+      title="Click to edit price"
+    >
+      {price}
+    </span>
+  );
+}
+
 export function PricingSummary({
   items,
   groups,
@@ -86,6 +121,7 @@ export function PricingSummary({
   validUntil,
   bundleSavings,
   brandColor = "#fc956e",
+  onPriceEdit,
 }: PricingSummaryProps) {
   const uniqueModels = new Set(items.map((i) => i.model || "fixed"));
   const isMixed = uniqueModels.size > 1;
@@ -127,7 +163,9 @@ export function PricingSummary({
                   </div>
                 </div>
 
-                {group.items.map((item, idx) => (
+                {group.items.map((item, idx) => {
+                  const originalIdx = items.indexOf(item);
+                  return (
                   <div
                     key={idx}
                     className={`px-8 py-5 flex items-center justify-between ${
@@ -154,11 +192,10 @@ export function PricingSummary({
                         </span>
                       )}
                     </div>
-                    <span className="text-[#0A0A0A] shrink-0 ml-4" style={{ fontSize: "16px", fontWeight: 600 }}>
-                      {item.price}
-                    </span>
+                    <EditablePrice price={item.price} onEdit={onPriceEdit ? (v) => onPriceEdit(originalIdx, v) : undefined} />
                   </div>
-                ))}
+                  );
+                })}
 
                 {group.subtotal && (
                   <div className="px-8 py-3 bg-[#FAFAFA] border-t border-[#EBEBEB] flex items-center justify-between">
@@ -196,9 +233,7 @@ export function PricingSummary({
                     </span>
                   )}
                 </div>
-                <span className="text-[#0A0A0A] shrink-0 ml-4" style={{ fontSize: "16px", fontWeight: 600 }}>
-                  {item.price}
-                </span>
+                <EditablePrice price={item.price} onEdit={onPriceEdit ? (v) => onPriceEdit(idx, v) : undefined} />
               </div>
             ))}
 
