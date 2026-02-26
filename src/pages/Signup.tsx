@@ -1,4 +1,4 @@
-import { Sparkles } from 'lucide-react';
+import propopadLogo from '@/assets/propopad-logo.svg';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,7 +39,7 @@ export default function Signup() {
         <div className="mx-auto w-full max-w-sm">
           <div className="mb-8 flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand">
-              <Sparkles className="h-5 w-5 text-primary-foreground" />
+              <img src={propopadLogo} alt="Propopad" className="h-5 w-5" />
             </div>
             <span className="font-display text-xl font-bold text-foreground">Propopad</span>
           </div>
@@ -103,7 +103,7 @@ export default function Signup() {
 
       <div className="hidden flex-1 items-center justify-center bg-brand lg:flex">
         <div className="max-w-md px-12 text-center">
-          <Sparkles className="mx-auto mb-6 h-12 w-12 text-primary-foreground/80" />
+          <img src={propopadLogo} alt="Propopad" className="mx-auto mb-6 h-12 w-12 opacity-80" />
           <h2 className="font-display text-3xl font-bold text-primary-foreground">
             Join 2,000+ agencies
           </h2>
