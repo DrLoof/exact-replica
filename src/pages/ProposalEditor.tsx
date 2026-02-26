@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft, Eye, EyeOff, Share2, Download, Send, LinkIcon,
   ChevronDown, FileText, Check, DollarSign, Clock,
-  RefreshCw, MoreHorizontal,
+  RefreshCw, MoreHorizontal, Plus, X, Search,
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -96,6 +96,9 @@ export default function ProposalEditor() {
   const [hiddenSections, setHiddenSections] = useState<Set<number>>(new Set());
   const [activeSection, setActiveSection] = useState(0);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showAddService, setShowAddService] = useState(false);
+  const [addServiceSearch, setAddServiceSearch] = useState('');
+  const [availableModules, setAvailableModules] = useState<any[]>([]);
 
   const currencySymbol = agency?.currency_symbol || '$';
 
@@ -146,6 +149,50 @@ export default function ProposalEditor() {
     }
 
     setLoading(false);
+  };
+
+  // Load available modules for add-service picker
+  useEffect(() => {
+    if (agency?.id) {
+      supabase.from('service_modules').select('*').eq('agency_id', agency.id).eq('is_active', true).order('display_order')
+        .then(({ data }) => setAvailableModules(data || []));
+    }
+  }, [agency?.id]);
+
+  const removeService = async (serviceId: string) => {
+    if (!proposal) return;
+    await supabase.from('proposal_services').delete().eq('id', serviceId);
+    const updated = services.filter(s => s.id !== serviceId);
+    setServices(updated);
+    // Recalculate totals
+    const newFixed = updated.filter(s => s.module?.pricing_model === 'fixed').reduce((sum, s) => sum + getServicePrice(s), 0);
+    const newMonthly = updated.filter(s => s.module?.pricing_model === 'monthly').reduce((sum, s) => sum + getServicePrice(s), 0);
+    await supabase.from('proposals').update({ total_fixed: newFixed, total_monthly: newMonthly, grand_total: newFixed + newMonthly }).eq('id', proposal.id);
+    setProposal(prev => prev ? { ...prev, total_fixed: newFixed, total_monthly: newMonthly, grand_total: newFixed + newMonthly } : prev);
+    toast.success('Service removed');
+  };
+
+  const addService = async (mod: any) => {
+    if (!proposal) return;
+    const { data: newSvc, error } = await supabase.from('proposal_services').insert({
+      proposal_id: proposal.id,
+      module_id: mod.id,
+      display_order: services.length,
+      is_addon: mod.service_type === 'addon',
+    }).select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, icon)').single();
+    if (error) { toast.error('Failed to add service'); return; }
+    const mapped = { ...newSvc, module: newSvc.service_modules };
+    const updated = [...services, mapped];
+    setServices(updated);
+    // Recalculate totals
+    const price = mod.price_fixed ?? mod.price_monthly ?? mod.price_hourly ?? 0;
+    const newFixed = (proposal.total_fixed || 0) + (mod.pricing_model === 'fixed' ? price : 0);
+    const newMonthly = (proposal.total_monthly || 0) + (mod.pricing_model === 'monthly' ? price : 0);
+    await supabase.from('proposals').update({ total_fixed: newFixed, total_monthly: newMonthly, grand_total: newFixed + newMonthly }).eq('id', proposal.id);
+    setProposal(prev => prev ? { ...prev, total_fixed: newFixed, total_monthly: newMonthly, grand_total: newFixed + newMonthly } : prev);
+    setShowAddService(false);
+    setAddServiceSearch('');
+    toast.success(`Added ${mod.name}`);
   };
 
   const updateField = async (field: string, value: any) => {
@@ -332,26 +379,44 @@ export default function ProposalEditor() {
                     {services.length === 0 ? (
                       <div className="text-center py-16">
                         <p className="text-[#999]" style={{ fontSize: '15px' }}>No services added yet.</p>
-                        <Link to="/proposals/new" className="mt-2 inline-block text-sm" style={{ color: agency?.brand_color || '#fc956e' }}>
-                          ← Go back to add services
-                        </Link>
+                        <button onClick={() => setShowAddService(true)} className="mt-2 inline-block text-sm font-medium" style={{ color: agency?.brand_color || '#fc956e' }}>
+                          + Add a service
+                        </button>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                        {services.map((svc, i) => (
-                          <ServiceCard
-                            key={svc.id}
-                            icon={resolveIcon(svc.module?.icon)}
-                            name={svc.module?.name || 'Service'}
-                            price={`${currencySymbol}${getServicePrice(svc).toLocaleString()}`}
-                            pricingModel={(svc.module?.pricing_model || 'fixed') as any}
-                            description={svc.module?.description || svc.module?.short_description || ''}
-                            deliverables={svc.module?.deliverables || []}
-                            isAddon={svc.is_addon || false}
-                            delay={i * 0.1}
-                          />
-                        ))}
-                      </div>
+                      <>
+                        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                          {services.map((svc, i) => (
+                            <div key={svc.id} className="group/svc relative">
+                              <button
+                                onClick={() => removeService(svc.id)}
+                                className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white opacity-0 shadow-md transition-opacity group-hover/svc:opacity-100 print:hidden"
+                                title="Remove service"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                              <ServiceCard
+                                icon={resolveIcon(svc.module?.icon)}
+                                name={svc.module?.name || 'Service'}
+                                price={`${currencySymbol}${getServicePrice(svc).toLocaleString()}`}
+                                pricingModel={(svc.module?.pricing_model || 'fixed') as any}
+                                description={svc.module?.description || svc.module?.short_description || ''}
+                                deliverables={svc.module?.deliverables || []}
+                                isAddon={svc.is_addon || false}
+                                delay={i * 0.1}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                        <div className="mt-6 text-center print:hidden">
+                          <button
+                            onClick={() => setShowAddService(true)}
+                            className="inline-flex items-center gap-2 rounded-lg border-2 border-dashed border-[#DDD] px-5 py-2.5 text-sm font-medium text-[#999] transition-colors hover:border-[#BBB] hover:text-[#666]"
+                          >
+                            <Plus className="h-4 w-4" /> Add Service
+                          </button>
+                        </div>
+                      </>
                     )}
                   </PageWrapper>
                 </div>
@@ -516,11 +581,57 @@ export default function ProposalEditor() {
         </div>
       </div>
 
+      {/* Add Service Modal */}
+      {showAddService && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 backdrop-blur-sm print:hidden" onClick={() => { setShowAddService(false); setAddServiceSearch(''); }}>
+          <div className="w-full max-w-lg rounded-2xl border border-border bg-card shadow-xl max-h-[70vh] flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <h3 className="font-display text-base font-bold text-foreground">Add Service</h3>
+              <button onClick={() => { setShowAddService(false); setAddServiceSearch(''); }} className="text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>
+            </div>
+            <div className="px-6 py-3 border-b border-border">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input type="text" placeholder="Search services..." value={addServiceSearch} onChange={e => setAddServiceSearch(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background py-2 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none" />
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 py-3 space-y-1">
+              {availableModules
+                .filter(m => !services.some(s => s.module_id === m.id))
+                .filter(m => !addServiceSearch || m.name.toLowerCase().includes(addServiceSearch.toLowerCase()))
+                .map(mod => (
+                  <button key={mod.id} onClick={() => addService(mod)}
+                    className="flex w-full items-center justify-between rounded-lg px-3 py-3 text-left transition-colors hover:bg-muted">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{mod.name}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{mod.short_description || mod.description?.slice(0, 60) || ''}</p>
+                    </div>
+                    <div className="text-right shrink-0 ml-3">
+                      <p className="text-sm font-semibold tabular-nums text-foreground">
+                        {currencySymbol}{(mod.price_fixed ?? mod.price_monthly ?? mod.price_hourly ?? 0).toLocaleString()}
+                        {mod.pricing_model === 'monthly' ? '/mo' : mod.pricing_model === 'hourly' ? '/hr' : ''}
+                      </p>
+                      <span className={cn('text-[10px] uppercase tracking-wider font-medium',
+                        mod.pricing_model === 'fixed' ? 'text-status-info' : mod.pricing_model === 'monthly' ? 'text-status-success' : 'text-status-warning'
+                      )}>{mod.pricing_model}</span>
+                    </div>
+                  </button>
+                ))}
+              {availableModules.filter(m => !services.some(s => s.module_id === m.id)).length === 0 && (
+                <p className="text-center text-sm text-muted-foreground py-6">All services are already added</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Share Modal */}
       {showShareModal && (
         <ShareModal
           proposal={proposal}
           client={client}
+          agency={agency}
           onClose={() => setShowShareModal(false)}
           onStatusUpdate={(status) => setProposal(prev => prev ? { ...prev, status } : prev)}
         />
@@ -530,79 +641,111 @@ export default function ProposalEditor() {
 }
 
 // Share Modal Component
-function ShareModal({ proposal, client, onClose, onStatusUpdate }: {
-  proposal: ProposalData; client: any; onClose: () => void; onStatusUpdate: (status: string) => void;
+function ShareModal({ proposal, client, agency, onClose, onStatusUpdate }: {
+  proposal: ProposalData; client: any; agency: any; onClose: () => void; onStatusUpdate: (status: string) => void;
 }) {
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showEmailComposer, setShowEmailComposer] = useState(false);
 
-  const generateShareLink = async () => {
+  const contactFirst = client?.contact_name?.split(' ')[0] || 'there';
+  const agencyName = agency?.name || 'Our Agency';
+  const proposalTitle = proposal.title || 'our proposal';
+
+  const [emailSubject, setEmailSubject] = useState(`${agencyName} — ${proposalTitle}`);
+  const [emailBody, setEmailBody] = useState('');
+
+  const ensureShareLink = async (): Promise<string | null> => {
+    if (shareUrl) return shareUrl;
     setGenerating(true);
     const shareId = crypto.randomUUID().replace(/-/g, '').slice(0, 12);
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + (proposal.validity_days || 30));
-
     const { error } = await supabase.from('proposal_shares').insert({
       proposal_id: proposal.id,
       share_id: shareId,
       share_type: 'link',
       expires_at: expiresAt.toISOString(),
     });
-
-    if (error) {
-      toast.error('Failed to generate link');
-    } else {
-      const url = `${window.location.origin}/p/${shareId}`;
-      setShareUrl(url);
-      if (proposal.status === 'draft') {
-        await supabase.from('proposals').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', proposal.id);
-        onStatusUpdate('sent');
-      }
+    if (error) { toast.error('Failed to generate link'); setGenerating(false); return null; }
+    const url = `${window.location.origin}/p/${shareId}`;
+    setShareUrl(url);
+    if (proposal.status === 'draft') {
+      await supabase.from('proposals').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', proposal.id);
+      onStatusUpdate('sent');
     }
     setGenerating(false);
+    return url;
   };
 
-  const sendViaEmail = async () => {
-    // Generate link first if needed
-    let url = shareUrl;
-    if (!url) {
-      setGenerating(true);
-      const shareId = crypto.randomUUID().replace(/-/g, '').slice(0, 12);
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + (proposal.validity_days || 30));
-      const { error } = await supabase.from('proposal_shares').insert({
-        proposal_id: proposal.id,
-        share_id: shareId,
-        share_type: 'email',
-        recipient_email: client?.contact_email || null,
-        expires_at: expiresAt.toISOString(),
-      });
-      if (error) { toast.error('Failed to generate link'); setGenerating(false); return; }
-      url = `${window.location.origin}/p/${shareId}`;
-      setShareUrl(url);
-      if (proposal.status === 'draft') {
-        await supabase.from('proposals').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', proposal.id);
-        onStatusUpdate('sent');
-      }
-      setGenerating(false);
-    }
+  const openEmailComposer = async () => {
+    const url = await ensureShareLink();
+    if (!url) return;
+    setEmailBody(`Hi ${contactFirst},
 
-    const subject = encodeURIComponent(`${proposal.title || 'Proposal'} — ${proposal.reference_number}`);
-    const body = encodeURIComponent(
-      `Hi${client?.contact_name ? ' ' + client.contact_name : ''},\n\nPlease find your proposal here:\n${url}\n\nLooking forward to hearing from you.\n\nBest regards`
-    );
-    const to = client?.contact_email || '';
-    window.open(`mailto:${to}?subject=${subject}&body=${body}`, '_self');
+Thank you for the opportunity to put this together. Please find our proposal for ${proposalTitle} — we've outlined our recommended approach, timeline, and investment.
+
+You can view the full proposal here: ${url}
+
+Happy to discuss any questions. Looking forward to hearing your thoughts.
+
+Best regards,
+${agencyName}`);
+    setShowEmailComposer(true);
+  };
+
+  const handleSendEmail = () => {
+    const mailto = `mailto:${encodeURIComponent(client?.contact_email || '')}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+    window.open(mailto, '_self');
   };
 
   const copyLink = async () => {
-    if (!shareUrl) return;
-    await navigator.clipboard.writeText(shareUrl);
+    const url = await ensureShareLink();
+    if (!url) return;
+    await navigator.clipboard.writeText(url);
     setCopied(true);
     toast.success('Link copied to clipboard');
     setTimeout(() => setCopied(false), 2000);
   };
+
+  if (showEmailComposer) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 backdrop-blur-sm print:hidden" onClick={onClose}>
+        <div className="w-full max-w-lg rounded-2xl border border-border bg-card shadow-xl" onClick={e => e.stopPropagation()}>
+          <div className="flex items-center justify-between border-b border-border px-6 py-4">
+            <h3 className="font-display text-base font-bold text-foreground">Send Proposal</h3>
+            <button onClick={() => setShowEmailComposer(false)} className="text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>
+          </div>
+          <div className="p-6 space-y-4">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">To</label>
+              <div className="rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm text-foreground">
+                {client?.contact_email || <span className="text-muted-foreground italic">No email on file</span>}
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Subject</label>
+              <input type="text" value={emailSubject} onChange={e => setEmailSubject(e.target.value)}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Cover Message</label>
+              <textarea value={emailBody} onChange={e => setEmailBody(e.target.value)} rows={10}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 resize-none" />
+            </div>
+          </div>
+          <div className="flex items-center justify-between border-t border-border px-6 py-4">
+            <button onClick={() => setShowEmailComposer(false)} className="text-sm text-muted-foreground hover:text-foreground">← Back</button>
+            <button onClick={handleSendEmail} disabled={!client?.contact_email}
+              className="flex items-center gap-2 rounded-lg bg-brand px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-hover disabled:opacity-50">
+              <Send className="h-3.5 w-3.5" /> Open in Email Client
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 backdrop-blur-sm print:hidden" onClick={onClose}>
@@ -618,13 +761,13 @@ function ShareModal({ proposal, client, onClose, onStatusUpdate }: {
               <p className="text-xs text-muted-foreground">Print or save as PDF</p>
             </div>
           </button>
-          <button onClick={sendViaEmail} disabled={generating} className="flex w-full items-center gap-4 rounded-xl border border-border p-4 transition-all hover:border-brand/30 hover:shadow-sm disabled:opacity-50">
+          <button onClick={openEmailComposer} disabled={generating} className="flex w-full items-center gap-4 rounded-xl border border-border p-4 transition-all hover:border-brand/30 hover:shadow-sm disabled:opacity-50">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
               <Send className="h-5 w-5 text-accent-foreground" />
             </div>
             <div className="text-left">
               <p className="text-sm font-semibold text-foreground">{generating ? 'Preparing...' : 'Send via Email'}</p>
-              <p className="text-xs text-muted-foreground">Send to {client?.contact_email || 'client'}</p>
+              <p className="text-xs text-muted-foreground">Compose with cover message template</p>
             </div>
           </button>
 
@@ -643,7 +786,7 @@ function ShareModal({ proposal, client, onClose, onStatusUpdate }: {
             </div>
           ) : (
             <button
-              onClick={generateShareLink}
+              onClick={copyLink}
               disabled={generating}
               className="flex w-full items-center gap-4 rounded-xl border border-border p-4 transition-all hover:border-brand/30 hover:shadow-sm disabled:opacity-50"
             >

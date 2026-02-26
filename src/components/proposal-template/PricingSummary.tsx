@@ -61,11 +61,18 @@ function autoGroupItems(items: PricingItem[]): PricingGroup[] {
     .sort(([a], [b]) => (GROUP_CONFIG[a as PricingModel]?.order ?? 99) - (GROUP_CONFIG[b as PricingModel]?.order ?? 99))
     .map(([model, groupItems]) => {
       const config = GROUP_CONFIG[model as PricingModel] || { label: model, sublabel: "" };
+      // Calculate subtotal from price strings
+      const numericSum = groupItems.reduce((sum, item) => {
+        const num = parseFloat(item.price.replace(/[^0-9.-]/g, ''));
+        return sum + (isNaN(num) ? 0 : num);
+      }, 0);
+      const suffix = model === 'monthly' ? '/mo' : model === 'hourly' ? '/hr' : '';
+      const currency = groupItems[0]?.price.match(/^[^0-9]*/)?.[0] || '$';
       return {
         label: config.label,
         sublabel: config.sublabel,
         items: groupItems,
-        subtotal: "",
+        subtotal: `${currency}${numericSum.toLocaleString()}${suffix}`,
       };
     });
 }
