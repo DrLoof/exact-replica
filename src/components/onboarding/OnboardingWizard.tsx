@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import propopadLogo from '@/assets/propopad-logo.svg';
 import { StepProgress } from './StepProgress';
 import { Step1Agency } from './Step1Agency';
 import { Step2Groups } from './Step2Groups';
@@ -324,7 +325,7 @@ export function OnboardingWizard() {
       <div className="flex items-center justify-between border-b border-border px-6 py-4">
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand">
-            <Sparkles className="h-4 w-4 text-primary-foreground" />
+            <img src={propopadLogo} alt="Propopad" className="h-4 w-4" />
           </div>
           <span className="font-display text-base font-bold text-foreground">Propopad</span>
         </div>

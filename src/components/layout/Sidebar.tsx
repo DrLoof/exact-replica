@@ -1,9 +1,10 @@
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, Users, Layers, Package,
-  Building2, Palette, Receipt, UserPlus, LogOut, Sparkles,
+  Building2, Palette, Receipt, UserPlus, LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import propopadLogo from '@/assets/propopad-logo.svg';
 import { useAuth } from '@/hooks/useAuth';
 
 const mainNav = [
@@ -40,7 +41,7 @@ export function Sidebar() {
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand">
-          <Sparkles className="h-5 w-5 text-primary-foreground" />
+          <img src={propopadLogo} alt="Propopad" className="h-5 w-5" />
         </div>
         <span className="font-display text-lg font-bold text-foreground">Propopad</span>
       </div>
