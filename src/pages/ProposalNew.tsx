@@ -82,6 +82,37 @@ export default function ProposalNew() {
   const [clientContext, setClientContext] = useState('');
   const [showClientContext, setShowClientContext] = useState(false);
   const [showClientDropdown, setShowClientDropdown] = useState(false);
+  const [scraping, setScraping] = useState(false);
+
+  const handleAutoFill = async () => {
+    if (!newClientWebsite.trim()) return;
+    setScraping(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('scrape-website', {
+        body: { url: newClientWebsite.trim() },
+      });
+      if (error) throw error;
+      if (data?.error) { toast.error(data.error); setScraping(false); return; }
+      if (data?.name && !newClientName) {
+        setNewClientName(data.name);
+        setClientSearch(data.name);
+      }
+      if (data?.email && !newContactName) {
+        // Use contact info if available
+      }
+      const contextParts: string[] = [];
+      if (data?.tagline) contextParts.push(data.tagline);
+      if (data?.detected_services?.length > 0) contextParts.push(`Services detected: ${data.detected_services.join(', ')}`);
+      if (contextParts.length > 0 && !clientContext) {
+        setClientContext(contextParts.join('\n'));
+        setShowClientContext(true);
+      }
+      toast.success(`Auto-filled ${data?.fields_found || 0} fields from website`);
+    } catch (e: any) {
+      toast.error('Failed to scan website');
+    }
+    setScraping(false);
+  };
 
   // Zone 2: Services - pre-fill from query params
   const [selectedModuleIds, setSelectedModuleIds] = useState<Set<string>>(() => {
