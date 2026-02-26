@@ -1,11 +1,66 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Search, X, Check, ChevronDown, ChevronUp, CalendarDays, Sparkles } from 'lucide-react';
+import { ArrowLeft, Search, X, Check, ChevronDown, ChevronUp, CalendarDays, Sparkles, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
-import { useClients, useServiceModules, useServiceGroups, useBundles } from '@/hooks/useAgencyData';
+import { useClients, useServiceModules, useServiceGroups, useBundles, useTimelinePhases } from '@/hooks/useAgencyData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
+function InlinePrice({ value, onChange, currencySymbol, suffix, isOverridden, onReset }: {
+  value: number;
+  onChange: (v: number) => void;
+  currencySymbol: string;
+  suffix: string;
+  isOverridden: boolean;
+  onReset: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(String(value));
+
+  if (editing) {
+    return (
+      <input
+        autoFocus
+        type="number"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={() => {
+          setEditing(false);
+          const num = parseFloat(draft);
+          if (!isNaN(num) && num >= 0) onChange(num);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+          if (e.key === 'Escape') setEditing(false);
+        }}
+        className="w-20 rounded border border-brand bg-background px-1.5 py-0.5 text-right text-sm tabular-nums text-foreground focus:outline-none"
+        onClick={(e) => e.stopPropagation()}
+      />
+    );
+  }
+
+  return (
+    <span
+      className="relative cursor-pointer text-sm font-medium tabular-nums text-foreground hover:text-brand"
+      onClick={(e) => {
+        e.stopPropagation();
+        setDraft(String(value));
+        setEditing(true);
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        if (isOverridden) onReset();
+      }}
+      title={isOverridden ? 'Double-click to reset to default' : 'Click to edit price'}
+    >
+      {isOverridden && (
+        <span className="absolute -left-2.5 top-1/2 -translate-y-1/2 h-1.5 w-1.5 rounded-full bg-status-warning" />
+      )}
+      {currencySymbol}{value.toLocaleString()}{suffix}
+    </span>
+  );
+}
 
 export default function ProposalNew() {
   const navigate = useNavigate();
@@ -15,6 +70,7 @@ export default function ProposalNew() {
   const { data: modules = [] } = useServiceModules();
   const { data: groups = [] } = useServiceGroups();
   const { data: bundles = [] } = useBundles();
+  const { data: timelinePhases = [] } = useTimelinePhases();
   const currencySymbol = agency?.currency_symbol || '$';
 
   // Zone 1: Client
@@ -22,7 +78,9 @@ export default function ProposalNew() {
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [newClientName, setNewClientName] = useState('');
   const [newContactName, setNewContactName] = useState('');
-  const [newContactEmail, setNewContactEmail] = useState('');
+  const [newClientWebsite, setNewClientWebsite] = useState('');
+  const [clientContext, setClientContext] = useState('');
+  const [showClientContext, setShowClientContext] = useState(false);
   const [showClientDropdown, setShowClientDropdown] = useState(false);
 
   // Zone 2: Services - pre-fill from query params
@@ -38,7 +96,7 @@ export default function ProposalNew() {
   const [showTimeline, setShowTimeline] = useState(false);
   const [startDate, setStartDate] = useState(() => {
     const d = new Date();
-    d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7)); // next Monday
+    d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7));
     return d.toISOString().split('T')[0];
   });
 
@@ -53,7 +111,6 @@ export default function ProposalNew() {
       const found = clients.find((c: any) => c.id === prefilledClientId);
       if (found) {
         setSelectedClient(found);
-        // If repeat mode, load services from client's most recent proposal
         if (repeatMode) {
           loadLastProposalServices(prefilledClientId);
         }
@@ -97,7 +154,6 @@ export default function ProposalNew() {
     })).filter((g: any) => g.modules.length > 0),
   [groups, modules]);
 
-  // Toggle module
   const toggleModule = (id: string) => {
     setSelectedModuleIds(prev => {
       const next = new Set(prev);
@@ -106,7 +162,6 @@ export default function ProposalNew() {
     });
   };
 
-  // Toggle group expand
   const toggleGroup = (id: string) => {
     setExpandedGroups(prev => ({ ...prev, [id]: !prev[id] }));
   };
@@ -128,32 +183,50 @@ export default function ProposalNew() {
   const canBuild = hasClient && hasServices;
 
   const getModulePrice = (m: any) => priceOverrides[m.id] ?? m.price_fixed ?? m.price_monthly ?? m.price_hourly ?? 0;
+  const getModuleDefaultPrice = (m: any) => m.price_fixed ?? m.price_monthly ?? m.price_hourly ?? 0;
   const priceSuffix: Record<string, string> = { fixed: '', monthly: '/mo', hourly: '/hr' };
+
+  // Phase summary for timeline
+  const phaseSummary = useMemo(() => {
+    if (timelinePhases.length === 0) return null;
+    const names = timelinePhases.map((p: any) => p.name.split(' ')[0]).join(' → ');
+    const totalWeeks = timelinePhases.reduce((sum: number, p: any) => {
+      const match = p.default_duration?.match(/(\d+)/);
+      return sum + (match ? parseInt(match[1]) : 2);
+    }, 0);
+    return { names, totalWeeks };
+  }, [timelinePhases]);
+
+  // Get bundle included modules
+  const getBundleModuleNames = (bundle: any) => {
+    const moduleIds = (bundle.bundle_modules || []).map((bm: any) => bm.module_id);
+    return modules
+      .filter((m: any) => moduleIds.includes(m.id))
+      .map((m: any) => m.name);
+  };
 
   const createProposal = async (navigateToEditor: boolean) => {
     if (!agency || !canBuild) return;
     setSaving(true);
 
     try {
-      // Create or use client
       let clientId = selectedClient?.id;
       if (!clientId && newClientName.trim()) {
         const { data: newC, error } = await supabase.from('clients').insert({
           agency_id: agency.id,
           company_name: newClientName.trim(),
           contact_name: newContactName || null,
-          contact_email: newContactEmail || null,
+          website: newClientWebsite || null,
+          notes: clientContext || null,
         }).select('id').single();
         if (error) throw error;
         clientId = newC.id;
       }
 
-      // Generate reference number
       const counter = (agency.proposal_counter || 0) + 1;
       const prefix = agency.proposal_prefix || 'PRO';
       const refNum = `${prefix}-${new Date().getFullYear()}-${String(counter).padStart(4, '0')}`;
 
-      // Create proposal
       const { data: proposal, error: pError } = await supabase.from('proposals').insert({
         agency_id: agency.id,
         client_id: clientId,
@@ -171,7 +244,6 @@ export default function ProposalNew() {
       }).select('id').single();
       if (pError) throw pError;
 
-      // Insert proposal services
       const services = Array.from(selectedModuleIds).map((moduleId, i) => {
         const mod = modules.find((m: any) => m.id === moduleId);
         const override = priceOverrides[moduleId];
@@ -188,7 +260,6 @@ export default function ProposalNew() {
         await supabase.from('proposal_services').insert(services);
       }
 
-      // Update counter
       await supabase.from('agencies').update({ proposal_counter: counter }).eq('id', agency.id);
 
       toast.success(navigateToEditor ? 'Proposal created!' : 'Draft saved!');
@@ -301,19 +372,36 @@ export default function ProposalNew() {
 
               {/* New client fields */}
               {clientSearch && !selectedClient && !showClientDropdown && (
-                <div className="mt-3 grid grid-cols-2 gap-3">
-                  <input
-                    placeholder="Contact Name"
-                    value={newContactName}
-                    onChange={(e) => setNewContactName(e.target.value)}
-                    className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none"
-                  />
-                  <input
-                    placeholder="Contact Email"
-                    value={newContactEmail}
-                    onChange={(e) => setNewContactEmail(e.target.value)}
-                    className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none"
-                  />
+                <div className="mt-3 space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      placeholder="Contact Name"
+                      value={newContactName}
+                      onChange={(e) => setNewContactName(e.target.value)}
+                      className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none"
+                    />
+                    <input
+                      placeholder="Client Website URL"
+                      value={newClientWebsite}
+                      onChange={(e) => setNewClientWebsite(e.target.value)}
+                      className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none"
+                    />
+                  </div>
+                  <button
+                    onClick={() => setShowClientContext(!showClientContext)}
+                    className="text-xs text-brand hover:text-brand-hover"
+                  >
+                    {showClientContext ? '− Hide context' : '+ Add context about this client'}
+                  </button>
+                  {showClientContext && (
+                    <textarea
+                      placeholder="E.g., B2B SaaS company, 50 employees, looking to rebrand and increase inbound leads..."
+                      value={clientContext}
+                      onChange={(e) => setClientContext(e.target.value)}
+                      rows={3}
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none resize-none"
+                    />
+                  )}
                 </div>
               )}
             </div>
@@ -329,39 +417,57 @@ export default function ProposalNew() {
             <div className="mb-6">
               <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">Packages</p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {bundles.map((b: any) => (
-                  <button
-                    key={b.id}
-                    onClick={() => setSelectedBundleId(selectedBundleId === b.id ? null : b.id)}
-                    className={cn(
-                      'rounded-xl border-2 p-4 text-left transition-all',
-                      selectedBundleId === b.id
-                        ? 'border-brand bg-accent'
-                        : 'border-border hover:border-muted-foreground/30'
-                    )}
-                  >
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold text-foreground">{b.name}</p>
-                      {selectedBundleId === b.id && (
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand">
-                          <Check className="h-3 w-3 text-primary-foreground" />
+                {bundles.map((b: any) => {
+                  const bundleModuleNames = getBundleModuleNames(b);
+                  return (
+                    <button
+                      key={b.id}
+                      onClick={() => setSelectedBundleId(selectedBundleId === b.id ? null : b.id)}
+                      className={cn(
+                        'rounded-xl border-2 p-4 text-left transition-all',
+                        selectedBundleId === b.id
+                          ? 'border-brand bg-accent'
+                          : 'border-border hover:border-muted-foreground/30'
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-foreground">{b.name}</p>
+                        {selectedBundleId === b.id && (
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand">
+                            <Check className="h-3 w-3 text-primary-foreground" />
+                          </div>
+                        )}
+                      </div>
+                      {b.tagline && <p className="mt-1 text-xs text-muted-foreground">{b.tagline}</p>}
+                      {/* Included services as pills */}
+                      {bundleModuleNames.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {bundleModuleNames.slice(0, 5).map((name: string) => (
+                            <span key={name} className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+                              {name}
+                            </span>
+                          ))}
+                          {bundleModuleNames.length > 5 && (
+                            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+                              +{bundleModuleNames.length - 5} more
+                            </span>
+                          )}
                         </div>
                       )}
-                    </div>
-                    {b.tagline && <p className="mt-1 text-xs text-muted-foreground">{b.tagline}</p>}
-                    <div className="mt-3 flex items-baseline gap-2">
-                      <span className="text-lg font-bold tabular-nums text-foreground">{currencySymbol}{(b.bundle_price || 0).toLocaleString()}</span>
-                      {b.individual_total > b.bundle_price && (
-                        <span className="text-xs text-muted-foreground line-through">{currencySymbol}{b.individual_total.toLocaleString()}</span>
-                      )}
-                      {b.savings_amount > 0 && (
-                        <span className="rounded-full bg-status-success/15 px-2 py-0.5 text-[10px] font-medium text-status-success">
-                          Save {currencySymbol}{b.savings_amount.toLocaleString()}
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                ))}
+                      <div className="mt-3 flex items-baseline gap-2">
+                        <span className="text-lg font-bold tabular-nums text-foreground">{currencySymbol}{(b.bundle_price || 0).toLocaleString()}</span>
+                        {b.individual_total > b.bundle_price && (
+                          <span className="text-xs text-muted-foreground line-through">{currencySymbol}{b.individual_total.toLocaleString()}</span>
+                        )}
+                        {b.savings_amount > 0 && (
+                          <span className="rounded-full bg-status-success/15 px-2 py-0.5 text-[10px] font-medium text-status-success">
+                            Save {currencySymbol}{b.savings_amount.toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -393,12 +499,14 @@ export default function ProposalNew() {
                       {group.modules.map((mod: any) => {
                         const isSelected = selectedModuleIds.has(mod.id);
                         const price = getModulePrice(mod);
+                        const defaultPrice = getModuleDefaultPrice(mod);
+                        const isOverridden = priceOverrides[mod.id] !== undefined;
                         return (
                           <div
                             key={mod.id}
                             onClick={() => toggleModule(mod.id)}
                             className={cn(
-                              'flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors',
+                              'group flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors',
                               isSelected ? 'bg-accent/50' : 'hover:bg-muted/30'
                             )}
                           >
@@ -410,6 +518,9 @@ export default function ProposalNew() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm text-foreground">{mod.name}</p>
+                              {mod.short_description && (
+                                <p className="hidden text-xs text-muted-foreground group-hover:block">{mod.short_description}</p>
+                              )}
                             </div>
                             <span className={cn(
                               'rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider',
@@ -419,9 +530,22 @@ export default function ProposalNew() {
                             )}>
                               {mod.pricing_model}
                             </span>
-                            <span className="text-sm font-medium tabular-nums text-foreground">
-                              {currencySymbol}{price.toLocaleString()}{priceSuffix[mod.pricing_model] || ''}
-                            </span>
+                            <InlinePrice
+                              value={price}
+                              onChange={(newPrice) => {
+                                setPriceOverrides(prev => ({ ...prev, [mod.id]: newPrice }));
+                              }}
+                              currencySymbol={currencySymbol}
+                              suffix={priceSuffix[mod.pricing_model] || ''}
+                              isOverridden={isOverridden}
+                              onReset={() => {
+                                setPriceOverrides(prev => {
+                                  const next = { ...prev };
+                                  delete next[mod.id];
+                                  return next;
+                                });
+                              }}
+                            />
                           </div>
                         );
                       })}
@@ -458,7 +582,14 @@ export default function ProposalNew() {
           >
             <div className="flex items-center gap-3">
               <CalendarDays className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-semibold text-foreground">When does this start?</span>
+              <div className="text-left">
+                <span className="text-sm font-semibold text-foreground">When does this start?</span>
+                {phaseSummary && !showTimeline && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    ~{phaseSummary.totalWeeks} weeks: {phaseSummary.names}
+                  </p>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">{new Date(startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
@@ -466,14 +597,34 @@ export default function ProposalNew() {
             </div>
           </button>
           {showTimeline && (
-            <div className="border-t border-border px-6 py-4">
-              <label className="mb-1.5 block text-xs text-muted-foreground">Project Start Date</label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
-              />
+            <div className="border-t border-border px-6 py-4 space-y-4">
+              <div>
+                <label className="mb-1.5 block text-xs text-muted-foreground">Project Start Date</label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
+                />
+              </div>
+              {/* Phase breakdown */}
+              {timelinePhases.length > 0 && (
+                <div>
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">Project Phases</p>
+                  <div className="space-y-2">
+                    {timelinePhases.map((phase: any, i: number) => (
+                      <div key={phase.id} className="flex items-center gap-3 rounded-lg bg-muted/30 px-3 py-2">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand/15 text-[10px] font-bold text-brand">{i + 1}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-foreground">{phase.name}</p>
+                          {phase.description && <p className="text-[10px] text-muted-foreground truncate">{phase.description}</p>}
+                        </div>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">{phase.default_duration}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </section>
