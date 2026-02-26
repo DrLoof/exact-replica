@@ -473,6 +473,18 @@ export default function ProposalEditor() {
                         bundlePrice: `${currencySymbol}${(proposal.grand_total || 0).toLocaleString()}`,
                         savings: `-${currencySymbol}${(proposal.bundle_savings || 0).toLocaleString()}`,
                       } : undefined}
+                      onPriceEdit={async (index, newPrice) => {
+                        const svc = services[index];
+                        if (!svc || !proposal) return;
+                        await supabase.from('proposal_services').update({ price_override: newPrice }).eq('id', svc.id);
+                        const updated = services.map((s, i) => i === index ? { ...s, price_override: newPrice } : s);
+                        setServices(updated);
+                        const newFixed = updated.filter(s => s.module?.pricing_model === 'fixed').reduce((sum, s) => sum + getServicePrice(s), 0);
+                        const newMonthly = updated.filter(s => s.module?.pricing_model === 'monthly').reduce((sum, s) => sum + getServicePrice(s), 0);
+                        await supabase.from('proposals').update({ total_fixed: newFixed, total_monthly: newMonthly, grand_total: newFixed + newMonthly }).eq('id', proposal.id);
+                        setProposal(prev => prev ? { ...prev, total_fixed: newFixed, total_monthly: newMonthly, grand_total: newFixed + newMonthly } : prev);
+                        toast.success('Price updated');
+                      }}
                     />
                   </PageWrapper>
                 </div>
