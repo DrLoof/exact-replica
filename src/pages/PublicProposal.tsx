@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { AlertTriangle, Layers } from 'lucide-react';
+import { AlertTriangle, Layers, CheckCircle2, XCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   BrandProvider,
   HeroCover,
@@ -405,7 +406,7 @@ export default function PublicProposal() {
           </PageWrapper>
         )}
 
-        {/* Section 9: Signature */}
+        {/* Section 9: Signature + Accept/Decline */}
         <PageWrapper pageNumber="09">
           <SignatureBlock
             client={{
@@ -415,6 +416,23 @@ export default function PublicProposal() {
               title: client?.contact_title || undefined,
             }}
           />
+
+          {/* Accept / Decline Actions */}
+          {(proposal.status === 'sent' || proposal.status === 'viewed') && (
+            <ProposalActions proposalId={proposal.id} onStatusChange={(status) => setProposal((prev: any) => prev ? { ...prev, status } : prev)} />
+          )}
+          {proposal.status === 'accepted' && (
+            <div className="mt-8 flex items-center justify-center gap-3 rounded-xl border-2 border-green-200 bg-green-50 p-6">
+              <CheckCircle2 className="h-6 w-6 text-green-600" />
+              <p className="text-lg font-semibold text-green-800" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>This proposal has been accepted</p>
+            </div>
+          )}
+          {proposal.status === 'declined' && (
+            <div className="mt-8 flex items-center justify-center gap-3 rounded-xl border-2 border-red-200 bg-red-50 p-6">
+              <XCircle className="h-6 w-6 text-red-600" />
+              <p className="text-lg font-semibold text-red-800" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>This proposal has been declined</p>
+            </div>
+          )}
         </PageWrapper>
 
         {/* Footer */}
@@ -425,5 +443,67 @@ export default function PublicProposal() {
         </div>
       </div>
     </BrandProvider>
+  );
+}
+
+function ProposalActions({ proposalId, onStatusChange }: { proposalId: string; onStatusChange: (status: string) => void }) {
+  const [acting, setActing] = useState(false);
+  const [confirmed, setConfirmed] = useState<string | null>(null);
+
+  const handleAction = async (action: 'accepted' | 'declined') => {
+    if (confirmed && confirmed !== action) return;
+    if (!confirmed) {
+      setConfirmed(action);
+      return;
+    }
+    setActing(true);
+    const updates: any = { status: action };
+    if (action === 'accepted') updates.accepted_at = new Date().toISOString();
+    if (action === 'declined') updates.declined_at = new Date().toISOString();
+    await supabase.from('proposals').update(updates).eq('id', proposalId);
+    onStatusChange(action);
+    toast.success(action === 'accepted' ? 'Proposal accepted!' : 'Proposal declined');
+    setActing(false);
+  };
+
+  return (
+    <div className="mt-10 border-t border-[#EEE] pt-8">
+      <p className="text-center text-[15px] text-[#666] mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+        Ready to move forward?
+      </p>
+      <div className="flex items-center justify-center gap-4">
+        {(!confirmed || confirmed === 'accepted') && (
+          <button
+            onClick={() => handleAction('accepted')}
+            disabled={acting}
+            className="flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-semibold text-white transition-all hover:scale-105 disabled:opacity-50"
+            style={{ backgroundColor: '#22c55e', fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            <CheckCircle2 className="h-5 w-5" />
+            {confirmed === 'accepted' ? (acting ? 'Confirming...' : 'Click again to confirm') : 'Accept Proposal'}
+          </button>
+        )}
+        {(!confirmed || confirmed === 'declined') && (
+          <button
+            onClick={() => handleAction('declined')}
+            disabled={acting}
+            className="flex items-center gap-2 rounded-xl border-2 border-[#E5E5E5] px-8 py-3 text-sm font-semibold text-[#666] transition-all hover:border-red-300 hover:text-red-600 disabled:opacity-50"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            <XCircle className="h-5 w-5" />
+            {confirmed === 'declined' ? (acting ? 'Confirming...' : 'Click again to confirm') : 'Decline'}
+          </button>
+        )}
+        {confirmed && (
+          <button
+            onClick={() => setConfirmed(null)}
+            className="text-sm text-[#999] hover:text-[#666]"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          >
+            Cancel
+          </button>
+        )}
+      </div>
+    </div>
   );
 }
