@@ -943,7 +943,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_shared_proposal_ids: { Args: never; Returns: string[] }
+      get_user_agency_id: { Args: { p_user_id: string }; Returns: string }
+      has_active_share: { Args: { p_proposal_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
