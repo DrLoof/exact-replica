@@ -103,7 +103,7 @@ export default function Dashboard() {
   };
 
   return (
-    <AppShell>
+    <AppShell hideHeader>
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
