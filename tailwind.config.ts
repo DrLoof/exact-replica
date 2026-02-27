@@ -28,10 +28,13 @@ export default {
           hover: "hsl(var(--brand-primary-hover))",
           light: "hsl(var(--brand-primary-light))",
           ghost: "hsl(var(--brand-primary-ghost))",
+          text: "hsl(var(--brand-text))",
         },
         surface: {
           card: "hsl(var(--surface-card))",
+          "card-alt": "hsl(var(--surface-card-alt))",
           dark: "hsl(var(--surface-dark))",
+          "dark-end": "hsl(var(--surface-dark-end))",
           sidebar: "hsl(var(--surface-sidebar))",
         },
         primary: {
