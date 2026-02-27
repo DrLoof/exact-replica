@@ -1,4 +1,5 @@
 import propopadLogo from '@/assets/propopad-logo.svg';
+import propopadLogoFull from '@/assets/propopad-logo-full.svg';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
