@@ -39,6 +39,9 @@ export type Database = {
           phone: string | null
           proposal_counter: number | null
           proposal_prefix: string | null
+          scrape_status: string | null
+          scrape_url: string | null
+          scraped_at: string | null
           scraped_data: Json | null
           secondary_color: string | null
           state: string | null
@@ -70,6 +73,9 @@ export type Database = {
           phone?: string | null
           proposal_counter?: number | null
           proposal_prefix?: string | null
+          scrape_status?: string | null
+          scrape_url?: string | null
+          scraped_at?: string | null
           scraped_data?: Json | null
           secondary_color?: string | null
           state?: string | null
@@ -101,6 +107,9 @@ export type Database = {
           phone?: string | null
           proposal_counter?: number | null
           proposal_prefix?: string | null
+          scrape_status?: string | null
+          scrape_url?: string | null
+          scraped_at?: string | null
           scraped_data?: Json | null
           secondary_color?: string | null
           state?: string | null
@@ -256,6 +265,7 @@ export type Database = {
           display_order: number | null
           icon: string | null
           id: string
+          source: string | null
           stat_label: string | null
           stat_value: string | null
           title: string
@@ -266,6 +276,7 @@ export type Database = {
           display_order?: number | null
           icon?: string | null
           id?: string
+          source?: string | null
           stat_label?: string | null
           stat_value?: string | null
           title: string
@@ -276,6 +287,7 @@ export type Database = {
           display_order?: number | null
           icon?: string | null
           id?: string
+          source?: string | null
           stat_label?: string | null
           stat_value?: string | null
           title?: string
@@ -826,6 +838,7 @@ export type Database = {
           metric_value: string | null
           quote: string
           relevant_services: string[] | null
+          source: string | null
         }
         Insert: {
           agency_id?: string | null
@@ -840,6 +853,7 @@ export type Database = {
           metric_value?: string | null
           quote: string
           relevant_services?: string[] | null
+          source?: string | null
         }
         Update: {
           agency_id?: string | null
@@ -854,6 +868,7 @@ export type Database = {
           metric_value?: string | null
           quote?: string
           relevant_services?: string[] | null
+          source?: string | null
         }
         Relationships: [
           {
