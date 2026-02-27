@@ -28,6 +28,7 @@ export default {
           hover: "hsl(var(--brand-primary-hover))",
           light: "hsl(var(--brand-primary-light))",
           ghost: "hsl(var(--brand-primary-ghost))",
+          text: "hsl(var(--brand-text))",
         },
         surface: {
           card: "hsl(var(--surface-card))",
