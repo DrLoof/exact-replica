@@ -355,42 +355,46 @@ export default function ProposalNew() {
               <button onClick={() => { setSelectedClient(null); setClientSearch(''); }} className="text-xs text-brand hover:text-brand-hover">Change</button>
             </div>
           ) : (
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search existing clients or type a new company name..."
-                value={clientSearch}
-                onChange={(e) => { setClientSearch(e.target.value); setNewClientName(e.target.value); setShowClientDropdown(true); }}
-                onFocus={() => setShowClientDropdown(true)}
-                className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
-              />
-              {showClientDropdown && clientSearch.length > 0 && filteredClients.length > 0 && (
-                <div className="absolute z-10 mt-1 w-full rounded-lg border border-border bg-card shadow-lg">
-                  {filteredClients.slice(0, 5).map((c: any) => (
-                    <button
-                      key={c.id}
-                      onClick={() => { setSelectedClient(c); setShowClientDropdown(false); setClientSearch(''); }}
-                      className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-muted"
-                    >
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground">
-                        {c.company_name.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{c.company_name}</p>
-                        {c.contact_name && <p className="text-xs text-muted-foreground">{c.contact_name}</p>}
-                      </div>
-                    </button>
-                  ))}
-                  <div className="border-t border-border px-4 py-2">
-                    <button onClick={() => setShowClientDropdown(false)} className="text-xs text-brand hover:text-brand-hover">
-                      Create "{clientSearch}" as new client
-                    </button>
+            <div>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search existing clients or type a new company name..."
+                  value={clientSearch}
+                  onChange={(e) => { setClientSearch(e.target.value); setNewClientName(e.target.value); setShowClientDropdown(true); }}
+                  onFocus={() => setShowClientDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowClientDropdown(false), 200)}
+                  className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                />
+                {showClientDropdown && clientSearch.length > 0 && filteredClients.length > 0 && (
+                  <div className="absolute z-10 mt-1 w-full rounded-lg border border-border bg-card shadow-lg">
+                    {filteredClients.slice(0, 5).map((c: any) => (
+                      <button
+                        key={c.id}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => { setSelectedClient(c); setShowClientDropdown(false); setClientSearch(''); }}
+                        className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-muted"
+                      >
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground">
+                          {c.company_name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{c.company_name}</p>
+                          {c.contact_name && <p className="text-xs text-muted-foreground">{c.contact_name}</p>}
+                        </div>
+                      </button>
+                    ))}
+                    <div className="border-t border-border px-4 py-2">
+                      <button onMouseDown={(e) => e.preventDefault()} onClick={() => setShowClientDropdown(false)} className="text-xs text-brand hover:text-brand-hover">
+                        Create "{clientSearch}" as new client
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
-              {/* New client fields — show immediately when typing a new name */}
+              {/* New client fields — always visible when typing */}
               {clientSearch && !selectedClient && (
                 <div className="mt-3 space-y-3">
                   <div className="grid grid-cols-2 gap-3">
