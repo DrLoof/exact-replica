@@ -32,7 +32,9 @@ export default {
         },
         surface: {
           card: "hsl(var(--surface-card))",
+          "card-alt": "hsl(var(--surface-card-alt))",
           dark: "hsl(var(--surface-dark))",
+          "dark-end": "hsl(var(--surface-dark-end))",
           sidebar: "hsl(var(--surface-sidebar))",
         },
         primary: {
