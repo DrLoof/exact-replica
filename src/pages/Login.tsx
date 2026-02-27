@@ -80,7 +80,7 @@ export default function Login() {
 
       <div className="hidden flex-1 items-center justify-center bg-brand lg:flex">
         <div className="max-w-md px-12 text-center">
-          <img src={propopadLogo} alt="Propopad" className="mx-auto mb-6 h-12 w-12 opacity-80" />
+          <img src={propopadLogoFull} alt="Propopad" className="mx-auto mb-6 h-20 w-auto opacity-90" />
           <h2 className="font-display text-3xl font-bold text-primary-foreground">
             Beautiful proposals that win clients
           </h2>
