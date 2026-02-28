@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getDefaultModulesForGroup } from '@/lib/defaultModules';
+import { defaultBundles, findDefaultModule, calculateBundlePricing } from '@/lib/defaultBundles';
 import { ScanScreen } from './ScanScreen';
 import { ReviewScreen } from './ReviewScreen';
 
