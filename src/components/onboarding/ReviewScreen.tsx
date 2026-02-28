@@ -22,6 +22,8 @@ interface ReviewScreenProps {
   groupNameMap: Record<string, string>;
   onFinish: () => void;
   saving: boolean;
+  addedBundles?: Set<string>;
+  onAddBundle?: (bundleName: string) => void;
 }
 
 export function ReviewScreen({
