@@ -418,7 +418,7 @@ export default function ProposalEditor() {
                                 }}
                                 onDeliverablesEdit={async (dels) => {
                                   await supabase.from('proposal_services').update({ custom_deliverables: dels }).eq('id', svc.id);
-                                  setServices(prev => prev.map(s => s.id === svc.id ? { ...s, module: s.module ? { ...s.module, deliverables: dels } : s.module } : s));
+                                  setServices(prev => prev.map(s => s.id === svc.id ? { ...s, custom_deliverables: dels } : s));
                                 }}
                               />
                             </div>
