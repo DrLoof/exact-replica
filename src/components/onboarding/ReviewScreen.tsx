@@ -490,7 +490,13 @@ export function ReviewScreen({
           </button>
         )}
 
-        <p className="mt-4 text-[11px] text-muted-foreground">
+        <div className="flex items-start gap-2 mt-4 rounded-lg bg-background px-3 py-2.5">
+          <span className="text-sm mt-0.5" style={{ color: '#C07A5C' }}>⚠</span>
+          <p className="text-[12px] text-muted-foreground">
+            These are template clauses, not legal advice. Have a lawyer review your terms before using them with clients.
+          </p>
+        </div>
+        <p className="mt-3 text-[11px] text-muted-foreground">
           These appear in your proposals. Edit anytime in Settings.
         </p>
       </section>

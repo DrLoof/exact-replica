@@ -435,6 +435,11 @@ export default function PublicProposal() {
           )}
         </PageWrapper>
 
+        {/* Analytics notice */}
+        <p className="mt-16 text-center text-[10px]" style={{ color: '#B8B0A5' }}>
+          Viewing activity is tracked to help {agency?.name || 'the agency'} follow up.
+        </p>
+
         {/* Footer */}
         <div className="text-center py-6 bg-white">
           <p className="text-[#CCC]" style={{ fontSize: "12px", fontFamily: "'Space Grotesk', sans-serif" }}>
