@@ -415,6 +415,10 @@ export default function ProposalEditor() {
                                   await supabase.from('proposal_services').update({ custom_description: val }).eq('id', svc.id);
                                   setServices(prev => prev.map(s => s.id === svc.id ? { ...s, module: s.module ? { ...s.module, description: val } : s.module } : s));
                                 }}
+                                onDeliverablesEdit={async (dels) => {
+                                  await supabase.from('proposal_services').update({ custom_deliverables: dels }).eq('id', svc.id);
+                                  setServices(prev => prev.map(s => s.id === svc.id ? { ...s, module: s.module ? { ...s.module, deliverables: dels } : s.module } : s));
+                                }}
                               />
                             </div>
                           ))}
