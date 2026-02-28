@@ -444,6 +444,21 @@ export default function ProposalEditor() {
                             description={phase.description}
                             isLast={i === (proposal.phases as any[]).length - 1}
                             delay={i * 0.1}
+                            onNameEdit={(val) => {
+                              const updated = [...(proposal.phases as any[])];
+                              updated[i] = { ...updated[i], name: val };
+                              updateField('phases', updated);
+                            }}
+                            onDurationEdit={(val) => {
+                              const updated = [...(proposal.phases as any[])];
+                              updated[i] = { ...updated[i], duration: val };
+                              updateField('phases', updated);
+                            }}
+                            onDescriptionEdit={(val) => {
+                              const updated = [...(proposal.phases as any[])];
+                              updated[i] = { ...updated[i], description: val };
+                              updateField('phases', updated);
+                            }}
                           />
                         ))}
                       </div>
