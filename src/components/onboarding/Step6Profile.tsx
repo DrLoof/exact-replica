@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { Target, BarChart3, Users, Trophy, Zap, Layers, ChevronDown, ChevronRight } from 'lucide-react';
 
 const defaultDifferentiators = [
-  { icon: 'Target', title: 'Strategy-Led Approach', statValue: '87%', statLabel: 'Client Retention', description: 'Every project starts with strategy, not tactics.' },
+  { icon: 'Target', title: 'Strategy-Led Approach', statValue: '87%', statLabel: 'Success rate', description: 'Every project starts with strategy, not tactics.' },
   { icon: 'BarChart3', title: 'Transparent Reporting', statValue: 'Weekly', statLabel: 'Updates', description: 'Clear dashboards and weekly progress reports.' },
   { icon: 'Users', title: 'Dedicated Team', statValue: '1', statLabel: 'Point of Contact', description: 'A single dedicated account manager for your project.' },
   { icon: 'Trophy', title: 'Proven Results', statValue: '150+', statLabel: 'Projects', description: 'Track record of delivering measurable outcomes.' },

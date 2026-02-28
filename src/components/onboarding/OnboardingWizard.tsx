@@ -83,7 +83,7 @@ export function OnboardingWizard() {
 
     // Set differentiators
     const defaultDiffs = [
-      { title: 'Measurable Impact', stat_value: '', stat_label: 'Client retention', description: 'Beautiful work means nothing without results. We embed measurement into every engagement from day one, with clear KPIs, reporting dashboards, and a relentless focus on ROI.', icon: 'Target', source: 'default' },
+      { title: 'Measurable Impact', stat_value: '', stat_label: '', description: 'Beautiful work means nothing without results. We embed measurement into every engagement from day one, with clear KPIs, reporting dashboards, and a relentless focus on ROI.', icon: 'Target', source: 'default' },
       { title: 'True Partnership Model', stat_value: '', stat_label: '', description: 'We don\'t operate as a vendor — we operate as an extension of your team. Transparent communication, shared accountability, and a genuine investment in your success.', icon: 'Users', source: 'default' },
       { title: 'Strategy-First Approach', stat_value: '', stat_label: '', description: 'We don\'t start with design — we start with understanding. Every visual decision, every word, every pixel is backed by strategic intent based on your market reality and business goals.', icon: 'Zap', source: 'default' },
     ];
@@ -124,7 +124,7 @@ export function OnboardingWizard() {
       address: agency?.address_line1 || '',
     });
     setDifferentiators([
-      { title: 'Measurable Impact', stat_value: '', stat_label: 'Client retention', description: 'Beautiful work means nothing without results. We embed measurement into every engagement from day one, with clear KPIs, reporting dashboards, and a relentless focus on ROI.', icon: 'Target', source: 'default' },
+      { title: 'Measurable Impact', stat_value: '', stat_label: '', description: 'Beautiful work means nothing without results. We embed measurement into every engagement from day one, with clear KPIs, reporting dashboards, and a relentless focus on ROI.', icon: 'Target', source: 'default' },
       { title: 'True Partnership Model', stat_value: '', stat_label: '', description: 'We don\'t operate as a vendor — we operate as an extension of your team. Transparent communication, shared accountability, and a genuine investment in your success.', icon: 'Users', source: 'default' },
       { title: 'Strategy-First Approach', stat_value: '', stat_label: '', description: 'We don\'t start with design — we start with understanding. Every visual decision, every word, every pixel is backed by strategic intent based on your market reality and business goals.', icon: 'Zap', source: 'default' },
     ]);
