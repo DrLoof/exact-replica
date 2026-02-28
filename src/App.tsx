@@ -59,6 +59,7 @@ const App = () => (
             <Route path="/settings/differentiators" element={<ProtectedRoute><SettingsDifferentiators /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <CookieConsent />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
