@@ -38,7 +38,9 @@ export default function SettingsAgency() {
   const handleSave = async () => {
     if (!agency) return;
     setSaving(true);
-    const { error } = await supabase.from('agencies').update(form).eq('id', agency.id);
+    const { years_experience, ...rest } = form;
+    const payload = { ...rest, years_experience: years_experience ? parseInt(years_experience, 10) : null };
+    const { error } = await supabase.from('agencies').update(payload).eq('id', agency.id);
     if (error) toast.error('Failed to save');
     else toast.success('Agency profile updated');
     setSaving(false);
