@@ -40,6 +40,8 @@ export function ReviewScreen({
   groupNameMap,
   onFinish,
   saving,
+  addedBundles = new Set(),
+  onAddBundle,
 }: ReviewScreenProps) {
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [showAllServices, setShowAllServices] = useState(false);
