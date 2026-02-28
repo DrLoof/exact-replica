@@ -75,6 +75,11 @@ export default function Login() {
             Don't have an account?{' '}
             <Link to="/signup" className="font-medium text-brand hover:text-brand-hover">Sign up</Link>
           </p>
+          <p className="mt-4 text-center">
+            <Link to="/terms" className="text-[10px] hover:underline" style={{ color: '#B8B0A5' }}>Terms</Link>
+            <span className="mx-1 text-[10px]" style={{ color: '#B8B0A5' }}>·</span>
+            <Link to="/privacy" className="text-[10px] hover:underline" style={{ color: '#B8B0A5' }}>Privacy</Link>
+          </p>
         </div>
       </div>
 

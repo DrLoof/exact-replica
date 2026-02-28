@@ -141,6 +141,12 @@ export default function SettingsPricing() {
               <Plus className="h-3.5 w-3.5" /> Add Clause
             </button>
           </div>
+          <div className="flex items-start gap-2 mb-4 rounded-lg bg-background px-3 py-2.5">
+            <span className="text-sm mt-0.5" style={{ color: '#C07A5C' }}>⚠</span>
+            <p className="text-[12px] text-muted-foreground">
+              These are template clauses, not legal advice. Have a lawyer review your terms before using them with clients.
+            </p>
+          </div>
           {loadingClauses ? (
             <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-12 animate-pulse rounded-lg bg-muted" />)}</div>
           ) : clauses.length === 0 ? (

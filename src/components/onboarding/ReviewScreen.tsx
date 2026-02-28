@@ -341,15 +341,26 @@ export function ReviewScreen({
           </span>
         </div>
 
+        {testimonials.length > 0 && (
+          <div className="flex items-start gap-2 mb-4 rounded-lg bg-background px-3 py-2.5">
+            <span className="text-brass text-sm mt-0.5">ℹ</span>
+            <p className="text-[12px] text-muted-foreground">
+              We found these on your website. Confirm you have permission to use each one in proposals.
+            </p>
+          </div>
+        )}
+
         {testimonials.length === 0 ? (
           <p className="text-sm text-muted-foreground">No testimonials found on your website. Add them here or in Settings later.</p>
         ) : (
           <div className="space-y-4">
             {testimonials.map((t, idx) => (
               <div key={idx} className="relative rounded-xl bg-background p-4">
-                <button onClick={() => removeTestimonial(idx)} className="absolute top-2 right-2 p-1 rounded text-muted-foreground hover:text-foreground">
-                  <X className="h-3.5 w-3.5" />
-                </button>
+                <div className="absolute top-2 right-2 flex items-center gap-2">
+                  <button onClick={() => removeTestimonial(idx)} className="text-[11px] text-muted-foreground hover:text-destructive">
+                    Remove
+                  </button>
+                </div>
                 <Quote className="h-4 w-4 text-brand mb-2" />
                 <p className="text-sm text-foreground italic leading-relaxed">"{t.quote}"</p>
                 <p className="mt-2 text-xs text-muted-foreground">
@@ -360,6 +371,15 @@ export function ReviewScreen({
                     {t.metric_value} {t.metric_label}
                   </div>
                 )}
+                <label className="mt-3 flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={t.approved !== false}
+                    onChange={(e) => updateTestimonial(idx, 'approved', e.target.checked as any)}
+                    className="h-3.5 w-3.5 rounded border-border text-brand focus:ring-brand/20"
+                  />
+                  <span className="text-[11px] text-muted-foreground">Approve for proposals</span>
+                </label>
               </div>
             ))}
           </div>
@@ -470,7 +490,13 @@ export function ReviewScreen({
           </button>
         )}
 
-        <p className="mt-4 text-[11px] text-muted-foreground">
+        <div className="flex items-start gap-2 mt-4 rounded-lg bg-background px-3 py-2.5">
+          <span className="text-sm mt-0.5" style={{ color: '#C07A5C' }}>⚠</span>
+          <p className="text-[12px] text-muted-foreground">
+            These are template clauses, not legal advice. Have a lawyer review your terms before using them with clients.
+          </p>
+        </div>
+        <p className="mt-3 text-[11px] text-muted-foreground">
           These appear in your proposals. Edit anytime in Settings.
         </p>
       </section>

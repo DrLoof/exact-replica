@@ -236,6 +236,10 @@ export function ScanScreen({ onScrapeComplete, onManualSetup }: ScanScreenProps)
             Scan my website
           </button>
 
+          <p className="mt-2 text-center text-[11px]" style={{ color: '#B8B0A5' }}>
+            By scanning, you allow Propopad to read publicly available content from this URL to set up your account.
+          </p>
+
           <button
             onClick={onManualSetup}
             className="mt-3 text-sm text-muted-foreground hover:text-foreground"
