@@ -351,7 +351,7 @@ export default function Bundles() {
 
                 {/* Services — grows to fill */}
                 <div className="flex-1">
-                  <div className="flex flex-wrap gap-1.5 mb-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {template.serviceNames.map(name => {
                       const isMissing = !agencyModuleNames.has(name);
                       return (
@@ -366,20 +366,14 @@ export default function Bundles() {
                       );
                     })}
                   </div>
-
-                  {missingServices.length > 0 && !alreadyAdded && (
-                    <p className="mb-2 text-[11px] text-muted-foreground italic">
-                      Dashed = will be added to your service library
-                    </p>
-                  )}
                 </div>
 
                 {/* Pricing — pinned above button */}
                 <div className="border-t border-border pt-3 mb-4">
-                  <div className="flex items-baseline gap-2 flex-wrap">
-                    <span className="text-xs text-muted-foreground line-through">
-                      {formatBundlePrice(pricing.totalFixed, pricing.totalMonthly, currencySymbol)}
-                    </span>
+                  <span className="text-xs text-muted-foreground line-through">
+                    {formatBundlePrice(pricing.totalFixed, pricing.totalMonthly, currencySymbol)}
+                  </span>
+                  <div className="mt-1 flex items-baseline gap-2 flex-wrap">
                     <span className="font-display text-base font-bold tabular-nums text-foreground">
                       {formatBundlePrice(pricing.bundleFixed, pricing.bundleMonthly, currencySymbol)}
                     </span>
