@@ -960,6 +960,14 @@ export default function ProposalNew() {
           </div>
         </div>
       )}
+
+      {/* Signup Gate Modal for guest users */}
+      {showSignupGate && (
+        <SignupGate
+          onAuthenticated={handlePostSignupBuild}
+          onCancel={() => setShowSignupGate(false)}
+        />
+      )}
     </div>
   );
 }
