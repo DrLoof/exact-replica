@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Home from "./pages/Home";
+import GuestProposalPreview from "./pages/GuestProposalPreview";
 import Dashboard from "./pages/Dashboard";
 import Proposals from "./pages/Proposals";
 import ProposalNew from "./pages/ProposalNew";
