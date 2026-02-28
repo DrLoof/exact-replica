@@ -68,6 +68,19 @@ export function ReviewScreen({
     onModuleKeysChange(next);
   };
 
+  // Suggested bundles based on selected services
+  const selectedModuleNames = new Set(selectedModules.map(m => m.name));
+  const suggestedBundles = useMemo(() => {
+    const scored = defaultBundles.map(b => {
+      const matchCount = b.serviceNames.filter(n => selectedModuleNames.has(n)).length;
+      const missingCount = b.serviceNames.length - matchCount;
+      return { ...b, matchCount, missingCount };
+    });
+    const full = scored.filter(b => b.missingCount === 0).sort((a, b) => b.serviceNames.length - a.serviceNames.length);
+    const partial = scored.filter(b => b.missingCount === 1 && b.matchCount >= 2).sort((a, b) => b.matchCount - a.matchCount);
+    return [...full, ...partial].slice(0, 3);
+  }, [selectedModuleNames.size]);
+
   const pricingLabel: Record<string, string> = { fixed: '', monthly: '/mo', hourly: '/hr' };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
