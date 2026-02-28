@@ -525,21 +525,17 @@ export default function ProposalEditor() {
                     {/* About text — editable, with default fallback */}
                     <div className="mb-10">
                       <TextContent>
-                        <p
-                          className="cursor-text min-h-[60px] outline-none"
-                          contentEditable
-                          suppressContentEditableWarning
-                          onBlur={(e) => {
-                            const newText = e.currentTarget.textContent || '';
-                            updateField('executive_summary', proposal.executive_summary); // no-op to keep consistency
-                            // Save about_text to agency
+                        <EditableText
+                          value={agency?.about_text || ''}
+                          placeholder={getDefaultAboutText(agency?.years_experience)}
+                          onSave={(val) => {
                             if (agency?.id) {
-                              supabase.from('agencies').update({ about_text: newText }).eq('id', agency.id);
+                              supabase.from('agencies').update({ about_text: val }).eq('id', agency.id);
                             }
                           }}
-                        >
-                          {agency?.about_text || getDefaultAboutText(agency?.years_experience)}
-                        </p>
+                          as="p"
+                          className="min-h-[60px]"
+                        />
                       </TextContent>
                     </div>
 
