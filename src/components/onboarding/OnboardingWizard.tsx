@@ -369,6 +369,8 @@ export function OnboardingWizard() {
             groupNameMap={groupNameMap}
             onFinish={handleFinish}
             saving={saving}
+            addedBundles={addedBundles}
+            onAddBundle={(name) => setAddedBundles(prev => new Set([...prev, name]))}
           />
         )}
       </div>
