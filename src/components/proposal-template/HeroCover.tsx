@@ -20,6 +20,8 @@ export function HeroCover({
   date,
   proposalNumber,
   confidential = true,
+  onTitleEdit,
+  onSubtitleEdit,
 }: HeroCoverProps) {
   const brand = useBrand();
 
