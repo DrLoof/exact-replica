@@ -406,6 +406,10 @@ export default function ProposalEditor() {
                                 deliverables={svc.module?.deliverables || []}
                                 isAddon={svc.is_addon || false}
                                 delay={i * 0.1}
+                                onDescriptionEdit={async (val) => {
+                                  await supabase.from('proposal_services').update({ custom_description: val }).eq('id', svc.id);
+                                  setServices(prev => prev.map(s => s.id === svc.id ? { ...s, module: s.module ? { ...s.module, description: val } : s.module } : s));
+                                }}
                               />
                             </div>
                           ))}
