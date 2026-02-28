@@ -354,11 +354,11 @@ export default function Dashboard() {
             {/* Insight card — THE ONE DARK ELEMENT */}
             <div className="relative overflow-hidden rounded-[12px] p-5" style={{ background: '#2A2118' }}>
               {/* Brass top line */}
-              <div className="absolute left-0 right-0 top-0 h-[2px]" style={{ background: 'linear-gradient(90deg, #e2a62d, transparent)' }} />
+              <div className="absolute left-0 right-0 top-0 h-[2px]" style={{ background: 'linear-gradient(90deg, #ffcd6c, transparent)' }} />
               <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.1em] text-ink-faint">Insight</p>
               <p className="text-[13px] leading-relaxed" style={{ color: '#B8B0A5' }}>
                 Agencies using <span className="font-semibold" style={{ color: '#FAF9F6' }}>service bundles</span> close{' '}
-                <span className="font-semibold" style={{ color: '#e2a62d' }}>23% larger deals</span> on average.
+                <span className="font-semibold" style={{ color: '#ffcd6c' }}>23% larger deals</span> on average.
               </p>
               <Link to="/bundles" className="mt-3 inline-block text-[11px] font-medium text-brass transition-colors hover:opacity-80">
                 Create a bundle →
