@@ -174,8 +174,11 @@ export default function ProposalNew() {
     setScraping(false);
   };
 
-  // Zone 2: Services - pre-fill from query params
+  // Zone 2: Services - pre-fill from query params or guest data
   const [selectedModuleIds, setSelectedModuleIds] = useState<Set<string>>(() => {
+    if (isGuestMode && guestData) {
+      return new Set(guestData.virtualModules.map((m: any) => m.id));
+    }
     const servicesParam = searchParams.get('services');
     return servicesParam ? new Set(servicesParam.split(',').filter(Boolean)) : new Set();
   });
@@ -192,6 +195,7 @@ export default function ProposalNew() {
   });
 
   const [saving, setSaving] = useState(false);
+  const [showSignupGate, setShowSignupGate] = useState(false);
 
   // Pre-fill client from query param
   const prefilledClientId = searchParams.get('client');
