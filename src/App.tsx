@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Home from "./pages/Home";
+import GuestProposalPreview from "./pages/GuestProposalPreview";
 import Dashboard from "./pages/Dashboard";
 import Proposals from "./pages/Proposals";
 import ProposalNew from "./pages/ProposalNew";
@@ -47,6 +48,7 @@ const App = () => (
             <Route path="/p/:shareId" element={<PublicProposal />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/proposals" element={<ProtectedRoute><Proposals /></ProtectedRoute>} />
+            <Route path="/proposals/preview" element={<GuestProposalPreview />} />
             <Route path="/proposals/new" element={<ProposalNew />} />
             <Route path="/proposals/:id" element={<ProtectedRoute><ProposalEditor /></ProtectedRoute>} />
             <Route path="/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
