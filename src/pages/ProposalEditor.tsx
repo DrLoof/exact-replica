@@ -24,6 +24,7 @@ import {
   TextContent,
   PageWrapper,
   HighlightPanel,
+  EditableText,
 } from '@/components/proposal-template';
 
 interface ProposalData {
