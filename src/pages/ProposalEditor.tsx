@@ -409,7 +409,7 @@ export default function ProposalEditor() {
                                 price={`${currencySymbol}${getServicePrice(svc).toLocaleString()}`}
                                 pricingModel={(svc.module?.pricing_model || 'fixed') as any}
                                 description={svc.module?.description || svc.module?.short_description || ''}
-                                deliverables={svc.module?.deliverables || []}
+                                deliverables={svc.custom_deliverables || svc.module?.deliverables || []}
                                 isAddon={svc.is_addon || false}
                                 delay={i * 0.1}
                                 onDescriptionEdit={async (val) => {
