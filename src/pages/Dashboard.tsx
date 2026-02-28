@@ -215,7 +215,7 @@ export default function Dashboard() {
                         <div className="flex items-center gap-2">
                           <span className="text-[14px] font-semibold text-ink">{p.client?.company_name || 'Unknown Client'}</span>
                           {isHot && (
-                            <span className="h-[6px] w-[6px] rounded-full bg-brass" style={{ boxShadow: '0 0 6px #ffcd6c60' }} />
+                            <span className="h-[6px] w-[6px] rounded-full bg-brass" style={{ boxShadow: '0 0 6px #ffb18060' }} />
                           )}
                         </div>
                         <p className="mt-0.5 truncate text-[12px] text-ink-muted">{p.title || 'Untitled Proposal'}</p>
