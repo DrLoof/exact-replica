@@ -9,6 +9,9 @@ interface TimelineStepProps {
   description?: string;
   isLast?: boolean;
   delay?: number;
+  onNameEdit?: (value: string) => void;
+  onDurationEdit?: (value: string) => void;
+  onDescriptionEdit?: (value: string) => void;
 }
 
 export function TimelineStep({
