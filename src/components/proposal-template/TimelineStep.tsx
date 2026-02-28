@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
+import { EditableText } from "./EditableText";
 
 interface TimelineStepProps {
   number: number;
