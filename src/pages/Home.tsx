@@ -1,8 +1,9 @@
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import propopadLogo from '@/assets/propopad-logo.svg';
 import propopadLogoFull from '@/assets/propopad-logo-full.svg';
 import { ArrowRight, Zap, Eye, FileText, Shield, BarChart3, Palette } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useAuth } from '@/hooks/useAuth';
 
 const features = [
   { icon: Zap, title: 'AI-Powered Setup', desc: 'Scan your website. We auto-detect your brand, services, testimonials, and more.' },
