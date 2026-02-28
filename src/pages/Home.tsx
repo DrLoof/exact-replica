@@ -1,7 +1,6 @@
 import { Link, Navigate } from 'react-router-dom';
 import propopadLogo from '@/assets/propopad-logo.svg';
-import propopadLogoFull from '@/assets/propopad-logo-full.svg';
-import { ArrowRight, Zap, Eye, FileText, Shield, BarChart3, Palette } from 'lucide-react';
+import { ArrowRight, Zap, Eye, FileText, Shield, BarChart3, Palette, Clock, Layers, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -17,7 +16,6 @@ const features = [
 export default function Home() {
   const { session, loading } = useAuth();
 
-  // Redirect authenticated users to dashboard
   if (!loading && session) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -68,7 +66,8 @@ export default function Home() {
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
               to="/onboarding"
-              className="inline-flex items-center gap-2 rounded-xl bg-ink px-8 py-4 text-base font-semibold text-primary-foreground transition-colors hover:bg-ink-soft"
+              className="inline-flex items-center gap-2 rounded-xl bg-ink px-8 py-4 text-[16px] font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+              style={{ boxShadow: '0 2px 8px rgba(42,33,24,0.15)' }}
             >
               Try for free — no signup needed
               <ArrowRight className="h-4 w-4" />
@@ -83,21 +82,33 @@ export default function Home() {
       {/* Social proof strip */}
       <section className="border-y border-border bg-card py-8">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-8 px-6 md:gap-16">
-          <div className="text-center">
-            <p className="font-display text-2xl font-bold text-foreground">3 min</p>
-            <p className="text-xs text-muted-foreground">Average setup time</p>
+          <div className="flex items-center gap-2.5 text-center">
+            <Clock className="h-5 w-5 text-brass shrink-0" />
+            <div>
+              <p className="font-display text-2xl font-bold text-foreground">3 min</p>
+              <p className="text-xs text-muted-foreground">Average setup time</p>
+            </div>
           </div>
           <div className="h-8 w-px bg-border" />
-          <div className="text-center">
-            <p className="font-display text-2xl font-bold text-foreground">50+</p>
-            <p className="text-xs text-muted-foreground">Pre-built services</p>
+          <div className="flex items-center gap-2.5 text-center">
+            <Layers className="h-5 w-5 text-brass shrink-0" />
+            <div>
+              <p className="font-display text-2xl font-bold text-foreground">50+</p>
+              <p className="text-xs text-muted-foreground">Pre-built services</p>
+            </div>
           </div>
           <div className="h-8 w-px bg-border" />
-          <div className="text-center">
-            <p className="font-display text-2xl font-bold text-foreground">AI</p>
-            <p className="text-xs text-muted-foreground">Powered by smart scraping</p>
+          <div className="flex items-center gap-2.5 text-center">
+            <Sparkles className="h-5 w-5 text-brass shrink-0" />
+            <div>
+              <p className="font-display text-2xl font-bold text-foreground">AI</p>
+              <p className="text-xs text-muted-foreground">Powered by smart scraping</p>
+            </div>
           </div>
         </div>
+        <p className="mt-4 text-center text-[13px] font-medium text-muted-foreground">
+          Trusted by 50+ marketing agencies
+        </p>
       </section>
 
       {/* Features grid */}
@@ -163,7 +174,8 @@ export default function Home() {
           <div className="mt-14 text-center">
             <Link
               to="/onboarding"
-              className="inline-flex items-center gap-2 rounded-xl bg-ink px-8 py-4 text-base font-semibold text-primary-foreground transition-colors hover:bg-ink-soft"
+              className="inline-flex items-center gap-2 rounded-xl bg-ink px-8 py-4 text-[16px] font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+              style={{ boxShadow: '0 2px 8px rgba(42,33,24,0.15)' }}
             >
               Start now — it's free
               <ArrowRight className="h-4 w-4" />
