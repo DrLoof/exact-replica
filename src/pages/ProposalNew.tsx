@@ -6,6 +6,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useClients, useServiceModules, useServiceGroups, useBundles, useTimelinePhases } from '@/hooks/useAgencyData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { SignupGate } from '@/components/onboarding/SignupGate';
+import { defaultModulesByGroup, type DefaultModule } from '@/lib/defaultModules';
+import { defaultBundles, calculateBundlePricing } from '@/lib/defaultBundles';
 
 function InlinePrice({ value, onChange, currencySymbol, suffix, isOverridden, onReset }: {
   value: number;
@@ -15,6 +18,7 @@ function InlinePrice({ value, onChange, currencySymbol, suffix, isOverridden, on
   isOverridden: boolean;
   onReset: () => void;
 }) {
+  // ... keep existing code (InlinePrice component)
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(String(value));
 
@@ -62,16 +66,72 @@ function InlinePrice({ value, onChange, currencySymbol, suffix, isOverridden, on
   );
 }
 
+// Build virtual modules/groups from guest onboarding data
+function buildGuestData(guestOnboarding: any) {
+  const selectedKeys = new Set<string>(guestOnboarding.selectedModuleKeys || []);
+  const groupNameMap: Record<string, string> = guestOnboarding.groupNameMap || {};
+  
+  const virtualModules: any[] = [];
+  const virtualGroups: any[] = [];
+  const groupSet = new Set<string>();
+
+  for (const [groupName, mods] of Object.entries(defaultModulesByGroup)) {
+    (mods as DefaultModule[]).forEach((mod, i) => {
+      const key = `${groupName}-${i}`;
+      if (!selectedKeys.has(key)) return;
+      const id = `guest-${key}`;
+      if (!groupSet.has(groupName)) {
+        groupSet.add(groupName);
+        virtualGroups.push({ id: `group-${groupName}`, name: groupName });
+      }
+      virtualModules.push({
+        id,
+        name: mod.name,
+        short_description: mod.shortDesc,
+        description: mod.description,
+        pricing_model: mod.pricingModel,
+        price_fixed: mod.pricingModel === 'fixed' ? mod.price : null,
+        price_monthly: mod.pricingModel === 'monthly' ? mod.price : null,
+        price_hourly: mod.pricingModel === 'hourly' ? mod.price : null,
+        service_type: mod.serviceType,
+        group_id: `group-${groupName}`,
+        is_active: true,
+        deliverables: mod.deliverables,
+      });
+    });
+  }
+  return { virtualModules, virtualGroups };
+}
+
 export default function ProposalNew() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { agency, userProfile } = useAuth();
+  const { agency, userProfile, user } = useAuth();
+  const isGuestMode = searchParams.get('guest') === 'true' && !agency;
+  
+  // Load guest onboarding data from localStorage
+  const guestOnboarding = useMemo(() => {
+    if (!isGuestMode) return null;
+    try {
+      const raw = localStorage.getItem('propopad_guest_onboarding');
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  }, [isGuestMode]);
+
+  const guestData = useMemo(() => guestOnboarding ? buildGuestData(guestOnboarding) : null, [guestOnboarding]);
+
   const { data: clients = [] } = useClients();
-  const { data: modules = [] } = useServiceModules();
-  const { data: groups = [] } = useServiceGroups();
-  const { data: bundles = [] } = useBundles();
+  const { data: dbModules = [] } = useServiceModules();
+  const { data: dbGroups = [] } = useServiceGroups();
+  const { data: dbBundles = [] } = useBundles();
   const { data: timelinePhases = [] } = useTimelinePhases();
-  const currencySymbol = agency?.currency_symbol || '$';
+
+  const modules = isGuestMode ? (guestData?.virtualModules || []) : dbModules;
+  const groups = isGuestMode ? (guestData?.virtualGroups || []) : dbGroups;
+  const bundles = isGuestMode ? [] : dbBundles;
+  const currencySymbol = isGuestMode
+    ? (guestOnboarding?.scrapeData?.detected_currency?.symbol || '$')
+    : (agency?.currency_symbol || '$');
 
   // Zone 1: Client
   const [clientSearch, setClientSearch] = useState('');
