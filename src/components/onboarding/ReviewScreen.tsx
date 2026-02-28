@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
-import { Check, Pencil, X, Plus, Upload, Loader2, Quote, Target, BarChart3, Users, Trophy, Zap, Layers } from 'lucide-react';
+import { useState, useRef, useMemo } from 'react';
+import { Check, Pencil, X, Plus, Upload, Loader2, Quote, Target, BarChart3, Users, Trophy, Zap, Layers, Package, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getDefaultModulesForGroup } from '@/lib/defaultModules';
+import { defaultBundles, findDefaultModule, calculateBundlePricing, formatBundlePrice } from '@/lib/defaultBundles';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
