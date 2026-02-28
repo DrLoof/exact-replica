@@ -21,6 +21,9 @@ export function TimelineStep({
   description,
   isLast = false,
   delay = 0,
+  onNameEdit,
+  onDurationEdit,
+  onDescriptionEdit,
 }: TimelineStepProps) {
   const brand = useBrand();
 
