@@ -1,27 +1,17 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Share2, Download, FileText } from 'lucide-react';
+import { ArrowLeft, Share2, Download, FileText, EyeOff } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { SignupGate } from '@/components/onboarding/SignupGate';
 import { getDefaultModulesForGroup } from '@/lib/defaultModules';
 import {
-  BrandProvider,
-  HeroCover,
-  SectionHeader,
-  ServiceCard,
-  PricingSummary,
-  TimelineStep,
-  WhyUsCard,
-  TestimonialCard,
-  TermsSection,
-  SignatureBlock,
-  TextContent,
-  PageWrapper,
-  HighlightPanel,
-  EditableText,
+  BrandProvider, HeroCover, SectionHeader, ServiceCard, PricingSummary,
+  WhyUsCard, TestimonialCard, TermsSection, SignatureBlock,
+  TextContent, PageWrapper, HighlightPanel, EditableText,
 } from '@/components/proposal-template';
 import { AIContentNotice } from '@/components/AIContentNotice';
 
@@ -30,19 +20,22 @@ function getDefaultAboutText(yearsExperience?: number | null): string {
   return `${yearsPart}, we've helped ambitious brands transform their market position through the intersection of strategy, design, and technology. We're not the biggest agency — and that's by design. Our deliberately lean structure means faster decisions, fewer layers, and more senior attention on every engagement.`;
 }
 
-function SectionWrapper({ children, label }: { children: React.ReactNode; label: string }) {
-  return (
-    <div id={`section-${label}`} className="scroll-mt-20">
-      {children}
-    </div>
-  );
-}
+const sectionNames = [
+  'Cover', 'Executive Summary', 'Scope of Services',
+  'Investment', 'Why Us', 'Testimonials', 'Terms', 'Signature',
+];
 
 export default function GuestProposalPreview() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [showSignupGate, setShowSignupGate] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [activeSection, setActiveSection] = useState(0);
+  const [hiddenSections, setHiddenSections] = useState<Set<number>>(new Set());
+
+  // Editable local state
+  const [proposalTitle, setProposalTitle] = useState('');
+  const [executiveSummary, setExecutiveSummary] = useState('');
 
   const guestProposal = useMemo(() => {
     try {
@@ -58,6 +51,12 @@ export default function GuestProposalPreview() {
     } catch { return null; }
   }, []);
 
+  useEffect(() => {
+    if (guestProposal) {
+      setProposalTitle(`Proposal for ${guestProposal.clientName || 'Client'}`);
+    }
+  }, []);
+
   if (!guestProposal) {
     navigate('/');
     return null;
@@ -71,7 +70,6 @@ export default function GuestProposalPreview() {
   const clientName = guestProposal.clientName || 'Client';
   const agencyName = identity.name || 'Your Agency';
   const brandColor = identity.brand_color || '#E8825C';
-
   const totalFixed = guestProposal.totalFixed || 0;
   const totalMonthly = guestProposal.totalMonthly || 0;
 
@@ -103,15 +101,20 @@ export default function GuestProposalPreview() {
     return <FileText size={22} />;
   };
 
-  const requireSignup = () => {
-    setShowSignupGate(true);
+  const toggleSection = (idx: number) => {
+    setHiddenSections(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx); else next.add(idx);
+      return next;
+    });
   };
 
-  // After signup, persist everything and create the real proposal
+  const requireSignup = () => setShowSignupGate(true);
+
+  // Post-signup: persist all data and create real proposal
   const handlePostSignup = async () => {
     setShowSignupGate(false);
     setSaving(true);
-
     try {
       let retries = 0;
       const waitForAgency = async (): Promise<any> => {
@@ -127,22 +130,17 @@ export default function GuestProposalPreview() {
       };
 
       const freshAgency = await waitForAgency();
-      if (!freshAgency) { toast.error('Could not set up your agency. Please try again.'); setSaving(false); return; }
+      if (!freshAgency) { toast.error('Could not set up your agency.'); setSaving(false); return; }
 
-      // Persist onboarding data
       if (guestOnboarding) {
         const groupNameMap = guestOnboarding.groupNameMap || {};
         const selectedKeys = new Set<string>(guestOnboarding.selectedModuleKeys || []);
 
         await supabase.from('agencies').update({
-          name: identity.name || freshAgency.name,
-          email: identity.email || null,
-          phone: identity.phone || null,
-          logo_url: identity.logo_url || null,
-          brand_color: identity.brand_color || '#E8825C',
-          tagline: identity.tagline || null,
-          address_line1: identity.address || null,
-          about_text: identity.about_text || null,
+          name: identity.name || freshAgency.name, email: identity.email || null,
+          phone: identity.phone || null, logo_url: identity.logo_url || null,
+          brand_color: identity.brand_color || '#E8825C', tagline: identity.tagline || null,
+          address_line1: identity.address || null, about_text: identity.about_text || null,
           scraped_data: guestOnboarding.scrapeData || null,
           scrape_status: guestOnboarding.scrapeData ? 'complete' : 'manual',
           scraped_at: guestOnboarding.scrapeData ? new Date().toISOString() : null,
@@ -153,7 +151,6 @@ export default function GuestProposalPreview() {
           onboarding_complete: true, onboarding_step: 7,
         } as any).eq('id', freshAgency.id);
 
-        // Save modules
         const matchedGroupNames = [...new Set([...selectedKeys].map(key => key.replace(/-\d+$/, '')))];
         const modulesToInsert = matchedGroupNames.flatMap(groupName => {
           const groupId = Object.entries(groupNameMap).find(([_, name]) => name === groupName)?.[0];
@@ -167,8 +164,8 @@ export default function GuestProposalPreview() {
               price_fixed: mod.pricingModel === 'fixed' ? mod.price : null,
               price_monthly: mod.pricingModel === 'monthly' ? mod.price : null,
               price_hourly: mod.pricingModel === 'hourly' ? mod.price : null,
-              service_type: mod.serviceType || 'core',
-              deliverables: mod.deliverables || [], client_responsibilities: mod.clientResponsibilities || [],
+              service_type: mod.serviceType || 'core', deliverables: mod.deliverables || [],
+              client_responsibilities: mod.clientResponsibilities || [],
               out_of_scope: mod.outOfScope || [], default_timeline: mod.defaultTimeline || null,
               suggested_kpis: mod.suggestedKpis || [], common_tools: mod.commonTools || [],
               is_active: true, display_order: i,
@@ -179,7 +176,6 @@ export default function GuestProposalPreview() {
           await supabase.from('service_modules').insert(modulesToInsert);
         }
 
-        // Save testimonials
         const allTestimonials = guestOnboarding.testimonials || [];
         if (allTestimonials.length > 0) {
           await supabase.from('testimonials').insert(allTestimonials.map((t: any) => ({
@@ -189,7 +185,6 @@ export default function GuestProposalPreview() {
           })));
         }
 
-        // Save differentiators
         if (differentiators.length > 0) {
           await supabase.from('differentiators').delete().eq('agency_id', freshAgency.id);
           await supabase.from('differentiators').insert(differentiators.map((d: any, i: number) => ({
@@ -199,7 +194,6 @@ export default function GuestProposalPreview() {
           })));
         }
 
-        // Save defaults (terms, payment templates, timeline phases)
         const { data: et } = await supabase.from('terms_clauses').select('id').eq('agency_id', freshAgency.id);
         if (!et?.length) {
           await supabase.from('terms_clauses').insert([
@@ -227,16 +221,13 @@ export default function GuestProposalPreview() {
         }
       }
 
-      // Now create the actual proposal
+      // Create proposal
       const { data: currentUser } = await supabase.auth.getUser();
       const { data: profile } = await supabase.from('users').select('id, agency_id').eq('id', currentUser.user!.id).single();
       const agencyId = profile!.agency_id!;
-
-      // Refresh agency
       const { data: ag } = await supabase.from('agencies').select('*').eq('id', agencyId).single();
       if (!ag) { toast.error('Agency not found'); setSaving(false); return; }
 
-      // Create client
       let clientId: string | null = null;
       if (clientName.trim()) {
         const { data: newC } = await supabase.from('clients').insert({
@@ -251,15 +242,15 @@ export default function GuestProposalPreview() {
       const counter = (ag.proposal_counter || 0) + 1;
       const prefix = ag.proposal_prefix || 'PRO';
       const refNum = `${prefix}-${new Date().getFullYear()}-${String(counter).padStart(4, '0')}`;
-
-      // Match guest services to real DB modules by name
       const { data: realModules } = await supabase.from('service_modules').select('id, name, service_type').eq('agency_id', agencyId);
 
       const { data: proposal } = await supabase.from('proposals').insert({
         agency_id: agencyId, client_id: clientId, reference_number: refNum,
-        title: `Proposal for ${clientName}`, status: 'draft',
-        total_fixed: totalFixed, total_monthly: totalMonthly, grand_total: totalFixed + totalMonthly,
-        created_by: profile!.id, project_start_date: guestProposal.startDate,
+        title: proposalTitle || `Proposal for ${clientName}`,
+        executive_summary: executiveSummary || null,
+        status: 'draft', total_fixed: totalFixed, total_monthly: totalMonthly,
+        grand_total: totalFixed + totalMonthly, created_by: profile!.id,
+        project_start_date: guestProposal.startDate,
         validity_days: 30, revision_rounds: 2, notice_period: '30 days',
       }).select('id').single();
 
@@ -275,10 +266,8 @@ export default function GuestProposalPreview() {
         if (svcInserts.length > 0) await supabase.from('proposal_services').insert(svcInserts);
         await supabase.from('agencies').update({ proposal_counter: counter }).eq('id', agencyId);
 
-        // Clean up localStorage
         localStorage.removeItem('propopad_guest_proposal');
         localStorage.removeItem('propopad_guest_onboarding');
-
         toast.success('Proposal created!');
         window.location.href = `/proposals/${proposal.id}`;
       }
@@ -291,9 +280,9 @@ export default function GuestProposalPreview() {
 
   const defaultTerms = [
     { title: 'Payment Terms', content: 'All fees are due according to the payment schedule outlined in the Investment section of this proposal.' },
-    { title: 'Revision Policy', content: 'This proposal includes the number of revision rounds specified per deliverable. Additional revision rounds will be billed at our standard hourly rate.' },
-    { title: 'Intellectual Property', content: 'Upon receipt of full and final payment, the client will receive full ownership of all final deliverables created specifically for this project.' },
-    { title: 'Termination', content: 'Either party may terminate this agreement with written notice as specified in the notice period above.' },
+    { title: 'Revision Policy', content: 'This proposal includes the number of revision rounds specified per deliverable.' },
+    { title: 'Intellectual Property', content: 'Upon receipt of full payment, the client receives full ownership of all final deliverables.' },
+    { title: 'Termination', content: 'Either party may terminate this agreement with written notice as specified in the notice period.' },
   ];
 
   return (
@@ -302,132 +291,139 @@ export default function GuestProposalPreview() {
       <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-background/95 backdrop-blur px-6 py-3 print:hidden">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate('/proposals/new?guest=true')} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-4 w-4" /> Back to editing
+            <ArrowLeft className="h-4 w-4" /> Back
           </button>
-          <span className="text-sm font-medium text-foreground">Proposal for {clientName}</span>
+          <span className="text-sm font-medium text-foreground">{proposalTitle || `Proposal for ${clientName}`}</span>
           <span className="rounded-full bg-status-draft/15 px-2.5 py-0.5 text-xs font-medium text-status-draft">Preview</span>
         </div>
         <div className="flex items-center gap-3">
-          <button
-            onClick={requireSignup}
-            disabled={saving}
-            className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-50"
-          >
-            <Download className="inline h-4 w-4 mr-1.5" />
-            Export PDF
-          </button>
-          <button
-            onClick={requireSignup}
-            disabled={saving}
-            className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-50"
-          >
+          <button onClick={requireSignup} disabled={saving} className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-50">
             Save as Draft
           </button>
-          <button
-            onClick={requireSignup}
-            disabled={saving}
-            className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-hover disabled:opacity-50"
-          >
+          <button onClick={requireSignup} disabled={saving} className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-hover disabled:opacity-50">
             <Share2 className="h-4 w-4" /> {saving ? 'Saving...' : 'Share & Send'}
           </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        <BrandProvider brand={{
-          agencyName: agencyName.toUpperCase(),
-          agencyFullName: agencyName,
-          primaryColor: brandColor,
-          darkColor: '#0A0A0A',
-          logoUrl: identity.logo_url || null,
-          logoInitial: (agencyName || 'A').charAt(0).toUpperCase(),
-          contactEmail: identity.email || '',
-          contactWebsite: '',
-          contactPhone: identity.phone || '',
-          currency: currencySymbol,
-        }}>
-          <div className="mx-auto max-w-[900px] py-8 px-4 space-y-6">
-            <AIContentNotice />
+      <div className="flex">
+        {/* Section Nav */}
+        <div className="sticky top-[57px] hidden h-[calc(100vh-57px)] w-48 flex-col gap-1 overflow-y-auto border-r border-border bg-background p-3 lg:flex print:hidden">
+          {sectionNames.map((name, idx) => (
+            <button
+              key={idx}
+              onClick={() => {
+                setActiveSection(idx);
+                document.getElementById(`guest-section-${idx}`)?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className={cn(
+                'flex items-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors text-left',
+                activeSection === idx ? 'bg-accent font-medium text-accent-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                hiddenSections.has(idx) && 'opacity-40'
+              )}
+            >
+              {hiddenSections.has(idx) && <EyeOff className="h-3 w-3" />}
+              {name}
+            </button>
+          ))}
+        </div>
 
-            {/* Cover */}
-            <SectionWrapper label="Cover">
-              <div className="rounded-2xl overflow-hidden shadow-lg">
-                <HeroCover
-                  proposalTitle={`Proposal for ${clientName}`}
-                  clientName={clientName}
-                  date={proposalDate}
-                  proposalNumber="DRAFT-001"
-                />
-              </div>
-            </SectionWrapper>
+        {/* Proposal Content */}
+        <div className="flex-1">
+          <BrandProvider brand={{
+            agencyName: agencyName.toUpperCase(),
+            agencyFullName: agencyName,
+            primaryColor: brandColor,
+            darkColor: '#0A0A0A',
+            logoUrl: identity.logo_url || null,
+            logoInitial: (agencyName || 'A').charAt(0).toUpperCase(),
+            contactEmail: identity.email || '',
+            contactWebsite: '',
+            contactPhone: identity.phone || '',
+            currency: currencySymbol,
+          }}>
+            <div className="mx-auto max-w-[900px] py-8 px-4 space-y-6">
+              <AIContentNotice />
 
-            {/* Executive Summary */}
-            <SectionWrapper label="Executive Summary">
-              <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
-                <PageWrapper pageNumber="02">
-                  <SectionHeader number="01" title="Executive Summary" subtitle="Our understanding and approach" />
-                  <TextContent dropCap>
-                    <p style={{ fontSize: '15px', lineHeight: 1.8, color: '#444' }}>
-                      Click to add an executive summary for this proposal. Describe the project goals, your approach, and expected outcomes.
-                    </p>
-                  </TextContent>
-                  <div className="mt-12">
-                    <HighlightPanel items={[
-                      { label: 'Investment', value: totalStr, accent: true },
-                      { label: 'Timeline', value: `${Math.max(services.length * 2, 4)} weeks est.` },
-                      { label: 'Services', value: `${services.length} included` },
-                    ]} />
-                  </div>
-                </PageWrapper>
-              </div>
-            </SectionWrapper>
-
-            {/* Scope of Services */}
-            <SectionWrapper label="Scope of Services">
-              <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
-                <PageWrapper pageNumber="03">
-                  <SectionHeader number="02" title="Scope of Services" subtitle="What we'll deliver for you" />
-                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    {services.map((svc: any, i: number) => {
-                      const price = svc.priceOverride ?? svc.price_fixed ?? svc.price_monthly ?? svc.price_hourly ?? 0;
-                      const suffix = svc.pricing_model === 'monthly' ? '/mo' : svc.pricing_model === 'hourly' ? '/hr' : '';
-                      return (
-                        <ServiceCard
-                          key={i}
-                          icon={resolveIcon(svc.icon)}
-                          name={svc.name}
-                          price={`${currencySymbol}${price.toLocaleString()}${suffix}`}
-                          pricingModel={(svc.pricing_model || 'fixed') as any}
-                          description={svc.description || svc.short_description || ''}
-                          deliverables={svc.deliverables || []}
-                          isAddon={svc.service_type === 'addon'}
-                          delay={i * 0.1}
-                        />
-                      );
-                    })}
-                  </div>
-                </PageWrapper>
-              </div>
-            </SectionWrapper>
-
-            {/* Investment */}
-            <SectionWrapper label="Investment">
-              <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
-                <PageWrapper pageNumber="04">
-                  <SectionHeader number="03" title="Investment" subtitle="Transparent pricing for every deliverable" />
-                  <PricingSummary
-                    items={pricingItems}
-                    total={totalStr}
-                    brandColor={brandColor}
+              {/* Section 0: Cover */}
+              {!hiddenSections.has(0) && (
+                <div id="guest-section-0" className="scroll-mt-20 rounded-2xl overflow-hidden shadow-lg">
+                  <HeroCover
+                    proposalTitle={proposalTitle}
+                    clientName={clientName}
+                    date={proposalDate}
+                    proposalNumber="DRAFT-001"
+                    onTitleEdit={(val) => setProposalTitle(val)}
                   />
-                </PageWrapper>
-              </div>
-            </SectionWrapper>
+                </div>
+              )}
 
-            {/* Why Us */}
-            {differentiators.length > 0 && (
-              <SectionWrapper label="Why Us">
-                <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
+              {/* Section 1: Executive Summary */}
+              {!hiddenSections.has(1) && (
+                <div id="guest-section-1" className="scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
+                  <PageWrapper pageNumber="02">
+                    <SectionHeader number="01" title="Executive Summary" subtitle="Our understanding and approach" />
+                    <TextContent dropCap>
+                      <EditableText
+                        value={executiveSummary}
+                        placeholder="Click to add an executive summary for this proposal. Describe the project goals, your approach, and expected outcomes."
+                        onSave={(val) => setExecutiveSummary(val)}
+                        as="p"
+                        className="min-h-[80px]"
+                      />
+                    </TextContent>
+                    <div className="mt-12">
+                      <HighlightPanel items={[
+                        { label: 'Investment', value: totalStr, accent: true },
+                        { label: 'Timeline', value: `${Math.max(services.length * 2, 4)} weeks est.` },
+                        { label: 'Services', value: `${services.length} included` },
+                      ]} />
+                    </div>
+                  </PageWrapper>
+                </div>
+              )}
+
+              {/* Section 2: Scope of Services */}
+              {!hiddenSections.has(2) && (
+                <div id="guest-section-2" className="scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
+                  <PageWrapper pageNumber="03">
+                    <SectionHeader number="02" title="Scope of Services" subtitle="What we'll deliver for you" />
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                      {services.map((svc: any, i: number) => {
+                        const price = svc.priceOverride ?? svc.price_fixed ?? svc.price_monthly ?? svc.price_hourly ?? 0;
+                        const suffix = svc.pricing_model === 'monthly' ? '/mo' : svc.pricing_model === 'hourly' ? '/hr' : '';
+                        return (
+                          <ServiceCard
+                            key={i}
+                            icon={resolveIcon(svc.icon)}
+                            name={svc.name}
+                            price={`${currencySymbol}${price.toLocaleString()}${suffix}`}
+                            pricingModel={(svc.pricing_model || 'fixed') as any}
+                            description={svc.description || svc.short_description || ''}
+                            deliverables={svc.deliverables || []}
+                            isAddon={svc.service_type === 'addon'}
+                            delay={i * 0.1}
+                          />
+                        );
+                      })}
+                    </div>
+                  </PageWrapper>
+                </div>
+              )}
+
+              {/* Section 3: Investment */}
+              {!hiddenSections.has(3) && (
+                <div id="guest-section-3" className="scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
+                  <PageWrapper pageNumber="04">
+                    <SectionHeader number="03" title="Investment" subtitle="Transparent pricing for every deliverable" />
+                    <PricingSummary items={pricingItems} total={totalStr} brandColor={brandColor} />
+                  </PageWrapper>
+                </div>
+              )}
+
+              {/* Section 4: Why Us */}
+              {!hiddenSections.has(4) && differentiators.length > 0 && (
+                <div id="guest-section-4" className="scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="05">
                     <SectionHeader number="04" title="Why Us" subtitle="What sets us apart" />
                     <div className="mb-10">
@@ -444,13 +440,11 @@ export default function GuestProposalPreview() {
                     </div>
                   </PageWrapper>
                 </div>
-              </SectionWrapper>
-            )}
+              )}
 
-            {/* Testimonials */}
-            {testimonials.length > 0 && (
-              <SectionWrapper label="Testimonials">
-                <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
+              {/* Section 5: Testimonials */}
+              {!hiddenSections.has(5) && testimonials.length > 0 && (
+                <div id="guest-section-5" className="scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="06">
                     <SectionHeader number="05" title="What Our Clients Say" subtitle="Proof of impact" />
                     <div className="space-y-6">
@@ -460,40 +454,36 @@ export default function GuestProposalPreview() {
                     </div>
                   </PageWrapper>
                 </div>
-              </SectionWrapper>
-            )}
+              )}
 
-            {/* Terms */}
-            <SectionWrapper label="Terms">
-              <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
-                <PageWrapper pageNumber="07">
-                  <SectionHeader number="06" title="Terms & Conditions" />
-                  <TermsSection clauses={defaultTerms} />
-                </PageWrapper>
-              </div>
-            </SectionWrapper>
+              {/* Section 6: Terms */}
+              {!hiddenSections.has(6) && (
+                <div id="guest-section-6" className="scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
+                  <PageWrapper pageNumber="07">
+                    <SectionHeader number="06" title="Terms & Conditions" />
+                    <TermsSection clauses={defaultTerms} />
+                  </PageWrapper>
+                </div>
+              )}
 
-            {/* Signature */}
-            <SectionWrapper label="Signature">
-              <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
-                <PageWrapper pageNumber="08">
-                  <SignatureBlock
-                    client={{ role: 'Client', companyName: clientName }}
-                    agency={{ role: 'Agency', companyName: agencyName }}
-                  />
-                </PageWrapper>
-              </div>
-            </SectionWrapper>
-          </div>
-        </BrandProvider>
+              {/* Section 7: Signature */}
+              {!hiddenSections.has(7) && (
+                <div id="guest-section-7" className="scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
+                  <PageWrapper pageNumber="08">
+                    <SignatureBlock
+                      client={{ role: 'Client', companyName: clientName }}
+                      agency={{ role: 'Agency', companyName: agencyName }}
+                    />
+                  </PageWrapper>
+                </div>
+              )}
+            </div>
+          </BrandProvider>
+        </div>
       </div>
 
-      {/* Signup Gate Modal */}
       {showSignupGate && (
-        <SignupGate
-          onAuthenticated={handlePostSignup}
-          onCancel={() => setShowSignupGate(false)}
-        />
+        <SignupGate onAuthenticated={handlePostSignup} onCancel={() => setShowSignupGate(false)} />
       )}
     </div>
   );
