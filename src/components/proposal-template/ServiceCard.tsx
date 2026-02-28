@@ -101,19 +101,25 @@ export function ServiceCard({
 
       {/* Name & description */}
       <h3
-        className="mb-3 tracking-tight"
+        className="mb-3 tracking-tight outline-none"
         style={{
           fontSize: "20px",
           fontWeight: 700,
           lineHeight: 1.2,
           color: brand.darkColor,
         }}
+        contentEditable={!!onNameEdit}
+        suppressContentEditableWarning
+        onBlur={(e) => onNameEdit?.(e.currentTarget.textContent || '')}
       >
         {name}
       </h3>
       <p
-        className="text-[#888] mb-6"
+        className="text-[#888] mb-6 outline-none"
         style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6 }}
+        contentEditable={!!onDescriptionEdit}
+        suppressContentEditableWarning
+        onBlur={(e) => onDescriptionEdit?.(e.currentTarget.textContent || '')}
       >
         {description}
       </p>
