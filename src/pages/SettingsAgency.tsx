@@ -10,7 +10,7 @@ export default function SettingsAgency() {
   const { agency } = useAuth();
   const [form, setForm] = useState({
     name: '', email: '', phone: '', website: '',
-    tagline: '', about_text: '',
+    tagline: '', about_text: '', years_experience: '' as string,
     address_line1: '', address_line2: '', city: '', state: '', zip: '', country: '',
   });
   const [saving, setSaving] = useState(false);
@@ -24,6 +24,7 @@ export default function SettingsAgency() {
         website: agency.website || '',
         tagline: agency.tagline || '',
         about_text: agency.about_text || '',
+        years_experience: agency.years_experience?.toString() || '',
         address_line1: agency.address_line1 || '',
         address_line2: agency.address_line2 || '',
         city: agency.city || '',
@@ -37,7 +38,9 @@ export default function SettingsAgency() {
   const handleSave = async () => {
     if (!agency) return;
     setSaving(true);
-    const { error } = await supabase.from('agencies').update(form).eq('id', agency.id);
+    const { years_experience, ...rest } = form;
+    const payload = { ...rest, years_experience: years_experience ? parseInt(years_experience, 10) : null };
+    const { error } = await supabase.from('agencies').update(payload).eq('id', agency.id);
     if (error) toast.error('Failed to save');
     else toast.success('Agency profile updated');
     setSaving(false);
@@ -85,7 +88,9 @@ export default function SettingsAgency() {
             <Field label="Email" name="email" type="email" />
             <Field label="Phone" name="phone" />
             <Field label="Tagline" name="tagline" span={2} />
-            <Field label="About" name="about_text" type="textarea" span={2} />
+            <Field label="Years of Experience" name="years_experience" />
+            <div /> {/* spacer */}
+            <Field label="About / Why Us" name="about_text" type="textarea" span={2} />
           </div>
         </div>
 

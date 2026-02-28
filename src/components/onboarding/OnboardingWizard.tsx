@@ -102,10 +102,10 @@ export function OnboardingWizard() {
         idx++;
       }
       setDifferentiators(combined.slice(0, 6));
-      setDiffIntro(data.differentiators.intro || '');
+      setDiffIntro(data.differentiators.intro || data.about_text || '');
     } else {
       setDifferentiators(defaultDiffs);
-      setDiffIntro('');
+      setDiffIntro(data.about_text || '');
     }
 
     setScreen('review');
