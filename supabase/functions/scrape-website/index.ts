@@ -329,9 +329,10 @@ Return this exact JSON structure:
 }
 
 Rules:
+- CRITICAL: ALL output text MUST be in English, regardless of the language of the source website. Translate ALL scraped content to natural, fluent English — including about_text, testimonial quotes, differentiator titles/descriptions/stat_labels/stat_values, intro paragraphs, and any other text fields. Do NOT leave any Swedish, German, French, Spanish, or other non-English text in the output.
 - For services_detected, use these exact category names when they match: "Brand & Creative", "Website & Digital", "Content & Copywriting", "SEO & Organic Growth", "Paid Advertising", "Social Media", "Email Marketing", "Analytics & Data", "Marketing Strategy"
-- Extract ALL testimonials/client quotes you can find across all pages, including case study pages. Look for direct quotes from clients (text in quotation marks or blockquotes attributed to a person).
-- For differentiators, ONLY use real data found on the website (mark as "scraped"). Do NOT invent or generate fake stats, KPI numbers, or differentiators. If fewer than 3 are found, that's fine — return only what you found.
+- Extract ALL testimonials/client quotes you can find across all pages, including case study pages. Look for direct quotes from clients (text in quotation marks or blockquotes attributed to a person). Translate quotes to English while preserving meaning and tone.
+- For differentiators, ONLY use real data found on the website (mark as "scraped"). Do NOT invent or generate fake stats, KPI numbers, or differentiators. If fewer than 3 are found, that's fine — return only what you found. Translate all differentiator text to English.
 - If data is not found, use null or empty string, don't invent testimonials or stats
 - Return ONLY the JSON object, no other text`
               },
