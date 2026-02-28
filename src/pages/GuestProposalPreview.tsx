@@ -43,13 +43,9 @@ export default function GuestProposalPreview() {
   const { user } = useAuth();
   const [showSignupGate, setShowSignupGate] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  const guestProposal = useMemo(() => {
-    try {
-      const raw = localStorage.getItem('propopad_guest_proposal');
-      return raw ? JSON.parse(raw) : null;
-    } catch { return null; }
-  }, []);
+  const [proposalTitle, setProposalTitle] = useState('');
+  const [executiveSummary, setExecutiveSummary] = useState('');
+  const [localServices, setLocalServices] = useState<any[]>([]);
 
   const guestOnboarding = useMemo(() => {
     try {
