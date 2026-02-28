@@ -381,9 +381,25 @@ export default function ProposalNew() {
   };
 
   const handleBuild = () => {
-    // Guest mode: require signup before building
     if (isGuestMode && !user) {
-      setShowSignupGate(true);
+      // Save proposal configuration to localStorage and navigate to guest preview
+      const selectedMods = modules.filter((m: any) => selectedModuleIds.has(m.id));
+      const guestProposal = {
+        clientName: selectedClient?.company_name || newClientName || 'Client',
+        contactName: selectedClient?.contact_name || newContactName || '',
+        clientWebsite: newClientWebsite || '',
+        clientContext: clientContext || '',
+        services: selectedMods.map((m: any) => ({
+          ...m,
+          priceOverride: priceOverrides[m.id] ?? null,
+        })),
+        startDate,
+        totalFixed,
+        totalMonthly,
+        currencySymbol,
+      };
+      localStorage.setItem('propopad_guest_proposal', JSON.stringify(guestProposal));
+      navigate('/proposals/preview');
       return;
     }
     createProposal(true);
@@ -391,7 +407,8 @@ export default function ProposalNew() {
 
   const handleSaveDraft = () => {
     if (isGuestMode && !user) {
-      setShowSignupGate(true);
+      // Same as build for guest
+      handleBuild();
       return;
     }
     createProposal(false);
