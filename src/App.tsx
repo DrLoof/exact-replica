@@ -23,6 +23,9 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import { CookieConsent } from "./components/CookieConsent";
 
 const queryClient = new QueryClient();
 
