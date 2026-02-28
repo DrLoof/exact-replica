@@ -337,6 +337,8 @@ export default function ProposalEditor() {
                     clientName={client?.company_name || 'Client'}
                     date={proposalDate}
                     proposalNumber={proposal.reference_number}
+                    onTitleEdit={(val) => updateField('title', val)}
+                    onSubtitleEdit={(val) => updateField('subtitle', val)}
                   />
                 </div>
               </SectionWrapper>
