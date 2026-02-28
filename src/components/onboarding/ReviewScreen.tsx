@@ -234,6 +234,104 @@ export function ReviewScreen({
         </p>
       </section>
 
+      {/* Section: Suggested Bundles */}
+      {suggestedBundles.length > 0 && (
+        <section className="mt-6 rounded-2xl border border-border bg-card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="label-overline">Suggested Bundles</h2>
+            <span className="text-xs text-muted-foreground">{suggestedBundles.length} matched</span>
+          </div>
+
+          <div className="space-y-3">
+            {suggestedBundles.map(bundle => {
+              const isAdded = addedBundles.has(bundle.name);
+              const pricing = calculateBundlePricing(bundle.serviceNames, bundle.discountPercentage);
+              const missingNames = bundle.serviceNames.filter(n => !selectedModuleNames.has(n));
+
+              return (
+                <div key={bundle.name} className={cn(
+                  'rounded-xl border p-4 transition-colors',
+                  isAdded ? 'border-brand/30 bg-brand/5' : 'border-border bg-background'
+                )}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <Package className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <h3 className="font-display text-sm font-semibold text-foreground">{bundle.name}</h3>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">{bundle.tagline}</p>
+
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {bundle.serviceNames.map(name => (
+                          <span key={name} className={cn(
+                            'rounded-full px-2 py-0.5 text-[10px]',
+                            missingNames.includes(name)
+                              ? 'border border-dashed border-muted-foreground/30 text-muted-foreground/70'
+                              : 'bg-muted text-muted-foreground'
+                          )}>{name}</span>
+                        ))}
+                      </div>
+
+                      <div className="mt-2 flex items-baseline gap-2">
+                        <span className="text-xs text-muted-foreground line-through">
+                          {formatBundlePrice(pricing.totalFixed, pricing.totalMonthly)}
+                        </span>
+                        <span className="font-display text-sm font-bold tabular-nums text-foreground">
+                          {formatBundlePrice(pricing.bundleFixed, pricing.bundleMonthly)}
+                        </span>
+                        {pricing.totalSavings > 0 && (
+                          <span className="rounded-full bg-status-success/15 px-2 py-0.5 text-[10px] font-semibold text-status-success">
+                            Save ${pricing.totalSavings.toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="shrink-0">
+                      {isAdded ? (
+                        <span className="flex items-center gap-1.5 text-xs font-medium text-brand">
+                          <Check className="h-4 w-4" /> Added
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            // Auto-add missing services to selected modules
+                            if (missingNames.length > 0) {
+                              const next = new Set(selectedModuleKeys);
+                              for (const name of missingNames) {
+                                const mod = allModules.find(m => m.name === name);
+                                if (mod) next.add(mod.key);
+                              }
+                              onModuleKeysChange(next);
+                            }
+                            onAddBundle?.(bundle.name);
+                          }}
+                          className="flex items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-brand-hover"
+                        >
+                          {missingNames.length > 0 ? `Add + ${missingNames.length} service${missingNames.length > 1 ? 's' : ''}` : 'Use this bundle'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            Bundles package your services for bigger deals. You can customize them later.
+          </p>
+        </section>
+      )}
+
+      {suggestedBundles.length === 0 && selectedModuleKeys.size > 0 && (
+        <section className="mt-6 rounded-2xl border border-dashed border-border bg-card p-4">
+          <p className="text-xs text-muted-foreground text-center">
+            You can create custom bundles or browse templates in Settings → Bundles after setup.
+          </p>
+        </section>
+      )}
+
       {/* Section: Testimonials */}
       <section className="mt-6 rounded-2xl border border-border bg-card p-6">
         <div className="flex items-center justify-between mb-4">
