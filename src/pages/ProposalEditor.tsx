@@ -56,6 +56,7 @@ interface ProposalService {
   price_override: number | null;
   display_order: number | null;
   is_addon: boolean | null;
+  custom_deliverables: string[] | null;
   module?: {
     name: string;
     description: string | null;
