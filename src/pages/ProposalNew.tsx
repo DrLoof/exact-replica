@@ -322,6 +322,14 @@ export default function ProposalNew() {
       const prefix = agency.proposal_prefix || 'PRO';
       const refNum = `${prefix}-${new Date().getFullYear()}-${String(counter).padStart(4, '0')}`;
 
+      // Get real module IDs (for guest mode, we need to match by name)
+      const { data: realModules } = await supabase
+        .from('service_modules')
+        .select('id, name, service_type')
+        .eq('agency_id', agency.id);
+
+      const selectedModsList = Array.from(selectedModuleIds).map(id => modules.find((m: any) => m.id === id)).filter(Boolean);
+
       const { data: proposal, error: pError } = await supabase.from('proposals').insert({
         agency_id: agency.id,
         client_id: clientId,
@@ -339,18 +347,20 @@ export default function ProposalNew() {
       }).select('id').single();
       if (pError) throw pError;
 
-      const services = Array.from(selectedModuleIds).map((moduleId, i) => {
-        const mod = modules.find((m: any) => m.id === moduleId);
-        const override = priceOverrides[moduleId];
+      const services = selectedModsList.map((mod: any, i: number) => {
+        // Match guest virtual module to real DB module by name
+        const realMod = realModules?.find((rm: any) => rm.name === mod.name);
+        const override = priceOverrides[mod.id];
         return {
           proposal_id: proposal.id,
-          module_id: moduleId,
+          module_id: realMod?.id || null,
           display_order: i,
           price_override: override !== undefined ? override : null,
           pricing_model_override: null,
-          is_addon: mod?.service_type === 'addon',
+          is_addon: (realMod?.service_type || mod.service_type) === 'addon',
         };
-      });
+      }).filter((s: any) => s.module_id);
+
       if (services.length > 0) {
         await supabase.from('proposal_services').insert(services);
       }
@@ -370,8 +380,204 @@ export default function ProposalNew() {
     setSaving(false);
   };
 
-  const handleBuild = () => createProposal(true);
-  const handleSaveDraft = () => createProposal(false);
+  const handleBuild = () => {
+    // Guest mode: require signup before building
+    if (isGuestMode && !user) {
+      setShowSignupGate(true);
+      return;
+    }
+    createProposal(true);
+  };
+
+  const handleSaveDraft = () => {
+    if (isGuestMode && !user) {
+      setShowSignupGate(true);
+      return;
+    }
+    createProposal(false);
+  };
+
+  // After signup in guest mode, persist onboarding data then create proposal
+  const handlePostSignupBuild = async () => {
+    setShowSignupGate(false);
+    setSaving(true);
+
+    try {
+      // Wait for agency to be created by signup trigger
+      let retries = 0;
+      const waitForAgency = async (): Promise<any> => {
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        if (!currentUser) return null;
+        const { data: profile } = await supabase
+          .from('users')
+          .select('agency_id')
+          .eq('id', currentUser.id)
+          .single();
+        if (profile?.agency_id) {
+          const { data: ag } = await supabase
+            .from('agencies')
+            .select('*')
+            .eq('id', profile.agency_id)
+            .single();
+          return ag;
+        }
+        if (retries < 15) {
+          retries++;
+          await new Promise(r => setTimeout(r, 500));
+          return waitForAgency();
+        }
+        return null;
+      };
+
+      const freshAgency = await waitForAgency();
+      if (!freshAgency) {
+        toast.error('Could not set up your agency. Please try again.');
+        setSaving(false);
+        return;
+      }
+
+      // Now persist all onboarding data (same logic as OnboardingWizard.handleFinishWithAgency)
+      if (guestOnboarding) {
+        const { getDefaultModulesForGroup } = await import('@/lib/defaultModules');
+        const identity = guestOnboarding.agencyIdentity || {};
+        const groupNameMap = guestOnboarding.groupNameMap || {};
+        const selectedKeys = new Set<string>(guestOnboarding.selectedModuleKeys || []);
+
+        await supabase.from('agencies').update({
+          name: identity.name || freshAgency.name,
+          email: identity.email || null,
+          phone: identity.phone || null,
+          logo_url: identity.logo_url || null,
+          brand_color: identity.brand_color || '#E8825C',
+          tagline: identity.tagline || null,
+          address_line1: identity.address || null,
+          about_text: identity.about_text || null,
+          scraped_data: guestOnboarding.scrapeData || null,
+          scrape_status: guestOnboarding.scrapeData ? 'complete' : 'manual',
+          scraped_at: guestOnboarding.scrapeData ? new Date().toISOString() : null,
+          currency: guestOnboarding.scrapeData?.detected_currency?.code || 'USD',
+          currency_symbol: guestOnboarding.scrapeData?.detected_currency?.symbol || '$',
+          default_validity_days: 30,
+          default_revision_rounds: 2,
+          default_notice_period: '30 days',
+          proposal_prefix: (identity.name || freshAgency.name || 'AGY').replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase(),
+          onboarding_complete: true,
+          onboarding_step: 7,
+        } as any).eq('id', freshAgency.id);
+
+        // Save modules
+        const matchedGroupNames = [...new Set(
+          [...selectedKeys].map(key => key.replace(/-\d+$/, ''))
+        )];
+        const modulesToInsert = matchedGroupNames.flatMap(groupName => {
+          const groupId = Object.entries(groupNameMap).find(([_, name]) => name === groupName)?.[0];
+          if (!groupId) return [];
+          return getDefaultModulesForGroup(groupName)
+            .filter((_, i) => selectedKeys.has(`${groupName}-${i}`))
+            .map((mod, i) => ({
+              agency_id: freshAgency.id,
+              group_id: groupId,
+              name: mod.name,
+              description: mod.description || null,
+              short_description: mod.shortDesc,
+              pricing_model: mod.pricingModel,
+              price_fixed: mod.pricingModel === 'fixed' ? mod.price : null,
+              price_monthly: mod.pricingModel === 'monthly' ? mod.price : null,
+              price_hourly: mod.pricingModel === 'hourly' ? mod.price : null,
+              service_type: mod.serviceType || 'core',
+              deliverables: mod.deliverables || [],
+              client_responsibilities: mod.clientResponsibilities || [],
+              out_of_scope: mod.outOfScope || [],
+              default_timeline: mod.defaultTimeline || null,
+              suggested_kpis: mod.suggestedKpis || [],
+              common_tools: mod.commonTools || [],
+              is_active: true,
+              display_order: i,
+            }));
+        });
+        if (modulesToInsert.length > 0) {
+          await supabase.from('service_modules').delete().eq('agency_id', freshAgency.id);
+          await supabase.from('service_modules').insert(modulesToInsert);
+        }
+
+        // Save testimonials
+        const testimonials = guestOnboarding.testimonials || [];
+        if (testimonials.length > 0) {
+          await supabase.from('testimonials').insert(testimonials.map((t: any) => ({
+            agency_id: freshAgency.id,
+            quote: t.quote,
+            client_name: t.client_name || 'Client',
+            client_title: t.client_title || null,
+            client_company: t.client_company || null,
+            metric_value: t.metric_value || null,
+            metric_label: t.metric_label || null,
+            source: 'scraped',
+          })));
+        }
+
+        // Save differentiators
+        const differentiators = guestOnboarding.differentiators || [];
+        if (differentiators.length > 0) {
+          await supabase.from('differentiators').delete().eq('agency_id', freshAgency.id);
+          await supabase.from('differentiators').insert(differentiators.map((d: any, i: number) => ({
+            agency_id: freshAgency.id,
+            title: d.title,
+            description: d.description,
+            stat_value: d.stat_value,
+            stat_label: d.stat_label,
+            icon: d.icon || 'Target',
+            display_order: i + 1,
+            source: d.source || 'generated',
+          })));
+        }
+
+        // Save default terms, payment templates, timeline phases
+        const { data: existingTerms } = await supabase.from('terms_clauses').select('id').eq('agency_id', freshAgency.id);
+        if (!existingTerms?.length) {
+          await supabase.from('terms_clauses').insert([
+            { title: 'Payment Terms', content: 'All fees are due according to the payment schedule outlined in the Investment section of this proposal.', display_order: 1 },
+            { title: 'Project Timeline & Milestones', content: 'The project timeline outlined in this proposal is an estimate based on the defined scope of work.', display_order: 2 },
+            { title: 'Revision Policy', content: 'This proposal includes the number of revision rounds specified per deliverable.', display_order: 3 },
+            { title: 'Intellectual Property', content: 'Upon receipt of full and final payment, the client will receive full ownership of all final deliverables.', display_order: 4 },
+            { title: 'Confidentiality', content: 'Both parties agree to keep confidential any proprietary or sensitive information shared during this engagement.', display_order: 5 },
+            { title: 'Termination', content: 'Either party may terminate this agreement with written notice as specified in the notice period above.', display_order: 6 },
+            { title: 'Liability', content: "The agency's total liability shall not exceed the total fees paid by the client.", display_order: 7 },
+            { title: 'Governing Law', content: 'This agreement shall be governed by the laws of the jurisdiction where the agency is registered.', display_order: 8 },
+          ].map(t => ({ ...t, agency_id: freshAgency.id, is_default: true })));
+        }
+
+        const { data: existingPT } = await supabase.from('payment_templates').select('id').eq('agency_id', freshAgency.id);
+        if (!existingPT?.length) {
+          await supabase.from('payment_templates').insert([
+            { agency_id: freshAgency.id, name: 'Equal Thirds', milestones: [{ label: 'Start', percentage: 33 }, { label: 'Midpoint', percentage: 33 }, { label: 'Delivery', percentage: 34 }], is_default: true },
+            { agency_id: freshAgency.id, name: '50/50', milestones: [{ label: 'Upfront', percentage: 50 }, { label: 'Completion', percentage: 50 }], is_default: false },
+          ]);
+        }
+
+        const { data: existingPhases } = await supabase.from('timeline_phases').select('id').eq('agency_id', freshAgency.id);
+        if (!existingPhases?.length) {
+          await supabase.from('timeline_phases').insert([
+            { agency_id: freshAgency.id, name: 'Discovery & Research', default_duration: '1-2 weeks', description: 'Understanding your business, audience, and goals.', display_order: 1 },
+            { agency_id: freshAgency.id, name: 'Strategy & Architecture', default_duration: '2-3 weeks', description: 'Defining the roadmap and project architecture.', display_order: 2 },
+            { agency_id: freshAgency.id, name: 'Creative Development', default_duration: '3-4 weeks', description: 'Design concepts, content creation, and iteration.', display_order: 3 },
+            { agency_id: freshAgency.id, name: 'Build & Produce', default_duration: '2-3 weeks', description: 'Development, production, and quality assurance.', display_order: 4 },
+            { agency_id: freshAgency.id, name: 'Launch & Optimize', default_duration: '1-2 weeks', description: 'Go live, monitor, and optimize performance.', display_order: 5 },
+          ]);
+        }
+
+        // Clear guest data
+        localStorage.removeItem('propopad_guest_onboarding');
+      }
+
+      // Now reload and navigate to proposals/new as authenticated user
+      toast.success('Account created! Building your proposal...');
+      window.location.href = '/proposals/new';
+    } catch (e: any) {
+      console.error('Post-signup error:', e);
+      toast.error('Failed to save. Please try again.');
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
