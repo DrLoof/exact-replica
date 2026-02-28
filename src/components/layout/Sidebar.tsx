@@ -139,7 +139,7 @@ export function Sidebar() {
       {/* Upgrade CTA — White card with brass top line */}
       <div className="relative mx-3 mb-3 overflow-hidden rounded-[10px] bg-paper p-4 shadow-card">
         {/* Brass top line */}
-        <div className="absolute left-0 right-0 top-0 h-[2px]" style={{ background: 'linear-gradient(90deg, #FFBF00, transparent)' }} />
+        <div className="absolute left-0 right-0 top-0 h-[2px]" style={{ background: 'linear-gradient(90deg, #e2a62d, transparent)' }} />
         <div className="flex items-center gap-1.5 mb-1.5">
           <Zap className="h-3.5 w-3.5 text-brass" />
           <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-brass">Go Pro</p>
