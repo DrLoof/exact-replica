@@ -15,6 +15,13 @@ const features = [
 ];
 
 export default function Home() {
+  const { session, loading } = useAuth();
+
+  // Redirect authenticated users to dashboard
+  if (!loading && session) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Nav */}
