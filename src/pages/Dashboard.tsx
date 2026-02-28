@@ -358,7 +358,7 @@ export default function Dashboard() {
               <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.1em] text-ink-faint">Insight</p>
               <p className="text-[13px] leading-relaxed" style={{ color: '#B8B0A5' }}>
                 Agencies using <span className="font-semibold" style={{ color: '#FAF9F6' }}>service bundles</span> close{' '}
-                <span className="font-semibold" style={{ color: '#ffcd6c' }}>23% larger deals</span> on average.
+                <span className="font-semibold" style={{ color: '#ffb180' }}>23% larger deals</span> on average.
               </p>
               <Link to="/bundles" className="mt-3 inline-block text-[11px] font-medium text-brass transition-colors hover:opacity-80">
                 Create a bundle →
