@@ -132,9 +132,21 @@ export function OnboardingWizard() {
   };
 
   const handleFinishAttempt = () => {
-    // If user is not authenticated, show signup gate
     if (!user) {
-      setShowSignupGate(true);
+      // Guest: save all onboarding data to localStorage so ProposalNew can use it
+      const guestData = {
+        agencyIdentity,
+        selectedModuleKeys: [...selectedModuleKeys],
+        testimonials,
+        differentiators,
+        diffIntro,
+        scrapeData,
+        groupNameMap,
+        addedBundles: [...addedBundles],
+      };
+      localStorage.setItem('propopad_guest_onboarding', JSON.stringify(guestData));
+      toast.success('Your agency profile is ready! Now create your first proposal.');
+      navigate('/proposals/new?guest=true');
       return;
     }
     // If authenticated, save directly
