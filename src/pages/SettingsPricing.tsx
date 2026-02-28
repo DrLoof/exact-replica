@@ -138,6 +138,12 @@ export default function SettingsPricing() {
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">Terms & Conditions Clauses</h2>
             <button onClick={openClauseCreate} className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-foreground hover:bg-muted">
+          </div>
+          <div className="flex items-start gap-2 mb-4 rounded-lg bg-background px-3 py-2.5">
+            <span className="text-sm mt-0.5" style={{ color: '#C07A5C' }}>⚠</span>
+            <p className="text-[12px] text-muted-foreground">
+              These are template clauses, not legal advice. Have a lawyer review your terms before using them with clients.
+            </p>
               <Plus className="h-3.5 w-3.5" /> Add Clause
             </button>
           </div>
