@@ -1,29 +1,17 @@
 import { Package } from 'lucide-react';
+import { defaultBundles, calculateBundlePricing, formatBundlePrice } from '@/lib/defaultBundles';
 
 export function Step4Bundles() {
-  const bundles = [
-    {
-      name: 'Brand Launch Package',
-      tagline: 'Everything you need to make a powerful first impression',
-      services: ['Brand Identity System', 'Brand Messaging & Voice', 'Website Design & Development', 'Website Copywriting'],
-      individualTotal: 31500,
-      bundlePrice: 26750,
-    },
-    {
-      name: 'Digital Growth Package',
-      tagline: 'Dominate organic search and content',
-      services: ['SEO Strategy', 'Content Strategy', 'Blog Writing', 'Analytics Setup'],
-      individualTotal: 13000,
-      bundlePrice: 11050,
-    },
-    {
-      name: 'Lead Generation Engine',
-      tagline: 'Turn clicks into customers with paid media',
-      services: ['Paid Search (PPC)', 'Paid Social Advertising', 'Landing Page Design', 'Email Marketing'],
-      individualTotal: 13000,
-      bundlePrice: 11050,
-    },
-  ];
+  const bundles = defaultBundles.slice(0, 3).map(b => {
+    const pricing = calculateBundlePricing(b.serviceNames, b.discountPercentage);
+    return {
+      name: b.name,
+      tagline: b.tagline,
+      services: b.serviceNames,
+      individualTotal: pricing.totalFixed + pricing.totalMonthly,
+      bundlePrice: pricing.bundleFixed + pricing.bundleMonthly,
+    };
+  });
 
   return (
     <div>

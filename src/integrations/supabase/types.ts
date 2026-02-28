@@ -155,6 +155,62 @@ export type Database = {
           },
         ]
       }
+      bundle_template_modules: {
+        Row: {
+          bundle_template_id: string | null
+          id: string
+          module_name: string
+        }
+        Insert: {
+          bundle_template_id?: string | null
+          id?: string
+          module_name: string
+        }
+        Update: {
+          bundle_template_id?: string | null
+          id?: string
+          module_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bundle_template_modules_bundle_template_id_fkey"
+            columns: ["bundle_template_id"]
+            isOneToOne: false
+            referencedRelation: "bundle_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bundle_templates: {
+        Row: {
+          description: string | null
+          discount_percentage: number | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          tagline: string | null
+        }
+        Insert: {
+          description?: string | null
+          discount_percentage?: number | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          tagline?: string | null
+        }
+        Update: {
+          description?: string | null
+          discount_percentage?: number | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          tagline?: string | null
+        }
+        Relationships: []
+      }
       bundles: {
         Row: {
           agency_id: string | null
