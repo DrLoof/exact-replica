@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Search, X, Check, ChevronDown, ChevronUp, CalendarDays, Sparkles, RotateCcw, Loader2, Globe } from 'lucide-react';
+import { ArrowLeft, Search, X, Check, ChevronDown, ChevronUp, CalendarDays, Sparkles, RotateCcw, Loader2, Globe, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useClients, useServiceModules, useServiceGroups, useBundles, useTimelinePhases } from '@/hooks/useAgencyData';
@@ -18,7 +18,6 @@ function InlinePrice({ value, onChange, currencySymbol, suffix, isOverridden, on
   isOverridden: boolean;
   onReset: () => void;
 }) {
-  // ... keep existing code (InlinePrice component)
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(String(value));
 
@@ -38,7 +37,7 @@ function InlinePrice({ value, onChange, currencySymbol, suffix, isOverridden, on
           if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
           if (e.key === 'Escape') setEditing(false);
         }}
-        className="w-20 rounded border border-brand bg-background px-1.5 py-0.5 text-right text-sm tabular-nums text-foreground focus:outline-none"
+        className="w-20 rounded border border-foreground/30 bg-background px-1.5 py-0.5 text-right text-sm tabular-nums text-foreground focus:outline-none"
         onClick={(e) => e.stopPropagation()}
       />
     );
@@ -46,7 +45,7 @@ function InlinePrice({ value, onChange, currencySymbol, suffix, isOverridden, on
 
   return (
     <span
-      className="relative cursor-pointer text-sm font-medium tabular-nums text-foreground hover:text-brand"
+      className="relative cursor-pointer text-[14px] font-semibold tabular-nums text-foreground hover:text-foreground/70"
       onClick={(e) => {
         e.stopPropagation();
         setDraft(String(value));
@@ -97,10 +96,67 @@ function buildGuestData(guestOnboarding: any) {
         group_id: `group-${groupName}`,
         is_active: true,
         deliverables: mod.deliverables,
+        default_timeline: mod.defaultTimeline,
       });
     });
   }
   return { virtualModules, virtualGroups };
+}
+
+// Generation progress screen component
+function GenerationScreen({ clientName }: { clientName: string }) {
+  const [progress, setProgress] = useState(0);
+  const [steps, setSteps] = useState([
+    { label: 'Executive summary written', done: false },
+    { label: 'Scope of services structured', done: false },
+    { label: 'Timeline generated', done: false },
+    { label: 'Investment calculated', done: false },
+    { label: 'Formatting and polishing...', done: false },
+  ]);
+
+  useEffect(() => {
+    const timings = [600, 1200, 1800, 2400, 3200];
+    timings.forEach((t, i) => {
+      setTimeout(() => {
+        setSteps(prev => prev.map((s, j) => j <= i ? { ...s, done: true } : s));
+        setProgress(Math.min(((i + 1) / timings.length) * 100, 100));
+      }, t);
+    });
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
+      <div className="mx-auto max-w-md text-center px-6">
+        <div className="mb-8 flex items-center justify-center gap-2 text-foreground">
+          <Sparkles className="h-5 w-5 text-accent-foreground" />
+          <span className="text-lg font-semibold">Building your proposal for {clientName}...</span>
+        </div>
+        <div className="mb-8 space-y-3 text-left">
+          {steps.map((step, i) => (
+            <div key={i} className="flex items-center gap-3">
+              {step.done ? (
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-status-success/20">
+                  <Check className="h-3 w-3 text-status-success" />
+                </div>
+              ) : (
+                <div className="flex h-5 w-5 items-center justify-center rounded-full border border-border">
+                  <Loader2 className={cn("h-3 w-3 text-muted-foreground", i === steps.findIndex(s => !s.done) && "animate-spin")} />
+                </div>
+              )}
+              <span className={cn("text-sm", step.done ? "text-foreground" : "text-muted-foreground")}>{step.label}</span>
+            </div>
+          ))}
+        </div>
+        <div className="h-2 rounded-full bg-muted overflow-hidden">
+          <div
+            className="h-full rounded-full bg-foreground transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground tabular-nums">{Math.round(progress)}%</p>
+      </div>
+    </div>
+  );
 }
 
 export default function ProposalNew() {
@@ -143,6 +199,8 @@ export default function ProposalNew() {
   const [showClientContext, setShowClientContext] = useState(false);
   const [showClientDropdown, setShowClientDropdown] = useState(false);
   const [scraping, setScraping] = useState(false);
+  const [suggestedContact, setSuggestedContact] = useState<string | null>(null);
+  const [clientIndustry, setClientIndustry] = useState('');
 
   const handleAutoFill = async () => {
     if (!newClientWebsite.trim()) return;
@@ -157,14 +215,35 @@ export default function ProposalNew() {
         setNewClientName(data.name);
         setClientSearch(data.name);
       }
-      if (data?.email && !newContactName) {
-        // Use contact info if available
+      // Suggest contact if found (don't auto-fill)
+      if (data?.email) {
+        setSuggestedContact(data.email);
       }
-      const contextParts: string[] = [];
-      if (data?.tagline) contextParts.push(data.tagline);
-      if (data?.detected_services?.length > 0) contextParts.push(`Services detected: ${data.detected_services.join(', ')}`);
-      if (contextParts.length > 0 && !clientContext) {
-        setClientContext(contextParts.join('\n'));
+      // Detect industry from services
+      if (data?.detected_services?.length > 0) {
+        setClientIndustry(data.detected_services[0] || '');
+      }
+      
+      // Generate AI summary instead of showing raw scrape data
+      const rawParts: string[] = [];
+      if (data?.tagline) rawParts.push(data.tagline);
+      if (data?.about_text) rawParts.push(data.about_text);
+      if (data?.detected_services?.length > 0) rawParts.push(`Services: ${data.detected_services.join(', ')}`);
+      
+      if (rawParts.length > 0 && !clientContext) {
+        // Try AI summarization
+        try {
+          const { data: summaryData } = await supabase.functions.invoke('summarize-client', {
+            body: { scraped_text: rawParts.join('\n'), company_name: data?.name || newClientName },
+          });
+          if (summaryData?.summary) {
+            setClientContext(summaryData.summary);
+          } else {
+            setClientContext(rawParts.join('\n'));
+          }
+        } catch {
+          setClientContext(rawParts.join('\n'));
+        }
         setShowClientContext(true);
       }
       toast.success(`Auto-filled ${data?.fields_found || 0} fields from website`);
@@ -174,13 +253,15 @@ export default function ProposalNew() {
     setScraping(false);
   };
 
-  // Zone 2: Services - pre-fill from query params or guest data
+  // Zone 2: Services — default to NONE selected (spec item 3)
   const [selectedModuleIds, setSelectedModuleIds] = useState<Set<string>>(() => {
     if (isGuestMode && guestData) {
       return new Set(guestData.virtualModules.map((m: any) => m.id));
     }
     const servicesParam = searchParams.get('services');
-    return servicesParam ? new Set(servicesParam.split(',').filter(Boolean)) : new Set();
+    if (servicesParam) return new Set(servicesParam.split(',').filter(Boolean));
+    // Default: nothing selected (user must choose)
+    return new Set<string>();
   });
   const [selectedBundleId, setSelectedBundleId] = useState<string | null>(() => searchParams.get('bundle'));
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
@@ -196,6 +277,7 @@ export default function ProposalNew() {
 
   const [saving, setSaving] = useState(false);
   const [showSignupGate, setShowSignupGate] = useState(false);
+  const [showGenerating, setShowGenerating] = useState(false);
 
   // Pre-fill client from query param
   const prefilledClientId = searchParams.get('client');
@@ -261,6 +343,34 @@ export default function ProposalNew() {
     setExpandedGroups(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
+  // Bundle handling: select bundle → auto-select its modules
+  const handleBundleSelect = (bundleId: string) => {
+    if (selectedBundleId === bundleId) {
+      // Deselect bundle — remove its module IDs
+      const bundle = bundles.find((b: any) => b.id === bundleId);
+      if (bundle) {
+        const bundleModuleIds = new Set((bundle.bundle_modules || []).map((bm: any) => bm.module_id));
+        setSelectedModuleIds(prev => {
+          const next = new Set(prev);
+          bundleModuleIds.forEach(id => next.delete(id));
+          return next;
+        });
+      }
+      setSelectedBundleId(null);
+    } else {
+      const bundle = bundles.find((b: any) => b.id === bundleId);
+      if (bundle) {
+        const bundleModuleIds = (bundle.bundle_modules || []).map((bm: any) => bm.module_id);
+        setSelectedModuleIds(prev => {
+          const next = new Set(prev);
+          bundleModuleIds.forEach((id: string) => next.add(id));
+          return next;
+        });
+      }
+      setSelectedBundleId(bundleId);
+    }
+  };
+
   // Price calculations
   const selectedModulesList = modules.filter((m: any) => selectedModuleIds.has(m.id));
   const totalFixed = selectedModulesList
@@ -272,6 +382,17 @@ export default function ProposalNew() {
   const totalHourly = selectedModulesList
     .filter((m: any) => m.pricing_model === 'hourly')
     .reduce((sum: number, m: any) => sum + (priceOverrides[m.id] ?? m.price_hourly ?? 0), 0);
+
+  // Bundle savings
+  const selectedBundle = bundles.find((b: any) => b.id === selectedBundleId);
+  const bundleSavings = selectedBundle?.savings_amount || 0;
+
+  // Add-on count (services selected but not in bundle)
+  const bundleModuleIdSet = useMemo(() => {
+    if (!selectedBundle) return new Set<string>();
+    return new Set((selectedBundle.bundle_modules || []).map((bm: any) => bm.module_id));
+  }, [selectedBundle]);
+  const addonCount = selectedModulesList.filter((m: any) => !bundleModuleIdSet.has(m.id)).length;
 
   const hasClient = selectedClient || newClientName.trim();
   const hasServices = selectedModuleIds.size > 0;
@@ -292,6 +413,17 @@ export default function ProposalNew() {
     return { names, totalWeeks };
   }, [timelinePhases]);
 
+  // Estimated duration from selected services
+  const estimatedDuration = useMemo(() => {
+    if (selectedModulesList.length === 0) return null;
+    let totalWeeks = 0;
+    selectedModulesList.forEach((m: any) => {
+      const match = m.default_timeline?.match(/(\d+)/);
+      totalWeeks += match ? parseInt(match[1]) : 2;
+    });
+    return `~${totalWeeks} weeks`;
+  }, [selectedModulesList]);
+
   // Get bundle included modules
   const getBundleModuleNames = (bundle: any) => {
     const moduleIds = (bundle.bundle_modules || []).map((bm: any) => bm.module_id);
@@ -300,9 +432,28 @@ export default function ProposalNew() {
       .map((m: any) => m.name);
   };
 
+  // Total display string
+  const totalStr = (() => {
+    const parts: string[] = [];
+    if (totalFixed > 0) parts.push(`${currencySymbol}${totalFixed.toLocaleString()}`);
+    if (totalMonthly > 0) parts.push(`${currencySymbol}${totalMonthly.toLocaleString()}/mo`);
+    if (totalFixed === 0 && totalMonthly === 0 && totalHourly > 0) parts.push(`${currencySymbol}${totalHourly.toLocaleString()}/hr`);
+    return parts.join(' + ');
+  })();
+
+  // Footer label
+  const footerLabel = (() => {
+    const clientDisplayName = selectedClient?.company_name || newClientName;
+    if (!hasServices) return 'Select services to build a proposal';
+    if (selectedBundle) {
+      const base = `${selectedBundle.name} bundle`;
+      return addonCount > 0 ? `${base} + ${addonCount} add-on${addonCount !== 1 ? 's' : ''} for ${clientDisplayName}` : `${base} for ${clientDisplayName}`;
+    }
+    return `${selectedModuleIds.size} service${selectedModuleIds.size !== 1 ? 's' : ''} for ${clientDisplayName}`;
+  })();
+
   const createProposal = async (navigateToEditor: boolean) => {
     if (!agency || !canBuild) return;
-    setSaving(true);
 
     try {
       let clientId = selectedClient?.id;
@@ -313,7 +464,7 @@ export default function ProposalNew() {
           contact_name: newContactName || null,
           website: newClientWebsite || null,
           notes: clientContext || null,
-        }).select('id').single();
+        } as any).select('id').single();
         if (error) throw error;
         clientId = newC.id;
       }
@@ -322,7 +473,6 @@ export default function ProposalNew() {
       const prefix = agency.proposal_prefix || 'PRO';
       const refNum = `${prefix}-${new Date().getFullYear()}-${String(counter).padStart(4, '0')}`;
 
-      // Get real module IDs (for guest mode, we need to match by name)
       const { data: realModules } = await supabase
         .from('service_modules')
         .select('id, name, service_type')
@@ -344,11 +494,11 @@ export default function ProposalNew() {
         validity_days: agency.default_validity_days || 30,
         revision_rounds: agency.default_revision_rounds ?? 2,
         notice_period: agency.default_notice_period || '30 days',
+        bundle_savings: bundleSavings,
       }).select('id').single();
       if (pError) throw pError;
 
       const services = selectedModsList.map((mod: any, i: number) => {
-        // Match guest virtual module to real DB module by name
         const realMod = realModules?.find((rm: any) => rm.name === mod.name);
         const override = priceOverrides[mod.id];
         return {
@@ -358,6 +508,7 @@ export default function ProposalNew() {
           price_override: override !== undefined ? override : null,
           pricing_model_override: null,
           is_addon: (realMod?.service_type || mod.service_type) === 'addon',
+          bundle_id: bundleModuleIdSet.has(mod.id) ? selectedBundleId : null,
         };
       }).filter((s: any) => s.module_id);
 
@@ -377,12 +528,10 @@ export default function ProposalNew() {
       console.error(e);
       toast.error('Failed to save proposal');
     }
-    setSaving(false);
   };
 
   const handleBuild = () => {
     if (isGuestMode && !user) {
-      // Save proposal configuration to localStorage and navigate to guest preview
       const selectedMods = modules.filter((m: any) => selectedModuleIds.has(m.id));
       const guestProposal = {
         clientName: selectedClient?.company_name || newClientName || 'Client',
@@ -402,25 +551,32 @@ export default function ProposalNew() {
       navigate('/proposals/preview');
       return;
     }
-    createProposal(true);
+    // Show generation screen, then create
+    setShowGenerating(true);
+    setSaving(true);
+    setTimeout(() => {
+      createProposal(true).finally(() => {
+        setSaving(false);
+        setShowGenerating(false);
+      });
+    }, 3500);
   };
 
   const handleSaveDraft = () => {
     if (isGuestMode && !user) {
-      // Same as build for guest
       handleBuild();
       return;
     }
-    createProposal(false);
+    setSaving(true);
+    createProposal(false).finally(() => setSaving(false));
   };
 
-  // After signup in guest mode, persist onboarding data then create proposal
+  // After signup in guest mode
   const handlePostSignupBuild = async () => {
     setShowSignupGate(false);
     setSaving(true);
 
     try {
-      // Wait for agency to be created by signup trigger
       let retries = 0;
       const waitForAgency = async (): Promise<any> => {
         const { data: { user: currentUser } } = await supabase.auth.getUser();
@@ -453,7 +609,6 @@ export default function ProposalNew() {
         return;
       }
 
-      // Now persist all onboarding data (same logic as OnboardingWizard.handleFinishWithAgency)
       if (guestOnboarding) {
         const { getDefaultModulesForGroup } = await import('@/lib/defaultModules');
         const identity = guestOnboarding.agencyIdentity || {};
@@ -482,7 +637,6 @@ export default function ProposalNew() {
           onboarding_step: 7,
         } as any).eq('id', freshAgency.id);
 
-        // Save modules
         const matchedGroupNames = [...new Set(
           [...selectedKeys].map(key => key.replace(/-\d+$/, ''))
         )];
@@ -517,7 +671,6 @@ export default function ProposalNew() {
           await supabase.from('service_modules').insert(modulesToInsert);
         }
 
-        // Save testimonials
         const testimonials = guestOnboarding.testimonials || [];
         if (testimonials.length > 0) {
           await supabase.from('testimonials').insert(testimonials.map((t: any) => ({
@@ -532,7 +685,6 @@ export default function ProposalNew() {
           })));
         }
 
-        // Save differentiators
         const differentiators = guestOnboarding.differentiators || [];
         if (differentiators.length > 0) {
           await supabase.from('differentiators').delete().eq('agency_id', freshAgency.id);
@@ -548,7 +700,6 @@ export default function ProposalNew() {
           })));
         }
 
-        // Save default terms, payment templates, timeline phases
         const { data: existingTerms } = await supabase.from('terms_clauses').select('id').eq('agency_id', freshAgency.id);
         if (!existingTerms?.length) {
           await supabase.from('terms_clauses').insert([
@@ -582,11 +733,9 @@ export default function ProposalNew() {
           ]);
         }
 
-        // Clear guest data
         localStorage.removeItem('propopad_guest_onboarding');
       }
 
-      // Now reload and navigate to proposals/new as authenticated user
       toast.success('Account created! Building your proposal...');
       window.location.href = '/proposals/new';
     } catch (e: any) {
@@ -595,6 +744,13 @@ export default function ProposalNew() {
       setSaving(false);
     }
   };
+
+  // Industry options
+  const industryOptions = ['Technology', 'Healthcare', 'Finance', 'E-commerce', 'Education', 'Real Estate', 'Manufacturing', 'Media', 'Non-profit', 'Professional Services', 'Retail', 'Other'];
+
+  if (showGenerating) {
+    return <GenerationScreen clientName={selectedClient?.company_name || newClientName || 'Client'} />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -615,7 +771,7 @@ export default function ProposalNew() {
           <button
             onClick={handleBuild}
             disabled={!canBuild || saving}
-            className="flex items-center gap-2 rounded-lg bg-brand px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-hover disabled:opacity-50"
+            className="flex items-center gap-2 rounded-[10px] bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-40"
           >
             <Sparkles className="h-4 w-4" />
             {saving ? 'Building...' : 'Build Proposal'}
@@ -625,8 +781,8 @@ export default function ProposalNew() {
 
       <div className="mx-auto max-w-[720px] px-6 py-8 space-y-8">
         {/* Zone 1: Client */}
-        <section className="rounded-xl border border-border bg-card p-6">
-          <p className="mb-4 text-sm font-semibold text-foreground">Who is this proposal for?</p>
+        <section className="rounded-xl border border-parchment bg-card p-6 shadow-card">
+          <p className="mb-4 text-[14px] font-semibold text-foreground">Who is this proposal for?</p>
 
           {selectedClient ? (
             <div className="flex items-center gap-3">
@@ -639,7 +795,7 @@ export default function ProposalNew() {
                   <p className="text-xs text-muted-foreground">{selectedClient.contact_name}{selectedClient.contact_email ? ` · ${selectedClient.contact_email}` : ''}</p>
                 )}
               </div>
-              <button onClick={() => { setSelectedClient(null); setClientSearch(''); }} className="text-xs text-brand hover:text-brand-hover">Change</button>
+              <button onClick={() => { setSelectedClient(null); setClientSearch(''); }} className="text-xs text-foreground/60 hover:text-foreground">Change</button>
             </div>
           ) : (
             <div>
@@ -652,10 +808,10 @@ export default function ProposalNew() {
                   onChange={(e) => { setClientSearch(e.target.value); setNewClientName(e.target.value); setShowClientDropdown(true); }}
                   onFocus={() => setShowClientDropdown(true)}
                   onBlur={() => setTimeout(() => setShowClientDropdown(false), 200)}
-                  className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                  className="w-full rounded-lg border border-parchment bg-background py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none focus:ring-2 focus:ring-foreground/5"
                 />
                 {showClientDropdown && clientSearch.length > 0 && filteredClients.length > 0 && (
-                  <div className="absolute z-10 mt-1 w-full rounded-lg border border-border bg-card shadow-lg">
+                  <div className="absolute z-10 mt-1 w-full rounded-lg border border-parchment bg-card shadow-lg">
                     {filteredClients.slice(0, 5).map((c: any) => (
                       <button
                         key={c.id}
@@ -672,8 +828,8 @@ export default function ProposalNew() {
                         </div>
                       </button>
                     ))}
-                    <div className="border-t border-border px-4 py-2">
-                      <button onMouseDown={(e) => e.preventDefault()} onClick={() => setShowClientDropdown(false)} className="text-xs text-brand hover:text-brand-hover">
+                    <div className="border-t border-parchment px-4 py-2">
+                      <button onMouseDown={(e) => e.preventDefault()} onClick={() => setShowClientDropdown(false)} className="text-xs text-foreground/60 hover:text-foreground">
                         Create "{clientSearch}" as new client
                       </button>
                     </div>
@@ -681,41 +837,76 @@ export default function ProposalNew() {
                 )}
               </div>
 
-              {/* New client fields — always visible when typing */}
+              {/* New client fields */}
               {clientSearch && !selectedClient && (
                 <div className="mt-3 space-y-3">
                   <div className="grid grid-cols-2 gap-3">
-                    <input
-                      placeholder="Contact Name"
-                      value={newContactName}
-                      onChange={(e) => setNewContactName(e.target.value)}
-                      className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none"
-                    />
-                    <div className="relative">
+                    <div>
                       <input
-                        placeholder="Client Website URL"
-                        value={newClientWebsite}
-                        onChange={(e) => setNewClientWebsite(e.target.value)}
-                        className="w-full rounded-lg border border-border bg-background px-3 py-2 pr-20 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none"
+                        placeholder="Contact Name"
+                        value={newContactName}
+                        onChange={(e) => setNewContactName(e.target.value)}
+                        className="w-full rounded-lg border border-parchment bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
                       />
-                      {newClientWebsite.trim() && (
-                        <button
-                          type="button"
-                          onClick={handleAutoFill}
-                          disabled={scraping}
-                          className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1 rounded-md bg-brand/10 px-2 py-1 text-[10px] font-medium text-brand hover:bg-brand/20 disabled:opacity-50"
-                        >
-                          {scraping ? <Loader2 className="h-3 w-3 animate-spin" /> : <Globe className="h-3 w-3" />}
-                          {scraping ? 'Scanning...' : 'Auto-fill'}
-                        </button>
+                      {/* Contact suggestion from scrape */}
+                      {suggestedContact && !newContactName && (
+                        <div className="mt-1 flex items-center gap-2">
+                          <span className="text-[11px] text-muted-foreground">Suggested: "{suggestedContact}" from website</span>
+                          <button
+                            onClick={() => { setNewContactName(suggestedContact); setSuggestedContact(null); }}
+                            className="text-[11px] font-medium text-foreground/60 hover:text-foreground"
+                          >
+                            Use this
+                          </button>
+                        </div>
                       )}
                     </div>
+                    <div>
+                      <div className="relative">
+                        <input
+                          placeholder="Client Website URL"
+                          value={newClientWebsite}
+                          onChange={(e) => setNewClientWebsite(e.target.value)}
+                          className="w-full rounded-lg border border-parchment bg-background px-3 py-2 pr-20 text-sm text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
+                        />
+                        {newClientWebsite.trim() && (
+                          <button
+                            type="button"
+                            onClick={handleAutoFill}
+                            disabled={scraping}
+                            className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1 rounded-md bg-foreground/5 px-2 py-1 text-[10px] font-medium text-foreground/60 hover:bg-foreground/10 disabled:opacity-50"
+                          >
+                            {scraping ? <Loader2 className="h-3 w-3 animate-spin" /> : <Globe className="h-3 w-3" />}
+                            {scraping ? 'Scanning...' : 'Auto-fill'}
+                          </button>
+                        )}
+                      </div>
+                      <p className="mt-1 text-[11px] text-muted-foreground">We'll read publicly available information from this website.</p>
+                    </div>
                   </div>
+
+                  {/* Industry selector */}
+                  {(clientIndustry || newClientName) && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">Industry:</span>
+                      <select
+                        value={clientIndustry}
+                        onChange={(e) => setClientIndustry(e.target.value)}
+                        className="rounded-md border border-parchment bg-background px-2 py-1 text-xs text-foreground focus:outline-none"
+                      >
+                        <option value="">Select...</option>
+                        {industryOptions.map(ind => (
+                          <option key={ind} value={ind}>{ind}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
                   <button
                     onClick={() => setShowClientContext(!showClientContext)}
-                    className="text-xs text-brand hover:text-brand-hover"
+                    className="text-xs text-foreground/60 hover:text-foreground"
                   >
-                    {showClientContext ? '− Hide context' : '+ Add context about this client'}
+                    {showClientContext ? '− Hide client context' : '+ About this client'}
                   </button>
                   {showClientContext && (
                     <textarea
@@ -723,7 +914,7 @@ export default function ProposalNew() {
                       value={clientContext}
                       onChange={(e) => setClientContext(e.target.value)}
                       rows={3}
-                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none resize-none"
+                      className="w-full rounded-lg border border-parchment bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none resize-none"
                     />
                   )}
                 </div>
@@ -733,56 +924,48 @@ export default function ProposalNew() {
         </section>
 
         {/* Zone 2: Services */}
-        <section className="rounded-xl border border-border bg-card p-6">
-          <p className="mb-4 text-sm font-semibold text-foreground">What are you proposing?</p>
+        <section className="rounded-xl border border-parchment bg-card p-6 shadow-card">
+          <p className="mb-4 text-[14px] font-semibold text-foreground">What are you proposing?</p>
 
-          {/* Bundle cards */}
+          {/* Bundle cards — spec item 4 */}
           {bundles.length > 0 && (
             <div className="mb-6">
-              <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">Packages</p>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <p className="mb-3 label-overline">Bundles</p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {bundles.map((b: any) => {
                   const bundleModuleNames = getBundleModuleNames(b);
+                  const isSelected = selectedBundleId === b.id;
+                  // Bundle price breakdown
+                  const bundleModuleIds = (b.bundle_modules || []).map((bm: any) => bm.module_id);
+                  const bundleModules = modules.filter((m: any) => bundleModuleIds.includes(m.id));
+                  const bFixed = bundleModules.filter((m: any) => m.pricing_model === 'fixed').reduce((s: number, m: any) => s + (m.price_fixed || 0), 0);
+                  const bMonthly = bundleModules.filter((m: any) => m.pricing_model === 'monthly').reduce((s: number, m: any) => s + (m.price_monthly || 0), 0);
+
                   return (
                     <button
                       key={b.id}
-                      onClick={() => setSelectedBundleId(selectedBundleId === b.id ? null : b.id)}
+                      onClick={() => handleBundleSelect(b.id)}
                       className={cn(
                         'rounded-xl border-2 p-4 text-left transition-all',
-                        selectedBundleId === b.id
-                          ? 'border-brand bg-accent'
-                          : 'border-border hover:border-muted-foreground/30'
+                        isSelected
+                          ? 'border-foreground bg-ivory'
+                          : 'border-parchment hover:border-muted-foreground/30'
                       )}
                     >
                       <div className="flex items-center justify-between">
                         <p className="text-sm font-semibold text-foreground">{b.name}</p>
-                        {selectedBundleId === b.id && (
-                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand">
+                        {isSelected && (
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground">
                             <Check className="h-3 w-3 text-primary-foreground" />
                           </div>
                         )}
                       </div>
-                      {b.tagline && <p className="mt-1 text-xs text-muted-foreground">{b.tagline}</p>}
-                      {/* Included services as pills */}
-                      {bundleModuleNames.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {bundleModuleNames.slice(0, 5).map((name: string) => (
-                            <span key={name} className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
-                              {name}
-                            </span>
-                          ))}
-                          {bundleModuleNames.length > 5 && (
-                            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
-                              +{bundleModuleNames.length - 5} more
-                            </span>
-                          )}
-                        </div>
-                      )}
-                      <div className="mt-3 flex items-baseline gap-2">
-                        <span className="text-lg font-bold tabular-nums text-foreground">{currencySymbol}{(b.bundle_price || 0).toLocaleString()}</span>
-                        {b.individual_total > b.bundle_price && (
-                          <span className="text-xs text-muted-foreground line-through">{currencySymbol}{b.individual_total.toLocaleString()}</span>
-                        )}
+                      <p className="mt-1 text-xs text-muted-foreground">{bundleModuleNames.length} services</p>
+                      <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+                        <span className="text-base font-bold tabular-nums text-foreground">
+                          {b.bundle_price ? `${currencySymbol}${b.bundle_price.toLocaleString()}` : 
+                            [bFixed > 0 && `${currencySymbol}${bFixed.toLocaleString()}`, bMonthly > 0 && `${currencySymbol}${bMonthly.toLocaleString()}/mo`].filter(Boolean).join(' + ')}
+                        </span>
                         {b.savings_amount > 0 && (
                           <span className="rounded-full bg-status-success/15 px-2 py-0.5 text-[10px] font-medium text-status-success">
                             Save {currencySymbol}{b.savings_amount.toLocaleString()}
@@ -796,34 +979,38 @@ export default function ProposalNew() {
             </div>
           )}
 
-          {/* Individual services */}
-          <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            {bundles.length > 0 ? 'Add Individual Services' : 'Select Services'}
-          </p>
+          {/* Individual services — spec items 3, 9 */}
+          <div className="flex items-center justify-between mb-3">
+            <p className="label-overline">
+              {bundles.length > 0 ? 'Select Services' : 'Select Services'}
+            </p>
+            <span className="text-[11px] text-muted-foreground">{modules.length} available</span>
+          </div>
           <div className="space-y-2">
             {groupedModules.map((group: any) => {
               const isOpen = expandedGroups[group.id] !== false;
               const selectedInGroup = group.modules.filter((m: any) => selectedModuleIds.has(m.id)).length;
               return (
-                <div key={group.id} className="rounded-lg border border-border overflow-hidden">
+                <div key={group.id} className="rounded-xl border border-parchment overflow-hidden">
                   <button
                     onClick={() => toggleGroup(group.id)}
-                    className="flex w-full items-center justify-between px-4 py-2.5 bg-muted/30 hover:bg-muted/50 transition-colors"
+                    className="flex w-full items-center justify-between px-4 py-2.5 border-b border-parchment hover:bg-muted/30 transition-colors"
                   >
-                    <span className="text-xs font-semibold text-foreground">{group.name}</span>
+                    <span className="text-[14px] font-semibold text-foreground">{group.name}</span>
                     <div className="flex items-center gap-2">
                       {selectedInGroup > 0 && (
-                        <span className="rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-medium text-brand">{selectedInGroup}</span>
+                        <span className="rounded-full bg-status-success/10 px-2 py-0.5 text-[11px] font-medium text-status-success">{selectedInGroup}</span>
                       )}
-                      {isOpen ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
+                      <span className="rounded-full bg-parchment-soft px-2 py-0.5 text-[11px] font-medium text-muted-foreground">{group.modules.length}</span>
+                      {isOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                     </div>
                   </button>
                   {isOpen && (
-                    <div className="divide-y divide-border">
+                    <div className="divide-y divide-parchment">
                       {group.modules.map((mod: any) => {
                         const isSelected = selectedModuleIds.has(mod.id);
+                        const isBundled = bundleModuleIdSet.has(mod.id);
                         const price = getModulePrice(mod);
-                        const defaultPrice = getModuleDefaultPrice(mod);
                         const isOverridden = priceOverrides[mod.id] !== undefined;
                         return (
                           <div
@@ -831,24 +1018,29 @@ export default function ProposalNew() {
                             onClick={() => toggleModule(mod.id)}
                             className={cn(
                               'group flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors',
-                              isSelected ? 'bg-accent/50' : 'hover:bg-muted/30'
+                              isSelected ? 'bg-ivory' : 'hover:bg-muted/30'
                             )}
                           >
                             <div className={cn(
-                              'flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-colors',
-                              isSelected ? 'border-brand bg-brand' : 'border-muted-foreground/30'
+                              'flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors',
+                              isSelected ? 'border-accent-foreground bg-accent-foreground' : 'border-muted-foreground/30'
                             )}>
                               {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm text-foreground">{mod.name}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-[14px] text-foreground">{mod.name}</p>
+                                {isBundled && isSelected && (
+                                  <span className="rounded px-1 py-0.5 text-[9px] font-medium bg-foreground/5 text-muted-foreground">BUNDLED</span>
+                                )}
+                              </div>
                               {mod.short_description && (
-                                <p className="hidden text-xs text-muted-foreground group-hover:block">{mod.short_description}</p>
+                                <p className="text-[12px] text-muted-foreground mt-0.5">{mod.short_description}</p>
                               )}
                             </div>
                             <span className={cn(
-                              'rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider',
-                              mod.pricing_model === 'fixed' ? 'bg-status-info/10 text-status-info' :
+                              'rounded px-1.5 py-0.5 text-[10px] font-medium uppercase',
+                              mod.pricing_model === 'fixed' ? 'bg-parchment-soft text-muted-foreground' :
                               mod.pricing_model === 'monthly' ? 'bg-status-success/10 text-status-success' :
                               'bg-status-warning/10 text-status-warning'
                             )}>
@@ -884,22 +1076,26 @@ export default function ProposalNew() {
           {selectedModuleIds.size > 0 && (
             <div className="mt-4 rounded-lg bg-muted/50 px-4 py-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">{selectedModuleIds.size} service{selectedModuleIds.size !== 1 ? 's' : ''} selected</span>
-                <div className="text-right">
-                  <span className="text-sm font-bold tabular-nums text-foreground">
-                    {totalFixed > 0 && `${currencySymbol}${totalFixed.toLocaleString()}`}
-                    {totalFixed > 0 && totalMonthly > 0 && ' + '}
-                    {totalMonthly > 0 && `${currencySymbol}${totalMonthly.toLocaleString()}/mo`}
-                    {totalFixed === 0 && totalMonthly === 0 && totalHourly > 0 && `${currencySymbol}${totalHourly.toLocaleString()}/hr`}
-                  </span>
+                <span className="text-xs text-muted-foreground">
+                  {selectedBundle
+                    ? `${selectedBundle.name}${addonCount > 0 ? ` + ${addonCount} add-on${addonCount !== 1 ? 's' : ''}` : ''}`
+                    : `${selectedModuleIds.size} service${selectedModuleIds.size !== 1 ? 's' : ''} selected`}
+                </span>
+                <div className="flex items-center gap-2">
+                  {bundleSavings > 0 && (
+                    <span className="rounded-full bg-status-success/15 px-2 py-0.5 text-[10px] font-medium text-status-success">
+                      Save {currencySymbol}{bundleSavings.toLocaleString()}
+                    </span>
+                  )}
+                  <span className="text-sm font-bold tabular-nums text-foreground">{totalStr}</span>
                 </div>
               </div>
             </div>
           )}
         </section>
 
-        {/* Zone 3: Timeline */}
-        <section className="rounded-xl border border-border bg-card overflow-hidden">
+        {/* Zone 3: Timeline — spec item 7 */}
+        <section className="rounded-xl border border-parchment bg-card overflow-hidden shadow-card">
           <button
             onClick={() => setShowTimeline(!showTimeline)}
             className="flex w-full items-center justify-between px-6 py-4 hover:bg-muted/30 transition-colors"
@@ -908,9 +1104,10 @@ export default function ProposalNew() {
               <CalendarDays className="h-4 w-4 text-muted-foreground" />
               <div className="text-left">
                 <span className="text-sm font-semibold text-foreground">When does this start?</span>
-                {phaseSummary && !showTimeline && (
+                {hasServices && !showTimeline && (
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    ~{phaseSummary.totalWeeks} weeks: {phaseSummary.names}
+                    {estimatedDuration && `Estimated duration: ${estimatedDuration}`}
+                    {phaseSummary && ` · ${phaseSummary.names}`}
                   </p>
                 )}
               </div>
@@ -921,24 +1118,33 @@ export default function ProposalNew() {
             </div>
           </button>
           {showTimeline && (
-            <div className="border-t border-border px-6 py-4 space-y-4">
+            <div className="border-t border-parchment px-6 py-4 space-y-4">
               <div>
                 <label className="mb-1.5 block text-xs text-muted-foreground">Project Start Date</label>
                 <input
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
+                  className="rounded-lg border border-parchment bg-background px-3 py-2 text-sm text-foreground focus:border-foreground/30 focus:outline-none"
                 />
               </div>
+
+              {/* Estimated duration */}
+              {hasServices && estimatedDuration && (
+                <div className="rounded-lg bg-muted/30 px-4 py-3">
+                  <p className="text-xs text-muted-foreground">Estimated duration: <span className="font-medium text-foreground">{estimatedDuration}</span></p>
+                  {phaseSummary && <p className="text-xs text-muted-foreground mt-1">{phaseSummary.names}</p>}
+                </div>
+              )}
+
               {/* Phase breakdown */}
               {timelinePhases.length > 0 && (
                 <div>
-                  <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">Project Phases</p>
+                  <p className="mb-2 label-overline">Project Phases</p>
                   <div className="space-y-2">
                     {timelinePhases.map((phase: any, i: number) => (
                       <div key={phase.id} className="flex items-center gap-3 rounded-lg bg-muted/30 px-3 py-2">
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand/15 text-[10px] font-bold text-brand">{i + 1}</span>
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground/10 text-[10px] font-bold text-foreground">{i + 1}</span>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-medium text-foreground">{phase.name}</p>
                           {phase.description && <p className="text-[10px] text-muted-foreground truncate">{phase.description}</p>}
@@ -954,29 +1160,32 @@ export default function ProposalNew() {
         </section>
       </div>
 
-      {/* Sticky bottom action bar */}
-      {canBuild && (
-        <div className="sticky bottom-0 border-t border-border bg-card/95 backdrop-blur px-6 py-4">
-          <div className="mx-auto flex max-w-[720px] items-center justify-between">
-            <div>
-              <p className="text-xs text-muted-foreground">{selectedModuleIds.size} services for {selectedClient?.company_name || newClientName}</p>
-              <p className="text-sm font-bold tabular-nums text-foreground">
-                {totalFixed > 0 && `${currencySymbol}${totalFixed.toLocaleString()}`}
-                {totalFixed > 0 && totalMonthly > 0 && ' + '}
-                {totalMonthly > 0 && `${currencySymbol}${totalMonthly.toLocaleString()}/mo`}
-              </p>
-            </div>
-            <button
-              onClick={handleBuild}
-              disabled={saving}
-              className="flex items-center gap-2 rounded-lg bg-brand px-6 py-2.5 text-sm font-medium text-primary-foreground hover:bg-brand-hover disabled:opacity-50"
-            >
-              <Sparkles className="h-4 w-4" />
-              {saving ? 'Building...' : 'Build Proposal'}
-            </button>
+      {/* Sticky bottom action bar — spec item 5 */}
+      <div className="sticky bottom-0 border-t border-parchment bg-card/95 backdrop-blur px-6 py-4">
+        <div className="mx-auto flex max-w-[720px] items-center justify-between">
+          <div>
+            <p className="text-xs text-muted-foreground">{footerLabel}</p>
+            {hasServices && (
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-bold tabular-nums text-foreground">{totalStr}</p>
+                {bundleSavings > 0 && (
+                  <span className="rounded-full bg-status-success/15 px-2 py-0.5 text-[10px] font-medium text-status-success">
+                    Save {currencySymbol}{bundleSavings.toLocaleString()}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
+          <button
+            onClick={handleBuild}
+            disabled={!canBuild || saving}
+            className="flex items-center gap-2 rounded-[10px] bg-primary px-7 py-3 text-[14px] font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Sparkles className="h-4 w-4" />
+            {saving ? 'Building...' : 'Build Proposal'}
+          </button>
         </div>
-      )}
+      </div>
 
       {/* Signup Gate Modal for guest users */}
       {showSignupGate && (
