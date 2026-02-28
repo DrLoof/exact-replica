@@ -60,7 +60,7 @@ export function Sidebar() {
           <div className="flex items-center gap-2.5">
             {agency.logo_url ? (
               <div
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] overflow-hidden"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] overflow-hidden"
                 style={{ backgroundColor: '#BE8E5E' }}
               >
                 <img src={agency.logo_url} alt={agency.name} className="h-5 w-5 object-contain" />
