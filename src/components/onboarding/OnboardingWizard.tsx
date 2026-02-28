@@ -8,13 +8,15 @@ import { getDefaultModulesForGroup } from '@/lib/defaultModules';
 import { defaultBundles, findDefaultModule, calculateBundlePricing } from '@/lib/defaultBundles';
 import { ScanScreen } from './ScanScreen';
 import { ReviewScreen } from './ReviewScreen';
+import { SignupGate } from './SignupGate';
 
 export function OnboardingWizard() {
   const navigate = useNavigate();
-  const { agency, userProfile } = useAuth();
+  const { agency, userProfile, user } = useAuth();
   const [screen, setScreen] = useState<'scan' | 'review'>('scan');
   const [saving, setSaving] = useState(false);
   const [scrapeData, setScrapeData] = useState<any>(null);
+  const [showSignupGate, setShowSignupGate] = useState(false);
 
   // Selected services (module keys that are toggled on)
   const [selectedModuleKeys, setSelectedModuleKeys] = useState<Set<string>>(new Set());
@@ -41,7 +43,7 @@ export function OnboardingWizard() {
     });
   }, []);
 
-  // Resume if already past scan
+  // Resume if already past scan (authenticated user with existing agency)
   useEffect(() => {
     if (agency?.scrape_status === 'complete' && agency?.scraped_data) {
       handleScrapeComplete(agency.scraped_data);
@@ -92,7 +94,6 @@ export function OnboardingWizard() {
         icon: 'Target',
         source: c.source || 'scraped',
       }));
-      // Fill to 6 with defaults
       const combined = [...scrapedCards];
       let idx = 0;
       while (combined.length < 6 && idx < defaultDiffs.length) {
@@ -112,7 +113,6 @@ export function OnboardingWizard() {
   };
 
   const handleManualSetup = () => {
-    // Go to review with empty data
     setAgencyIdentity({
       name: agency?.name || '',
       email: agency?.email || '',
@@ -131,14 +131,65 @@ export function OnboardingWizard() {
     setScreen('review');
   };
 
+  const handleFinishAttempt = () => {
+    // If user is not authenticated, show signup gate
+    if (!user) {
+      setShowSignupGate(true);
+      return;
+    }
+    // If authenticated, save directly
+    handleFinish();
+  };
+
+  const handlePostSignupSave = async () => {
+    setShowSignupGate(false);
+    // Wait for auth state to propagate and agency to be created
+    // The signup trigger should create the user + agency
+    let retries = 0;
+    const waitForAgency = async (): Promise<any> => {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser) return null;
+      const { data: profile } = await supabase
+        .from('users')
+        .select('agency_id')
+        .eq('id', currentUser.id)
+        .single();
+      if (profile?.agency_id) {
+        const { data: ag } = await supabase
+          .from('agencies')
+          .select('*')
+          .eq('id', profile.agency_id)
+          .single();
+        return ag;
+      }
+      if (retries < 10) {
+        retries++;
+        await new Promise(r => setTimeout(r, 500));
+        return waitForAgency();
+      }
+      return null;
+    };
+
+    const freshAgency = await waitForAgency();
+    if (!freshAgency) {
+      toast.error('Could not set up your agency. Please try again.');
+      return;
+    }
+    await handleFinishWithAgency(freshAgency);
+  };
+
   const handleFinish = async () => {
     if (!agency) return;
+    await handleFinishWithAgency(agency);
+  };
+
+  const handleFinishWithAgency = async (targetAgency: any) => {
     setSaving(true);
 
     try {
       // 1. Save agency info
       await supabase.from('agencies').update({
-        name: agencyIdentity.name || agency.name,
+        name: agencyIdentity.name || targetAgency.name,
         email: agencyIdentity.email || null,
         phone: agencyIdentity.phone || null,
         logo_url: agencyIdentity.logo_url || null,
@@ -149,17 +200,15 @@ export function OnboardingWizard() {
         scraped_data: scrapeData || null,
         scrape_status: scrapeData ? 'complete' : 'manual',
         scraped_at: scrapeData ? new Date().toISOString() : null,
-        // Auto-detect currency or default
-        currency: scrapeData?.detected_currency?.code || agency.currency || 'USD',
-        currency_symbol: scrapeData?.detected_currency?.symbol || agency.currency_symbol || '$',
-        // Defaults
+        currency: scrapeData?.detected_currency?.code || targetAgency.currency || 'USD',
+        currency_symbol: scrapeData?.detected_currency?.symbol || targetAgency.currency_symbol || '$',
         default_validity_days: 30,
         default_revision_rounds: 2,
         default_notice_period: '30 days',
-        proposal_prefix: (agencyIdentity.name || agency.name || 'AGY').replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase(),
+        proposal_prefix: (agencyIdentity.name || targetAgency.name || 'AGY').replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase(),
         onboarding_complete: true,
         onboarding_step: 7,
-      } as any).eq('id', agency.id);
+      } as any).eq('id', targetAgency.id);
 
       // 2. Save selected service modules
       const matchedGroupNames = [...new Set(
@@ -172,7 +221,7 @@ export function OnboardingWizard() {
         return getDefaultModulesForGroup(groupName)
           .filter((_, i) => selectedModuleKeys.has(`${groupName}-${i}`))
           .map((mod, i) => ({
-            agency_id: agency.id,
+            agency_id: targetAgency.id,
             group_id: groupId,
             name: mod.name,
             description: mod.description || null,
@@ -194,14 +243,14 @@ export function OnboardingWizard() {
       });
 
       if (modulesToInsert.length > 0) {
-        await supabase.from('service_modules').delete().eq('agency_id', agency.id);
+        await supabase.from('service_modules').delete().eq('agency_id', targetAgency.id);
         await supabase.from('service_modules').insert(modulesToInsert);
       }
 
       // 3. Save testimonials
       if (testimonials.length > 0) {
         const testimonialsToInsert = testimonials.map(t => ({
-          agency_id: agency.id,
+          agency_id: targetAgency.id,
           quote: t.quote,
           client_name: t.client_name || 'Client',
           client_title: t.client_title || null,
@@ -215,7 +264,7 @@ export function OnboardingWizard() {
 
       // 4. Save differentiators
       const diffsToInsert = differentiators.map((d, i) => ({
-        agency_id: agency.id,
+        agency_id: targetAgency.id,
         title: d.title,
         description: d.description,
         stat_value: d.stat_value,
@@ -224,11 +273,11 @@ export function OnboardingWizard() {
         display_order: i + 1,
         source: d.source || 'generated',
       }));
-      await supabase.from('differentiators').delete().eq('agency_id', agency.id);
+      await supabase.from('differentiators').delete().eq('agency_id', targetAgency.id);
       await supabase.from('differentiators').insert(diffsToInsert as any);
 
       // 5. Save default terms
-      const { data: existingTerms } = await supabase.from('terms_clauses').select('id').eq('agency_id', agency.id);
+      const { data: existingTerms } = await supabase.from('terms_clauses').select('id').eq('agency_id', targetAgency.id);
       if (!existingTerms?.length) {
         const defaultTerms = [
           { title: 'Payment Terms', content: 'All fees are due according to the payment schedule outlined in the Investment section of this proposal. Invoices will be issued at each milestone and are payable within 14 days of receipt.', display_order: 1 },
@@ -239,39 +288,38 @@ export function OnboardingWizard() {
           { title: 'Termination', content: 'Either party may terminate this agreement with written notice as specified in the notice period above.', display_order: 6 },
           { title: 'Liability', content: 'The agency\'s total liability under this agreement shall not exceed the total fees paid by the client for the services.', display_order: 7 },
           { title: 'Governing Law', content: 'This agreement shall be governed by and construed in accordance with the laws of the jurisdiction where the agency is registered.', display_order: 8 },
-        ].map(t => ({ ...t, agency_id: agency.id, is_default: true }));
+        ].map(t => ({ ...t, agency_id: targetAgency.id, is_default: true }));
         await supabase.from('terms_clauses').insert(defaultTerms);
       }
 
       // 6. Save default payment templates
-      const { data: existingPT } = await supabase.from('payment_templates').select('id').eq('agency_id', agency.id);
+      const { data: existingPT } = await supabase.from('payment_templates').select('id').eq('agency_id', targetAgency.id);
       if (!existingPT?.length) {
         await supabase.from('payment_templates').insert([
-          { agency_id: agency.id, name: 'Equal Thirds', milestones: [{ label: 'Start', percentage: 33 }, { label: 'Midpoint', percentage: 33 }, { label: 'Delivery', percentage: 34 }], is_default: true },
-          { agency_id: agency.id, name: '50/50', milestones: [{ label: 'Upfront', percentage: 50 }, { label: 'Completion', percentage: 50 }], is_default: false },
-          { agency_id: agency.id, name: 'Quarterly', milestones: [{ label: 'Q1', percentage: 25 }, { label: 'Q2', percentage: 25 }, { label: 'Q3', percentage: 25 }, { label: 'Q4', percentage: 25 }], is_default: false },
+          { agency_id: targetAgency.id, name: 'Equal Thirds', milestones: [{ label: 'Start', percentage: 33 }, { label: 'Midpoint', percentage: 33 }, { label: 'Delivery', percentage: 34 }], is_default: true },
+          { agency_id: targetAgency.id, name: '50/50', milestones: [{ label: 'Upfront', percentage: 50 }, { label: 'Completion', percentage: 50 }], is_default: false },
+          { agency_id: targetAgency.id, name: 'Quarterly', milestones: [{ label: 'Q1', percentage: 25 }, { label: 'Q2', percentage: 25 }, { label: 'Q3', percentage: 25 }, { label: 'Q4', percentage: 25 }], is_default: false },
         ]);
       }
 
       // 7. Save default timeline phases
-      const { data: existingPhases } = await supabase.from('timeline_phases').select('id').eq('agency_id', agency.id);
+      const { data: existingPhases } = await supabase.from('timeline_phases').select('id').eq('agency_id', targetAgency.id);
       if (!existingPhases?.length) {
         await supabase.from('timeline_phases').insert([
-          { agency_id: agency.id, name: 'Discovery & Research', default_duration: '1-2 weeks', description: 'Understanding your business, audience, and goals.', display_order: 1 },
-          { agency_id: agency.id, name: 'Strategy & Architecture', default_duration: '2-3 weeks', description: 'Defining the roadmap and project architecture.', display_order: 2 },
-          { agency_id: agency.id, name: 'Creative Development', default_duration: '3-4 weeks', description: 'Design concepts, content creation, and iteration.', display_order: 3 },
-          { agency_id: agency.id, name: 'Build & Produce', default_duration: '2-3 weeks', description: 'Development, production, and quality assurance.', display_order: 4 },
-          { agency_id: agency.id, name: 'Launch & Optimize', default_duration: '1-2 weeks', description: 'Go live, monitor, and optimize performance.', display_order: 5 },
+          { agency_id: targetAgency.id, name: 'Discovery & Research', default_duration: '1-2 weeks', description: 'Understanding your business, audience, and goals.', display_order: 1 },
+          { agency_id: targetAgency.id, name: 'Strategy & Architecture', default_duration: '2-3 weeks', description: 'Defining the roadmap and project architecture.', display_order: 2 },
+          { agency_id: targetAgency.id, name: 'Creative Development', default_duration: '3-4 weeks', description: 'Design concepts, content creation, and iteration.', display_order: 3 },
+          { agency_id: targetAgency.id, name: 'Build & Produce', default_duration: '2-3 weeks', description: 'Development, production, and quality assurance.', display_order: 4 },
+          { agency_id: targetAgency.id, name: 'Launch & Optimize', default_duration: '1-2 weeks', description: 'Go live, monitor, and optimize performance.', display_order: 5 },
         ]);
       }
 
       // 8. Save selected bundles
       if (addedBundles.size > 0) {
-        // Re-fetch inserted modules to get IDs
         const { data: insertedModules } = await supabase
           .from('service_modules')
           .select('id, name, price_fixed, price_monthly')
-          .eq('agency_id', agency.id)
+          .eq('agency_id', targetAgency.id)
           .eq('is_active', true);
 
         for (const bundleName of addedBundles) {
@@ -279,10 +327,10 @@ export function OnboardingWizard() {
           if (!template) continue;
 
           const pricing = calculateBundlePricing(template.serviceNames, template.discountPercentage, insertedModules || []);
-          const cs = agency.currency_symbol || '$';
+          const cs = targetAgency.currency_symbol || '$';
 
           const { data: newBundle } = await supabase.from('bundles').insert({
-            agency_id: agency.id,
+            agency_id: targetAgency.id,
             name: template.name,
             tagline: template.tagline,
             description: template.description,
@@ -318,6 +366,10 @@ export function OnboardingWizard() {
   };
 
   const handleSkip = async () => {
+    if (!user) {
+      navigate('/');
+      return;
+    }
     if (!agency) return;
     await supabase.from('agencies').update({
       onboarding_complete: true,
@@ -330,13 +382,13 @@ export function OnboardingWizard() {
       {/* Top bar */}
       <div className="flex items-center justify-between border-b border-border px-6 py-4">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand">
-            <img src={propopadLogo} alt="Propopad" className="h-4 w-4" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink">
+            <img src={propopadLogo} alt="Propopad" className="h-4 w-4 invert" />
           </div>
           <span className="font-display text-base font-bold text-foreground">Propopad</span>
         </div>
         <button onClick={handleSkip} className="text-xs text-muted-foreground hover:text-foreground">
-          Skip setup →
+          {user ? 'Skip setup →' : '← Back to home'}
         </button>
       </div>
 
@@ -361,13 +413,21 @@ export function OnboardingWizard() {
             diffIntro={diffIntro}
             onDiffIntroChange={setDiffIntro}
             groupNameMap={groupNameMap}
-            onFinish={handleFinish}
+            onFinish={handleFinishAttempt}
             saving={saving}
             addedBundles={addedBundles}
             onAddBundle={(name) => setAddedBundles(prev => new Set([...prev, name]))}
           />
         )}
       </div>
+
+      {/* Signup Gate Modal */}
+      {showSignupGate && (
+        <SignupGate
+          onAuthenticated={handlePostSignupSave}
+          onCancel={() => setShowSignupGate(false)}
+        />
+      )}
     </div>
   );
 }
