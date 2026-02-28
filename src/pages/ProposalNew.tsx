@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { SignupGate } from '@/components/onboarding/SignupGate';
 import { defaultModulesByGroup, type DefaultModule } from '@/lib/defaultModules';
-import { defaultBundles, calculateBundlePricing } from '@/lib/defaultBundles';
+
 
 function InlinePrice({ value, onChange, currencySymbol, suffix, isOverridden, onReset }: {
   value: number;
