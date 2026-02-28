@@ -81,6 +81,11 @@ const sectionNames = [
   'Investment', 'Why Us', 'Testimonials', 'Terms', 'Signature',
 ];
 
+function getDefaultAboutText(yearsExperience?: number | null): string {
+  const yearsPart = yearsExperience ? `Over the past ${yearsExperience} years` : 'Over the past years';
+  return `${yearsPart}, we've helped ambitious brands transform their market position through the intersection of strategy, design, and technology. We're not the biggest agency — and that's by design. Our deliberately lean structure means faster decisions, fewer layers, and more senior attention on every engagement.`;
+}
+
 export default function ProposalEditor() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();

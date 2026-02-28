@@ -88,7 +88,9 @@ export default function SettingsAgency() {
             <Field label="Email" name="email" type="email" />
             <Field label="Phone" name="phone" />
             <Field label="Tagline" name="tagline" span={2} />
-            <Field label="About" name="about_text" type="textarea" span={2} />
+            <Field label="Years of Experience" name="years_experience" />
+            <div /> {/* spacer */}
+            <Field label="About / Why Us" name="about_text" type="textarea" span={2} />
           </div>
         </div>
 
