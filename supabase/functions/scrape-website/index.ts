@@ -166,7 +166,14 @@ serve(async (req) => {
     }
 
     // Step 3: Detect internal pages and fetch them
-    const pagesToFetch = ['/about', '/about-us', '/who-we-are', '/services', '/what-we-do', '/testimonials', '/reviews', '/clients', '/work', '/case-studies', '/contact'];
+    // Include common paths in multiple languages (EN, SE, DE, etc.)
+    const pagesToFetch = [
+      '/about', '/about-us', '/who-we-are', '/om-oss', '/om',
+      '/services', '/what-we-do', '/tjanster',
+      '/testimonials', '/reviews', '/clients', '/kunder', '/referenser',
+      '/work', '/case-studies', '/cases', '/kundcase', '/portfolio',
+      '/contact', '/kontakt', '/kontakta-oss',
+    ];
     const navLinks = [...homepageHtml.matchAll(/<a[^>]*href=["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi)]
       .map(m => m[1])
       .filter(href => {
@@ -182,9 +189,11 @@ serve(async (req) => {
 
     const allPaths = [...new Set([...pagesToFetch, ...navLinks.slice(0, 10)])];
     
-    // Fetch additional pages in parallel (limit to 6 for speed)
+    // Fetch additional pages in parallel (limit to 8 for speed)
     const additionalContent: string[] = [];
-    const fetchPromises = allPaths.slice(0, 6).map(async (path) => {
+    const caseStudyLinks: string[] = [];
+    
+    const fetchPromises = allPaths.slice(0, 8).map(async (path) => {
       try {
         const pageUrl = urlObj.origin + path;
         const resp = await fetch(pageUrl, {
@@ -193,6 +202,19 @@ serve(async (req) => {
         });
         if (resp.ok) {
           const text = await resp.text();
+          
+          // Check if this is a case study / portfolio listing page — extract subpage links
+          const isCasePage = /\/(kundcase|case-studies|cases|work|portfolio|testimonials|reviews|referenser)\/?$/i.test(path);
+          if (isCasePage) {
+            const subLinks = [...text.matchAll(/<a[^>]*href=["']([^"'#]+)["'][^>]*>/gi)]
+              .map(m => {
+                try { return new URL(m[1], urlObj.origin).pathname; } catch { return null; }
+              })
+              .filter(Boolean)
+              .filter(p => p!.startsWith(path) && p !== path && p!.length > path.length + 1) as string[];
+            caseStudyLinks.push(...subLinks);
+          }
+          
           // Strip HTML, keep text content (truncate per page)
           const cleaned = text
             .replace(/<script[\s\S]*?<\/script>/gi, '')
@@ -211,6 +233,37 @@ serve(async (req) => {
       } catch (_) {}
     });
     await Promise.all(fetchPromises);
+
+    // Step 3b: Fetch case study subpages for testimonials (up to 6)
+    const uniqueCaseLinks = [...new Set(caseStudyLinks)].slice(0, 6);
+    if (uniqueCaseLinks.length > 0) {
+      const casePromises = uniqueCaseLinks.map(async (path) => {
+        try {
+          const pageUrl = urlObj.origin + path;
+          const resp = await fetch(pageUrl, {
+            headers: { "User-Agent": "Mozilla/5.0 (compatible; Propopad/1.0)" },
+            signal: AbortSignal.timeout(4000),
+          });
+          if (resp.ok) {
+            const text = await resp.text();
+            const cleaned = text
+              .replace(/<script[\s\S]*?<\/script>/gi, '')
+              .replace(/<style[\s\S]*?<\/style>/gi, '')
+              .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+              .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+              .replace(/<header[\s\S]*?<\/header>/gi, '')
+              .replace(/<[^>]+>/g, ' ')
+              .replace(/\s+/g, ' ')
+              .trim()
+              .slice(0, 3000);
+            if (cleaned.length > 50) {
+              additionalContent.push(`[Case study: ${path}]\n${cleaned}`);
+            }
+          }
+        } catch (_) {}
+      });
+      await Promise.all(casePromises);
+    }
 
     // Clean homepage text too
     const homepageText = homepageHtml
@@ -262,14 +315,14 @@ Return this exact JSON structure:
     }
   ],
   "differentiators": {
-    "intro": "One paragraph about why clients should choose this agency",
+    "intro": "One paragraph about why clients should choose this agency, based on what the website actually says",
     "cards": [
       {
         "title": "short title",
         "description": "one sentence",
-        "stat_value": "87% or 50+ etc",
-        "stat_label": "Client Retention etc",
-        "source": "scraped or generated"
+        "stat_value": "value found on the site or empty string if not found",
+        "stat_label": "label found on the site or empty string",
+        "source": "scraped"
       }
     ]
   }
@@ -277,14 +330,14 @@ Return this exact JSON structure:
 
 Rules:
 - For services_detected, use these exact category names when they match: "Brand & Creative", "Website & Digital", "Content & Copywriting", "SEO & Organic Growth", "Paid Advertising", "Social Media", "Email Marketing", "Analytics & Data", "Marketing Strategy"
-- Extract ALL testimonials you can find (quotes from clients)
-- For differentiators, use real stats found on the site (mark as "scraped"). Generate remaining to fill 6 total (mark as "generated")
-- If data is not found, use null, don't invent testimonials
+- Extract ALL testimonials/client quotes you can find across all pages, including case study pages. Look for direct quotes from clients (text in quotation marks or blockquotes attributed to a person).
+- For differentiators, ONLY use real data found on the website (mark as "scraped"). Do NOT invent or generate fake stats, KPI numbers, or differentiators. If fewer than 3 are found, that's fine — return only what you found.
+- If data is not found, use null or empty string, don't invent testimonials or stats
 - Return ONLY the JSON object, no other text`
               },
               {
                 role: "user",
-                content: `Parse this agency website content:\n\n${allContent.slice(0, 12000)}`
+                content: `Parse this agency website content:\n\n${allContent.slice(0, 15000)}`
               }
             ],
             temperature: 0.3,
@@ -324,12 +377,12 @@ Rules:
         "Brand & Creative": ["branding", "brand identity", "logo design", "visual identity", "creative"],
         "Website & Digital": ["web design", "website", "web development", "ui/ux", "digital"],
         "Content & Copywriting": ["content", "copywriting", "blog", "editorial", "content marketing"],
-        "SEO & Organic Growth": ["seo", "search engine", "organic", "search optimization"],
-        "Paid Advertising": ["ppc", "google ads", "paid media", "advertising", "paid search", "paid social"],
-        "Social Media": ["social media", "instagram", "tiktok", "social management"],
+        "SEO & Organic Growth": ["seo", "search engine", "organic", "search optimization", "sökmotoroptimering"],
+        "Paid Advertising": ["ppc", "google ads", "paid media", "advertising", "paid search", "paid social", "annonsering", "ads"],
+        "Social Media": ["social media", "instagram", "tiktok", "social management", "sociala medier"],
         "Email Marketing": ["email marketing", "newsletter", "email automation"],
         "Analytics & Data": ["analytics", "data", "conversion", "tracking", "reporting"],
-        "Marketing Strategy": ["strategy", "consulting", "marketing strategy", "growth strategy"],
+        "Marketing Strategy": ["strategy", "consulting", "marketing strategy", "growth strategy", "tillväxt"],
       };
       const detected: string[] = [];
       for (const [group, keywords] of Object.entries(serviceKeywords)) {
