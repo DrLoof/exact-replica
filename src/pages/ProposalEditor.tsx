@@ -26,6 +26,7 @@ import {
   HighlightPanel,
   EditableText,
 } from '@/components/proposal-template';
+import { AIContentNotice } from '@/components/AIContentNotice';
 
 interface ProposalData {
   id: string;
