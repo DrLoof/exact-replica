@@ -31,6 +31,8 @@ export function ServiceCard({
   deliverables,
   isAddon = false,
   delay = 0,
+  onNameEdit,
+  onDescriptionEdit,
 }: ServiceCardProps) {
   const brand = useBrand();
   const suffix = pricingModel ? MODEL_LABELS[pricingModel] || "" : "";
