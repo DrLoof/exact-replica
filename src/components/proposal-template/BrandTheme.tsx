@@ -16,7 +16,7 @@ export interface BrandTheme {
 const defaultBrand: BrandTheme = {
   agencyName: "AGENCY",
   agencyFullName: "Your Agency",
-  primaryColor: "#ffbf68",
+  primaryColor: "#fc956e",
   darkColor: "#0A0A0A",
   logoUrl: null,
   logoInitial: "A",
