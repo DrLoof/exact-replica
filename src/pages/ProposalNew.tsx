@@ -630,7 +630,7 @@ export default function ProposalNew() {
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder="Search existing clients or type a new company name..."
+                  placeholder={isGuestMode ? "Type the company name for your first proposal..." : "Search existing clients or type a new company name..."}
                   value={clientSearch}
                   onChange={(e) => { setClientSearch(e.target.value); setNewClientName(e.target.value); setShowClientDropdown(true); }}
                   onFocus={() => setShowClientDropdown(true)}
