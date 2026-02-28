@@ -355,14 +355,13 @@ export default function ProposalEditor() {
                   <PageWrapper pageNumber="02">
                     <SectionHeader number="01" title="Executive Summary" subtitle="Our understanding and approach" />
                     <TextContent dropCap>
-                      <p
-                        className="cursor-text min-h-[80px] outline-none"
-                        contentEditable
-                        suppressContentEditableWarning
-                        onBlur={(e) => updateField('executive_summary', e.currentTarget.textContent)}
-                      >
-                        {proposal.executive_summary || 'Click to add an executive summary for this proposal. Describe the project goals, your approach, and expected outcomes.'}
-                      </p>
+                      <EditableText
+                        value={proposal.executive_summary || ''}
+                        placeholder="Click to add an executive summary for this proposal. Describe the project goals, your approach, and expected outcomes."
+                        onSave={(val) => updateField('executive_summary', val)}
+                        as="p"
+                        className="min-h-[80px]"
+                      />
                     </TextContent>
 
                     {/* Key highlights */}
