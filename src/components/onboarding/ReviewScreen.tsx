@@ -405,7 +405,7 @@ export function ReviewScreen({
                           }}
                           className="flex items-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90"
                         >
-                          {missingNames.length === 1 ? `Add bundle + ${missingNames[0]}` : 'Use this bundle'}
+                          {missingNames.length > 0 ? `Add bundle + ${missingNames.length} service${missingNames.length !== 1 ? 's' : ''}` : 'Use this bundle'}
                         </button>
                       )}
                     </div>
