@@ -9,6 +9,9 @@ interface TimelineStepProps {
   description?: string;
   isLast?: boolean;
   delay?: number;
+  onNameEdit?: (value: string) => void;
+  onDurationEdit?: (value: string) => void;
+  onDescriptionEdit?: (value: string) => void;
 }
 
 export function TimelineStep({
@@ -18,6 +21,9 @@ export function TimelineStep({
   description,
   isLast = false,
   delay = 0,
+  onNameEdit,
+  onDurationEdit,
+  onDescriptionEdit,
 }: TimelineStepProps) {
   const brand = useBrand();
 
@@ -51,34 +57,43 @@ export function TimelineStep({
       <div className={`pb-8 ${isLast ? "" : ""}`}>
         <div className="flex items-center gap-3 mb-2">
           <h3
-            className="tracking-tight"
+            className="tracking-tight outline-none"
             style={{ fontSize: "18px", fontWeight: 700, color: brand.darkColor }}
+            contentEditable={!!onNameEdit}
+            suppressContentEditableWarning
+            onBlur={(e) => onNameEdit?.(e.currentTarget.textContent || '')}
           >
             {name}
           </h3>
           <span
-            className="inline-block rounded-full px-3 py-0.5"
+            className="inline-block rounded-full px-3 py-0.5 outline-none"
             style={{
               fontSize: "12px",
               fontWeight: 600,
               backgroundColor: `${brand.primaryColor}15`,
               color: brand.primaryColor,
             }}
+            contentEditable={!!onDurationEdit}
+            suppressContentEditableWarning
+            onBlur={(e) => onDurationEdit?.(e.currentTarget.textContent || '')}
           >
             {duration}
           </span>
         </div>
-        {description && (
+        {(description || onDescriptionEdit) && (
           <p
-            className="text-[#888] max-w-md"
+            className="text-[#888] max-w-md outline-none"
             style={{
               fontSize: "14px",
               fontWeight: 400,
               lineHeight: 1.6,
               fontFamily: "'Inter', sans-serif",
             }}
+            contentEditable={!!onDescriptionEdit}
+            suppressContentEditableWarning
+            onBlur={(e) => onDescriptionEdit?.(e.currentTarget.textContent || '')}
           >
-            {description}
+            {description || 'Click to add a description...'}
           </p>
         )}
       </div>

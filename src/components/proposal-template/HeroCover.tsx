@@ -9,6 +9,8 @@ interface HeroCoverProps {
   date?: string;
   proposalNumber?: string;
   confidential?: boolean;
+  onTitleEdit?: (value: string) => void;
+  onSubtitleEdit?: (value: string) => void;
 }
 
 export function HeroCover({
@@ -18,6 +20,8 @@ export function HeroCover({
   date,
   proposalNumber,
   confidential = true,
+  onTitleEdit,
+  onSubtitleEdit,
 }: HeroCoverProps) {
   const brand = useBrand();
 
@@ -115,22 +119,28 @@ export function HeroCover({
             Proposal for
           </span>
           <h1
-            className="mb-4 tracking-tight"
+            className="mb-4 tracking-tight outline-none"
             style={{
               fontSize: "clamp(36px, 5vw, 64px)",
               fontWeight: 700,
               lineHeight: 1.05,
               color: brand.darkColor,
             }}
+            contentEditable={!!onTitleEdit}
+            suppressContentEditableWarning
+            onBlur={(e) => onTitleEdit?.(e.currentTarget.textContent || '')}
           >
             {proposalTitle}
           </h1>
-          {subtitle && (
+          {(subtitle || onSubtitleEdit) && (
             <p
-              className="text-[#666] max-w-lg mt-4"
+              className="text-[#666] max-w-lg mt-4 outline-none"
               style={{ fontSize: "18px", fontWeight: 300, lineHeight: 1.6 }}
+              contentEditable={!!onSubtitleEdit}
+              suppressContentEditableWarning
+              onBlur={(e) => onSubtitleEdit?.(e.currentTarget.textContent || '')}
             >
-              {subtitle}
+              {subtitle || 'Click to add a subtitle...'}
             </p>
           )}
         </motion.div>
