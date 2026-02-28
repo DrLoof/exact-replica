@@ -37,7 +37,6 @@ export function ScanScreen({ onScrapeComplete, onManualSetup }: ScanScreenProps)
     setProgress(5);
 
     try {
-      // Start with animated progress while waiting for the real scrape
       const progressInterval = setInterval(() => {
         setProgress(p => Math.min(p + 2, 75));
       }, 200);
@@ -54,31 +53,23 @@ export function ScanScreen({ onScrapeComplete, onManualSetup }: ScanScreenProps)
         return;
       }
 
-      // Animate through discovered items
       const details: Record<string, string> = {};
       const steps: string[] = [];
 
-      // Step 1: Name
-      if (result.name) {
-        details.name = result.name;
-      }
+      if (result.name) details.name = result.name;
       steps.push('name');
       setCompletedSteps([...steps]);
       setCurrentStep('logo');
       setProgress(20);
       await delay(200);
 
-      // Step 2: Logo
-      if (result.logo_url) {
-        details.logo = 'Found';
-      }
+      if (result.logo_url) details.logo = 'Found';
       steps.push('logo');
       setCompletedSteps([...steps]);
       setCurrentStep('colors');
       setProgress(35);
       await delay(200);
 
-      // Step 3: Colors
       if (result.brand_color || result.detected_colors?.length) {
         details.colors = result.brand_color || result.detected_colors?.[0];
       }
@@ -88,7 +79,6 @@ export function ScanScreen({ onScrapeComplete, onManualSetup }: ScanScreenProps)
       setProgress(50);
       await delay(200);
 
-      // Step 4: Contact
       if (result.email || result.phone) {
         details.contact = [result.email, result.phone].filter(Boolean).join(', ');
       }
@@ -98,7 +88,6 @@ export function ScanScreen({ onScrapeComplete, onManualSetup }: ScanScreenProps)
       setProgress(65);
       await delay(200);
 
-      // Step 5: Services
       const serviceCount = result.detected_services?.length || 0;
       details.services = `${serviceCount}`;
       steps.push('services');
@@ -107,7 +96,6 @@ export function ScanScreen({ onScrapeComplete, onManualSetup }: ScanScreenProps)
       setProgress(80);
       await delay(200);
 
-      // Step 6: Testimonials
       const testimonialCount = result.testimonials?.length || 0;
       details.testimonials = `${testimonialCount}`;
       steps.push('testimonials');
@@ -116,7 +104,6 @@ export function ScanScreen({ onScrapeComplete, onManualSetup }: ScanScreenProps)
       setProgress(90);
       await delay(300);
 
-      // Step 7: Profile generation
       steps.push('profile');
       setCompletedSteps([...steps]);
       setCurrentStep(null);
@@ -133,8 +120,12 @@ export function ScanScreen({ onScrapeComplete, onManualSetup }: ScanScreenProps)
 
   const getStepLabel = (step: typeof scanSteps[0]) => {
     const detail = stepDetails[step.key];
-    if (step.key === 'services' && detail) return `${detail} services identified`;
-    if (step.key === 'testimonials' && detail) return `${detail} testimonials found`;
+    if (step.key === 'services' && detail) {
+      return detail === '0' ? 'No services identified' : `${detail} services identified`;
+    }
+    if (step.key === 'testimonials' && detail) {
+      return detail === '0' ? 'No testimonials found' : `${detail} testimonials found`;
+    }
     return step.label;
   };
 
@@ -166,7 +157,7 @@ export function ScanScreen({ onScrapeComplete, onManualSetup }: ScanScreenProps)
                     {isCompleted ? (
                       <CheckCircle2 className="h-5 w-5 text-status-success shrink-0" />
                     ) : (
-                      <Loader2 className="h-5 w-5 text-brand animate-spin shrink-0" />
+                      <Loader2 className="h-5 w-5 text-ink animate-spin shrink-0" />
                     )}
                     <span className={`text-sm ${isCompleted ? 'text-foreground' : 'text-muted-foreground'}`}>
                       {getStepLabel(step)}
@@ -177,11 +168,11 @@ export function ScanScreen({ onScrapeComplete, onManualSetup }: ScanScreenProps)
             </AnimatePresence>
           </div>
 
-          {/* Progress bar */}
+          {/* Progress bar — espresso color */}
           <div className="mt-8">
             <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
               <motion.div
-                className="h-full rounded-full bg-brand"
+                className="h-full rounded-full bg-ink"
                 initial={{ width: '0%' }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.3 }}
@@ -197,8 +188,8 @@ export function ScanScreen({ onScrapeComplete, onManualSetup }: ScanScreenProps)
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-20">
       <div className="w-full max-w-md text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand">
-          <img src={propopadLogo} alt="" className="h-7 w-7" />
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-ink">
+          <img src={propopadLogo} alt="" className="h-7 w-7 invert" />
         </div>
 
         <h1 className="mt-6 font-display text-2xl font-bold text-foreground">
@@ -210,14 +201,14 @@ export function ScanScreen({ onScrapeComplete, onManualSetup }: ScanScreenProps)
 
         <div className="mt-8">
           <div className="relative">
-            <Globe className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+            <Globe className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-brass" />
             <input
               type="url"
               placeholder="youragency.com"
               value={url}
               onChange={(e) => { setUrl(e.target.value); setError(null); }}
               onKeyDown={(e) => e.key === 'Enter' && handleScan()}
-              className="w-full rounded-xl border border-border bg-card py-3.5 pl-12 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+              className="w-full rounded-xl border border-border bg-card py-3.5 pl-12 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink/10"
             />
           </div>
 
@@ -231,12 +222,12 @@ export function ScanScreen({ onScrapeComplete, onManualSetup }: ScanScreenProps)
           <button
             onClick={handleScan}
             disabled={!url}
-            className="mt-4 w-full rounded-xl bg-brand px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-brand-hover disabled:opacity-50"
+            className="mt-4 w-full rounded-xl bg-ink px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             Scan my website
           </button>
 
-          <p className="mt-2 text-center text-[11px]" style={{ color: '#B8B0A5' }}>
+          <p className="mt-2 text-center text-[11px] text-muted-foreground">
             By scanning, you allow Propopad to read publicly available content from this URL to set up your account.
           </p>
 

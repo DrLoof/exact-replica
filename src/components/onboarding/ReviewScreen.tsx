@@ -1,5 +1,5 @@
-import { useState, useRef, useMemo } from 'react';
-import { Check, Pencil, X, Plus, Upload, Loader2, Quote, Target, BarChart3, Users, Trophy, Zap, Layers, Package, ArrowRight } from 'lucide-react';
+import { useState, useRef, useMemo, useEffect } from 'react';
+import { Check, Pencil, X, Plus, Upload, Loader2, Quote, Target, BarChart3, Users, Trophy, Zap, Layers, Package, ArrowRight, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getDefaultModulesForGroup } from '@/lib/defaultModules';
 import { defaultBundles, findDefaultModule, calculateBundlePricing, formatBundlePrice } from '@/lib/defaultBundles';
@@ -46,7 +46,21 @@ export function ReviewScreen({
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [showAllServices, setShowAllServices] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [editingPrice, setEditingPrice] = useState<string | null>(null);
+  const [priceOverrides, setPriceOverrides] = useState<Record<string, number>>({});
+  const [showStickyCta, setShowStickyCta] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const agencyRef = useRef<HTMLElement>(null);
+
+  // Show sticky CTA after scrolling past agency section
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyCta(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    if (agencyRef.current) observer.observe(agencyRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   // All available services grouped
   const allGroupNames = Object.values(groupNameMap);
@@ -61,12 +75,34 @@ export function ReviewScreen({
   const selectedModules = allModules.filter(m => selectedModuleKeys.has(m.key));
   const unselectedModules = allModules.filter(m => !selectedModuleKeys.has(m.key));
 
+  // Group selected modules by group name
+  const selectedByGroup = useMemo(() => {
+    const groups: Record<string, typeof selectedModules> = {};
+    selectedModules.forEach(m => {
+      if (!groups[m.groupName]) groups[m.groupName] = [];
+      groups[m.groupName].push(m);
+    });
+    return groups;
+  }, [selectedModules]);
+
+  // Group unselected modules by group name
+  const unselectedByGroup = useMemo(() => {
+    const groups: Record<string, typeof unselectedModules> = {};
+    unselectedModules.forEach(m => {
+      if (!groups[m.groupName]) groups[m.groupName] = [];
+      groups[m.groupName].push(m);
+    });
+    return groups;
+  }, [unselectedModules]);
+
   const toggleModule = (key: string) => {
     const next = new Set(selectedModuleKeys);
     if (next.has(key)) next.delete(key);
     else next.add(key);
     onModuleKeysChange(next);
   };
+
+  const getModulePrice = (mod: any) => priceOverrides[mod.key] ?? mod.price;
 
   // Suggested bundles based on selected services
   const selectedModuleNames = new Set(selectedModules.map(m => m.name));
@@ -77,8 +113,8 @@ export function ReviewScreen({
       return { ...b, matchCount, missingCount };
     });
     const full = scored.filter(b => b.missingCount === 0).sort((a, b) => b.serviceNames.length - a.serviceNames.length);
-    const partial = scored.filter(b => b.missingCount === 1 && b.matchCount >= 2).sort((a, b) => b.matchCount - a.matchCount);
-    return [...full, ...partial].slice(0, 3);
+    const partial = scored.filter(b => b.missingCount <= 2 && b.matchCount >= 2).sort((a, b) => a.missingCount - b.missingCount || b.matchCount - a.matchCount);
+    return [...full, ...partial].slice(0, 4);
   }, [selectedModuleNames.size]);
 
   const pricingLabel: Record<string, string> = { fixed: '', monthly: '/mo', hourly: '/hr' };
@@ -106,19 +142,85 @@ export function ReviewScreen({
   };
 
   const addTestimonial = () => {
-    onTestimonialsChange([...testimonials, { quote: '', client_name: '', client_title: '', client_company: '', metric_value: '', metric_label: '' }]);
+    onTestimonialsChange([...testimonials, { quote: '', client_name: '', client_title: '', client_company: '', metric_value: '', metric_label: '', approved: false }]);
   };
 
-  const updateTestimonial = (idx: number, field: string, value: string) => {
+  const updateTestimonial = (idx: number, field: string, value: any) => {
     const updated = [...testimonials];
     updated[idx] = { ...updated[idx], [field]: value };
     onTestimonialsChange(updated);
   };
 
+  const renderServiceRow = (mod: any, isSelected: boolean) => {
+    const price = getModulePrice(mod);
+    const isEditing = editingPrice === mod.key;
+    const isModified = priceOverrides[mod.key] !== undefined;
+
+    return (
+      <div key={mod.key} className={cn("flex items-center justify-between py-2 border-b border-border last:border-0", !isSelected && "opacity-50")}>
+        <div className="flex items-center gap-3">
+          <button onClick={() => toggleModule(mod.key)} className={cn(
+            "flex h-5 w-5 shrink-0 items-center justify-center rounded border",
+            isSelected ? "border-ink bg-ink" : "border-muted-foreground/30"
+          )}>
+            {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
+          </button>
+          <span className={cn("text-sm", isSelected ? "text-foreground" : "text-muted-foreground")}>{mod.name}</span>
+          {isModified && <span className="text-[10px] text-brass font-medium">Modified</span>}
+        </div>
+        <div className="flex items-center gap-1">
+          {isEditing ? (
+            <input
+              type="number"
+              autoFocus
+              defaultValue={price}
+              onBlur={(e) => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val) && val !== mod.price) {
+                  setPriceOverrides(prev => ({ ...prev, [mod.key]: val }));
+                } else if (val === mod.price) {
+                  setPriceOverrides(prev => { const n = { ...prev }; delete n[mod.key]; return n; });
+                }
+                setEditingPrice(null);
+              }}
+              onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+              className="w-24 rounded border border-border bg-background px-2 py-0.5 text-right text-sm tabular-nums text-foreground focus:border-ink focus:outline-none"
+            />
+          ) : (
+            <button
+              onClick={() => isSelected && setEditingPrice(mod.key)}
+              className={cn("text-sm font-medium tabular-nums", isSelected ? "text-foreground hover:text-brass cursor-pointer" : "text-muted-foreground")}
+            >
+              ${price.toLocaleString()}{pricingLabel[mod.pricingModel]}
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="mx-auto max-w-[680px] px-6 py-10">
+    <div className="mx-auto max-w-[720px] px-6 py-10">
+      {/* Progress indicator */}
+      <div className="mb-8 flex items-center justify-center gap-3 text-xs">
+        <div className="flex items-center gap-1.5">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brass text-[10px] font-bold text-primary-foreground">✓</span>
+          <span className="text-muted-foreground font-medium">Enter website</span>
+        </div>
+        <div className="h-px w-8 bg-border" />
+        <div className="flex items-center gap-1.5">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-ink text-[10px] font-bold text-primary-foreground">●</span>
+          <span className="text-foreground font-semibold">Review profile</span>
+        </div>
+        <div className="h-px w-8 bg-border" />
+        <div className="flex items-center gap-1.5">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-[10px] text-muted-foreground">○</span>
+          <span className="text-muted-foreground">Create proposal</span>
+        </div>
+      </div>
+
       {/* Section: Agency */}
-      <section className="rounded-2xl border border-border bg-card p-6">
+      <section ref={agencyRef} className="rounded-2xl border border-border bg-card p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="label-overline">Your Agency</h2>
           <button
@@ -136,13 +238,13 @@ export function ReviewScreen({
               value={agencyIdentity.name || ''}
               onChange={e => onAgencyChange({ ...agencyIdentity, name: e.target.value })}
               placeholder="Agency Name"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-ink focus:outline-none"
             />
             <div className="grid grid-cols-2 gap-3">
-              <input type="email" value={agencyIdentity.email || ''} onChange={e => onAgencyChange({ ...agencyIdentity, email: e.target.value })} placeholder="Email" className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none" />
-              <input type="tel" value={agencyIdentity.phone || ''} onChange={e => onAgencyChange({ ...agencyIdentity, phone: e.target.value })} placeholder="Phone" className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none" />
+              <input type="email" value={agencyIdentity.email || ''} onChange={e => onAgencyChange({ ...agencyIdentity, email: e.target.value })} placeholder="Email" className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-ink focus:outline-none" />
+              <input type="tel" value={agencyIdentity.phone || ''} onChange={e => onAgencyChange({ ...agencyIdentity, phone: e.target.value })} placeholder="Phone" className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-ink focus:outline-none" />
             </div>
-            <input type="text" value={agencyIdentity.tagline || ''} onChange={e => onAgencyChange({ ...agencyIdentity, tagline: e.target.value })} placeholder="Tagline" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none" />
+            <input type="text" value={agencyIdentity.tagline || ''} onChange={e => onAgencyChange({ ...agencyIdentity, tagline: e.target.value })} placeholder="Tagline" className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-ink focus:outline-none" />
             <div className="flex items-center gap-3">
               <label className="text-xs text-muted-foreground">Brand Color</label>
               <input type="color" value={agencyIdentity.brand_color || '#E8825C'} onChange={e => onAgencyChange({ ...agencyIdentity, brand_color: e.target.value })} className="h-8 w-8 cursor-pointer rounded border border-border" />
@@ -168,15 +270,15 @@ export function ReviewScreen({
             )}
             <div className="min-w-0">
               <p className="font-display text-lg font-bold text-foreground truncate">{agencyIdentity.name || 'Your Agency'}</p>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 {agencyIdentity.brand_color && (
                   <>
-                    <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: agencyIdentity.brand_color }} />
+                    <span className="inline-block h-4 w-4 rounded-full border border-border" style={{ backgroundColor: agencyIdentity.brand_color }} />
                     <span>{agencyIdentity.brand_color}</span>
                     <span>·</span>
                   </>
                 )}
-                {agencyIdentity.email && <span>{agencyIdentity.email}</span>}
+                {agencyIdentity.email ? <span>{agencyIdentity.email}</span> : <span className="italic">Add email in Settings</span>}
                 {agencyIdentity.phone && <><span>·</span><span>{agencyIdentity.phone}</span></>}
               </div>
             </div>
@@ -184,59 +286,48 @@ export function ReviewScreen({
         )}
       </section>
 
-      {/* Section: Services */}
-      <section className="mt-6 rounded-2xl border border-border bg-card p-6">
+      {/* Section: Services — grouped by category */}
+      <section className="mt-4 rounded-2xl border border-border bg-card p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="label-overline">Your Services</h2>
           <span className="text-xs text-muted-foreground">{selectedModuleKeys.size} selected</span>
         </div>
 
-        <div className="space-y-1">
-          {selectedModules.map(mod => (
-            <div key={mod.key} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-              <div className="flex items-center gap-3">
-                <button onClick={() => toggleModule(mod.key)} className="flex h-5 w-5 shrink-0 items-center justify-center rounded border border-brand bg-brand">
-                  <Check className="h-3 w-3 text-primary-foreground" />
-                </button>
-                <span className="text-sm text-foreground">{mod.name}</span>
-              </div>
-              <span className="text-sm font-medium tabular-nums text-foreground">
-                ${mod.price.toLocaleString()}{pricingLabel[mod.pricingModel]}
-              </span>
+        <div className="space-y-0">
+          {Object.entries(selectedByGroup).map(([groupName, modules], gi) => (
+            <div key={groupName}>
+              {gi > 0 && <div className="border-t border-border mt-3 pt-3" />}
+              <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-faint mb-1">{groupName}</p>
+              {modules.map(mod => renderServiceRow(mod, true))}
             </div>
           ))}
 
           {!showAllServices && unselectedModules.length > 0 && (
             <button
               onClick={() => setShowAllServices(true)}
-              className="mt-2 text-xs text-brand hover:text-brand-hover font-medium"
+              className="mt-3 text-xs text-brass hover:text-foreground font-medium"
             >
               + {unselectedModules.length} more available
             </button>
           )}
 
-          {showAllServices && unselectedModules.map(mod => (
-            <div key={mod.key} className="flex items-center justify-between py-2 border-b border-border last:border-0 opacity-50">
-              <div className="flex items-center gap-3">
-                <button onClick={() => toggleModule(mod.key)} className="flex h-5 w-5 shrink-0 items-center justify-center rounded border border-muted-foreground/30">
-                </button>
-                <span className="text-sm text-muted-foreground">{mod.name}</span>
-              </div>
-              <span className="text-sm tabular-nums text-muted-foreground">
-                ${mod.price.toLocaleString()}{pricingLabel[mod.pricingModel]}
-              </span>
+          {showAllServices && Object.entries(unselectedByGroup).map(([groupName, modules], gi) => (
+            <div key={groupName}>
+              <div className="border-t border-border mt-3 pt-3" />
+              <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-faint mb-1">{groupName}</p>
+              {modules.map(mod => renderServiceRow(mod, false))}
             </div>
           ))}
         </div>
 
         <p className="mt-4 text-[11px] text-muted-foreground">
-          Each service has full deliverables, timelines, and scope pre-filled. Customize in Settings later.
+          Click any price to edit. Each service has full deliverables, timelines, and scope pre-filled. Customize in Settings later.
         </p>
       </section>
 
       {/* Section: Suggested Bundles */}
       {suggestedBundles.length > 0 && (
-        <section className="mt-6 rounded-2xl border border-border bg-card p-6">
+        <section className="mt-4 rounded-2xl border border-border bg-card p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="label-overline">Suggested Bundles</h2>
             <span className="text-xs text-muted-foreground">{suggestedBundles.length} matched</span>
@@ -247,11 +338,12 @@ export function ReviewScreen({
               const isAdded = addedBundles.has(bundle.name);
               const pricing = calculateBundlePricing(bundle.serviceNames, bundle.discountPercentage);
               const missingNames = bundle.serviceNames.filter(n => !selectedModuleNames.has(n));
+              const isFullMatch = missingNames.length === 0;
 
               return (
                 <div key={bundle.name} className={cn(
                   'rounded-xl border p-4 transition-colors',
-                  isAdded ? 'border-brand/30 bg-brand/5' : 'border-border bg-background'
+                  isAdded ? 'border-ink/20 bg-ink/5' : missingNames.length > 1 ? 'border-border bg-background opacity-60' : 'border-border bg-background'
                 )}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
@@ -272,30 +364,35 @@ export function ReviewScreen({
                         ))}
                       </div>
 
-                      <div className="mt-2 flex items-baseline gap-2">
-                        <span className="text-xs text-muted-foreground line-through">
-                          {formatBundlePrice(pricing.totalFixed, pricing.totalMonthly)}
-                        </span>
-                        <span className="font-display text-sm font-bold tabular-nums text-foreground">
-                          {formatBundlePrice(pricing.bundleFixed, pricing.bundleMonthly)}
-                        </span>
-                        {pricing.totalSavings > 0 && (
-                          <span className="rounded-full bg-status-success/15 px-2 py-0.5 text-[10px] font-semibold text-status-success">
-                            Save ${pricing.totalSavings.toLocaleString()}
+                      <div className="mt-3 space-y-0.5">
+                        <div className="flex items-baseline gap-3">
+                          <span className="font-display text-sm font-bold tabular-nums text-foreground">
+                            {formatBundlePrice(pricing.bundleFixed, pricing.bundleMonthly)}
                           </span>
-                        )}
+                          {pricing.totalSavings > 0 && (
+                            <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ backgroundColor: '#F0F5F1', color: '#6E9A7A' }}>
+                              Save ${pricing.totalSavings.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[11px] text-muted-foreground line-through">
+                          {formatBundlePrice(pricing.totalFixed, pricing.totalMonthly)} (individual)
+                        </span>
                       </div>
                     </div>
 
                     <div className="shrink-0">
                       {isAdded ? (
-                        <span className="flex items-center gap-1.5 text-xs font-medium text-brand">
+                        <span className="flex items-center gap-1.5 text-xs font-medium text-ink">
                           <Check className="h-4 w-4" /> Added
+                        </span>
+                      ) : missingNames.length > 1 ? (
+                        <span className="text-[11px] text-muted-foreground">
+                          Add {missingNames.length} services to unlock
                         </span>
                       ) : (
                         <button
                           onClick={() => {
-                            // Auto-add missing services to selected modules
                             if (missingNames.length > 0) {
                               const next = new Set(selectedModuleKeys);
                               for (const name of missingNames) {
@@ -306,9 +403,9 @@ export function ReviewScreen({
                             }
                             onAddBundle?.(bundle.name);
                           }}
-                          className="flex items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-brand-hover"
+                          className="flex items-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90"
                         >
-                          {missingNames.length > 0 ? `Add + ${missingNames.length} service${missingNames.length > 1 ? 's' : ''}` : 'Use this bundle'}
+                          {missingNames.length === 1 ? `Add bundle + ${missingNames[0]}` : 'Use this bundle'}
                         </button>
                       )}
                     </div>
@@ -325,19 +422,19 @@ export function ReviewScreen({
       )}
 
       {suggestedBundles.length === 0 && selectedModuleKeys.size > 0 && (
-        <section className="mt-6 rounded-2xl border border-dashed border-border bg-card p-4">
+        <section className="mt-4 rounded-2xl border border-dashed border-border bg-card p-4">
           <p className="text-xs text-muted-foreground text-center">
             You can create custom bundles or browse templates in Settings → Bundles after setup.
           </p>
         </section>
       )}
 
-      {/* Section: Testimonials */}
-      <section className="mt-6 rounded-2xl border border-border bg-card p-6">
+      {/* Section: Testimonials — more spacing before this group */}
+      <section className="mt-8 rounded-2xl border border-border bg-card p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="label-overline">Testimonials</h2>
           <span className="text-xs text-muted-foreground">
-            {testimonials.length > 0 ? `${testimonials.length} found from website` : 'None found'}
+            {testimonials.length > 0 ? `${testimonials.length} found` : 'None found'}
           </span>
         </div>
 
@@ -351,7 +448,13 @@ export function ReviewScreen({
         )}
 
         {testimonials.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No testimonials found on your website. Add them here or in Settings later.</p>
+          <div className="text-center py-4">
+            <p className="text-sm text-muted-foreground">No testimonials found on your website.</p>
+            <p className="mt-1 text-[12px] text-muted-foreground">
+              Adding testimonials increases win rates by up to 30%.<br />
+              Add them here or anytime in Settings.
+            </p>
+          </div>
         ) : (
           <div className="space-y-4">
             {testimonials.map((t, idx) => (
@@ -361,22 +464,22 @@ export function ReviewScreen({
                     Remove
                   </button>
                 </div>
-                <Quote className="h-4 w-4 text-brand mb-2" />
+                <Quote className="h-4 w-4 text-brass mb-2" />
                 <p className="text-sm text-foreground italic leading-relaxed">"{t.quote}"</p>
                 <p className="mt-2 text-xs text-muted-foreground">
                   — {t.client_name}{t.client_title ? `, ${t.client_title}` : ''}{t.client_company ? `, ${t.client_company}` : ''}
                 </p>
                 {t.metric_value && (
-                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-2.5 py-1 text-xs font-medium text-brand">
+                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium" style={{ backgroundColor: '#F0F5F1', color: '#6E9A7A' }}>
                     {t.metric_value} {t.metric_label}
                   </div>
                 )}
                 <label className="mt-3 flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={t.approved !== false}
-                    onChange={(e) => updateTestimonial(idx, 'approved', e.target.checked as any)}
-                    className="h-3.5 w-3.5 rounded border-border text-brand focus:ring-brand/20"
+                    checked={t.approved === true}
+                    onChange={(e) => updateTestimonial(idx, 'approved', e.target.checked)}
+                    className="h-3.5 w-3.5 rounded border-border accent-ink"
                   />
                   <span className="text-[11px] text-muted-foreground">Approve for proposals</span>
                 </label>
@@ -385,13 +488,13 @@ export function ReviewScreen({
           </div>
         )}
 
-        <button onClick={addTestimonial} className="mt-4 flex items-center gap-2 text-xs text-brand hover:text-brand-hover font-medium">
+        <button onClick={addTestimonial} className="mt-4 flex items-center gap-2 text-xs text-brass hover:text-foreground font-medium">
           <Plus className="h-3.5 w-3.5" /> Add testimonial
         </button>
       </section>
 
       {/* Section: Why Choose You */}
-      <section className="mt-6 rounded-2xl border border-border bg-card p-6">
+      <section className="mt-4 rounded-2xl border border-border bg-card p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="label-overline">Why Choose You</h2>
           <button
@@ -408,7 +511,7 @@ export function ReviewScreen({
               value={diffIntro}
               onChange={e => onDiffIntroChange(e.target.value)}
               rows={3}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground leading-relaxed mb-4 focus:border-brand focus:outline-none"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground leading-relaxed mb-4 focus:border-ink focus:outline-none"
             />
           ) : (
             <p className="text-sm text-foreground leading-relaxed mb-4">"{diffIntro}"</p>
@@ -428,7 +531,7 @@ export function ReviewScreen({
                     onDifferentiatorsChange(updated);
                   }}
                   placeholder="Title"
-                  className="w-full rounded border border-border bg-card px-2 py-1 text-xs font-medium text-foreground focus:border-brand focus:outline-none"
+                  className="w-full rounded border border-border bg-card px-2 py-1 text-xs font-medium text-foreground focus:border-ink focus:outline-none"
                 />
                 <div className="grid grid-cols-2 gap-1.5">
                   <input
@@ -439,7 +542,7 @@ export function ReviewScreen({
                       onDifferentiatorsChange(updated);
                     }}
                     placeholder="KPI value"
-                    className="rounded border border-border bg-card px-2 py-1 text-xs text-foreground focus:border-brand focus:outline-none"
+                    className="rounded border border-border bg-card px-2 py-1 text-xs text-foreground focus:border-ink focus:outline-none"
                   />
                   <input
                     value={d.stat_label || ''}
@@ -449,7 +552,7 @@ export function ReviewScreen({
                       onDifferentiatorsChange(updated);
                     }}
                     placeholder="KPI label"
-                    className="rounded border border-border bg-card px-2 py-1 text-xs text-muted-foreground focus:border-brand focus:outline-none"
+                    className="rounded border border-border bg-card px-2 py-1 text-xs text-muted-foreground focus:border-ink focus:outline-none"
                   />
                 </div>
                 <textarea
@@ -461,7 +564,7 @@ export function ReviewScreen({
                   }}
                   rows={3}
                   placeholder="Description"
-                  className="w-full rounded border border-border bg-card px-2 py-1 text-xs text-muted-foreground focus:border-brand focus:outline-none"
+                  className="w-full rounded border border-border bg-card px-2 py-1 text-xs text-muted-foreground focus:border-ink focus:outline-none"
                 />
                 <button
                   onClick={() => onDifferentiatorsChange(differentiators.filter((_, idx) => idx !== i))}
@@ -471,11 +574,11 @@ export function ReviewScreen({
                 </button>
               </div>
             ) : (
-              <div key={i} className="rounded-xl border border-border bg-background p-3">
-                {d.stat_value && <p className="font-display text-lg font-bold text-foreground">{d.stat_value}</p>}
-                {d.stat_label && <p className="text-[10px] text-muted-foreground">{d.stat_label}</p>}
-                <p className="mt-1 text-xs font-medium text-foreground">{d.title}</p>
-                {d.description && <p className="mt-1 text-[10px] text-muted-foreground line-clamp-2">{d.description}</p>}
+              <div key={i} className="rounded-xl border border-border border-l-2 bg-background p-3 transition-colors hover:border-l-brass group" style={{ borderLeftColor: undefined }}>
+                {d.stat_value && <p className="font-display text-2xl font-bold text-foreground">{d.stat_value}</p>}
+                {d.stat_label && <p className="text-[11px] text-muted-foreground">{d.stat_label}</p>}
+                <p className="mt-1 text-[14px] font-semibold text-foreground">{d.title}</p>
+                {d.description && <p className="mt-1 text-[12px] text-muted-foreground line-clamp-2">{d.description}</p>}
               </div>
             );
           })}
@@ -484,36 +587,48 @@ export function ReviewScreen({
         {editingSection === 'differentiators' && (
           <button
             onClick={() => onDifferentiatorsChange([...differentiators, { title: '', stat_value: '', stat_label: '', description: '', icon: 'Target', source: 'manual' }])}
-            className="mt-3 flex items-center gap-2 text-xs text-brand hover:text-brand-hover font-medium"
+            className="mt-3 flex items-center gap-2 text-xs text-brass hover:text-foreground font-medium"
           >
             <Plus className="h-3.5 w-3.5" /> Add differentiator
           </button>
         )}
 
-        <div className="flex items-start gap-2 mt-4 rounded-lg bg-background px-3 py-2.5">
-          <span className="text-sm mt-0.5" style={{ color: '#C07A5C' }}>⚠</span>
-          <p className="text-[12px] text-muted-foreground">
-            These are template clauses, not legal advice. Have a lawyer review your terms before using them with clients.
-          </p>
-        </div>
         <p className="mt-3 text-[11px] text-muted-foreground">
           These appear in your proposals. Edit anytime in Settings.
         </p>
       </section>
 
-      {/* CTA */}
-      <div className="mt-10 text-center pb-10">
+      {/* CTA — inline */}
+      <div className="mt-10 text-center pb-24">
         <button
           onClick={onFinish}
           disabled={saving}
-          className="rounded-xl bg-brand px-8 py-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-brand-hover disabled:opacity-50"
+          className="w-full max-w-[480px] rounded-[10px] bg-ink px-8 py-4 text-[15px] font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+          style={{ boxShadow: '0 2px 8px rgba(42,33,24,0.15)' }}
         >
           {saving ? 'Setting up...' : 'Looks good — create my first proposal'}
         </button>
         <p className="mt-3 text-xs text-muted-foreground">
-          Everything can be edited later in Settings
+          Everything can be edited later in Settings.<br />
+          No credit card required.
         </p>
       </div>
+
+      {/* Sticky CTA bar */}
+      {showStickyCta && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur-sm">
+          <div className="mx-auto flex max-w-[720px] items-center justify-center px-6 py-4">
+            <button
+              onClick={onFinish}
+              disabled={saving}
+              className="w-full max-w-[480px] rounded-[10px] bg-ink px-8 py-3.5 text-[14px] font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+              style={{ boxShadow: '0 2px 8px rgba(42,33,24,0.15)' }}
+            >
+              {saving ? 'Setting up...' : 'Looks good — create my first proposal'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
