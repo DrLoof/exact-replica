@@ -27,6 +27,8 @@ export function OnboardingWizard() {
   const [agencyIdentity, setAgencyIdentity] = useState<any>({});
   // Service group lookup
   const [groupNameMap, setGroupNameMap] = useState<Record<string, string>>({});
+  // Selected bundles
+  const [addedBundles, setAddedBundles] = useState<Set<string>>(new Set());
 
   // Load service groups
   useEffect(() => {
