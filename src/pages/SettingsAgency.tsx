@@ -10,7 +10,7 @@ export default function SettingsAgency() {
   const { agency } = useAuth();
   const [form, setForm] = useState({
     name: '', email: '', phone: '', website: '',
-    tagline: '', about_text: '',
+    tagline: '', about_text: '', years_experience: '' as string,
     address_line1: '', address_line2: '', city: '', state: '', zip: '', country: '',
   });
   const [saving, setSaving] = useState(false);
