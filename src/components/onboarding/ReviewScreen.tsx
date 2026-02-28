@@ -465,15 +465,33 @@ export function ReviewScreen({
                   </button>
                 </div>
                 <Quote className="h-4 w-4 text-brass mb-2" />
-                <p className="text-sm text-foreground italic leading-relaxed">"{t.quote}"</p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  — {t.client_name}{t.client_title ? `, ${t.client_title}` : ''}{t.client_company ? `, ${t.client_company}` : ''}
-                </p>
-                {t.metric_value && (
-                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium" style={{ backgroundColor: '#F0F5F1', color: '#6E9A7A' }}>
-                    {t.metric_value} {t.metric_label}
-                  </div>
-                )}
+                <textarea
+                  value={t.quote || ''}
+                  onChange={(e) => updateTestimonial(idx, 'quote', e.target.value)}
+                  placeholder="Enter testimonial quote…"
+                  rows={2}
+                  className="w-full text-sm text-foreground italic leading-relaxed bg-transparent border-b border-border/50 focus:border-brass outline-none resize-none pb-1"
+                />
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <input
+                    value={t.client_name || ''}
+                    onChange={(e) => updateTestimonial(idx, 'client_name', e.target.value)}
+                    placeholder="Client name"
+                    className="text-xs text-muted-foreground bg-transparent border-b border-border/50 focus:border-brass outline-none pb-0.5 w-28"
+                  />
+                  <input
+                    value={t.client_title || ''}
+                    onChange={(e) => updateTestimonial(idx, 'client_title', e.target.value)}
+                    placeholder="Title"
+                    className="text-xs text-muted-foreground bg-transparent border-b border-border/50 focus:border-brass outline-none pb-0.5 w-24"
+                  />
+                  <input
+                    value={t.client_company || ''}
+                    onChange={(e) => updateTestimonial(idx, 'client_company', e.target.value)}
+                    placeholder="Company"
+                    className="text-xs text-muted-foreground bg-transparent border-b border-border/50 focus:border-brass outline-none pb-0.5 w-28"
+                  />
+                </div>
                 <label className="mt-3 flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
