@@ -1,6 +1,7 @@
 import React, { type ReactNode } from "react";
 import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
+import { EditableText } from "./EditableText";
 
 interface ServiceCardProps {
   icon: ReactNode;
