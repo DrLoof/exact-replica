@@ -337,9 +337,10 @@ export default function Bundles() {
 
             return (
               <div key={template.name} className={cn(
-                'rounded-xl border bg-card p-6 transition-shadow',
+                'flex flex-col rounded-xl border bg-card p-6 transition-shadow',
                 alreadyAdded ? 'border-border opacity-60' : 'border-border hover:shadow-sm'
               )}>
+                {/* Header — fixed height zone */}
                 <div className="flex items-start gap-3 mb-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent">
                     <Package className="h-4 w-4 text-accent-foreground" />
@@ -350,48 +351,51 @@ export default function Bundles() {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                  {template.serviceNames.map(name => {
-                    const isMissing = !agencyModuleNames.has(name);
-                    return (
-                      <span key={name} className={cn(
-                        'rounded-full px-2.5 py-0.5 text-[11px]',
-                        isMissing
-                          ? 'border border-dashed border-muted-foreground/30 text-muted-foreground/70'
-                          : 'bg-muted text-muted-foreground'
-                      )}>
-                        {name}
-                      </span>
-                    );
-                  })}
+                {/* Services — grows to fill */}
+                <div className="flex-1">
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {template.serviceNames.map(name => {
+                      const isMissing = !agencyModuleNames.has(name);
+                      return (
+                        <span key={name} className={cn(
+                          'rounded-full px-2.5 py-0.5 text-[11px]',
+                          isMissing
+                            ? 'border border-dashed border-muted-foreground/30 text-muted-foreground/70'
+                            : 'bg-muted text-muted-foreground'
+                        )}>
+                          {name}
+                        </span>
+                      );
+                    })}
+                  </div>
+
+                  {missingServices.length > 0 && !alreadyAdded && (
+                    <p className="mb-2 text-[11px] text-muted-foreground italic">
+                      Dashed = will be added to your service library
+                    </p>
+                  )}
                 </div>
 
-                {missingServices.length > 0 && !alreadyAdded && (
-                  <p className="mb-3 text-[11px] text-muted-foreground">
-                    <span className="italic">Dashed = will be added to your service library</span>
-                  </p>
-                )}
-
+                {/* Pricing — pinned above button */}
                 <div className="border-t border-border pt-3 mb-4">
-                  <div className="flex items-baseline justify-between">
-                    <div>
-                      <span className="text-xs text-muted-foreground line-through">
-                        {formatBundlePrice(pricing.totalFixed, pricing.totalMonthly, currencySymbol)}
-                      </span>
-                      <span className="ml-2 font-display text-base font-bold tabular-nums text-foreground">
-                        {formatBundlePrice(pricing.bundleFixed, pricing.bundleMonthly, currencySymbol)}
-                      </span>
-                    </div>
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <span className="text-xs text-muted-foreground line-through">
+                      {formatBundlePrice(pricing.totalFixed, pricing.totalMonthly, currencySymbol)}
+                    </span>
+                    <span className="font-display text-base font-bold tabular-nums text-foreground">
+                      {formatBundlePrice(pricing.bundleFixed, pricing.bundleMonthly, currencySymbol)}
+                    </span>
                     {pricing.totalSavings > 0 && (
-                      <span className="rounded-full bg-status-success/15 px-2 py-0.5 text-[11px] font-semibold text-status-success">
-                        Save {currencySymbol}{pricing.totalSavings.toLocaleString()}
+                      <span className="ml-auto rounded-full bg-status-success/15 px-2 py-0.5 text-[11px] font-semibold text-status-success whitespace-nowrap">
+                        {template.discountPercentage}% off
                       </span>
                     )}
                   </div>
                 </div>
 
+                {/* CTA — always at bottom */}
                 {alreadyAdded ? (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="flex h-10 items-center justify-center gap-2 text-sm text-muted-foreground">
                     <Check className="h-4 w-4" />
                     Already in your library
                   </div>
@@ -399,7 +403,7 @@ export default function Bundles() {
                   <button
                     onClick={() => addTemplateBundle(template)}
                     disabled={isAdding}
-                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover disabled:opacity-50"
+                    className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-brand px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover disabled:opacity-50"
                   >
                     {isAdding ? (
                       <><Loader2 className="h-4 w-4 animate-spin" /> Adding...</>
