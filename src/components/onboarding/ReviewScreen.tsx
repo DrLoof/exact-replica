@@ -374,28 +374,101 @@ export function ReviewScreen({
       <section className="mt-6 rounded-2xl border border-border bg-card p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="label-overline">Why Choose You</h2>
-          <span className="text-xs text-muted-foreground">Generated from your site</span>
+          <button
+            onClick={() => setEditingSection(editingSection === 'differentiators' ? null : 'differentiators')}
+            className="text-xs text-muted-foreground hover:text-foreground"
+          >
+            {editingSection === 'differentiators' ? 'Done' : 'Edit'}
+          </button>
         </div>
 
         {diffIntro && (
-          <p className="text-sm text-foreground leading-relaxed mb-4">"{diffIntro}"</p>
+          editingSection === 'differentiators' ? (
+            <textarea
+              value={diffIntro}
+              onChange={e => onDiffIntroChange(e.target.value)}
+              rows={3}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground leading-relaxed mb-4 focus:border-brand focus:outline-none"
+            />
+          ) : (
+            <p className="text-sm text-foreground leading-relaxed mb-4">"{diffIntro}"</p>
+          )
         )}
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {differentiators.map((d, i) => {
             const Icon = iconMap[d.icon] || Target;
-            return (
+            return editingSection === 'differentiators' ? (
+              <div key={i} className="rounded-xl border border-border bg-background p-3 space-y-2">
+                <input
+                  value={d.title}
+                  onChange={e => {
+                    const updated = [...differentiators];
+                    updated[i] = { ...updated[i], title: e.target.value };
+                    onDifferentiatorsChange(updated);
+                  }}
+                  placeholder="Title"
+                  className="w-full rounded border border-border bg-card px-2 py-1 text-xs font-medium text-foreground focus:border-brand focus:outline-none"
+                />
+                <div className="grid grid-cols-2 gap-1.5">
+                  <input
+                    value={d.stat_value || ''}
+                    onChange={e => {
+                      const updated = [...differentiators];
+                      updated[i] = { ...updated[i], stat_value: e.target.value };
+                      onDifferentiatorsChange(updated);
+                    }}
+                    placeholder="KPI value"
+                    className="rounded border border-border bg-card px-2 py-1 text-xs text-foreground focus:border-brand focus:outline-none"
+                  />
+                  <input
+                    value={d.stat_label || ''}
+                    onChange={e => {
+                      const updated = [...differentiators];
+                      updated[i] = { ...updated[i], stat_label: e.target.value };
+                      onDifferentiatorsChange(updated);
+                    }}
+                    placeholder="KPI label"
+                    className="rounded border border-border bg-card px-2 py-1 text-xs text-muted-foreground focus:border-brand focus:outline-none"
+                  />
+                </div>
+                <textarea
+                  value={d.description || ''}
+                  onChange={e => {
+                    const updated = [...differentiators];
+                    updated[i] = { ...updated[i], description: e.target.value };
+                    onDifferentiatorsChange(updated);
+                  }}
+                  rows={3}
+                  placeholder="Description"
+                  className="w-full rounded border border-border bg-card px-2 py-1 text-xs text-muted-foreground focus:border-brand focus:outline-none"
+                />
+                <button
+                  onClick={() => onDifferentiatorsChange(differentiators.filter((_, idx) => idx !== i))}
+                  className="text-[10px] text-destructive hover:underline"
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
               <div key={i} className="rounded-xl border border-border bg-background p-3">
-                <p className="font-display text-lg font-bold text-foreground">{d.stat_value}</p>
-                <p className="text-[10px] text-muted-foreground">{d.stat_label}</p>
+                {d.stat_value && <p className="font-display text-lg font-bold text-foreground">{d.stat_value}</p>}
+                {d.stat_label && <p className="text-[10px] text-muted-foreground">{d.stat_label}</p>}
                 <p className="mt-1 text-xs font-medium text-foreground">{d.title}</p>
-                {d.source === 'generated' && (
-                  <span className="mt-1 inline-block text-[9px] text-muted-foreground/60 italic">AI-generated</span>
-                )}
+                {d.description && <p className="mt-1 text-[10px] text-muted-foreground line-clamp-2">{d.description}</p>}
               </div>
             );
           })}
         </div>
+
+        {editingSection === 'differentiators' && (
+          <button
+            onClick={() => onDifferentiatorsChange([...differentiators, { title: '', stat_value: '', stat_label: '', description: '', icon: 'Target', source: 'manual' }])}
+            className="mt-3 flex items-center gap-2 text-xs text-brand hover:text-brand-hover font-medium"
+          >
+            <Plus className="h-3.5 w-3.5" /> Add differentiator
+          </button>
+        )}
 
         <p className="mt-4 text-[11px] text-muted-foreground">
           These appear in your proposals. Edit anytime in Settings.
