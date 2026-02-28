@@ -47,7 +47,7 @@ const App = () => (
             <Route path="/p/:shareId" element={<PublicProposal />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/proposals" element={<ProtectedRoute><Proposals /></ProtectedRoute>} />
-            <Route path="/proposals/new" element={<ProtectedRoute><ProposalNew /></ProtectedRoute>} />
+            <Route path="/proposals/new" element={<ProposalNew />} />
             <Route path="/proposals/:id" element={<ProtectedRoute><ProposalEditor /></ProtectedRoute>} />
             <Route path="/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
             <Route path="/services" element={<ProtectedRoute><Services /></ProtectedRoute>} />
