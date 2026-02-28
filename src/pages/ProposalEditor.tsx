@@ -516,6 +516,28 @@ export default function ProposalEditor() {
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="06">
                     <SectionHeader number="05" title="Why Us" subtitle="What sets us apart" />
+                    
+                    {/* About text — editable, with default fallback */}
+                    <div className="mb-10">
+                      <TextContent>
+                        <p
+                          className="cursor-text min-h-[60px] outline-none"
+                          contentEditable
+                          suppressContentEditableWarning
+                          onBlur={(e) => {
+                            const newText = e.currentTarget.textContent || '';
+                            updateField('executive_summary', proposal.executive_summary); // no-op to keep consistency
+                            // Save about_text to agency
+                            if (agency?.id) {
+                              supabase.from('agencies').update({ about_text: newText }).eq('id', agency.id);
+                            }
+                          }}
+                        >
+                          {agency?.about_text || getDefaultAboutText(agency?.years_experience)}
+                        </p>
+                      </TextContent>
+                    </div>
+
                     {differentiators.length === 0 ? (
                       <div className="text-center py-16">
                         <p className="text-[#999]" style={{ fontSize: '15px' }}>Add differentiators in Settings to build trust.</p>
