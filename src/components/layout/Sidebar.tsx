@@ -58,9 +58,18 @@ export function Sidebar() {
       {agency?.name && (
         <div className="mx-3 mb-3 rounded-[10px] bg-paper p-2.5 shadow-card">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] bg-ink text-[11px] font-bold text-ivory">
-              {agencyInitial}
-            </div>
+            {agency.logo_url ? (
+              <div
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] overflow-hidden"
+                style={{ backgroundColor: '#BE8E5E' }}
+              >
+                <img src={agency.logo_url} alt={agency.name} className="h-5 w-5 object-contain" />
+              </div>
+            ) : (
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] bg-ink text-[11px] font-bold text-ivory">
+                {agencyInitial}
+              </div>
+            )}
             <div className="min-w-0 flex-1">
               <p className="truncate text-[12px] font-semibold text-ink">{agency.name}</p>
               <p className="text-[10px] text-ink-faint">Free · {proposals.length} proposals</p>
