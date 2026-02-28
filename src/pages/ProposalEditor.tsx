@@ -24,6 +24,7 @@ import {
   TextContent,
   PageWrapper,
   HighlightPanel,
+  EditableText,
 } from '@/components/proposal-template';
 
 interface ProposalData {
@@ -354,14 +355,13 @@ export default function ProposalEditor() {
                   <PageWrapper pageNumber="02">
                     <SectionHeader number="01" title="Executive Summary" subtitle="Our understanding and approach" />
                     <TextContent dropCap>
-                      <p
-                        className="cursor-text min-h-[80px] outline-none"
-                        contentEditable
-                        suppressContentEditableWarning
-                        onBlur={(e) => updateField('executive_summary', e.currentTarget.textContent)}
-                      >
-                        {proposal.executive_summary || 'Click to add an executive summary for this proposal. Describe the project goals, your approach, and expected outcomes.'}
-                      </p>
+                      <EditableText
+                        value={proposal.executive_summary || ''}
+                        placeholder="Click to add an executive summary for this proposal. Describe the project goals, your approach, and expected outcomes."
+                        onSave={(val) => updateField('executive_summary', val)}
+                        as="p"
+                        className="min-h-[80px]"
+                      />
                     </TextContent>
 
                     {/* Key highlights */}
@@ -525,21 +525,17 @@ export default function ProposalEditor() {
                     {/* About text — editable, with default fallback */}
                     <div className="mb-10">
                       <TextContent>
-                        <p
-                          className="cursor-text min-h-[60px] outline-none"
-                          contentEditable
-                          suppressContentEditableWarning
-                          onBlur={(e) => {
-                            const newText = e.currentTarget.textContent || '';
-                            updateField('executive_summary', proposal.executive_summary); // no-op to keep consistency
-                            // Save about_text to agency
+                        <EditableText
+                          value={agency?.about_text || ''}
+                          placeholder={getDefaultAboutText(agency?.years_experience)}
+                          onSave={(val) => {
                             if (agency?.id) {
-                              supabase.from('agencies').update({ about_text: newText }).eq('id', agency.id);
+                              supabase.from('agencies').update({ about_text: val }).eq('id', agency.id);
                             }
                           }}
-                        >
-                          {agency?.about_text || getDefaultAboutText(agency?.years_experience)}
-                        </p>
+                          as="p"
+                          className="min-h-[60px]"
+                        />
                       </TextContent>
                     </div>
 

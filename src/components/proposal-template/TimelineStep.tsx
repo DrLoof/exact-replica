@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
+import { EditableText } from "./EditableText";
 
 interface TimelineStepProps {
   number: number;
@@ -56,45 +57,53 @@ export function TimelineStep({
       {/* Content */}
       <div className={`pb-8 ${isLast ? "" : ""}`}>
         <div className="flex items-center gap-3 mb-2">
-          <h3
-            className="tracking-tight outline-none"
-            style={{ fontSize: "18px", fontWeight: 700, color: brand.darkColor }}
-            contentEditable={!!onNameEdit}
-            suppressContentEditableWarning
-            onBlur={(e) => onNameEdit?.(e.currentTarget.textContent || '')}
-          >
-            {name}
-          </h3>
-          <span
-            className="inline-block rounded-full px-3 py-0.5 outline-none"
-            style={{
-              fontSize: "12px",
-              fontWeight: 600,
-              backgroundColor: `${brand.primaryColor}15`,
-              color: brand.primaryColor,
-            }}
-            contentEditable={!!onDurationEdit}
-            suppressContentEditableWarning
-            onBlur={(e) => onDurationEdit?.(e.currentTarget.textContent || '')}
-          >
-            {duration}
-          </span>
+          {onNameEdit ? (
+            <EditableText
+              value={name}
+              placeholder="Phase name..."
+              onSave={onNameEdit}
+              as="h3"
+              className="tracking-tight"
+              style={{ fontSize: "18px", fontWeight: 700, color: brand.darkColor }}
+            />
+          ) : (
+            <h3 className="tracking-tight" style={{ fontSize: "18px", fontWeight: 700, color: brand.darkColor }}>
+              {name}
+            </h3>
+          )}
+          {onDurationEdit ? (
+            <EditableText
+              value={duration}
+              placeholder="Duration..."
+              onSave={onDurationEdit}
+              as="span"
+              className="inline-block rounded-full px-3 py-0.5"
+              style={{ fontSize: "12px", fontWeight: 600, backgroundColor: `${brand.primaryColor}15`, color: brand.primaryColor }}
+            />
+          ) : (
+            <span
+              className="inline-block rounded-full px-3 py-0.5"
+              style={{ fontSize: "12px", fontWeight: 600, backgroundColor: `${brand.primaryColor}15`, color: brand.primaryColor }}
+            >
+              {duration}
+            </span>
+          )}
         </div>
         {(description || onDescriptionEdit) && (
-          <p
-            className="text-[#888] max-w-md outline-none"
-            style={{
-              fontSize: "14px",
-              fontWeight: 400,
-              lineHeight: 1.6,
-              fontFamily: "'Inter', sans-serif",
-            }}
-            contentEditable={!!onDescriptionEdit}
-            suppressContentEditableWarning
-            onBlur={(e) => onDescriptionEdit?.(e.currentTarget.textContent || '')}
-          >
-            {description || 'Click to add a description...'}
-          </p>
+          onDescriptionEdit ? (
+            <EditableText
+              value={description || ''}
+              placeholder="Click to add a description..."
+              onSave={onDescriptionEdit}
+              as="p"
+              className="text-[#888] max-w-md"
+              style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6, fontFamily: "'Inter', sans-serif" }}
+            />
+          ) : (
+            <p className="text-[#888] max-w-md" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6, fontFamily: "'Inter', sans-serif" }}>
+              {description}
+            </p>
+          )
         )}
       </div>
     </motion.div>

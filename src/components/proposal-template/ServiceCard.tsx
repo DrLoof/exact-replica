@@ -1,6 +1,7 @@
 import React, { type ReactNode } from "react";
 import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
+import { EditableText } from "./EditableText";
 
 interface ServiceCardProps {
   icon: ReactNode;
@@ -100,29 +101,34 @@ export function ServiceCard({
       </div>
 
       {/* Name & description */}
-      <h3
-        className="mb-3 tracking-tight outline-none"
-        style={{
-          fontSize: "20px",
-          fontWeight: 700,
-          lineHeight: 1.2,
-          color: brand.darkColor,
-        }}
-        contentEditable={!!onNameEdit}
-        suppressContentEditableWarning
-        onBlur={(e) => onNameEdit?.(e.currentTarget.textContent || '')}
-      >
-        {name}
-      </h3>
-      <p
-        className="text-[#888] mb-6 outline-none"
-        style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6 }}
-        contentEditable={!!onDescriptionEdit}
-        suppressContentEditableWarning
-        onBlur={(e) => onDescriptionEdit?.(e.currentTarget.textContent || '')}
-      >
-        {description}
-      </p>
+      {onNameEdit ? (
+        <EditableText
+          value={name}
+          placeholder="Service name..."
+          onSave={onNameEdit}
+          as="h3"
+          className="mb-3 tracking-tight"
+          style={{ fontSize: "20px", fontWeight: 700, lineHeight: 1.2, color: brand.darkColor }}
+        />
+      ) : (
+        <h3 className="mb-3 tracking-tight" style={{ fontSize: "20px", fontWeight: 700, lineHeight: 1.2, color: brand.darkColor }}>
+          {name}
+        </h3>
+      )}
+      {onDescriptionEdit ? (
+        <EditableText
+          value={description}
+          placeholder="Click to add a description..."
+          onSave={onDescriptionEdit}
+          as="p"
+          className="text-[#888] mb-6"
+          style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6 }}
+        />
+      ) : (
+        <p className="text-[#888] mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6 }}>
+          {description}
+        </p>
+      )}
 
       {/* Deliverables */}
       <div className="border-t border-[#F0F0F0] pt-5">
