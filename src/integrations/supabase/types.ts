@@ -263,6 +263,7 @@ export type Database = {
       }
       clients: {
         Row: {
+          about_summary: string | null
           address: string | null
           agency_id: string | null
           company_name: string
@@ -278,6 +279,7 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          about_summary?: string | null
           address?: string | null
           agency_id?: string | null
           company_name: string
@@ -293,6 +295,7 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          about_summary?: string | null
           address?: string | null
           agency_id?: string | null
           company_name?: string
