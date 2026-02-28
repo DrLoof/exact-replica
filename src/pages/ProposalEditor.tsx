@@ -56,6 +56,7 @@ interface ProposalService {
   price_override: number | null;
   display_order: number | null;
   is_addon: boolean | null;
+  custom_deliverables: string[] | null;
   module?: {
     name: string;
     description: string | null;
@@ -408,12 +409,16 @@ export default function ProposalEditor() {
                                 price={`${currencySymbol}${getServicePrice(svc).toLocaleString()}`}
                                 pricingModel={(svc.module?.pricing_model || 'fixed') as any}
                                 description={svc.module?.description || svc.module?.short_description || ''}
-                                deliverables={svc.module?.deliverables || []}
+                                deliverables={svc.custom_deliverables || svc.module?.deliverables || []}
                                 isAddon={svc.is_addon || false}
                                 delay={i * 0.1}
                                 onDescriptionEdit={async (val) => {
                                   await supabase.from('proposal_services').update({ custom_description: val }).eq('id', svc.id);
                                   setServices(prev => prev.map(s => s.id === svc.id ? { ...s, module: s.module ? { ...s.module, description: val } : s.module } : s));
+                                }}
+                                onDeliverablesEdit={async (dels) => {
+                                  await supabase.from('proposal_services').update({ custom_deliverables: dels }).eq('id', svc.id);
+                                  setServices(prev => prev.map(s => s.id === svc.id ? { ...s, custom_deliverables: dels } : s));
                                 }}
                               />
                             </div>
