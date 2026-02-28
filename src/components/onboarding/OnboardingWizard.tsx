@@ -271,6 +271,47 @@ export function OnboardingWizard() {
         ]);
       }
 
+      // 8. Save selected bundles
+      if (addedBundles.size > 0) {
+        // Re-fetch inserted modules to get IDs
+        const { data: insertedModules } = await supabase
+          .from('service_modules')
+          .select('id, name, price_fixed, price_monthly')
+          .eq('agency_id', agency.id)
+          .eq('is_active', true);
+
+        for (const bundleName of addedBundles) {
+          const template = defaultBundles.find(b => b.name === bundleName);
+          if (!template) continue;
+
+          const pricing = calculateBundlePricing(template.serviceNames, template.discountPercentage, insertedModules || []);
+          const cs = agency.currency_symbol || '$';
+
+          const { data: newBundle } = await supabase.from('bundles').insert({
+            agency_id: agency.id,
+            name: template.name,
+            tagline: template.tagline,
+            description: template.description,
+            bundle_price: pricing.bundleFixed + pricing.bundleMonthly,
+            individual_total: pricing.totalFixed + pricing.totalMonthly,
+            savings_amount: pricing.totalSavings,
+            savings_label: pricing.totalSavings > 0 ? `Save ${cs}${pricing.totalSavings.toLocaleString()}` : null,
+            is_active: true,
+          }).select('id').single();
+
+          if (newBundle) {
+            const moduleIds = template.serviceNames
+              .map(n => (insertedModules || []).find((m: any) => m.name === n)?.id)
+              .filter(Boolean);
+            if (moduleIds.length > 0) {
+              await supabase.from('bundle_modules').insert(
+                moduleIds.map(mid => ({ bundle_id: newBundle.id, module_id: mid }))
+              );
+            }
+          }
+        }
+      }
+
       toast.success('Your agency is set up! Create your first proposal.');
       navigate('/proposals/new');
       window.location.href = '/proposals/new';
