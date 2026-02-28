@@ -271,7 +271,7 @@ export default function Bundles() {
               const bundleModules = modules.filter((m: any) => moduleIds.includes(m.id));
 
               return (
-                <div key={bundle.id} className="rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-sm">
+                <div key={bundle.id} className="flex flex-col rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-sm">
                   <div className="flex items-start justify-between">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
                       <Package className="h-5 w-5 text-accent-foreground" />
@@ -289,7 +289,7 @@ export default function Bundles() {
                   <h3 className="mt-4 font-display text-base font-semibold text-foreground">{bundle.name}</h3>
                   {bundle.tagline && <p className="mt-1 text-sm text-muted-foreground">{bundle.tagline}</p>}
 
-                  <div className="mt-4 flex flex-wrap gap-1.5">
+                  <div className="mt-4 flex flex-1 flex-wrap gap-1.5 content-start">
                     {bundleModules.map((m: any) => (
                       <span key={m.id} className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">{m.name}</span>
                     ))}
@@ -299,16 +299,14 @@ export default function Bundles() {
                   </div>
 
                   <div className="mt-5 border-t border-border pt-4">
-                    <div className="flex items-baseline justify-between">
-                      <div>
-                        {bundle.individual_total > bundle.bundle_price && (
-                          <span className="text-sm text-muted-foreground line-through">{currencySymbol}{(bundle.individual_total || 0).toLocaleString()}</span>
-                        )}
-                        <span className="ml-2 font-display text-xl font-bold tabular-nums text-foreground">{currencySymbol}{(bundle.bundle_price || 0).toLocaleString()}</span>
-                      </div>
-                      {(bundle.savings_amount || 0) > 0 && (
-                        <span className="rounded-full bg-status-success/15 px-2.5 py-0.5 text-xs font-medium text-status-success">
-                          Save {currencySymbol}{(bundle.savings_amount || 0).toLocaleString()}
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      {bundle.individual_total > bundle.bundle_price && (
+                        <span className="text-sm text-muted-foreground line-through">{currencySymbol}{(bundle.individual_total || 0).toLocaleString()}</span>
+                      )}
+                      <span className="font-display text-xl font-bold tabular-nums text-foreground">{currencySymbol}{(bundle.bundle_price || 0).toLocaleString()}</span>
+                      {(bundle.savings_amount || 0) > 0 && bundle.individual_total > 0 && (
+                        <span className="ml-auto rounded-full bg-status-success/15 px-2.5 py-0.5 text-xs font-medium text-status-success">
+                          {Math.round((bundle.savings_amount / bundle.individual_total) * 100)}% off
                         </span>
                       )}
                     </div>
