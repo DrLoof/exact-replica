@@ -24,6 +24,7 @@ export default function SettingsAgency() {
         website: agency.website || '',
         tagline: agency.tagline || '',
         about_text: agency.about_text || '',
+        years_experience: agency.years_experience?.toString() || '',
         address_line1: agency.address_line1 || '',
         address_line2: agency.address_line2 || '',
         city: agency.city || '',
