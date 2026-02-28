@@ -84,16 +84,27 @@ export default function Signup() {
                 className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
               />
             </div>
+            <label className="mt-4 flex items-start gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-border text-brand focus:ring-brand/20"
+              />
+              <span className="text-[12px] text-muted-foreground">
+                I agree to the{' '}
+                <Link to="/terms" target="_blank" className="text-[12px] font-medium underline" style={{ color: '#4A3F32' }}>Terms of Service</Link>
+                {' '}and{' '}
+                <Link to="/privacy" target="_blank" className="text-[12px] font-medium underline" style={{ color: '#4A3F32' }}>Privacy Policy</Link>
+              </span>
+            </label>
             <button
               type="submit"
-              disabled={loading}
-              className="block w-full rounded-lg bg-brand py-2.5 text-center text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover disabled:opacity-50"
+              disabled={loading || !agreed}
+              className="mt-4 block w-full rounded-lg bg-brand py-2.5 text-center text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover disabled:opacity-50"
             >
               {loading ? 'Creating account...' : 'Create account'}
             </button>
-            <p className="text-center text-xs text-muted-foreground">
-              By signing up, you agree to our Terms of Service and Privacy Policy.
-            </p>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
