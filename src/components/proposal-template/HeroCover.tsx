@@ -119,30 +119,51 @@ export function HeroCover({
           >
             Proposal for
           </span>
-          <h1
-            className="mb-4 tracking-tight outline-none"
-            style={{
-              fontSize: "clamp(36px, 5vw, 64px)",
-              fontWeight: 700,
-              lineHeight: 1.05,
-              color: brand.darkColor,
-            }}
-            contentEditable={!!onTitleEdit}
-            suppressContentEditableWarning
-            onBlur={(e) => onTitleEdit?.(e.currentTarget.textContent || '')}
-          >
-            {proposalTitle}
-          </h1>
-          {(subtitle || onSubtitleEdit) && (
-            <p
-              className="text-[#666] max-w-lg mt-4 outline-none"
-              style={{ fontSize: "18px", fontWeight: 300, lineHeight: 1.6 }}
-              contentEditable={!!onSubtitleEdit}
-              suppressContentEditableWarning
-              onBlur={(e) => onSubtitleEdit?.(e.currentTarget.textContent || '')}
+          {onTitleEdit ? (
+            <EditableText
+              value={proposalTitle}
+              placeholder="Enter proposal title..."
+              onSave={onTitleEdit}
+              as="h1"
+              className="mb-4 tracking-tight"
+              style={{
+                fontSize: "clamp(36px, 5vw, 64px)",
+                fontWeight: 700,
+                lineHeight: 1.05,
+                color: brand.darkColor,
+              }}
+            />
+          ) : (
+            <h1
+              className="mb-4 tracking-tight"
+              style={{
+                fontSize: "clamp(36px, 5vw, 64px)",
+                fontWeight: 700,
+                lineHeight: 1.05,
+                color: brand.darkColor,
+              }}
             >
-              {subtitle || 'Click to add a subtitle...'}
-            </p>
+              {proposalTitle}
+            </h1>
+          )}
+          {(subtitle || onSubtitleEdit) && (
+            onSubtitleEdit ? (
+              <EditableText
+                value={subtitle || ''}
+                placeholder="Click to add a subtitle..."
+                onSave={onSubtitleEdit}
+                as="p"
+                className="max-w-lg mt-4"
+                style={{ fontSize: "18px", fontWeight: 300, lineHeight: 1.6, color: "#666" }}
+              />
+            ) : (
+              <p
+                className="text-[#666] max-w-lg mt-4"
+                style={{ fontSize: "18px", fontWeight: 300, lineHeight: 1.6 }}
+              >
+                {subtitle}
+              </p>
+            )
           )}
         </motion.div>
 
