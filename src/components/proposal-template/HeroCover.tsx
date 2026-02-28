@@ -9,6 +9,8 @@ interface HeroCoverProps {
   date?: string;
   proposalNumber?: string;
   confidential?: boolean;
+  onTitleEdit?: (value: string) => void;
+  onSubtitleEdit?: (value: string) => void;
 }
 
 export function HeroCover({
