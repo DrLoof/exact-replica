@@ -70,10 +70,10 @@
     --sidebar-foreground: 24 8% 49%;
     --sidebar-primary: 24 28% 13%;
     --sidebar-primary-foreground: 40 20% 98%;
-    --sidebar-accent: 30 43% 56% / 0.13;
-    --sidebar-accent-foreground: 30 43% 56%;
+    --sidebar-accent: 45 100% 50% / 0.13;
+    --sidebar-accent-foreground: 45 100% 50%;
     --sidebar-border: 34 14% 91%;
-    --sidebar-ring: 30 43% 56%;
+    --sidebar-ring: 45 100% 50%;
   }
 
   .dark {
