@@ -47,6 +47,7 @@ export type Database = {
           state: string | null
           tagline: string | null
           website: string | null
+          years_experience: number | null
           zip: string | null
         }
         Insert: {
@@ -81,6 +82,7 @@ export type Database = {
           state?: string | null
           tagline?: string | null
           website?: string | null
+          years_experience?: number | null
           zip?: string | null
         }
         Update: {
@@ -115,6 +117,7 @@ export type Database = {
           state?: string | null
           tagline?: string | null
           website?: string | null
+          years_experience?: number | null
           zip?: string | null
         }
         Relationships: []
