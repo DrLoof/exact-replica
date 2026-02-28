@@ -163,6 +163,13 @@ export function Sidebar() {
           <LogOut className="h-4 w-4" />
         </button>
       </div>
+
+      {/* Legal links */}
+      <div className="px-4 pb-3 text-center">
+        <Link to="/terms" className="text-[10px] hover:underline" style={{ color: '#B8B0A5' }}>Terms</Link>
+        <span className="mx-1 text-[10px]" style={{ color: '#B8B0A5' }}>·</span>
+        <Link to="/privacy" className="text-[10px] hover:underline" style={{ color: '#B8B0A5' }}>Privacy</Link>
+      </div>
     </aside>
   );
 }
