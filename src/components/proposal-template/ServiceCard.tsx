@@ -11,6 +11,8 @@ interface ServiceCardProps {
   deliverables: string[];
   isAddon?: boolean;
   delay?: number;
+  onNameEdit?: (value: string) => void;
+  onDescriptionEdit?: (value: string) => void;
 }
 
 const MODEL_LABELS: Record<string, string> = {
