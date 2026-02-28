@@ -4,7 +4,6 @@ import {
   Building2, Palette, Receipt, UserPlus, LogOut, Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import propopadLogo from '@/assets/propopad-logo.svg';
 import { useAuth } from '@/hooks/useAuth';
 import { useProposals } from '@/hooks/useAgencyData';
 
@@ -40,21 +39,33 @@ export function Sidebar() {
     ? userProfile.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
     : '??';
 
+  const agencyInitial = agency?.name ? agency.name.charAt(0).toUpperCase() : 'P';
+
   return (
-    <aside className="fixed left-0 top-0 z-30 flex h-screen w-60 flex-col border-r border-border bg-surface-sidebar">
+    <aside className="fixed left-0 top-0 z-30 flex h-screen w-[236px] flex-col bg-ivory" style={{ borderRight: '1px solid hsl(var(--parchment))' }}>
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand">
-          <img src={propopadLogo} alt="Propopad" className="h-5 w-5" />
-        </div>
-        <span className="font-display text-lg font-bold text-foreground">Propopad</span>
+        {/* Paper-fold P mark */}
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 2C3 0.9 3.9 0 5 0H18L23 5V24C23 25.1 22.1 26 21 26H5C3.9 26 3 25.1 3 24V2Z" fill="#2A2118"/>
+          <path d="M18 0L23 5H20C18.9 5 18 4.1 18 3V0Z" fill="#4A3F32"/>
+          <text x="9.5" y="19" fill="#FAF9F6" fontSize="14" fontWeight="700" fontFamily="Satoshi, system-ui, sans-serif">P</text>
+        </svg>
+        <span className="text-[14px] font-semibold tracking-[-0.01em] text-ink">Propopad</span>
       </div>
 
-      {/* Agency name block */}
+      {/* Agency block — white card with shadow */}
       {agency?.name && (
-        <div className="mx-4 mb-3 rounded-lg bg-muted px-3 py-2.5">
-          <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">Agency</p>
-          <p className="text-[13px] font-semibold text-foreground truncate">{agency.name}</p>
+        <div className="mx-3 mb-3 rounded-[10px] bg-paper p-2.5 shadow-card">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] bg-ink text-[11px] font-bold text-ivory">
+              {agencyInitial}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[12px] font-semibold text-ink">{agency.name}</p>
+              <p className="text-[10px] text-ink-faint">Free · {proposals.length} proposals</p>
+            </div>
+          </div>
         </div>
       )}
 
@@ -69,24 +80,20 @@ export function Sidebar() {
                 <Link
                   to={item.path}
                   className={cn(
-                    'relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200',
+                    'relative flex items-center gap-3 rounded-[8px] px-3 py-2 text-sm transition-all duration-200',
                     active
-                      ? 'font-semibold text-brand-hover'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                      ? 'font-semibold text-ink shadow-card bg-paper'
+                      : 'text-ink-muted hover:bg-parchment-soft hover:text-ink'
                   )}
-                  style={active ? { background: 'linear-gradient(135deg, #fff8f5, #FFF1EB)' } : undefined}
                 >
-                  {active && (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-brand" />
-                  )}
                   <item.icon className="h-[18px] w-[18px]" />
                   <span className="flex-1">{item.label}</span>
                   {item.showCount && activeProposalCount > 0 && (
                     <span className={cn(
-                      'min-w-[20px] rounded-full px-1.5 py-0.5 text-center text-[10px] font-semibold leading-none',
+                      'min-w-[20px] rounded-[6px] px-1.5 py-0.5 text-center text-[10px] font-semibold leading-none',
                       active
-                        ? 'bg-brand text-primary-foreground'
-                        : 'bg-muted text-muted-foreground'
+                        ? 'bg-brass-glow text-brass'
+                        : 'bg-parchment-soft text-ink-faint'
                     )}>
                       {activeProposalCount}
                     </span>
@@ -106,16 +113,12 @@ export function Sidebar() {
                 <Link
                   to={item.path}
                   className={cn(
-                    'relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200',
+                    'relative flex items-center gap-3 rounded-[8px] px-3 py-2 text-sm transition-all duration-200',
                     active
-                      ? 'font-semibold text-brand-hover'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                      ? 'font-semibold text-ink shadow-card bg-paper'
+                      : 'text-ink-muted hover:bg-parchment-soft hover:text-ink'
                   )}
-                  style={active ? { background: 'linear-gradient(135deg, #fff8f5, #FFF1EB)' } : undefined}
                 >
-                  {active && (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-brand" />
-                  )}
                   <item.icon className="h-[18px] w-[18px]" />
                   {item.label}
                 </Link>
@@ -125,30 +128,30 @@ export function Sidebar() {
         </ul>
       </nav>
 
-      {/* Upgrade CTA — Dark */}
-      <div className="relative mx-3 mb-3 overflow-hidden rounded-xl p-4" style={{ background: 'linear-gradient(145deg, #1A1917, #2A2925)' }}>
-        {/* Coral glow */}
-        <div className="absolute -right-4 -top-4 h-16 w-16 rounded-full opacity-10 blur-[20px]" style={{ background: '#fc956e' }} />
+      {/* Upgrade CTA — White card with brass top line */}
+      <div className="relative mx-3 mb-3 overflow-hidden rounded-[10px] bg-paper p-4 shadow-card">
+        {/* Brass top line */}
+        <div className="absolute left-0 right-0 top-0 h-[2px]" style={{ background: 'linear-gradient(90deg, #BE8E5E, transparent)' }} />
         <div className="flex items-center gap-1.5 mb-1.5">
-          <Zap className="h-3.5 w-3.5 text-amber-400" />
-          <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-amber-400">Go Pro</p>
+          <Zap className="h-3.5 w-3.5 text-brass" />
+          <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-brass">Go Pro</p>
         </div>
-        <p className="text-[12px] text-white/60">Remove branding & unlock analytics</p>
-        <button className="mt-3 w-full rounded-lg bg-brand px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-brand-hover">
+        <p className="text-[12px] text-ink-muted">Remove branding & unlock analytics</p>
+        <button className="mt-3 w-full rounded-[8px] bg-ink px-3 py-1.5 text-xs font-medium text-ivory transition-colors hover:bg-ink-soft">
           Upgrade — $79/mo
         </button>
       </div>
 
       {/* User */}
-      <div className="flex items-center gap-3 border-t border-border px-4 py-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-xs font-semibold text-primary-foreground">
+      <div className="flex items-center gap-3 px-4 py-3" style={{ borderTop: '1px solid hsl(var(--parchment))' }}>
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-xs font-semibold text-ivory">
           {initials}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="truncate text-sm font-medium text-foreground">{userProfile?.full_name || 'User'}</p>
-          <p className="truncate text-xs text-muted-foreground">{userProfile?.email}</p>
+          <p className="truncate text-sm font-medium text-ink">{userProfile?.full_name || 'User'}</p>
+          <p className="truncate text-xs text-ink-muted">{userProfile?.email}</p>
         </div>
-        <button onClick={handleSignOut} className="text-muted-foreground hover:text-foreground">
+        <button onClick={handleSignOut} className="text-ink-faint hover:text-ink">
           <LogOut className="h-4 w-4" />
         </button>
       </div>

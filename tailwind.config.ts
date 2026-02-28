@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["DM Sans", "system-ui", "sans-serif"],
-        display: ["Space Grotesk", "DM Sans", "sans-serif"],
+        sans: ["Satoshi", "system-ui", "sans-serif"],
+        display: ["Satoshi", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -23,19 +23,37 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        ink: {
+          DEFAULT: "hsl(var(--ink))",
+          soft: "hsl(var(--ink-soft))",
+          muted: "hsl(var(--ink-muted))",
+          faint: "hsl(var(--ink-faint))",
+        },
+        brass: {
+          DEFAULT: "hsl(var(--brass))",
+          glow: "hsl(var(--brass-glow))",
+        },
+        cream: "hsl(var(--cream))",
+        ivory: "hsl(var(--ivory))",
+        paper: "hsl(var(--paper))",
+        parchment: {
+          DEFAULT: "hsl(var(--parchment))",
+          soft: "hsl(var(--parchment-soft))",
+        },
+        // Legacy aliases
         brand: {
-          DEFAULT: "hsl(var(--brand-primary))",
-          hover: "hsl(var(--brand-primary-hover))",
-          light: "hsl(var(--brand-primary-light))",
-          ghost: "hsl(var(--brand-primary-ghost))",
-          text: "hsl(var(--brand-text))",
+          DEFAULT: "hsl(var(--brass))",
+          hover: "hsl(var(--brass))",
+          light: "hsl(var(--brass-glow))",
+          ghost: "hsl(var(--brass-glow))",
+          text: "hsl(var(--brass))",
         },
         surface: {
-          card: "hsl(var(--surface-card))",
-          "card-alt": "hsl(var(--surface-card-alt))",
-          dark: "hsl(var(--surface-dark))",
-          "dark-end": "hsl(var(--surface-dark-end))",
-          sidebar: "hsl(var(--surface-sidebar))",
+          card: "hsl(var(--paper))",
+          "card-alt": "hsl(var(--parchment-soft))",
+          dark: "hsl(var(--ink))",
+          "dark-end": "hsl(var(--ink-soft))",
+          sidebar: "hsl(var(--ivory))",
         },
         primary: {
           DEFAULT: "hsl(var(--primary))",
