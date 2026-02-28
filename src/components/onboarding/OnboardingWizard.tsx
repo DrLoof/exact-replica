@@ -81,12 +81,9 @@ export function OnboardingWizard() {
 
     // Set differentiators
     const defaultDiffs = [
-      { title: 'Strategy-Led Approach', stat_value: '87%', stat_label: 'Client Retention', description: 'Every project starts with strategy, not tactics.', icon: 'Target', source: 'generated' },
-      { title: 'Transparent Reporting', stat_value: 'Weekly', stat_label: 'Updates', description: 'Clear dashboards and weekly progress reports.', icon: 'BarChart3', source: 'generated' },
-      { title: 'Dedicated Team', stat_value: '1', stat_label: 'Point of Contact', description: 'A single dedicated account manager for your project.', icon: 'Users', source: 'generated' },
-      { title: 'Proven Results', stat_value: '150+', stat_label: 'Projects', description: 'Track record of delivering measurable outcomes.', icon: 'Trophy', source: 'generated' },
-      { title: 'Agile Process', stat_value: '2-week', stat_label: 'Sprint Cycles', description: 'Iterative approach with regular check-ins and pivots.', icon: 'Zap', source: 'generated' },
-      { title: 'Full-Service Capability', stat_value: 'End-to-end', stat_label: 'Delivery', description: 'From strategy through execution and optimization.', icon: 'Layers', source: 'generated' },
+      { title: 'Measurable Impact', stat_value: '', stat_label: 'Client retention', description: 'Beautiful work means nothing without results. We embed measurement into every engagement from day one, with clear KPIs, reporting dashboards, and a relentless focus on ROI.', icon: 'Target', source: 'default' },
+      { title: 'True Partnership Model', stat_value: '', stat_label: '', description: 'We don\'t operate as a vendor — we operate as an extension of your team. Transparent communication, shared accountability, and a genuine investment in your success.', icon: 'Users', source: 'default' },
+      { title: 'Strategy-First Approach', stat_value: '', stat_label: '', description: 'We don\'t start with design — we start with understanding. Every visual decision, every word, every pixel is backed by strategic intent based on your market reality and business goals.', icon: 'Zap', source: 'default' },
     ];
 
     if (data.differentiators?.cards?.length > 0) {
@@ -127,12 +124,9 @@ export function OnboardingWizard() {
       address: agency?.address_line1 || '',
     });
     setDifferentiators([
-      { title: 'Strategy-Led Approach', stat_value: '87%', stat_label: 'Client Retention', description: 'Every project starts with strategy, not tactics.', icon: 'Target', source: 'generated' },
-      { title: 'Transparent Reporting', stat_value: 'Weekly', stat_label: 'Updates', description: 'Clear dashboards and weekly progress reports.', icon: 'BarChart3', source: 'generated' },
-      { title: 'Dedicated Team', stat_value: '1', stat_label: 'Point of Contact', description: 'A single dedicated account manager for your project.', icon: 'Users', source: 'generated' },
-      { title: 'Proven Results', stat_value: '150+', stat_label: 'Projects', description: 'Track record of delivering measurable outcomes.', icon: 'Trophy', source: 'generated' },
-      { title: 'Agile Process', stat_value: '2-week', stat_label: 'Sprint Cycles', description: 'Iterative approach with regular check-ins and pivots.', icon: 'Zap', source: 'generated' },
-      { title: 'Full-Service Capability', stat_value: 'End-to-end', stat_label: 'Delivery', description: 'From strategy through execution and optimization.', icon: 'Layers', source: 'generated' },
+      { title: 'Measurable Impact', stat_value: '', stat_label: 'Client retention', description: 'Beautiful work means nothing without results. We embed measurement into every engagement from day one, with clear KPIs, reporting dashboards, and a relentless focus on ROI.', icon: 'Target', source: 'default' },
+      { title: 'True Partnership Model', stat_value: '', stat_label: '', description: 'We don\'t operate as a vendor — we operate as an extension of your team. Transparent communication, shared accountability, and a genuine investment in your success.', icon: 'Users', source: 'default' },
+      { title: 'Strategy-First Approach', stat_value: '', stat_label: '', description: 'We don\'t start with design — we start with understanding. Every visual decision, every word, every pixel is backed by strategic intent based on your market reality and business goals.', icon: 'Zap', source: 'default' },
     ]);
     setScreen('review');
   };
