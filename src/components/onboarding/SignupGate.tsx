@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import propopadLogo from '@/assets/propopad-logo.svg';
+import propopadLogo from '@/assets/logo_propopad_small.svg';
 import { Loader2 } from 'lucide-react';
 
 interface SignupGateProps {
