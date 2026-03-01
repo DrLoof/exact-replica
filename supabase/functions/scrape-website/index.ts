@@ -250,8 +250,12 @@ serve(async (req) => {
           if (cleaned.length > 50) {
             additionalContent.push(`[Page: ${path}]\n${cleaned}`);
           }
+        } else {
+          console.log(`Skip ${path} — status ${resp.status}`);
         }
-      } catch (_) {}
+      } catch (e) {
+        console.log(`Error fetching ${path}: ${e}`);
+      }
     });
     await Promise.all(fetchPromises);
 
