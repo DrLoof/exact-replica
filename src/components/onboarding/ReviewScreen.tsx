@@ -631,7 +631,7 @@ export function ReviewScreen({
       </section>
 
       {/* CTA — inline */}
-      <div className="mt-10 text-center pb-24">
+      <div ref={inlineCtaRef} className="mt-10 text-center pb-6">
         <button
           onClick={onFinish}
           disabled={saving}
