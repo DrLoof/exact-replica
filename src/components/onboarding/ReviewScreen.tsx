@@ -657,7 +657,12 @@ export function ReviewScreen({
                       updated[i] = { ...updated[i], stat_value: e.target.value };
                       onDifferentiatorsChange(updated);
                     }}
-                    placeholder="KPI value"
+                    placeholder={
+                      d.title?.toLowerCase().includes('impact') ? 'e.g. 312%' :
+                      d.title?.toLowerCase().includes('partnership') ? 'e.g. 12+' :
+                      d.title?.toLowerCase().includes('strategy') ? 'e.g. 94%' :
+                      'e.g. 50+'
+                    }
                     className="rounded border border-border bg-card px-2 py-1 text-xs text-foreground focus:border-ink focus:outline-none"
                   />
                   <input
@@ -667,7 +672,12 @@ export function ReviewScreen({
                       updated[i] = { ...updated[i], stat_label: e.target.value };
                       onDifferentiatorsChange(updated);
                     }}
-                    placeholder="KPI label"
+                    placeholder={
+                      d.title?.toLowerCase().includes('impact') ? 'Avg ROI %' :
+                      d.title?.toLowerCase().includes('partnership') ? 'Avg yrs relationship' :
+                      d.title?.toLowerCase().includes('strategy') ? 'Client retention %' :
+                      'Label'
+                    }
                     className="rounded border border-border bg-card px-2 py-1 text-xs text-muted-foreground focus:border-ink focus:outline-none"
                   />
                 </div>
@@ -692,23 +702,19 @@ export function ReviewScreen({
             ) : (
               <div key={i} className="rounded-xl border border-border border-l-2 bg-background p-3 transition-colors hover:border-l-brass group" style={{ borderLeftColor: undefined }}>
                 {d.stat_value ? (
-                  <div className="rounded-lg border border-dashed border-border bg-muted/30 px-2.5 py-1.5 mb-2 inline-block cursor-text group/kpi"
+                  <div className="mb-2 cursor-text"
                     onClick={() => setEditingSection('differentiators')}
                   >
-                    <p className="font-display text-2xl font-bold text-foreground leading-tight">{d.stat_value}</p>
+                    <p className="font-display text-[28px] font-bold text-foreground leading-tight">{d.stat_value}</p>
                     {d.stat_label && <p className="text-[11px] text-muted-foreground">{d.stat_label}</p>}
                   </div>
                 ) : (
                   <button
                     onClick={() => setEditingSection('differentiators')}
-                    className="rounded-lg border border-dashed border-border bg-muted/30 px-2.5 py-2 mb-2 w-full text-left hover:border-brass/50 transition-colors"
+                    className="flex items-center gap-1 mb-2 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
                   >
-                    <p className="text-lg font-bold text-muted-foreground/40">+ {
-                      d.title?.toLowerCase().includes('impact') ? 'AVG ROI %' :
-                      d.title?.toLowerCase().includes('partnership') ? 'AVG YRS RELATIONSHIP' :
-                      d.title?.toLowerCase().includes('strategy') ? 'CLIENT RETENTION %' :
-                      'ADD KPI'
-                    }</p>
+                    <span className="text-[11px]">+</span>
+                    <span className="text-[11px]">Add stat</span>
                   </button>
                 )}
                 <p className="text-[14px] font-semibold text-foreground">{d.title}</p>
