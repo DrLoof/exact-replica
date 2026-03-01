@@ -410,7 +410,7 @@ Return this exact JSON structure:
       "client_name": "name",
       "client_title": "title or null",
       "client_company": "company or null",
-      "metric_value": "+200% or null",
+      "metric_value": "+200% or null — MUST contain a specific number or percentage (e.g. '+265%', '15,000', '3x'). Do NOT include vague descriptions like 'increased' or 'improved'. Set to null if no specific metric.",
       "metric_label": "Organic Traffic or null"
     }
   ],
