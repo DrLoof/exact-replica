@@ -300,6 +300,8 @@ serve(async (req) => {
 
     // Step 4: Send everything to AI for structured parsing
     const allContent = `[Homepage]\n${homepageText}\n\n${additionalContent.join('\n\n')}`;
+    console.log(`Scraped ${additionalContent.length} additional pages. Total content length: ${allContent.length} chars`);
+    console.log(`Pages scraped: ${additionalContent.map(c => c.split('\n')[0]).join(', ')}`);
 
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     let aiResult: any = null;
