@@ -224,7 +224,7 @@ serve(async (req) => {
                 return norm.startsWith(normalizedPath) && norm !== normalizedPath && norm.length > normalizedPath.length + 1;
               }) as string[];
             caseStudyLinks.push(...subLinks);
-          }
+            console.log(`Case listing ${path} found ${subLinks.length} sublinks:`, subLinks.slice(0, 5));
           
           // Strip HTML but preserve blockquote content with markers
           const cleaned = text
