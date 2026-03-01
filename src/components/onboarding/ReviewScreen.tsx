@@ -288,7 +288,7 @@ export function ReviewScreen({
                 {agencyIdentity.brand_color && (
                   <>
                     <span className="inline-block h-4 w-4 rounded-full border border-border" style={{ backgroundColor: agencyIdentity.brand_color }} />
-                    <span>{agencyIdentity.brand_color}</span>
+                    <span>Brand color</span>
                     <span>·</span>
                   </>
                 )}
