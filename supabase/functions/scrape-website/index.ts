@@ -208,6 +208,7 @@ serve(async (req) => {
         });
         if (resp.ok) {
           const text = await resp.text();
+          console.log(`Fetched ${path} — ${text.length} chars, status ${resp.status}`);
           
           // Check if this is a case study / portfolio listing page — extract subpage links
           const normalizedPath = path.replace(/\/$/, '');
