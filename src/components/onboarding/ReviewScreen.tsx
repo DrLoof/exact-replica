@@ -728,7 +728,7 @@ export function ReviewScreen({
       {/* CTA — inline */}
       <div ref={inlineCtaRef} className="mt-10 text-center pb-6">
         <button
-          onClick={onFinish}
+          onClick={handleFinishAttemptWrapped}
           disabled={saving}
           className="w-full max-w-[480px] rounded-[10px] bg-ink px-8 py-4 text-[15px] font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
           style={{ boxShadow: '0 2px 8px rgba(42,33,24,0.15)' }}
