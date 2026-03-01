@@ -746,7 +746,7 @@ export function ReviewScreen({
         <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur-sm">
           <div className="mx-auto flex max-w-[720px] items-center justify-center px-6 py-4">
             <button
-              onClick={onFinish}
+              onClick={handleFinishAttemptWrapped}
               disabled={saving}
               className="w-full max-w-[480px] rounded-[10px] bg-ink px-8 py-3.5 text-[14px] font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
               style={{ boxShadow: '0 2px 8px rgba(42,33,24,0.15)' }}

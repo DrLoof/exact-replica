@@ -10,6 +10,22 @@ import { ScanScreen } from './ScanScreen';
 import { ReviewScreen } from './ReviewScreen';
 import { SignupGate } from './SignupGate';
 
+/** Deduplicate testimonials by comparing normalized first 50 chars of quote text */
+function deduplicateTestimonials(testimonials: any[]): any[] {
+  const seen = new Set<string>();
+  return testimonials.filter(t => {
+    if (!t.quote) return false;
+    const normalized = t.quote.toLowerCase().trim().replace(/\s+/g, ' ').slice(0, 50);
+    if (seen.has(normalized)) return false;
+    // Also check existing entries for near-match
+    for (const existing of seen) {
+      if (existing === normalized) return false;
+    }
+    seen.add(normalized);
+    return true;
+  });
+}
+
 export function OnboardingWizard() {
   const navigate = useNavigate();
   const { agency, userProfile, user } = useAuth();
