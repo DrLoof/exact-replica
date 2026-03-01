@@ -193,13 +193,15 @@ serve(async (req) => {
       })
       .filter(Boolean) as string[];
 
-    const allPaths = [...new Set([...pagesToFetch, ...navLinks.slice(0, 15)])];
+    // Prioritize nav links (real pages) over guessed paths, then deduplicate
+    const allPaths = [...new Set([...navLinks.slice(0, 20), ...pagesToFetch])];
+    console.log(`Will try ${Math.min(allPaths.length, 15)} paths. Nav links: ${navLinks.length}. First 15:`, allPaths.slice(0, 15));
     
-    // Fetch additional pages in parallel (limit to 12 for better coverage)
+    // Fetch additional pages in parallel (limit to 15 for better coverage)
     const additionalContent: string[] = [];
     const caseStudyLinks: string[] = [];
     
-    const fetchPromises = allPaths.slice(0, 12).map(async (path) => {
+    const fetchPromises = allPaths.slice(0, 15).map(async (path) => {
       try {
         const pageUrl = urlObj.origin + path;
         const resp = await fetch(pageUrl, {
