@@ -443,8 +443,9 @@ The agency's name is "${agencyName}". Use this to distinguish client quotes from
 3. ACCEPT quotes where the speaker is clearly from a DIFFERENT company (their title mentions a different company name).
 4. DO NOT include press releases, blog excerpts, news announcements, or agency self-descriptions.
 5. DO NOT include generic company statements or mission descriptions.
-6. If a case study page mentions metrics/results near a client quote, include them as metric_value and metric_label.
-7. If NO valid client testimonials are found, return an EMPTY testimonials array []. Do NOT fabricate testimonials.
+6. Only select quotes that explicitly praise or reference the agency's work, results, or collaboration. Skip generic statements or industry observations that don't mention the agency or the working relationship, even if spoken by a client.
+7. If a case study page mentions metrics/results near a client quote, include them as metric_value and metric_label.
+8. If NO valid client testimonials are found, return an EMPTY testimonials array []. Do NOT fabricate testimonials.
 8. Translate all quotes to English while preserving meaning and tone.
 
 I have also pre-extracted quotes from HTML blockquotes and testimonial elements. These are listed in the "EXTRACTED QUOTES" section. Analyze each one carefully — only include those that are genuine client testimonials.
