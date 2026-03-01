@@ -36,12 +36,17 @@ serve(async (req) => {
       return urlObj.origin + '/' + u;
     };
 
+    const browserUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+    const fetchHeaders = {
+      "User-Agent": browserUA,
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.9",
+    };
+
     // Step 1: Fetch homepage
     let homepageHtml = "";
     try {
-      const response = await fetch(targetUrl, {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; Propopad/1.0)" },
-      });
+      const response = await fetch(targetUrl, { headers: fetchHeaders });
       homepageHtml = await response.text();
     } catch (e) {
       return new Response(
