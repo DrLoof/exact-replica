@@ -461,6 +461,15 @@ export function ReviewScreen({
                 We found these on your website. Confirm you have permission to use each one in proposals.
               </p>
             </div>
+            {(() => {
+              const approvedCount = testimonials.filter(t => t.approved).length;
+              const hasApproved = approvedCount > 0;
+              return (
+                <p className={cn("text-[12px] font-medium px-1", hasApproved ? "text-[#6E9A7A]" : "text-muted-foreground")}>
+                  {approvedCount} of {testimonials.length} approved for proposals{hasApproved ? ' ✓' : ''}
+                </p>
+              );
+            })()}
             <p className="text-[11px] text-muted-foreground italic px-1">
               Testimonials were translated to English from your website. Review for accuracy before using in proposals.
             </p>
@@ -477,60 +486,114 @@ export function ReviewScreen({
           </div>
         ) : (
           <div className="space-y-4">
-            {testimonials.map((t, idx) => (
-              <div key={idx} className="relative rounded-xl bg-background p-4">
-                <div className="absolute top-2 right-2 flex items-center gap-2">
-                  <button onClick={() => removeTestimonial(idx)} className="text-[11px] text-muted-foreground hover:text-destructive">
-                    Remove
-                  </button>
-                </div>
-                <Quote className="h-4 w-4 text-brass mb-2" />
-                <textarea
-                  value={t.quote || ''}
-                  onChange={(e) => updateTestimonial(idx, 'quote', e.target.value)}
-                  placeholder="Enter testimonial quote…"
-                  rows={2}
-                  className="w-full text-sm text-foreground italic leading-relaxed bg-transparent border-b border-border/50 focus:border-brass outline-none resize-none pb-1"
-                />
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <input
-                    value={t.client_name || ''}
-                    onChange={(e) => updateTestimonial(idx, 'client_name', e.target.value)}
-                    placeholder="Client name"
-                    className="text-xs text-muted-foreground bg-transparent border-b border-border/50 focus:border-brass outline-none pb-0.5 w-28"
-                  />
-                  <input
-                    value={t.client_title || ''}
-                    onChange={(e) => updateTestimonial(idx, 'client_title', e.target.value)}
-                    placeholder="Title"
-                    className="text-xs text-muted-foreground bg-transparent border-b border-border/50 focus:border-brass outline-none pb-0.5 w-24"
-                  />
-                  <input
-                    value={t.client_company || ''}
-                    onChange={(e) => updateTestimonial(idx, 'client_company', e.target.value)}
-                    placeholder="Company"
-                    className="text-xs text-muted-foreground bg-transparent border-b border-border/50 focus:border-brass outline-none pb-0.5 w-28"
-                  />
-                </div>
-                {/* Metric badge */}
-                {(t.metric_value || t.metric_label) && (
-                  <div className="mt-2 flex items-center gap-1.5">
-                    <span className="text-[11px]">📈</span>
-                    <span className="text-[11px] font-semibold text-foreground">{t.metric_value}</span>
-                    {t.metric_label && <span className="text-[11px] text-muted-foreground">{t.metric_label}</span>}
+            {testimonials.map((t, idx) => {
+              const isApproved = t.approved === true;
+              const hasNumericMetric = t.metric_value && /\d/.test(t.metric_value);
+              // Build attribution parts: Name · Title · Company (skip empty)
+              const attrParts = [t.client_name, t.client_title, t.client_company].filter(Boolean);
+
+              return (
+                <div
+                  key={idx}
+                  className={cn(
+                    "relative rounded-xl p-4 transition-all",
+                    isApproved
+                      ? "border border-solid bg-[#FAFCFA]"
+                      : "border border-dashed bg-white"
+                  )}
+                  style={{
+                    borderColor: isApproved ? '#C5DBC9' : '#EEEAE3',
+                  }}
+                >
+                  {/* Top-right: Toggle + label + Remove */}
+                  <div className="absolute top-3 right-3 flex items-center gap-3">
+                    <div className="flex items-center gap-1.5">
+                      <span className={cn("text-[11px]", isApproved ? "text-[#6E9A7A] font-medium" : "text-muted-foreground")}>
+                        {isApproved ? '✓ Approved' : 'Not approved'}
+                      </span>
+                      <Switch
+                        checked={isApproved}
+                        onCheckedChange={(checked) => updateTestimonial(idx, 'approved', checked)}
+                        className="data-[state=checked]:bg-[#6E9A7A] scale-75"
+                      />
+                    </div>
+                    <button onClick={() => removeTestimonial(idx)} className="text-[11px] text-muted-foreground hover:text-destructive">
+                      Remove
+                    </button>
                   </div>
-                )}
-                <label className="mt-3 flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={t.approved === true}
-                    onChange={(e) => updateTestimonial(idx, 'approved', e.target.checked)}
-                    className="h-3.5 w-3.5 rounded border-border accent-ink"
+
+                  {/* Quote icon with optional green check overlay */}
+                  <div className="relative inline-block mb-2">
+                    <Quote className={cn("h-4 w-4", isApproved ? "text-[#6E9A7A]" : "text-brass")} />
+                    {isApproved && <CheckCircle2 className="absolute -top-1 -right-1.5 h-2.5 w-2.5 text-[#6E9A7A]" />}
+                  </div>
+
+                  <textarea
+                    value={t.quote || ''}
+                    onChange={(e) => updateTestimonial(idx, 'quote', e.target.value)}
+                    placeholder="Enter testimonial quote…"
+                    rows={2}
+                    className="w-full text-sm text-foreground italic leading-relaxed bg-transparent border-b border-border/50 focus:border-brass outline-none resize-none pb-1"
                   />
-                  <span className="text-[11px] text-muted-foreground">Approve for proposals</span>
-                </label>
-              </div>
-            ))}
+                  {/* Attribution line — editable inline inputs, only show fields with values or on focus */}
+                  <div className="mt-2 flex flex-wrap items-center gap-0">
+                    <input
+                      value={t.client_name || ''}
+                      onChange={(e) => updateTestimonial(idx, 'client_name', e.target.value)}
+                      placeholder="Client name"
+                      className="text-[13px] font-medium bg-transparent border-b border-transparent focus:border-brass outline-none pb-0.5 w-auto min-w-[80px]"
+                      style={{ color: '#4A3F32', width: Math.max(80, (t.client_name?.length || 11) * 7.5) + 'px' }}
+                    />
+                    {(t.client_title || t.client_company) && (
+                      <>
+                        {t.client_title && (
+                          <>
+                            <span className="text-[13px] text-muted-foreground mx-1">·</span>
+                            <input
+                              value={t.client_title}
+                              onChange={(e) => updateTestimonial(idx, 'client_title', e.target.value)}
+                              placeholder="Title"
+                              className="text-[13px] bg-transparent border-b border-transparent focus:border-brass outline-none pb-0.5 w-auto min-w-[50px]"
+                              style={{ color: '#4A3F32', width: Math.max(50, (t.client_title?.length || 5) * 7) + 'px' }}
+                            />
+                          </>
+                        )}
+                        {t.client_company && (
+                          <>
+                            <span className="text-[13px] text-muted-foreground mx-1">·</span>
+                            <input
+                              value={t.client_company}
+                              onChange={(e) => updateTestimonial(idx, 'client_company', e.target.value)}
+                              placeholder="Company"
+                              className="text-[13px] bg-transparent border-b border-transparent focus:border-brass outline-none pb-0.5 w-auto min-w-[60px]"
+                              style={{ color: '#4A3F32', width: Math.max(60, (t.client_company?.length || 7) * 7) + 'px' }}
+                            />
+                          </>
+                        )}
+                      </>
+                    )}
+                    {/* Show add buttons for missing title/company */}
+                    {!t.client_title && !t.client_company && (
+                      <button
+                        onClick={() => updateTestimonial(idx, 'client_title', '')}
+                        className="ml-1 text-[11px] text-muted-foreground/50 hover:text-brass"
+                      >
+                        + add details
+                      </button>
+                    )}
+                  </div>
+                  {/* Metric badge — only show if metric contains a number */}
+                  {hasNumericMetric && (
+                    <div className="mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1" style={{ backgroundColor: '#F0F5F1' }}>
+                      <span className="text-[12px]">📈</span>
+                      <span className="text-[12px] font-medium" style={{ color: '#6E9A7A' }}>
+                        {t.metric_value}{t.metric_label ? ` ${t.metric_label}` : ''}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
