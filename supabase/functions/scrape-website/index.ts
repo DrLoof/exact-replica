@@ -1,3 +1,4 @@
+// Scrape website edge function v2
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -193,13 +194,15 @@ serve(async (req) => {
       })
       .filter(Boolean) as string[];
 
-    const allPaths = [...new Set([...pagesToFetch, ...navLinks.slice(0, 15)])];
+    // Prioritize nav links (real pages) over guessed paths, then deduplicate
+    const allPaths = [...new Set([...navLinks.slice(0, 20), ...pagesToFetch])];
+    console.log(`Will try ${Math.min(allPaths.length, 15)} paths. Nav links: ${navLinks.length}. First 15:`, allPaths.slice(0, 15));
     
-    // Fetch additional pages in parallel (limit to 12 for better coverage)
+    // Fetch additional pages in parallel (limit to 15 for better coverage)
     const additionalContent: string[] = [];
     const caseStudyLinks: string[] = [];
     
-    const fetchPromises = allPaths.slice(0, 12).map(async (path) => {
+    const fetchPromises = allPaths.slice(0, 15).map(async (path) => {
       try {
         const pageUrl = urlObj.origin + path;
         const resp = await fetch(pageUrl, {
@@ -387,17 +390,34 @@ Rules:
               }
             ],
             temperature: 0.3,
-            max_tokens: 4000,
+            max_tokens: 5000,
           }),
         });
 
         if (aiResponse.ok) {
           const aiData = await aiResponse.json();
           const content = aiData.choices?.[0]?.message?.content || "";
+          console.log(`AI response length: ${content.length} chars`);
           // Try to parse JSON from response (handle markdown code blocks)
           const jsonMatch = content.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
-            aiResult = JSON.parse(jsonMatch[0]);
+            let jsonStr = jsonMatch[0];
+            // Attempt to fix common JSON issues: trailing commas, unescaped quotes in values
+            jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
+            try {
+              aiResult = JSON.parse(jsonStr);
+            } catch (parseErr) {
+              console.error("JSON parse failed, attempting repair:", parseErr);
+              // Try to extract testimonials even from broken JSON
+              const testMatch = content.match(/"testimonials"\s*:\s*\[([\s\S]*?)\]/);
+              if (testMatch) {
+                try {
+                  const fixedTestimonials = JSON.parse(`[${testMatch[1].replace(/,\s*$/, '')}]`);
+                  aiResult = { testimonials: fixedTestimonials };
+                  console.log(`Recovered ${fixedTestimonials.length} testimonials from partial JSON`);
+                } catch (_) {}
+              }
+            }
           }
         }
       } catch (e) {
