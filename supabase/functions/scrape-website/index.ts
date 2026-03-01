@@ -390,17 +390,34 @@ Rules:
               }
             ],
             temperature: 0.3,
-            max_tokens: 4000,
+            max_tokens: 5000,
           }),
         });
 
         if (aiResponse.ok) {
           const aiData = await aiResponse.json();
           const content = aiData.choices?.[0]?.message?.content || "";
+          console.log(`AI response length: ${content.length} chars`);
           // Try to parse JSON from response (handle markdown code blocks)
           const jsonMatch = content.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
-            aiResult = JSON.parse(jsonMatch[0]);
+            let jsonStr = jsonMatch[0];
+            // Attempt to fix common JSON issues: trailing commas, unescaped quotes in values
+            jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
+            try {
+              aiResult = JSON.parse(jsonStr);
+            } catch (parseErr) {
+              console.error("JSON parse failed, attempting repair:", parseErr);
+              // Try to extract testimonials even from broken JSON
+              const testMatch = content.match(/"testimonials"\s*:\s*\[([\s\S]*?)\]/);
+              if (testMatch) {
+                try {
+                  const fixedTestimonials = JSON.parse(`[${testMatch[1].replace(/,\s*$/, '')}]`);
+                  aiResult = { testimonials: fixedTestimonials };
+                  console.log(`Recovered ${fixedTestimonials.length} testimonials from partial JSON`);
+                } catch (_) {}
+              }
+            }
           }
         }
       } catch (e) {
