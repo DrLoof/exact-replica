@@ -272,6 +272,7 @@ serve(async (req) => {
           });
           if (resp.ok) {
             const text = await resp.text();
+            console.log(`Fetched case study ${path} — ${text.length} chars`);
             const cleaned = text
               .replace(/<script[\s\S]*?<\/script>/gi, '')
               .replace(/<style[\s\S]*?<\/style>/gi, '')
