@@ -1,4 +1,4 @@
-// Scrape website edge function v2
+// Scrape website edge function v3 — Smart multi-page testimonial discovery
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -8,6 +8,74 @@ const corsHeaders = {
 };
 
 const AI_GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
+
+// Extract quotes from HTML with rich patterns
+function extractQuotesFromHtml(html: string, pagePath: string): { quote: string; attribution: string; context: string }[] {
+  const quotes: { quote: string; attribution: string; context: string }[] = [];
+
+  // Pattern 1: <blockquote> elements
+  const blockquoteRegex = /<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi;
+  let match;
+  while ((match = blockquoteRegex.exec(html)) !== null) {
+    const quoteText = match[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    if (quoteText.length < 15 || quoteText.length > 1000) continue;
+    
+    // Look for attribution nearby (next 500 chars after the blockquote)
+    const afterQuote = html.slice(match.index + match[0].length, match.index + match[0].length + 500);
+    const attrMatch = afterQuote.match(/<(?:figcaption|cite|p|span|div)[^>]*(?:class=["'][^"']*(?:author|attribution|cite|name|credit|source)[^"']*["'])?[^>]*>([\s\S]*?)<\/(?:figcaption|cite|p|span|div)>/i);
+    const attribution = attrMatch ? attrMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
+    
+    quotes.push({ quote: quoteText, attribution, context: pagePath });
+  }
+
+  // Pattern 2: Elements with testimonial/quote class names
+  const classPatterns = [
+    /<(?:div|section|article|figure)[^>]*class=["'][^"']*(?:testimonial|quote|review|client-quote|pullquote|customer-quote|feedback)[^"']*["'][^>]*>([\s\S]*?)<\/(?:div|section|article|figure)>/gi,
+  ];
+  for (const pattern of classPatterns) {
+    while ((match = pattern.exec(html)) !== null) {
+      const block = match[1];
+      // Extract quote text (look for p, blockquote, or quoted text)
+      const quoteMatch = block.match(/<(?:p|blockquote|q|span)[^>]*>([\s\S]*?)<\/(?:p|blockquote|q|span)>/i);
+      if (!quoteMatch) continue;
+      const quoteText = quoteMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      if (quoteText.length < 15 || quoteText.length > 1000) continue;
+      
+      // Check we haven't already captured this quote via blockquote
+      if (quotes.some(q => q.quote === quoteText)) continue;
+      
+      // Look for attribution within the same block
+      const attrMatch = block.match(/<(?:cite|figcaption|span|p|div)[^>]*(?:class=["'][^"']*(?:author|name|credit|source|attribution)[^"']*["'])?[^>]*>([\s\S]*?)<\/(?:cite|figcaption|span|p|div)>/i);
+      const attribution = attrMatch ? attrMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
+      
+      quotes.push({ quote: quoteText, attribution, context: pagePath });
+    }
+  }
+
+  return quotes;
+}
+
+// Clean HTML to text with quote/attribution markers for AI fallback
+function cleanHtmlToText(html: string, maxLen = 5000): string {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+    .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+    .replace(/<header[\s\S]*?<\/header>/gi, '')
+    .replace(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi, (_, content) => {
+      const text = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      return ` [QUOTE: "${text}"] `;
+    })
+    .replace(/<(?:figcaption|cite)[^>]*>([\s\S]*?)<\/(?:figcaption|cite)>/gi, (_, content) => {
+      const text = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      return ` [ATTRIBUTION: ${text}] `;
+    })
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, maxLen);
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -171,8 +239,7 @@ serve(async (req) => {
       }
     }
 
-    // Step 3: Detect internal pages and fetch them
-    // Include common paths in multiple languages (EN, SE, DE, etc.)
+    // Step 3: Discover & fetch internal pages
     const pagesToFetch = [
       '/about', '/about-us', '/who-we-are', '/om-oss', '/om',
       '/services', '/what-we-do', '/tjanster', '/tjanster/',
@@ -194,13 +261,14 @@ serve(async (req) => {
       })
       .filter(Boolean) as string[];
 
-    // Prioritize nav links (real pages) over guessed paths, then deduplicate
     const allPaths = [...new Set([...navLinks.slice(0, 20), ...pagesToFetch])];
     console.log(`Will try ${Math.min(allPaths.length, 15)} paths. Nav links: ${navLinks.length}. First 15:`, allPaths.slice(0, 15));
     
-    // Fetch additional pages in parallel (limit to 15 for better coverage)
     const additionalContent: string[] = [];
     const caseStudyLinks: string[] = [];
+    const allExtractedQuotes: { quote: string; attribution: string; context: string }[] = [];
+    // Store raw HTML of case-study-bearing pages for quote extraction
+    const rawPageHtml: Map<string, string> = new Map();
     
     const fetchPromises = allPaths.slice(0, 15).map(async (path) => {
       try {
@@ -213,7 +281,6 @@ serve(async (req) => {
           const text = await resp.text();
           console.log(`Fetched ${path} — ${text.length} chars, status ${resp.status}`);
           
-          // Check if this is a case study / portfolio listing page — extract subpage links
           const normalizedPath = path.replace(/\/$/, '');
           const isCasePage = /\/(kundcase|case-studies|cases|work|portfolio|testimonials|reviews|referenser|references|kunder)\/?$/i.test(path);
           if (isCasePage) {
@@ -230,27 +297,14 @@ serve(async (req) => {
             console.log(`Case listing ${path} found ${subLinks.length} sublinks:`, subLinks.slice(0, 5));
           }
           
-          // Strip HTML but preserve blockquote content with markers
-          const cleaned = text
-            .replace(/<script[\s\S]*?<\/script>/gi, '')
-            .replace(/<style[\s\S]*?<\/style>/gi, '')
-            .replace(/<nav[\s\S]*?<\/nav>/gi, '')
-            .replace(/<footer[\s\S]*?<\/footer>/gi, '')
-            .replace(/<header[\s\S]*?<\/header>/gi, '')
-            // Preserve blockquotes as quotes
-            .replace(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi, (_, content) => {
-              const text = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-              return ` [QUOTE: "${text}"] `;
-            })
-            // Preserve figcaption / cite as attribution
-            .replace(/<(?:figcaption|cite)[^>]*>([\s\S]*?)<\/(?:figcaption|cite)>/gi, (_, content) => {
-              const text = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-              return ` [ATTRIBUTION: ${text}] `;
-            })
-            .replace(/<[^>]+>/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim()
-            .slice(0, 5000);
+          // Extract quotes from raw HTML
+          const pageQuotes = extractQuotesFromHtml(text, path);
+          if (pageQuotes.length > 0) {
+            allExtractedQuotes.push(...pageQuotes);
+            console.log(`Extracted ${pageQuotes.length} quotes from ${path}`);
+          }
+          
+          const cleaned = cleanHtmlToText(text);
           if (cleaned.length > 50) {
             additionalContent.push(`[Page: ${path}]\n${cleaned}`);
           }
@@ -263,8 +317,8 @@ serve(async (req) => {
     });
     await Promise.all(fetchPromises);
 
-    // Step 3b: Fetch case study subpages for testimonials (up to 10)
-    const uniqueCaseLinks = [...new Set(caseStudyLinks)].slice(0, 10);
+    // Step 3b: Fetch case study subpages (up to 5 for testimonials)
+    const uniqueCaseLinks = [...new Set(caseStudyLinks)].slice(0, 5);
     if (uniqueCaseLinks.length > 0) {
       console.log(`Found ${uniqueCaseLinks.length} case study subpages:`, uniqueCaseLinks);
       const casePromises = uniqueCaseLinks.map(async (path) => {
@@ -277,24 +331,15 @@ serve(async (req) => {
           if (resp.ok) {
             const text = await resp.text();
             console.log(`Fetched case study ${path} — ${text.length} chars`);
-            const cleaned = text
-              .replace(/<script[\s\S]*?<\/script>/gi, '')
-              .replace(/<style[\s\S]*?<\/style>/gi, '')
-              .replace(/<nav[\s\S]*?<\/nav>/gi, '')
-              .replace(/<footer[\s\S]*?<\/footer>/gi, '')
-              .replace(/<header[\s\S]*?<\/header>/gi, '')
-              .replace(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi, (_, content) => {
-                const t = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-                return ` [QUOTE: "${t}"] `;
-              })
-              .replace(/<(?:figcaption|cite)[^>]*>([\s\S]*?)<\/(?:figcaption|cite)>/gi, (_, content) => {
-                const t = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-                return ` [ATTRIBUTION: ${t}] `;
-              })
-              .replace(/<[^>]+>/g, ' ')
-              .replace(/\s+/g, ' ')
-              .trim()
-              .slice(0, 5000);
+            
+            // Extract quotes from raw HTML
+            const pageQuotes = extractQuotesFromHtml(text, path);
+            if (pageQuotes.length > 0) {
+              allExtractedQuotes.push(...pageQuotes);
+              console.log(`Extracted ${pageQuotes.length} quotes from case study ${path}`);
+            }
+            
+            const cleaned = cleanHtmlToText(text);
             if (cleaned.length > 50) {
               additionalContent.push(`[Case study: ${path}]\n${cleaned}`);
             }
@@ -306,19 +351,31 @@ serve(async (req) => {
       await Promise.all(casePromises);
     }
 
-    // Clean homepage text too
-    const homepageText = homepageHtml
-      .replace(/<script[\s\S]*?<\/script>/gi, '')
-      .replace(/<style[\s\S]*?<\/style>/gi, '')
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, 4000);
+    // Also extract quotes from homepage
+    const homepageQuotes = extractQuotesFromHtml(homepageHtml, '/');
+    if (homepageQuotes.length > 0) {
+      allExtractedQuotes.push(...homepageQuotes);
+      console.log(`Extracted ${homepageQuotes.length} quotes from homepage`);
+    }
+
+    console.log(`Total extracted quotes: ${allExtractedQuotes.length}`);
+
+    // Clean homepage text
+    const homepageText = cleanHtmlToText(homepageHtml, 4000);
 
     // Step 4: Send everything to AI for structured parsing
     const allContent = `[Homepage]\n${homepageText}\n\n${additionalContent.join('\n\n')}`;
     console.log(`Scraped ${additionalContent.length} additional pages. Total content length: ${allContent.length} chars`);
     console.log(`Pages scraped: ${additionalContent.map(c => c.split('\n')[0]).join(', ')}`);
+
+    const agencyName = result.name || 'Unknown Agency';
+
+    // Build extracted quotes section for AI
+    const quotesSection = allExtractedQuotes.length > 0
+      ? `\n\n--- EXTRACTED QUOTES (from blockquotes and testimonial elements) ---\n${allExtractedQuotes.map((q, i) => 
+          `Quote ${i + 1} [from ${q.context}]:\n  Text: "${q.quote}"\n  Attribution: "${q.attribution}"`
+        ).join('\n\n')}`
+      : '';
 
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     let aiResult: any = null;
@@ -336,7 +393,7 @@ serve(async (req) => {
             messages: [
               {
                 role: "system",
-                content: `You are parsing a marketing agency's website content. Extract structured data and return ONLY valid JSON (no markdown, no code blocks).
+                content: `You are parsing a marketing agency's website content. The agency's name is "${agencyName}". Extract structured data and return ONLY valid JSON (no markdown, no code blocks).
 
 Return this exact JSON structure:
 {
@@ -349,7 +406,7 @@ Return this exact JSON structure:
   "services_detected": ["keyword1", "keyword2"],
   "testimonials": [
     {
-      "quote": "exact quote text",
+      "quote": "exact quote text translated to English",
       "client_name": "name",
       "client_title": "title or null",
       "client_company": "company or null",
@@ -372,28 +429,36 @@ Return this exact JSON structure:
 }
 
 Rules:
-- CRITICAL: ALL output text MUST be in English, regardless of the language of the source website. Translate ALL scraped content to natural, fluent English — including about_text, testimonial quotes, differentiator titles/descriptions/stat_labels/stat_values, intro paragraphs, and any other text fields. Do NOT leave any Swedish, German, French, Spanish, or other non-English text in the output.
+- CRITICAL: ALL output text MUST be in English, regardless of the language of the source website. Translate ALL scraped content to natural, fluent English.
 - For services_detected, use these exact category names when they match: "Brand & Creative", "Website & Digital", "Content & Copywriting", "SEO & Organic Growth", "Paid Advertising", "Social Media", "Email Marketing", "Analytics & Data", "Marketing Strategy"
-- TESTIMONIALS — STRICT RULES:
-  * A testimonial is a quote FROM A CLIENT about the agency — someone OUTSIDE the agency praising their work.
-  * DO NOT include quotes from agency founders, team members, or employees about themselves or their own company. Those are NOT testimonials.
-  * DO NOT include press releases, blog excerpts, news announcements, or internal team statements.
-  * DO NOT include generic company statements or mission descriptions as testimonials.
-  * A valid testimonial MUST have: (1) a quote praising the agency's work, AND (2) attribution to someone who is clearly a CLIENT (not an agency employee).
-  * Look for text marked with [QUOTE: "..."] near [ATTRIBUTION: ...] where the attribution is a client contact, NOT an agency team member.
-  * Case study pages may contain client quotes — only extract those where the speaker is clearly the CLIENT, not the agency describing results.
-  * If NO valid client testimonials are found, return an EMPTY testimonials array. Do NOT fabricate or stretch non-testimonial content.
-  * Translate all quotes to English while preserving meaning and tone.
-- For differentiators, ONLY use real data found on the website (mark as "scraped"). Do NOT invent or generate fake stats, KPI numbers, or differentiators. If fewer than 3 are found, that's fine — return only what you found. Translate all differentiator text to English.
+
+TESTIMONIAL EXTRACTION — CRITICAL RULES:
+The agency's name is "${agencyName}". Use this to distinguish client quotes from staff quotes.
+
+1. A testimonial MUST be a quote FROM A CLIENT — someone OUTSIDE "${agencyName}" — praising the agency's work.
+2. REJECT any quote where the speaker works at "${agencyName}" or any variation of the agency name. Check the attribution carefully:
+   - If title/role contains "${agencyName}" or a recognizable variation → REJECT (it's a staff quote)
+   - If the person is described as owner/CEO/founder/employee of "${agencyName}" → REJECT
+   - Examples of INTERNAL quotes to reject: "SEO-specialist på ${agencyName}", "VD ${agencyName}", "Grundare av ${agencyName}"
+3. ACCEPT quotes where the speaker is clearly from a DIFFERENT company (their title mentions a different company name).
+4. DO NOT include press releases, blog excerpts, news announcements, or agency self-descriptions.
+5. DO NOT include generic company statements or mission descriptions.
+6. If a case study page mentions metrics/results near a client quote, include them as metric_value and metric_label.
+7. If NO valid client testimonials are found, return an EMPTY testimonials array []. Do NOT fabricate testimonials.
+8. Translate all quotes to English while preserving meaning and tone.
+
+I have also pre-extracted quotes from HTML blockquotes and testimonial elements. These are listed in the "EXTRACTED QUOTES" section. Analyze each one carefully — only include those that are genuine client testimonials.
+
+- For differentiators, ONLY use real data found on the website (mark as "scraped"). Do NOT invent or generate fake stats, KPI numbers, or differentiators. If fewer than 3 are found, return only what you found. Translate all differentiator text to English.
 - If data is not found, use null or empty string, don't invent testimonials or stats
 - Return ONLY the JSON object, no other text`
               },
               {
                 role: "user",
-                content: `Parse this agency website content and extract ALL testimonials:\n\n${allContent.slice(0, 25000)}`
+                content: `Parse this agency website content. Agency name: "${agencyName}".\n\n${allContent.slice(0, 22000)}${quotesSection}`
               }
             ],
-            temperature: 0.3,
+            temperature: 0.2,
             max_tokens: 5000,
           }),
         });
@@ -402,17 +467,14 @@ Rules:
           const aiData = await aiResponse.json();
           const content = aiData.choices?.[0]?.message?.content || "";
           console.log(`AI response length: ${content.length} chars`);
-          // Try to parse JSON from response (handle markdown code blocks)
           const jsonMatch = content.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
             let jsonStr = jsonMatch[0];
-            // Attempt to fix common JSON issues: trailing commas, unescaped quotes in values
             jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
             try {
               aiResult = JSON.parse(jsonStr);
             } catch (parseErr) {
               console.error("JSON parse failed, attempting repair:", parseErr);
-              // Try to extract testimonials even from broken JSON
               const testMatch = content.match(/"testimonials"\s*:\s*\[([\s\S]*?)\]/);
               if (testMatch) {
                 try {
@@ -438,6 +500,14 @@ Rules:
       if (aiResult.services_detected?.length > 0) result.detected_services = aiResult.services_detected;
       if (aiResult.testimonials?.length > 0) result.testimonials = aiResult.testimonials;
       if (aiResult.differentiators) result.differentiators = aiResult.differentiators;
+    }
+
+    // Log testimonial results
+    console.log(`Testimonials found: ${result.testimonials?.length || 0}`);
+    if (result.testimonials?.length > 0) {
+      result.testimonials.forEach((t: any, i: number) => {
+        console.log(`  ${i + 1}. "${t.quote?.slice(0, 60)}..." — ${t.client_name}, ${t.client_company || 'unknown'}`);
+      });
     }
 
     // Fallback: detect services from keywords if AI didn't find them

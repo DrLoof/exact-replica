@@ -511,6 +511,14 @@ export function ReviewScreen({
                     className="text-xs text-muted-foreground bg-transparent border-b border-border/50 focus:border-brass outline-none pb-0.5 w-28"
                   />
                 </div>
+                {/* Metric badge */}
+                {(t.metric_value || t.metric_label) && (
+                  <div className="mt-2 flex items-center gap-1.5">
+                    <span className="text-[11px]">📈</span>
+                    <span className="text-[11px] font-semibold text-foreground">{t.metric_value}</span>
+                    {t.metric_label && <span className="text-[11px] text-muted-foreground">{t.metric_label}</span>}
+                  </div>
+                )}
                 <label className="mt-3 flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
