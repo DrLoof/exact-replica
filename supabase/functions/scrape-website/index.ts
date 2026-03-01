@@ -295,7 +295,9 @@ serve(async (req) => {
               additionalContent.push(`[Case study: ${path}]\n${cleaned}`);
             }
           }
-        } catch (_) {}
+        } catch (e) {
+          console.log(`Error fetching case study ${path}: ${e}`);
+        }
       });
       await Promise.all(casePromises);
     }
