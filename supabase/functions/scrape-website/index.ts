@@ -225,6 +225,7 @@ serve(async (req) => {
               }) as string[];
             caseStudyLinks.push(...subLinks);
             console.log(`Case listing ${path} found ${subLinks.length} sublinks:`, subLinks.slice(0, 5));
+          }
           
           // Strip HTML but preserve blockquote content with markers
           const cleaned = text
