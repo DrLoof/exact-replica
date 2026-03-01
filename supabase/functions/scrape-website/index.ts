@@ -374,12 +374,16 @@ Return this exact JSON structure:
 Rules:
 - CRITICAL: ALL output text MUST be in English, regardless of the language of the source website. Translate ALL scraped content to natural, fluent English — including about_text, testimonial quotes, differentiator titles/descriptions/stat_labels/stat_values, intro paragraphs, and any other text fields. Do NOT leave any Swedish, German, French, Spanish, or other non-English text in the output.
 - For services_detected, use these exact category names when they match: "Brand & Creative", "Website & Digital", "Content & Copywriting", "SEO & Organic Growth", "Paid Advertising", "Social Media", "Email Marketing", "Analytics & Data", "Marketing Strategy"
-- TESTIMONIALS ARE CRITICAL: Extract ALL testimonials/client quotes you can find across ALL pages, especially case study pages. Look for:
-  * Text marked with [QUOTE: "..."] — these are blockquotes from the HTML
-  * Text near [ATTRIBUTION: ...] — these identify who said the quote
-  * Any text that appears to be a client quote (first-person statements about working with the agency, often near a person's name and title/company)
-  * Metrics/stats shown on case study pages (like "+265% ROAS") should be included as metric_value/metric_label on the corresponding testimonial
-  * Translate all quotes to English while preserving meaning and tone
+- TESTIMONIALS — STRICT RULES:
+  * A testimonial is a quote FROM A CLIENT about the agency — someone OUTSIDE the agency praising their work.
+  * DO NOT include quotes from agency founders, team members, or employees about themselves or their own company. Those are NOT testimonials.
+  * DO NOT include press releases, blog excerpts, news announcements, or internal team statements.
+  * DO NOT include generic company statements or mission descriptions as testimonials.
+  * A valid testimonial MUST have: (1) a quote praising the agency's work, AND (2) attribution to someone who is clearly a CLIENT (not an agency employee).
+  * Look for text marked with [QUOTE: "..."] near [ATTRIBUTION: ...] where the attribution is a client contact, NOT an agency team member.
+  * Case study pages may contain client quotes — only extract those where the speaker is clearly the CLIENT, not the agency describing results.
+  * If NO valid client testimonials are found, return an EMPTY testimonials array. Do NOT fabricate or stretch non-testimonial content.
+  * Translate all quotes to English while preserving meaning and tone.
 - For differentiators, ONLY use real data found on the website (mark as "scraped"). Do NOT invent or generate fake stats, KPI numbers, or differentiators. If fewer than 3 are found, that's fine — return only what you found. Translate all differentiator text to English.
 - If data is not found, use null or empty string, don't invent testimonials or stats
 - Return ONLY the JSON object, no other text`
