@@ -267,8 +267,8 @@ serve(async (req) => {
         try {
           const pageUrl = urlObj.origin + path;
           const resp = await fetch(pageUrl, {
-            headers: { "User-Agent": "Mozilla/5.0 (compatible; Propopad/1.0)" },
-            signal: AbortSignal.timeout(5000),
+            headers: fetchHeaders,
+            signal: AbortSignal.timeout(6000),
           });
           if (resp.ok) {
             const text = await resp.text();
