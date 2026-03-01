@@ -25,8 +25,8 @@ export default function Home() {
       {/* Nav */}
       <nav className="flex items-center justify-between px-6 py-5 md:px-12 lg:px-20">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-ink">
-            <img src={propopadLogo} alt="Propopad" className="h-5 w-5 invert" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl overflow-hidden">
+            <img src={propopadLogo} alt="Propopad" className="h-9 w-9" />
           </div>
           <span className="font-display text-lg font-bold text-foreground">Propopad</span>
         </div>
