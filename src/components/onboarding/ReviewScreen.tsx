@@ -110,6 +110,13 @@ export function ReviewScreen({
     return groups;
   }, [unselectedModules]);
 
+  const handleFinishAttemptWrapped = () => {
+    if (testimonials.length > 0 && !testimonials.some(t => t.approved)) {
+      toast('No testimonials approved — you can add them later in Settings.', { icon: 'ℹ️' });
+    }
+    onFinish();
+  };
+
   const toggleModule = (key: string) => {
     const next = new Set(selectedModuleKeys);
     if (next.has(key)) next.delete(key);
