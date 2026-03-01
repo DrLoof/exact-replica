@@ -36,12 +36,17 @@ serve(async (req) => {
       return urlObj.origin + '/' + u;
     };
 
+    const browserUA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+    const fetchHeaders = {
+      "User-Agent": browserUA,
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.9",
+    };
+
     // Step 1: Fetch homepage
     let homepageHtml = "";
     try {
-      const response = await fetch(targetUrl, {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; Propopad/1.0)" },
-      });
+      const response = await fetch(targetUrl, { headers: fetchHeaders });
       homepageHtml = await response.text();
     } catch (e) {
       return new Response(
@@ -198,11 +203,12 @@ serve(async (req) => {
       try {
         const pageUrl = urlObj.origin + path;
         const resp = await fetch(pageUrl, {
-          headers: { "User-Agent": "Mozilla/5.0 (compatible; Propopad/1.0)" },
-          signal: AbortSignal.timeout(5000),
+          headers: fetchHeaders,
+          signal: AbortSignal.timeout(6000),
         });
         if (resp.ok) {
           const text = await resp.text();
+          console.log(`Fetched ${path} — ${text.length} chars, status ${resp.status}`);
           
           // Check if this is a case study / portfolio listing page — extract subpage links
           const normalizedPath = path.replace(/\/$/, '');
@@ -218,7 +224,7 @@ serve(async (req) => {
                 return norm.startsWith(normalizedPath) && norm !== normalizedPath && norm.length > normalizedPath.length + 1;
               }) as string[];
             caseStudyLinks.push(...subLinks);
-          }
+            console.log(`Case listing ${path} found ${subLinks.length} sublinks:`, subLinks.slice(0, 5));
           
           // Strip HTML but preserve blockquote content with markers
           const cleaned = text
@@ -244,8 +250,12 @@ serve(async (req) => {
           if (cleaned.length > 50) {
             additionalContent.push(`[Page: ${path}]\n${cleaned}`);
           }
+        } else {
+          console.log(`Skip ${path} — status ${resp.status}`);
         }
-      } catch (_) {}
+      } catch (e) {
+        console.log(`Error fetching ${path}: ${e}`);
+      }
     });
     await Promise.all(fetchPromises);
 
@@ -257,11 +267,12 @@ serve(async (req) => {
         try {
           const pageUrl = urlObj.origin + path;
           const resp = await fetch(pageUrl, {
-            headers: { "User-Agent": "Mozilla/5.0 (compatible; Propopad/1.0)" },
-            signal: AbortSignal.timeout(5000),
+            headers: fetchHeaders,
+            signal: AbortSignal.timeout(6000),
           });
           if (resp.ok) {
             const text = await resp.text();
+            console.log(`Fetched case study ${path} — ${text.length} chars`);
             const cleaned = text
               .replace(/<script[\s\S]*?<\/script>/gi, '')
               .replace(/<style[\s\S]*?<\/style>/gi, '')
@@ -284,7 +295,9 @@ serve(async (req) => {
               additionalContent.push(`[Case study: ${path}]\n${cleaned}`);
             }
           }
-        } catch (_) {}
+        } catch (e) {
+          console.log(`Error fetching case study ${path}: ${e}`);
+        }
       });
       await Promise.all(casePromises);
     }
