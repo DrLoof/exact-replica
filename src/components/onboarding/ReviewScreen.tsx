@@ -620,9 +620,27 @@ export function ReviewScreen({
               </div>
             ) : (
               <div key={i} className="rounded-xl border border-border border-l-2 bg-background p-3 transition-colors hover:border-l-brass group" style={{ borderLeftColor: undefined }}>
-                {d.stat_value && <p className="font-display text-2xl font-bold text-foreground">{d.stat_value}</p>}
-                {d.stat_label && <p className="text-[11px] text-muted-foreground">{d.stat_label}</p>}
-                <p className="mt-1 text-[14px] font-semibold text-foreground">{d.title}</p>
+                {d.stat_value ? (
+                  <div className="rounded-lg border border-dashed border-border bg-muted/30 px-2.5 py-1.5 mb-2 inline-block cursor-text group/kpi"
+                    onClick={() => setEditingSection('differentiators')}
+                  >
+                    <p className="font-display text-2xl font-bold text-foreground leading-tight">{d.stat_value}</p>
+                    {d.stat_label && <p className="text-[11px] text-muted-foreground">{d.stat_label}</p>}
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setEditingSection('differentiators')}
+                    className="rounded-lg border border-dashed border-border bg-muted/30 px-2.5 py-2 mb-2 w-full text-left hover:border-brass/50 transition-colors"
+                  >
+                    <p className="text-lg font-bold text-muted-foreground/40">+ {
+                      d.title?.toLowerCase().includes('impact') ? 'AVG ROI %' :
+                      d.title?.toLowerCase().includes('partnership') ? 'AVG YRS RELATIONSHIP' :
+                      d.title?.toLowerCase().includes('strategy') ? 'CLIENT RETENTION %' :
+                      'ADD KPI'
+                    }</p>
+                  </button>
+                )}
+                <p className="text-[14px] font-semibold text-foreground">{d.title}</p>
                 {d.description && <p className="mt-1 text-[12px] text-muted-foreground line-clamp-2">{d.description}</p>}
               </div>
             );
