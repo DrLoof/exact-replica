@@ -30,8 +30,8 @@ export default function Login() {
       <div className="flex flex-1 flex-col justify-center px-8 py-12 sm:px-16 lg:px-24">
         <div className="mx-auto w-full max-w-sm">
           <div className="mb-8 flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand">
-              <img src={propopadLogo} alt="Propopad" className="h-5 w-5" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl overflow-hidden">
+              <img src={propopadLogo} alt="Propopad" className="h-9 w-9" />
             </div>
             <span className="font-display text-xl font-bold text-foreground">Propopad</span>
           </div>

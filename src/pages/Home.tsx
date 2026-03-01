@@ -188,8 +188,8 @@ export default function Home() {
       <footer className="border-t border-border px-6 py-10">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-ink">
-              <img src={propopadLogo} alt="" className="h-3.5 w-3.5 invert" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg overflow-hidden">
+              <img src={propopadLogo} alt="" className="h-7 w-7" />
             </div>
             <span className="font-display text-sm font-bold text-foreground">Propopad</span>
           </div>
