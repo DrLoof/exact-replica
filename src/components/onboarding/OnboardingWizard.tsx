@@ -78,8 +78,10 @@ export function OnboardingWizard() {
     });
     setSelectedModuleKeys(keys);
 
-    // Set testimonials
-    setTestimonials(data.testimonials || []);
+    // Set testimonials (with deduplication)
+    const rawTestimonials = data.testimonials || [];
+    const deduped = deduplicateTestimonials(rawTestimonials);
+    setTestimonials(deduped);
 
     // Set differentiators
     const defaultDiffs = [
