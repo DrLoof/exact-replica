@@ -51,14 +51,28 @@ export function ReviewScreen({
   const [showStickyCta, setShowStickyCta] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const agencyRef = useRef<HTMLElement>(null);
+  const inlineCtaRef = useRef<HTMLDivElement>(null);
 
-  // Show sticky CTA after scrolling past agency section
+  // Show sticky CTA after scrolling past agency section, but hide when inline CTA is visible
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setShowStickyCta(!entry.isIntersecting),
-      { threshold: 0 }
-    );
+    let agencyVisible = true;
+    let inlineCtaVisible = false;
+
+    const update = () => setShowStickyCta(!agencyVisible && !inlineCtaVisible);
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.target === agencyRef.current) {
+          agencyVisible = entry.isIntersecting;
+        } else if (entry.target === inlineCtaRef.current) {
+          inlineCtaVisible = entry.isIntersecting;
+        }
+      });
+      update();
+    }, { threshold: 0 });
+
     if (agencyRef.current) observer.observe(agencyRef.current);
+    if (inlineCtaRef.current) observer.observe(inlineCtaRef.current);
     return () => observer.disconnect();
   }, []);
 
@@ -617,7 +631,7 @@ export function ReviewScreen({
       </section>
 
       {/* CTA — inline */}
-      <div className="mt-10 text-center pb-24">
+      <div ref={inlineCtaRef} className="mt-10 text-center pb-6">
         <button
           onClick={onFinish}
           disabled={saving}
