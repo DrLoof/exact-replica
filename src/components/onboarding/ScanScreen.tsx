@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Globe, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'motion/react';
-import propopadLogo from '@/assets/propopad-logo.svg';
+import propopadLogo from '@/assets/logo_propopad_orange.svg';
 
 interface ScanScreenProps {
   onScrapeComplete: (data: any) => void;
