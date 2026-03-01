@@ -169,10 +169,11 @@ serve(async (req) => {
     // Include common paths in multiple languages (EN, SE, DE, etc.)
     const pagesToFetch = [
       '/about', '/about-us', '/who-we-are', '/om-oss', '/om',
-      '/services', '/what-we-do', '/tjanster',
+      '/services', '/what-we-do', '/tjanster', '/tjanster/',
       '/testimonials', '/reviews', '/clients', '/kunder', '/referenser',
-      '/work', '/case-studies', '/cases', '/kundcase', '/portfolio',
+      '/work', '/case-studies', '/cases', '/kundcase', '/kundcase/', '/portfolio',
       '/contact', '/kontakt', '/kontakta-oss',
+      '/references', '/referenties', '/projekte', '/projets',
     ];
     const navLinks = [...homepageHtml.matchAll(/<a[^>]*href=["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi)]
       .map(m => m[1])
@@ -187,45 +188,59 @@ serve(async (req) => {
       })
       .filter(Boolean) as string[];
 
-    const allPaths = [...new Set([...pagesToFetch, ...navLinks.slice(0, 10)])];
+    const allPaths = [...new Set([...pagesToFetch, ...navLinks.slice(0, 15)])];
     
-    // Fetch additional pages in parallel (limit to 8 for speed)
+    // Fetch additional pages in parallel (limit to 12 for better coverage)
     const additionalContent: string[] = [];
     const caseStudyLinks: string[] = [];
     
-    const fetchPromises = allPaths.slice(0, 8).map(async (path) => {
+    const fetchPromises = allPaths.slice(0, 12).map(async (path) => {
       try {
         const pageUrl = urlObj.origin + path;
         const resp = await fetch(pageUrl, {
           headers: { "User-Agent": "Mozilla/5.0 (compatible; Propopad/1.0)" },
-          signal: AbortSignal.timeout(4000),
+          signal: AbortSignal.timeout(5000),
         });
         if (resp.ok) {
           const text = await resp.text();
           
           // Check if this is a case study / portfolio listing page — extract subpage links
-          const isCasePage = /\/(kundcase|case-studies|cases|work|portfolio|testimonials|reviews|referenser)\/?$/i.test(path);
+          const normalizedPath = path.replace(/\/$/, '');
+          const isCasePage = /\/(kundcase|case-studies|cases|work|portfolio|testimonials|reviews|referenser|references|kunder)\/?$/i.test(path);
           if (isCasePage) {
             const subLinks = [...text.matchAll(/<a[^>]*href=["']([^"'#]+)["'][^>]*>/gi)]
               .map(m => {
                 try { return new URL(m[1], urlObj.origin).pathname; } catch { return null; }
               })
               .filter(Boolean)
-              .filter(p => p!.startsWith(path) && p !== path && p!.length > path.length + 1) as string[];
+              .filter(p => {
+                const norm = p!.replace(/\/$/, '');
+                return norm.startsWith(normalizedPath) && norm !== normalizedPath && norm.length > normalizedPath.length + 1;
+              }) as string[];
             caseStudyLinks.push(...subLinks);
           }
           
-          // Strip HTML, keep text content (truncate per page)
+          // Strip HTML but preserve blockquote content with markers
           const cleaned = text
             .replace(/<script[\s\S]*?<\/script>/gi, '')
             .replace(/<style[\s\S]*?<\/style>/gi, '')
             .replace(/<nav[\s\S]*?<\/nav>/gi, '')
             .replace(/<footer[\s\S]*?<\/footer>/gi, '')
             .replace(/<header[\s\S]*?<\/header>/gi, '')
+            // Preserve blockquotes as quotes
+            .replace(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi, (_, content) => {
+              const text = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+              return ` [QUOTE: "${text}"] `;
+            })
+            // Preserve figcaption / cite as attribution
+            .replace(/<(?:figcaption|cite)[^>]*>([\s\S]*?)<\/(?:figcaption|cite)>/gi, (_, content) => {
+              const text = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+              return ` [ATTRIBUTION: ${text}] `;
+            })
             .replace(/<[^>]+>/g, ' ')
             .replace(/\s+/g, ' ')
             .trim()
-            .slice(0, 3000);
+            .slice(0, 5000);
           if (cleaned.length > 50) {
             additionalContent.push(`[Page: ${path}]\n${cleaned}`);
           }
@@ -234,15 +249,16 @@ serve(async (req) => {
     });
     await Promise.all(fetchPromises);
 
-    // Step 3b: Fetch case study subpages for testimonials (up to 6)
-    const uniqueCaseLinks = [...new Set(caseStudyLinks)].slice(0, 6);
+    // Step 3b: Fetch case study subpages for testimonials (up to 10)
+    const uniqueCaseLinks = [...new Set(caseStudyLinks)].slice(0, 10);
     if (uniqueCaseLinks.length > 0) {
+      console.log(`Found ${uniqueCaseLinks.length} case study subpages:`, uniqueCaseLinks);
       const casePromises = uniqueCaseLinks.map(async (path) => {
         try {
           const pageUrl = urlObj.origin + path;
           const resp = await fetch(pageUrl, {
             headers: { "User-Agent": "Mozilla/5.0 (compatible; Propopad/1.0)" },
-            signal: AbortSignal.timeout(4000),
+            signal: AbortSignal.timeout(5000),
           });
           if (resp.ok) {
             const text = await resp.text();
@@ -252,10 +268,18 @@ serve(async (req) => {
               .replace(/<nav[\s\S]*?<\/nav>/gi, '')
               .replace(/<footer[\s\S]*?<\/footer>/gi, '')
               .replace(/<header[\s\S]*?<\/header>/gi, '')
+              .replace(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi, (_, content) => {
+                const t = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+                return ` [QUOTE: "${t}"] `;
+              })
+              .replace(/<(?:figcaption|cite)[^>]*>([\s\S]*?)<\/(?:figcaption|cite)>/gi, (_, content) => {
+                const t = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+                return ` [ATTRIBUTION: ${t}] `;
+              })
               .replace(/<[^>]+>/g, ' ')
               .replace(/\s+/g, ' ')
               .trim()
-              .slice(0, 3000);
+              .slice(0, 5000);
             if (cleaned.length > 50) {
               additionalContent.push(`[Case study: ${path}]\n${cleaned}`);
             }
