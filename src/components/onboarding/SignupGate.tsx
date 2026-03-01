@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import propopadLogo from '@/assets/propopad-logo.svg';
+import propopadLogo from '@/assets/logo_propopad_small.svg';
 import { Loader2 } from 'lucide-react';
 
 interface SignupGateProps {
@@ -64,8 +64,8 @@ export function SignupGate({ onAuthenticated, onCancel }: SignupGateProps) {
         </button>
 
         <div className="mb-6 flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink">
-            <img src={propopadLogo} alt="" className="h-4 w-4 invert" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden">
+            <img src={propopadLogo} alt="" className="h-8 w-8" />
           </div>
           <span className="font-display text-base font-bold text-foreground">Propopad</span>
         </div>

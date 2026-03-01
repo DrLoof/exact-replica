@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Globe, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'motion/react';
-import propopadLogo from '@/assets/logo_propopad_orange.svg';
+import propopadLogo from '@/assets/logo_propopad_small.svg';
 
 interface ScanScreenProps {
   onScrapeComplete: (data: any) => void;
@@ -188,8 +188,8 @@ export function ScanScreen({ onScrapeComplete, onManualSetup }: ScanScreenProps)
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 py-20">
       <div className="w-full max-w-md text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl overflow-hidden">
-          <img src={propopadLogo} alt="Propopad" className="h-16 w-16" />
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl overflow-hidden">
+          <img src={propopadLogo} alt="Propopad" className="h-14 w-14" />
         </div>
 
         <h1 className="mt-6 font-display text-2xl font-bold text-foreground">

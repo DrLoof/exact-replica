@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import propopadLogo from '@/assets/propopad-logo.svg';
+import propopadLogo from '@/assets/logo_propopad_small.svg';
 
 export default function Terms() {
   const { session } = useAuth();
@@ -11,8 +11,8 @@ export default function Terms() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand">
-              <img src={propopadLogo} alt="Propopad" className="h-5 w-5" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl overflow-hidden">
+              <img src={propopadLogo} alt="Propopad" className="h-9 w-9" />
             </div>
             <span className="font-display text-xl font-bold text-foreground">Propopad</span>
           </Link>
