@@ -367,11 +367,11 @@ Rules:
               },
               {
                 role: "user",
-                content: `Parse this agency website content:\n\n${allContent.slice(0, 15000)}`
+                content: `Parse this agency website content and extract ALL testimonials:\n\n${allContent.slice(0, 25000)}`
               }
             ],
             temperature: 0.3,
-            max_tokens: 3000,
+            max_tokens: 4000,
           }),
         });
 
