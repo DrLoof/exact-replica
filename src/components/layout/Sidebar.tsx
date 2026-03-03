@@ -4,6 +4,7 @@ import {
   Building2, Palette, Receipt, UserPlus, LogOut, Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import logoOrange from '@/assets/logo_propopad_small.svg';
 import { useAuth } from '@/hooks/useAuth';
 import { useProposals } from '@/hooks/useAgencyData';
 
