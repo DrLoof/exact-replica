@@ -283,6 +283,23 @@ export default function ProposalNew() {
   const prefilledClientId = searchParams.get('client');
   const repeatMode = searchParams.get('repeat') === 'true';
 
+  // Pre-select bundle modules from query param
+  const initialBundleId = searchParams.get('bundle');
+  useEffect(() => {
+    if (initialBundleId && bundles.length > 0 && modules.length > 0) {
+      const bundle = bundles.find((b: any) => b.id === initialBundleId);
+      if (bundle) {
+        const bundleModuleIds = (bundle.bundle_modules || []).map((bm: any) => bm.module_id);
+        setSelectedModuleIds(prev => {
+          const next = new Set(prev);
+          bundleModuleIds.forEach((id: string) => next.add(id));
+          return next;
+        });
+      }
+    }
+  }, [initialBundleId, bundles.length, modules.length]);
+
+  // Pre-fill client from query param
   useEffect(() => {
     if (prefilledClientId && clients.length > 0 && !selectedClient) {
       const found = clients.find((c: any) => c.id === prefilledClientId);
