@@ -4,6 +4,7 @@ import {
   Building2, Palette, Receipt, UserPlus, LogOut, Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import logoOrange from '@/assets/logo_propopad_small.svg';
 import { useAuth } from '@/hooks/useAuth';
 import { useProposals } from '@/hooks/useAgencyData';
 
@@ -45,12 +46,7 @@ export function Sidebar() {
     <aside className="fixed left-0 top-0 z-30 flex h-screen w-[236px] flex-col bg-ivory" style={{ borderRight: '1px solid hsl(var(--parchment))' }}>
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5">
-        {/* Paper-fold P mark */}
-        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M3 2C3 0.9 3.9 0 5 0H18L23 5V24C23 25.1 22.1 26 21 26H5C3.9 26 3 25.1 3 24V2Z" fill="#2A2118"/>
-          <path d="M18 0L23 5H20C18.9 5 18 4.1 18 3V0Z" fill="#4A3F32"/>
-          <text x="9.5" y="19" fill="#FAF9F6" fontSize="14" fontWeight="700" fontFamily="Satoshi, system-ui, sans-serif">P</text>
-        </svg>
+        <img src={logoOrange} alt="Propopad" className="h-7 w-7 rounded-[6px]" />
         <span className="text-[14px] font-semibold tracking-[-0.01em] text-ink">Propopad</span>
       </div>
 
