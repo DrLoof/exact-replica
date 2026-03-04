@@ -33,29 +33,29 @@ export function TimelineStep({
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay, duration: 0.5, ease: "easeOut" }}
-      className="flex gap-6"
+      className="flex gap-5"
       style={{ fontFamily: "'Space Grotesk', sans-serif" }}
     >
-      {/* Timeline line + dot */}
+      {/* Timeline line + number square */}
       <div className="flex flex-col items-center shrink-0">
         <div
-          className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-          style={{ backgroundColor: brand.primaryColor }}
+          className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+          style={{ backgroundColor: "#1E1E2E" }}
         >
-          <span className="text-white" style={{ fontSize: "14px", fontWeight: 700 }}>
+          <span className="text-white" style={{ fontSize: "16px", fontWeight: 700 }}>
             {String(number).padStart(2, "0")}
           </span>
         </div>
         {!isLast && (
           <div
-            className="w-px flex-1 min-h-[40px]"
-            style={{ backgroundColor: `${brand.primaryColor}30` }}
+            className="w-0.5 flex-1 min-h-[48px]"
+            style={{ backgroundColor: "#E5E7EB" }}
           />
         )}
       </div>
 
       {/* Content */}
-      <div className={`pb-8 ${isLast ? "" : ""}`}>
+      <div className={`pb-10 pt-1 ${isLast ? "" : ""}`}>
         <div className="flex items-center gap-3 mb-2">
           {onNameEdit ? (
             <EditableText
@@ -64,10 +64,10 @@ export function TimelineStep({
               onSave={onNameEdit}
               as="h3"
               className="tracking-tight"
-              style={{ fontSize: "18px", fontWeight: 700, color: brand.darkColor }}
+              style={{ fontSize: "18px", fontWeight: 700, color: "#1E1E2E" }}
             />
           ) : (
-            <h3 className="tracking-tight" style={{ fontSize: "18px", fontWeight: 700, color: brand.darkColor }}>
+            <h3 className="tracking-tight" style={{ fontSize: "18px", fontWeight: 700, color: "#1E1E2E" }}>
               {name}
             </h3>
           )}
@@ -77,13 +77,13 @@ export function TimelineStep({
               placeholder="Duration..."
               onSave={onDurationEdit}
               as="span"
-              className="inline-block rounded-full px-3 py-0.5"
-              style={{ fontSize: "12px", fontWeight: 600, backgroundColor: `${brand.primaryColor}15`, color: brand.primaryColor }}
+              className="inline-block rounded-full px-3 py-0.5 border uppercase tracking-wider"
+              style={{ fontSize: "11px", fontWeight: 700, borderColor: "#4880FF", color: "#4880FF", backgroundColor: "transparent" }}
             />
           ) : (
             <span
-              className="inline-block rounded-full px-3 py-0.5"
-              style={{ fontSize: "12px", fontWeight: 600, backgroundColor: `${brand.primaryColor}15`, color: brand.primaryColor }}
+              className="inline-block rounded-full px-3 py-0.5 border uppercase tracking-wider"
+              style={{ fontSize: "11px", fontWeight: 700, borderColor: "#4880FF", color: "#4880FF", backgroundColor: "transparent" }}
             >
               {duration}
             </span>
@@ -96,11 +96,11 @@ export function TimelineStep({
               placeholder="Click to add a description..."
               onSave={onDescriptionEdit}
               as="p"
-              className="text-[#888] max-w-md"
-              style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6, fontFamily: "'Inter', sans-serif" }}
+              className="max-w-xl"
+              style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: "#6B7280", fontFamily: "'Inter', sans-serif" }}
             />
           ) : (
-            <p className="text-[#888] max-w-md" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6, fontFamily: "'Inter', sans-serif" }}>
+            <p className="max-w-xl" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: "#6B7280", fontFamily: "'Inter', sans-serif" }}>
               {description}
             </p>
           )

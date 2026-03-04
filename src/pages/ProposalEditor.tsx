@@ -445,8 +445,32 @@ export default function ProposalEditor() {
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="04">
                     <SectionHeader number="03" title="Timeline" subtitle="How we'll get there" />
+                    
+                    {/* Stat bar */}
+                    {(() => {
+                      const startDateStr = proposal.project_start_date
+                        ? new Date(proposal.project_start_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                        : 'TBD';
+                      const durationStr = proposal.estimated_duration || `~${Math.max(services.length * 2, 4)} weeks`;
+                      const durationMatch = durationStr.match(/(\d+)/);
+                      const totalWeeks = durationMatch ? parseInt(durationMatch[1]) : 16;
+                      const launchDate = proposal.project_start_date
+                        ? new Date(new Date(proposal.project_start_date).getTime() + totalWeeks * 7 * 86400000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                        : 'TBD';
+                      return (
+                        <HighlightPanel
+                          items={[
+                            { label: 'Project Start', value: startDateStr },
+                            { label: 'Total Duration', value: `${totalWeeks} Weeks` },
+                            { label: 'Projected Launch', value: launchDate, accent: true },
+                          ]}
+                        />
+                      );
+                    })()}
+
+                    {/* Phase timeline */}
                     {proposal.phases && Array.isArray(proposal.phases) && (proposal.phases as any[]).length > 0 ? (
-                      <div>
+                      <div className="mt-10">
                         {(proposal.phases as any[]).map((phase: any, i: number) => (
                           <TimelineStep
                             key={i}
@@ -475,14 +499,36 @@ export default function ProposalEditor() {
                         ))}
                       </div>
                     ) : (
-                      <div className="py-10">
-                        <HighlightPanel
-                          items={[
-                            { label: 'Start Date', value: proposal.project_start_date ? new Date(proposal.project_start_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'TBD' },
-                            { label: 'Duration', value: proposal.estimated_duration || `~${Math.max(services.length * 2, 4)} weeks` },
-                            { label: 'Revisions', value: `${proposal.revision_rounds ?? 2} rounds` },
-                          ]}
-                        />
+                      <div className="mt-10 text-center py-12">
+                        <Clock className="mx-auto h-8 w-8 text-muted-foreground mb-3" />
+                        <p className="text-[#999]" style={{ fontSize: '15px' }}>No timeline generated yet</p>
+                        <p className="text-xs text-muted-foreground mt-1 mb-4">Generate project phases based on your selected services.</p>
+                        <button
+                          onClick={async () => {
+                            try {
+                              const serviceNames = services.map(s => ({ name: s.module?.name || 'Service' }));
+                              const durationMatch = (proposal.estimated_duration || '16 weeks').match(/(\d+)/);
+                              const totalWeeks = durationMatch ? parseInt(durationMatch[1]) : 16;
+                              const { data } = await supabase.functions.invoke('generate-timeline', {
+                                body: {
+                                  services: serviceNames,
+                                  clientName: client?.company_name || 'Client',
+                                  totalWeeks,
+                                },
+                              });
+                              if (data?.phases) {
+                                await updateField('phases', data.phases);
+                                toast.success('Timeline generated!');
+                              }
+                            } catch {
+                              toast.error('Failed to generate timeline');
+                            }
+                          }}
+                          className="rounded-lg px-5 py-2.5 text-sm font-medium text-white"
+                          style={{ backgroundColor: '#2A2118' }}
+                        >
+                          Generate Timeline
+                        </button>
                       </div>
                     )}
                   </PageWrapper>
