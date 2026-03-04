@@ -497,6 +497,53 @@ export default function ProposalNew() {
 
       const selectedModsList = Array.from(selectedModuleIds).map(id => modules.find((m: any) => m.id === id)).filter(Boolean);
 
+      // Calculate total duration from selected services
+      let totalDurationWeeks = 0;
+      selectedModsList.forEach((m: any) => {
+        const match = m.default_timeline?.match(/(\d+)/);
+        totalDurationWeeks += match ? parseInt(match[1]) : 2;
+      });
+      totalDurationWeeks = Math.max(totalDurationWeeks, 4);
+      const durationStr = `${totalDurationWeeks} weeks`;
+
+      // Generate timeline phases via edge function
+      let generatedPhases: any[] = [];
+      try {
+        const clientDisplayName = selectedClient?.company_name || newClientName;
+        const { data: timelineData } = await supabase.functions.invoke('generate-timeline', {
+          body: {
+            services: selectedModsList.map((m: any) => ({ name: m.name })),
+            clientName: clientDisplayName,
+            totalWeeks: totalDurationWeeks,
+            customPhases: timelinePhases.length > 0 ? timelinePhases.map((p: any) => ({ name: p.name })) : null,
+          },
+        });
+        if (timelineData?.phases) {
+          generatedPhases = timelineData.phases;
+        }
+      } catch (e) {
+        console.warn('Timeline generation failed, using defaults', e);
+      }
+
+      // Fallback phases if generation failed
+      if (generatedPhases.length === 0) {
+        const defaultNames = ['Discovery & Research', 'Strategy & Architecture', 'Creative Development', 'Build & Produce', 'Launch & Optimize'];
+        const pcts = [0.12, 0.12, 0.31, 0.25, 0.20];
+        let weekStart = 1;
+        generatedPhases = defaultNames.map((name, i) => {
+          const weeks = Math.max(1, Math.round(pcts[i] * totalDurationWeeks));
+          const weekEnd = weekStart + weeks - 1;
+          const duration = weekStart === weekEnd ? `WEEK ${weekStart}` : `WEEKS ${weekStart}–${weekEnd}`;
+          const phase = { name, duration, description: '' };
+          weekStart = weekEnd + 1;
+          return phase;
+        });
+      }
+
+      // Calculate projected launch date
+      const startDateObj = new Date(startDate);
+      const launchDate = new Date(startDateObj.getTime() + totalDurationWeeks * 7 * 86400000);
+
       const { data: proposal, error: pError } = await supabase.from('proposals').insert({
         agency_id: agency.id,
         client_id: clientId,
@@ -508,10 +555,12 @@ export default function ProposalNew() {
         grand_total: totalFixed + totalMonthly,
         created_by: userProfile?.id,
         project_start_date: startDate,
+        estimated_duration: durationStr,
         validity_days: agency.default_validity_days || 30,
         revision_rounds: agency.default_revision_rounds ?? 2,
         notice_period: agency.default_notice_period || '30 days',
         bundle_savings: bundleSavings,
+        phases: generatedPhases,
       }).select('id').single();
       if (pError) throw pError;
 
