@@ -274,6 +274,11 @@ export function ReviewScreen({
             <div>
               <input ref={fileInputRef} type="file" accept=".png,.svg,.webp" onChange={handleLogoUpload} className="hidden" />
               <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground">
+                {agencyIdentity.logo_url && (
+                  <div className="h-6 w-6 rounded border border-border bg-background p-0.5 shrink-0">
+                    <img src={agencyIdentity.logo_url} alt="" className="h-full w-full object-contain" />
+                  </div>
+                )}
                 {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
                 {agencyIdentity.logo_url ? 'Replace logo' : 'Upload logo'}
               </button>
