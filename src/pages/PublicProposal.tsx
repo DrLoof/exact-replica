@@ -274,14 +274,26 @@ export default function PublicProposal() {
               title="Timeline"
               subtitle="A phased approach ensuring quality delivery at every stage."
             />
-            <HighlightPanel
-              items={[
-                { label: 'Start Date', value: proposal.project_start_date ? new Date(proposal.project_start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD' },
-                { label: 'Phases', value: `${phases.length} stages` },
-                { label: 'Est. Duration', value: proposal.estimated_duration || `~${phases.length * 2} weeks`, accent: true },
-              ]}
-              variant="default"
-            />
+            {(() => {
+              const startDateStr = proposal.project_start_date
+                ? new Date(proposal.project_start_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                : 'TBD';
+              const durationMatch = (proposal.estimated_duration || '16 weeks').match(/(\d+)/);
+              const tw = durationMatch ? parseInt(durationMatch[1]) : phases.length * 3;
+              const launchDate = proposal.project_start_date
+                ? new Date(new Date(proposal.project_start_date).getTime() + tw * 7 * 86400000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                : 'TBD';
+              return (
+                <HighlightPanel
+                  items={[
+                    { label: 'Project Start', value: startDateStr },
+                    { label: 'Total Duration', value: `${tw} Weeks` },
+                    { label: 'Projected Launch', value: launchDate, accent: true },
+                  ]}
+                  variant="default"
+                />
+              );
+            })()}
             <div className="mt-10">
               {phases.map((phase: any, idx: number) => (
                 <TimelineStep
