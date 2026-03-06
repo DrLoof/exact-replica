@@ -212,7 +212,40 @@ export default function ProposalEditor() {
     setProposal(prev => prev ? { ...prev, [field]: value } : prev);
   };
 
-  const toggleSection = (idx: number) => {
+  const regenerateExecutiveSummary = async () => {
+    if (!proposal || !agency) return;
+    setRegenerating(true);
+    try {
+      // Get service names and ai_context from modules
+      const moduleIds = services.map(s => s.module_id).filter(Boolean);
+      const { data: modulesData } = await supabase
+        .from('service_modules')
+        .select('name, ai_context')
+        .in('id', moduleIds);
+      
+      const { data: summaryData } = await supabase.functions.invoke('generate-executive-summary', {
+        body: {
+          agencyName: agency.name,
+          clientName: client?.company_name || 'Client',
+          serviceNames: (modulesData || []).map((m: any) => m.name),
+          serviceContexts: (modulesData || []).map((m: any) => m.ai_context).filter(Boolean),
+          clientChallenge: (proposal as any).client_challenge || null,
+          clientGoal: (proposal as any).client_goal || null,
+          clientContextNote: (proposal as any).client_context_note || null,
+        },
+      });
+      if (summaryData?.summary) {
+        await updateField('executive_summary', summaryData.summary);
+        toast.success('Executive summary regenerated');
+      } else {
+        toast.error('Failed to generate summary');
+      }
+    } catch {
+      toast.error('Failed to regenerate summary');
+    }
+    setRegenerating(false);
+  };
+
     setHiddenSections(prev => {
       const next = new Set(prev);
       if (next.has(idx)) next.delete(idx); else next.add(idx);
