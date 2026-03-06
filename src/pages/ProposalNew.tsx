@@ -227,6 +227,13 @@ export default function ProposalNew() {
   const [scraping, setScraping] = useState(false);
   const [suggestedContact, setSuggestedContact] = useState<string | null>(null);
   const [clientIndustry, setClientIndustry] = useState('');
+  
+  // Client context for executive summary
+  const [clientChallenge, setClientChallenge] = useState('');
+  const [clientChallengeOther, setClientChallengeOther] = useState('');
+  const [clientGoal, setClientGoal] = useState('');
+  const [clientGoalOther, setClientGoalOther] = useState('');
+  const [clientContextNote, setClientContextNote] = useState('');
 
   const handleAutoFill = async () => {
     if (!newClientWebsite.trim()) return;
