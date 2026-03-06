@@ -321,7 +321,12 @@ export default function ProposalEditor() {
           <button onClick={() => navigate('/proposals')} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> Back
           </button>
-          <span className="text-sm font-medium text-foreground">{proposal.title || 'Untitled Proposal'}</span>
+          <EditableText
+            value={proposal.title || 'Untitled Proposal'}
+            onSave={(val) => updateField('title', val)}
+            as="span"
+            className="text-sm font-medium text-foreground"
+          />
           <span className={cn('rounded-full px-2.5 py-0.5 text-xs font-medium', sc.className)}>{sc.label}</span>
         </div>
         <div className="flex items-center gap-3">
