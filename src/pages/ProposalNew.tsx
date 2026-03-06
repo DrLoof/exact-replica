@@ -1063,6 +1063,75 @@ export default function ProposalNew() {
           )}
         </section>
 
+        {/* Client Context Section */}
+        {(selectedClient || newClientName.trim()) && (
+          <section className="rounded-xl border border-parchment bg-card p-6 shadow-card">
+            <p className="mb-1 text-[14px] font-semibold text-foreground">Client context</p>
+            <p className="mb-4 text-xs text-muted-foreground">Optional — makes the proposal more specific to this client</p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Main challenge</label>
+                <select
+                  value={clientChallenge}
+                  onChange={(e) => setClientChallenge(e.target.value)}
+                  className="w-full rounded-lg border border-parchment bg-background px-3 py-2.5 text-sm text-foreground focus:border-foreground/30 focus:outline-none"
+                >
+                  <option value="">Select one...</option>
+                  {challengeOptions.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                  <option value="Other">Other</option>
+                </select>
+                {clientChallenge === 'Other' && (
+                  <input
+                    type="text"
+                    placeholder="Describe the challenge..."
+                    maxLength={100}
+                    value={clientChallengeOther}
+                    onChange={(e) => setClientChallengeOther(e.target.value)}
+                    className="mt-2 w-full rounded-lg border border-parchment bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
+                  />
+                )}
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Primary goal</label>
+                <select
+                  value={clientGoal}
+                  onChange={(e) => setClientGoal(e.target.value)}
+                  className="w-full rounded-lg border border-parchment bg-background px-3 py-2.5 text-sm text-foreground focus:border-foreground/30 focus:outline-none"
+                >
+                  <option value="">Select one...</option>
+                  {goalOptions.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                  <option value="Other">Other</option>
+                </select>
+                {clientGoal === 'Other' && (
+                  <input
+                    type="text"
+                    placeholder="Describe the goal..."
+                    maxLength={100}
+                    value={clientGoalOther}
+                    onChange={(e) => setClientGoalOther(e.target.value)}
+                    className="mt-2 w-full rounded-lg border border-parchment bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
+                  />
+                )}
+              </div>
+            </div>
+            <div className="mt-3">
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Quick note</label>
+              <input
+                type="text"
+                placeholder="e.g. They just raised a round and need to scale quickly"
+                maxLength={200}
+                value={clientContextNote}
+                onChange={(e) => setClientContextNote(e.target.value)}
+                className="w-full rounded-lg border border-parchment bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
+              />
+            </div>
+          </section>
+        )}
+
         {/* Zone 2: Services */}
         <section className="rounded-xl border border-parchment bg-card p-6 shadow-card">
           <p className="mb-4 text-[14px] font-semibold text-foreground">What are you proposing?</p>
