@@ -246,6 +246,7 @@ export default function ProposalEditor() {
     setRegenerating(false);
   };
 
+  const toggleSection = (idx: number) => {
     setHiddenSections(prev => {
       const next = new Set(prev);
       if (next.has(idx)) next.delete(idx); else next.add(idx);
