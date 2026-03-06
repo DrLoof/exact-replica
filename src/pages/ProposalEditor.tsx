@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft, Eye, EyeOff, Share2, Download, Send, LinkIcon,
   ChevronDown, FileText, Check, DollarSign, Clock,
-  RefreshCw, MoreHorizontal, Plus, X, Search,
+  RefreshCw, MoreHorizontal, Plus, X, Search, RotateCcw, Loader2,
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { cn } from '@/lib/utils';
