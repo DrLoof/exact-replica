@@ -194,6 +194,7 @@ export default function PublicProposal() {
     { label: 'Services', value: `${services.length} modules` },
     { label: 'Timeline', value: proposal.estimated_duration || `~${phases.length * 2} weeks` },
     { label: 'Investment', value: totalStr, accent: true },
+    { label: 'Goal', value: proposal.client_goal || 'Grow the business' },
   ];
 
   return (
