@@ -110,7 +110,7 @@ export default function ProposalEditor() {
   const [showAddService, setShowAddService] = useState(false);
   const [addServiceSearch, setAddServiceSearch] = useState('');
   const [availableModules, setAvailableModules] = useState<any[]>([]);
-
+  const [regenerating, setRegenerating] = useState(false);
   const currencySymbol = agency?.currency_symbol || '$';
 
   useEffect(() => {
