@@ -48,6 +48,9 @@ interface ProposalData {
   created_at: string;
   client_id: string | null;
   agency_id: string | null;
+  client_challenge: string | null;
+  client_goal: string | null;
+  client_context_note: string | null;
 }
 
 interface ProposalService {
