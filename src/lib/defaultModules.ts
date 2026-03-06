@@ -11,6 +11,7 @@ export interface DefaultModule {
   defaultTimeline: string;
   suggestedKpis: string[];
   commonTools: string[];
+  aiContext?: string;
 }
 
 export const defaultModulesByGroup: Record<string, DefaultModule[]> = {

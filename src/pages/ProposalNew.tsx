@@ -8,6 +8,32 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { SignupGate } from '@/components/onboarding/SignupGate';
 import { defaultModulesByGroup, type DefaultModule } from '@/lib/defaultModules';
+import { generateProposalTitle } from '@/lib/proposalTitleGenerator';
+
+const challengeOptions = [
+  'Not enough website traffic',
+  'Website isn\'t converting visitors',
+  'Low brand awareness',
+  'Inconsistent or outdated branding',
+  'No clear marketing strategy',
+  'Social media isn\'t driving results',
+  'Not generating enough leads',
+  'Ad spend isn\'t delivering results',
+  'Email marketing underperforming',
+  'Can\'t measure what\'s working',
+];
+
+const goalOptions = [
+  'Get more leads',
+  'Increase website traffic',
+  'Build brand awareness',
+  'Launch or relaunch a brand',
+  'Grow social media following',
+  'Increase online sales or revenue',
+  'Build a marketing foundation',
+  'Improve marketing ROI',
+  'Enter a new market',
+];
 
 
 function InlinePrice({ value, onChange, currencySymbol, suffix, isOverridden, onReset }: {
@@ -201,6 +227,13 @@ export default function ProposalNew() {
   const [scraping, setScraping] = useState(false);
   const [suggestedContact, setSuggestedContact] = useState<string | null>(null);
   const [clientIndustry, setClientIndustry] = useState('');
+  
+  // Client context for executive summary
+  const [clientChallenge, setClientChallenge] = useState('');
+  const [clientChallengeOther, setClientChallengeOther] = useState('');
+  const [clientGoal, setClientGoal] = useState('');
+  const [clientGoalOther, setClientGoalOther] = useState('');
+  const [clientContextNote, setClientContextNote] = useState('');
 
   const handleAutoFill = async () => {
     if (!newClientWebsite.trim()) return;
@@ -492,7 +525,7 @@ export default function ProposalNew() {
 
       const { data: realModules } = await supabase
         .from('service_modules')
-        .select('id, name, service_type')
+        .select('id, name, service_type, ai_context, group_id')
         .eq('agency_id', agency.id);
 
       const selectedModsList = Array.from(selectedModuleIds).map(id => modules.find((m: any) => m.id === id)).filter(Boolean);
@@ -506,10 +539,46 @@ export default function ProposalNew() {
       totalDurationWeeks = Math.max(totalDurationWeeks, 4);
       const durationStr = `${totalDurationWeeks} weeks`;
 
+      const clientDisplayName = selectedClient?.company_name || newClientName;
+
+      // Generate proposal title from service categories
+      const moduleGroupMap: Record<string, string> = {};
+      const selectedWithGroups = selectedModsList.map((mod: any) => {
+        const group = groups.find((g: any) => g.id === mod.group_id);
+        return { name: mod.name, groupName: group?.name || '' };
+      });
+      const generatedTitle = generateProposalTitle(selectedWithGroups, clientDisplayName, groups, moduleGroupMap);
+
+      // Generate executive summary via edge function
+      let executiveSummary: string | null = null;
+      const resolvedChallenge = clientChallenge === 'Other' ? clientChallengeOther : clientChallenge;
+      const resolvedGoal = clientGoal === 'Other' ? clientGoalOther : clientGoal;
+      try {
+        const realSelectedModules = selectedModsList.map((m: any) => {
+          const rm = realModules?.find((rm: any) => rm.name === m.name);
+          return rm || m;
+        });
+        const { data: summaryData } = await supabase.functions.invoke('generate-executive-summary', {
+          body: {
+            agencyName: agency.name,
+            clientName: clientDisplayName,
+            serviceNames: realSelectedModules.map((m: any) => m.name),
+            serviceContexts: realSelectedModules.map((m: any) => m.ai_context).filter(Boolean),
+            clientChallenge: resolvedChallenge || null,
+            clientGoal: resolvedGoal || null,
+            clientContextNote: clientContextNote || null,
+          },
+        });
+        if (summaryData?.summary) {
+          executiveSummary = summaryData.summary;
+        }
+      } catch (e) {
+        console.warn('Executive summary generation failed', e);
+      }
+
       // Generate timeline phases via edge function
       let generatedPhases: any[] = [];
       try {
-        const clientDisplayName = selectedClient?.company_name || newClientName;
         const { data: timelineData } = await supabase.functions.invoke('generate-timeline', {
           body: {
             services: selectedModsList.map((m: any) => ({ name: m.name })),
@@ -548,7 +617,8 @@ export default function ProposalNew() {
         agency_id: agency.id,
         client_id: clientId,
         reference_number: refNum,
-        title: `Proposal for ${selectedClient?.company_name || newClientName}`,
+        title: generatedTitle,
+        subtitle: null,
         status: 'draft',
         total_fixed: totalFixed,
         total_monthly: totalMonthly,
@@ -561,7 +631,11 @@ export default function ProposalNew() {
         notice_period: agency.default_notice_period || '30 days',
         bundle_savings: bundleSavings,
         phases: generatedPhases,
-      }).select('id').single();
+        executive_summary: executiveSummary,
+        client_challenge: resolvedChallenge || null,
+        client_goal: resolvedGoal || null,
+        client_context_note: clientContextNote || null,
+      } as any).select('id').single();
       if (pError) throw pError;
 
       const services = selectedModsList.map((mod: any, i: number) => {
@@ -988,6 +1062,75 @@ export default function ProposalNew() {
             </div>
           )}
         </section>
+
+        {/* Client Context Section */}
+        {(selectedClient || newClientName.trim()) && (
+          <section className="rounded-xl border border-parchment bg-card p-6 shadow-card">
+            <p className="mb-1 text-[14px] font-semibold text-foreground">Client context</p>
+            <p className="mb-4 text-xs text-muted-foreground">Optional — makes the proposal more specific to this client</p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Main challenge</label>
+                <select
+                  value={clientChallenge}
+                  onChange={(e) => setClientChallenge(e.target.value)}
+                  className="w-full rounded-lg border border-parchment bg-background px-3 py-2.5 text-sm text-foreground focus:border-foreground/30 focus:outline-none"
+                >
+                  <option value="">Select one...</option>
+                  {challengeOptions.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                  <option value="Other">Other</option>
+                </select>
+                {clientChallenge === 'Other' && (
+                  <input
+                    type="text"
+                    placeholder="Describe the challenge..."
+                    maxLength={100}
+                    value={clientChallengeOther}
+                    onChange={(e) => setClientChallengeOther(e.target.value)}
+                    className="mt-2 w-full rounded-lg border border-parchment bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
+                  />
+                )}
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Primary goal</label>
+                <select
+                  value={clientGoal}
+                  onChange={(e) => setClientGoal(e.target.value)}
+                  className="w-full rounded-lg border border-parchment bg-background px-3 py-2.5 text-sm text-foreground focus:border-foreground/30 focus:outline-none"
+                >
+                  <option value="">Select one...</option>
+                  {goalOptions.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                  <option value="Other">Other</option>
+                </select>
+                {clientGoal === 'Other' && (
+                  <input
+                    type="text"
+                    placeholder="Describe the goal..."
+                    maxLength={100}
+                    value={clientGoalOther}
+                    onChange={(e) => setClientGoalOther(e.target.value)}
+                    className="mt-2 w-full rounded-lg border border-parchment bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
+                  />
+                )}
+              </div>
+            </div>
+            <div className="mt-3">
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Quick note</label>
+              <input
+                type="text"
+                placeholder="e.g. They just raised a round and need to scale quickly"
+                maxLength={200}
+                value={clientContextNote}
+                onChange={(e) => setClientContextNote(e.target.value)}
+                className="w-full rounded-lg border border-parchment bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
+              />
+            </div>
+          </section>
+        )}
 
         {/* Zone 2: Services */}
         <section className="rounded-xl border border-parchment bg-card p-6 shadow-card">

@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft, Eye, EyeOff, Share2, Download, Send, LinkIcon,
   ChevronDown, FileText, Check, DollarSign, Clock,
-  RefreshCw, MoreHorizontal, Plus, X, Search,
+  RefreshCw, MoreHorizontal, Plus, X, Search, RotateCcw, Loader2,
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -48,6 +48,9 @@ interface ProposalData {
   created_at: string;
   client_id: string | null;
   agency_id: string | null;
+  client_challenge: string | null;
+  client_goal: string | null;
+  client_context_note: string | null;
 }
 
 interface ProposalService {
@@ -107,7 +110,7 @@ export default function ProposalEditor() {
   const [showAddService, setShowAddService] = useState(false);
   const [addServiceSearch, setAddServiceSearch] = useState('');
   const [availableModules, setAvailableModules] = useState<any[]>([]);
-
+  const [regenerating, setRegenerating] = useState(false);
   const currencySymbol = agency?.currency_symbol || '$';
 
   useEffect(() => {
@@ -209,6 +212,40 @@ export default function ProposalEditor() {
     setProposal(prev => prev ? { ...prev, [field]: value } : prev);
   };
 
+  const regenerateExecutiveSummary = async () => {
+    if (!proposal || !agency) return;
+    setRegenerating(true);
+    try {
+      // Get service names and ai_context from modules
+      const moduleIds = services.map(s => s.module_id).filter(Boolean);
+      const { data: modulesData } = await supabase
+        .from('service_modules')
+        .select('name, ai_context')
+        .in('id', moduleIds);
+      
+      const { data: summaryData } = await supabase.functions.invoke('generate-executive-summary', {
+        body: {
+          agencyName: agency.name,
+          clientName: client?.company_name || 'Client',
+          serviceNames: (modulesData || []).map((m: any) => m.name),
+          serviceContexts: (modulesData || []).map((m: any) => m.ai_context).filter(Boolean),
+          clientChallenge: (proposal as any).client_challenge || null,
+          clientGoal: (proposal as any).client_goal || null,
+          clientContextNote: (proposal as any).client_context_note || null,
+        },
+      });
+      if (summaryData?.summary) {
+        await updateField('executive_summary', summaryData.summary);
+        toast.success('Executive summary regenerated');
+      } else {
+        toast.error('Failed to generate summary');
+      }
+    } catch {
+      toast.error('Failed to regenerate summary');
+    }
+    setRegenerating(false);
+  };
+
   const toggleSection = (idx: number) => {
     setHiddenSections(prev => {
       const next = new Set(prev);
@@ -284,7 +321,12 @@ export default function ProposalEditor() {
           <button onClick={() => navigate('/proposals')} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> Back
           </button>
-          <span className="text-sm font-medium text-foreground">{proposal.title || 'Untitled Proposal'}</span>
+          <EditableText
+            value={proposal.title || 'Untitled Proposal'}
+            onSave={(val) => updateField('title', val)}
+            as="span"
+            className="text-sm font-medium text-foreground"
+          />
           <span className={cn('rounded-full px-2.5 py-0.5 text-xs font-medium', sc.className)}>{sc.label}</span>
         </div>
         <div className="flex items-center gap-3">
@@ -367,13 +409,29 @@ export default function ProposalEditor() {
                       />
                     </TextContent>
 
-                    {/* Key highlights */}
+                    {/* Regenerate button */}
+                    <div className="mt-4 flex items-center gap-3 print:hidden">
+                      <button
+                        onClick={regenerateExecutiveSummary}
+                        disabled={regenerating}
+                        className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground hover:bg-muted/50 disabled:opacity-50"
+                      >
+                        {regenerating ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCcw className="h-3 w-3" />}
+                        {regenerating ? 'Regenerating...' : 'Regenerate'}
+                      </button>
+                      {!proposal.executive_summary && (
+                        <span className="text-[11px] text-muted-foreground">Add client context on the creation page to make this more specific →</span>
+                      )}
+                    </div>
+
+                    {/* Key highlights with GOAL stat */}
                     <div className="mt-12">
                       <HighlightPanel
                         items={[
                           { label: 'Investment', value: totalStr, accent: true },
                           { label: 'Timeline', value: proposal.estimated_duration || `${services.length * 2} weeks est.` },
                           { label: 'Services', value: `${services.length} included` },
+                          { label: 'Goal', value: (proposal as any).client_goal || 'Grow the business' },
                         ]}
                       />
                     </div>

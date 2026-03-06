@@ -602,6 +602,9 @@ export type Database = {
           accepted_at: string | null
           agency_id: string | null
           bundle_savings: number | null
+          client_challenge: string | null
+          client_context_note: string | null
+          client_goal: string | null
           client_id: string | null
           created_at: string
           created_by: string | null
@@ -636,6 +639,9 @@ export type Database = {
           accepted_at?: string | null
           agency_id?: string | null
           bundle_savings?: number | null
+          client_challenge?: string | null
+          client_context_note?: string | null
+          client_goal?: string | null
           client_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -670,6 +676,9 @@ export type Database = {
           accepted_at?: string | null
           agency_id?: string | null
           bundle_savings?: number | null
+          client_challenge?: string | null
+          client_context_note?: string | null
+          client_goal?: string | null
           client_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -761,6 +770,7 @@ export type Database = {
       service_modules: {
         Row: {
           agency_id: string | null
+          ai_context: string | null
           client_responsibilities: string[] | null
           common_tools: string[] | null
           created_at: string
@@ -786,6 +796,7 @@ export type Database = {
         }
         Insert: {
           agency_id?: string | null
+          ai_context?: string | null
           client_responsibilities?: string[] | null
           common_tools?: string[] | null
           created_at?: string
@@ -811,6 +822,7 @@ export type Database = {
         }
         Update: {
           agency_id?: string | null
+          ai_context?: string | null
           client_responsibilities?: string[] | null
           common_tools?: string[] | null
           created_at?: string
