@@ -8,6 +8,32 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { SignupGate } from '@/components/onboarding/SignupGate';
 import { defaultModulesByGroup, type DefaultModule } from '@/lib/defaultModules';
+import { generateProposalTitle } from '@/lib/proposalTitleGenerator';
+
+const challengeOptions = [
+  'Not enough website traffic',
+  'Website isn\'t converting visitors',
+  'Low brand awareness',
+  'Inconsistent or outdated branding',
+  'No clear marketing strategy',
+  'Social media isn\'t driving results',
+  'Not generating enough leads',
+  'Ad spend isn\'t delivering results',
+  'Email marketing underperforming',
+  'Can\'t measure what\'s working',
+];
+
+const goalOptions = [
+  'Get more leads',
+  'Increase website traffic',
+  'Build brand awareness',
+  'Launch or relaunch a brand',
+  'Grow social media following',
+  'Increase online sales or revenue',
+  'Build a marketing foundation',
+  'Improve marketing ROI',
+  'Enter a new market',
+];
 
 
 function InlinePrice({ value, onChange, currencySymbol, suffix, isOverridden, onReset }: {
