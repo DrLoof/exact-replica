@@ -404,13 +404,29 @@ export default function ProposalEditor() {
                       />
                     </TextContent>
 
-                    {/* Key highlights */}
+                    {/* Regenerate button */}
+                    <div className="mt-4 flex items-center gap-3 print:hidden">
+                      <button
+                        onClick={regenerateExecutiveSummary}
+                        disabled={regenerating}
+                        className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground hover:bg-muted/50 disabled:opacity-50"
+                      >
+                        {regenerating ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCcw className="h-3 w-3" />}
+                        {regenerating ? 'Regenerating...' : 'Regenerate'}
+                      </button>
+                      {!proposal.executive_summary && (
+                        <span className="text-[11px] text-muted-foreground">Add client context on the creation page to make this more specific →</span>
+                      )}
+                    </div>
+
+                    {/* Key highlights with GOAL stat */}
                     <div className="mt-12">
                       <HighlightPanel
                         items={[
                           { label: 'Investment', value: totalStr, accent: true },
                           { label: 'Timeline', value: proposal.estimated_duration || `${services.length * 2} weeks est.` },
                           { label: 'Services', value: `${services.length} included` },
+                          { label: 'Goal', value: (proposal as any).client_goal || 'Grow the business' },
                         ]}
                       />
                     </div>
