@@ -525,7 +525,7 @@ export default function ProposalNew() {
 
       const { data: realModules } = await supabase
         .from('service_modules')
-        .select('id, name, service_type')
+        .select('id, name, service_type, ai_context, group_id')
         .eq('agency_id', agency.id);
 
       const selectedModsList = Array.from(selectedModuleIds).map(id => modules.find((m: any) => m.id === id)).filter(Boolean);
@@ -539,10 +539,46 @@ export default function ProposalNew() {
       totalDurationWeeks = Math.max(totalDurationWeeks, 4);
       const durationStr = `${totalDurationWeeks} weeks`;
 
+      const clientDisplayName = selectedClient?.company_name || newClientName;
+
+      // Generate proposal title from service categories
+      const moduleGroupMap: Record<string, string> = {};
+      const selectedWithGroups = selectedModsList.map((mod: any) => {
+        const group = groups.find((g: any) => g.id === mod.group_id);
+        return { name: mod.name, groupName: group?.name || '' };
+      });
+      const generatedTitle = generateProposalTitle(selectedWithGroups, clientDisplayName, groups, moduleGroupMap);
+
+      // Generate executive summary via edge function
+      let executiveSummary: string | null = null;
+      const resolvedChallenge = clientChallenge === 'Other' ? clientChallengeOther : clientChallenge;
+      const resolvedGoal = clientGoal === 'Other' ? clientGoalOther : clientGoal;
+      try {
+        const realSelectedModules = selectedModsList.map((m: any) => {
+          const rm = realModules?.find((rm: any) => rm.name === m.name);
+          return rm || m;
+        });
+        const { data: summaryData } = await supabase.functions.invoke('generate-executive-summary', {
+          body: {
+            agencyName: agency.name,
+            clientName: clientDisplayName,
+            serviceNames: realSelectedModules.map((m: any) => m.name),
+            serviceContexts: realSelectedModules.map((m: any) => m.ai_context).filter(Boolean),
+            clientChallenge: resolvedChallenge || null,
+            clientGoal: resolvedGoal || null,
+            clientContextNote: clientContextNote || null,
+          },
+        });
+        if (summaryData?.summary) {
+          executiveSummary = summaryData.summary;
+        }
+      } catch (e) {
+        console.warn('Executive summary generation failed', e);
+      }
+
       // Generate timeline phases via edge function
       let generatedPhases: any[] = [];
       try {
-        const clientDisplayName = selectedClient?.company_name || newClientName;
         const { data: timelineData } = await supabase.functions.invoke('generate-timeline', {
           body: {
             services: selectedModsList.map((m: any) => ({ name: m.name })),
@@ -581,7 +617,8 @@ export default function ProposalNew() {
         agency_id: agency.id,
         client_id: clientId,
         reference_number: refNum,
-        title: `Proposal for ${selectedClient?.company_name || newClientName}`,
+        title: generatedTitle,
+        subtitle: null,
         status: 'draft',
         total_fixed: totalFixed,
         total_monthly: totalMonthly,
@@ -594,7 +631,11 @@ export default function ProposalNew() {
         notice_period: agency.default_notice_period || '30 days',
         bundle_savings: bundleSavings,
         phases: generatedPhases,
-      }).select('id').single();
+        executive_summary: executiveSummary,
+        client_challenge: resolvedChallenge || null,
+        client_goal: resolvedGoal || null,
+        client_context_note: clientContextNote || null,
+      } as any).select('id').single();
       if (pError) throw pError;
 
       const services = selectedModsList.map((mod: any, i: number) => {
