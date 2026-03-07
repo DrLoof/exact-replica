@@ -13,7 +13,7 @@ import {
   WhyUsCard, TestimonialCard, TermsSection, SignatureBlock,
   TextContent, PageWrapper, HighlightPanel, EditableText,
 } from '@/components/proposal-template';
-import { AIContentNotice } from '@/components/AIContentNotice';
+
 
 function getDefaultAboutText(yearsExperience?: number | null): string {
   const yearsPart = yearsExperience ? `Over the past ${yearsExperience} years` : 'Over the past years';
