@@ -53,7 +53,10 @@ export default function GuestProposalPreview() {
 
   useEffect(() => {
     if (guestProposal) {
-      setProposalTitle(`Proposal for ${guestProposal.clientName || 'Client'}`);
+      setProposalTitle(guestProposal.title || `Proposal for ${guestProposal.clientName || 'Client'}`);
+      if (guestProposal.executiveSummary) {
+        setExecutiveSummary(guestProposal.executiveSummary);
+      }
     }
   }, []);
 
