@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import { useAuth } from '@/hooks/useAuth';
 
 const features = [
-  { icon: Zap, title: 'AI-Powered Setup', desc: 'Scan your website. We auto-detect your brand, services, testimonials, and more.' },
+  { icon: Zap, title: 'Automated Setup', desc: 'Scan your website. We auto-detect your brand, services, testimonials, and more.' },
   { icon: Palette, title: 'Branded Templates', desc: 'Your colors, your logo, your voice — every proposal looks like you built it from scratch.' },
   { icon: FileText, title: 'Service Bundles', desc: 'Package your services into compelling bundles with automatic discount calculations.' },
   { icon: Eye, title: 'Client Tracking', desc: 'Know when your client opens, reads, and revisits your proposal in real time.' },
