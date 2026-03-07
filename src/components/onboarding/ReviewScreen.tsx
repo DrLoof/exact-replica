@@ -305,8 +305,28 @@ export function ReviewScreen({
                     <span>·</span>
                   </>
                 )}
-                {agencyIdentity.email ? <span>{agencyIdentity.email}</span> : <span className="italic">Add email in Settings</span>}
+                {agencyIdentity.email ? (
+                  <span>{agencyIdentity.email}</span>
+                ) : (
+                  <button
+                    onClick={() => setEditingSection(editingSection === 'agency' ? null : 'agency')}
+                    className="italic text-brass hover:text-foreground"
+                  >
+                    Add email
+                  </button>
+                )}
                 {agencyIdentity.phone && <><span>·</span><span>{agencyIdentity.phone}</span></>}
+                {!agencyIdentity.phone && (
+                  <>
+                    {agencyIdentity.email && <span>·</span>}
+                    <button
+                      onClick={() => setEditingSection(editingSection === 'agency' ? null : 'agency')}
+                      className="italic text-brass hover:text-foreground"
+                    >
+                      Add phone
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
