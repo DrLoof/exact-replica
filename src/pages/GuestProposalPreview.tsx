@@ -13,7 +13,7 @@ import {
   WhyUsCard, TestimonialCard, TermsSection, SignatureBlock,
   TextContent, PageWrapper, HighlightPanel, EditableText,
 } from '@/components/proposal-template';
-import { AIContentNotice } from '@/components/AIContentNotice';
+
 
 function getDefaultAboutText(yearsExperience?: number | null): string {
   const yearsPart = yearsExperience ? `Over the past ${yearsExperience} years` : 'Over the past years';
@@ -343,7 +343,7 @@ export default function GuestProposalPreview() {
             currency: currencySymbol,
           }}>
             <div className="mx-auto max-w-[900px] py-8 px-4 space-y-6">
-              <AIContentNotice />
+              
 
               {/* Section 0: Cover */}
               {!hiddenSections.has(0) && (
