@@ -343,7 +343,7 @@ export default function GuestProposalPreview() {
             currency: currencySymbol,
           }}>
             <div className="mx-auto max-w-[900px] py-8 px-4 space-y-6">
-              <AIContentNotice />
+              
 
               {/* Section 0: Cover */}
               {!hiddenSections.has(0) && (

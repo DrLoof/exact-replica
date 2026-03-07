@@ -377,7 +377,7 @@ export default function ProposalEditor() {
             currency: agency?.currency_symbol || '$',
           }}>
             <div className="mx-auto max-w-[900px] py-8 px-4 space-y-6 print:max-w-none print:p-0 print:space-y-0">
-              <AIContentNotice />
+              
 
               {/* Section 0: Cover */}
               <SectionWrapper idx={0} hidden={hiddenSections.has(0)} onToggle={toggleSection} label="Cover">
