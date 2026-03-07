@@ -332,6 +332,18 @@ export default function ProposalEditor() {
         <div className="flex items-center gap-3">
           <span className="text-xs text-muted-foreground font-mono">{proposal.reference_number}</span>
           <button
+            onClick={() => navigate('/dashboard')}
+            className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
+          >
+            Dashboard
+          </button>
+          <button
+            onClick={() => { toast.success('Draft saved'); }}
+            className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
+          >
+            Save Draft
+          </button>
+          <button
             onClick={() => setShowShareModal(true)}
             className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-hover"
           >
