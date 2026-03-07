@@ -670,11 +670,48 @@ export default function ProposalNew() {
     }
   };
 
-  const handleBuild = () => {
+  const handleBuild = async () => {
     if (isGuestMode && !user) {
       const selectedMods = modules.filter((m: any) => selectedModuleIds.has(m.id));
+      const clientDisplayName = selectedClient?.company_name || newClientName || 'Client';
+      const agencyName = guestOnboarding?.agencyIdentity?.name || 'Your Agency';
+
+      // Show generation screen
+      setShowGenerating(true);
+      setSaving(true);
+
+      // Generate executive summary via edge function
+      let executiveSummary: string | null = null;
+      const resolvedChallenge = clientChallenge === 'Other' ? clientChallengeOther : clientChallenge;
+      const resolvedGoal = clientGoal === 'Other' ? clientGoalOther : clientGoal;
+      try {
+        const { data: summaryData } = await supabase.functions.invoke('generate-executive-summary', {
+          body: {
+            agencyName,
+            clientName: clientDisplayName,
+            serviceNames: selectedMods.map((m: any) => m.name),
+            serviceContexts: selectedMods.map((m: any) => m.ai_context).filter(Boolean),
+            clientChallenge: resolvedChallenge || null,
+            clientGoal: resolvedGoal || null,
+            clientContextNote: clientContextNote || null,
+          },
+        });
+        if (summaryData?.summary) {
+          executiveSummary = summaryData.summary;
+        }
+      } catch (e) {
+        console.warn('Guest executive summary generation failed', e);
+      }
+
+      // Generate proposal title
+      const selectedWithGroups = selectedMods.map((mod: any) => {
+        const group = groups.find((g: any) => g.id === mod.group_id);
+        return { name: mod.name, groupName: group?.name || '' };
+      });
+      const generatedTitle = generateProposalTitle(selectedWithGroups, clientDisplayName, groups, {});
+
       const guestProposal = {
-        clientName: selectedClient?.company_name || newClientName || 'Client',
+        clientName: clientDisplayName,
         contactName: selectedClient?.contact_name || newContactName || '',
         clientWebsite: newClientWebsite || '',
         clientContext: clientContext || '',
@@ -686,8 +723,18 @@ export default function ProposalNew() {
         totalFixed,
         totalMonthly,
         currencySymbol,
+        executiveSummary,
+        title: generatedTitle,
+        clientChallenge: resolvedChallenge || null,
+        clientGoal: resolvedGoal || null,
+        clientContextNote: clientContextNote || null,
       };
       localStorage.setItem('propopad_guest_proposal', JSON.stringify(guestProposal));
+
+      // Wait for animation to finish (minimum 3.5s)
+      await new Promise(r => setTimeout(r, 3500));
+      setSaving(false);
+      setShowGenerating(false);
       navigate('/proposals/preview');
       return;
     }
