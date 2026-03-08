@@ -936,6 +936,17 @@ ${agencyName}`);
     window.open(mailto, '_self');
   };
 
+  const copyEmailBody = async () => {
+    try {
+      await navigator.clipboard.writeText(`Subject: ${emailSubject}\n\n${emailBody}`);
+      setCopiedEmail(true);
+      toast.success('Email copied to clipboard');
+      setTimeout(() => setCopiedEmail(false), 2000);
+    } catch {
+      toast.error('Failed to copy');
+    }
+  };
+
   const copyLink = async () => {
     const url = await ensureShareLink();
     if (!url) return;
