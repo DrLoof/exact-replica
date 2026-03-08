@@ -60,6 +60,23 @@ export default function Home() {
           transition={{ duration: 0.6 }}
         >
           <span className="label-overline text-brass">For agencies that mean business</span>
+
+          {/* Returning guest banner */}
+          {hasGuestProposal && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mx-auto mb-6 mt-2 max-w-md"
+            >
+              <Link
+                to="/proposals/preview"
+                className="flex items-center justify-center gap-2 rounded-xl border border-brass/30 bg-brass-glow px-5 py-3 text-sm font-semibold text-brass transition-colors hover:bg-brass/10"
+              >
+                <PenLine className="h-4 w-4" />
+                You have an unfinished proposal. Continue editing →
+              </Link>
+            </motion.div>
+          )}
           <h1 className="mt-4 font-display text-4xl font-bold leading-tight text-foreground md:text-5xl lg:text-6xl">
             Proposals that<br />
             <span className="text-brass">win clients</span>
