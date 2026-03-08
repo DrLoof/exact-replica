@@ -113,6 +113,16 @@ export default function ProposalEditor() {
   const [regenerating, setRegenerating] = useState(false);
   const currencySymbol = agency?.currency_symbol || '$';
 
+  // Warn user before leaving if an editable field is focused (unsaved inline edit)
+  useBeforeUnload(
+    useCallback((e) => {
+      const active = document.activeElement;
+      if (active && active.getAttribute('contenteditable') === 'true') {
+        e.preventDefault();
+      }
+    }, [])
+  );
+
   useEffect(() => {
     if (id) loadProposal();
   }, [id]);
