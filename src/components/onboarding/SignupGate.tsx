@@ -5,18 +5,52 @@ import { toast } from 'sonner';
 import propopadLogo from '@/assets/logo_propopad_small.svg';
 import { Loader2 } from 'lucide-react';
 
+export type SignupTrigger = 'share' | 'download' | 'navigate' | 'new_proposal' | 'default';
+
+const triggerContent: Record<SignupTrigger, { headline: string; subtitle: (clientName?: string) => string; button: string }> = {
+  share: {
+    headline: 'Create your free account to send this proposal',
+    subtitle: (clientName) => `Your proposal is ready. Sign up to share it with ${clientName || 'your client'} and start tracking responses.`,
+    button: 'Create account & send',
+  },
+  download: {
+    headline: 'Create your free account to download',
+    subtitle: () => 'Sign up to export this proposal as a PDF and start sending to clients.',
+    button: 'Create account & download',
+  },
+  navigate: {
+    headline: 'Create your free account',
+    subtitle: () => 'Sign up to access your dashboard, manage clients, and create more proposals.',
+    button: 'Create account',
+  },
+  new_proposal: {
+    headline: 'Create your free account to make more proposals',
+    subtitle: () => "You've built a great first proposal. Sign up to create unlimited proposals and manage your pipeline.",
+    button: 'Create account',
+  },
+  default: {
+    headline: 'Create your account to save',
+    subtitle: () => 'Your agency profile is ready. Sign up to save it and start sending proposals.',
+    button: 'Create account & save',
+  },
+};
+
 interface SignupGateProps {
   onAuthenticated: () => void;
   onCancel: () => void;
+  trigger?: SignupTrigger;
+  clientName?: string;
 }
 
-export function SignupGate({ onAuthenticated, onCancel }: SignupGateProps) {
+export function SignupGate({ onAuthenticated, onCancel, trigger = 'default', clientName }: SignupGateProps) {
   const [mode, setMode] = useState<'signup' | 'login'>('signup');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const content = triggerContent[trigger];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +80,6 @@ export function SignupGate({ onAuthenticated, onCancel }: SignupGateProps) {
       }
     }
 
-    // Small delay for auth state to propagate
     setTimeout(() => {
       setLoading(false);
       onAuthenticated();
@@ -71,10 +104,10 @@ export function SignupGate({ onAuthenticated, onCancel }: SignupGateProps) {
         </div>
 
         <h2 className="font-display text-xl font-bold text-foreground">
-          {mode === 'signup' ? 'Create your account to save' : 'Sign in to save'}
+          {mode === 'signup' ? content.headline : 'Sign in to continue'}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Your agency profile is ready. {mode === 'signup' ? 'Sign up' : 'Sign in'} to save it and start sending proposals.
+          {mode === 'signup' ? content.subtitle(clientName) : 'Sign in to your existing account to continue.'}
         </p>
 
         <form className="mt-6 space-y-3" onSubmit={handleSubmit}>
@@ -129,7 +162,7 @@ export function SignupGate({ onAuthenticated, onCancel }: SignupGateProps) {
             className="!mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-ink py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-ink-soft disabled:opacity-50"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {mode === 'signup' ? 'Create account & save' : 'Sign in & save'}
+            {mode === 'signup' ? content.button : 'Sign in'}
           </button>
         </form>
 
