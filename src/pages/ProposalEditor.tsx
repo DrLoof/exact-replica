@@ -84,7 +84,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 
 const sectionNames = [
   'Cover', 'Executive Summary', 'Scope of Services', 'Timeline',
-  'Investment', 'Why Us', 'Testimonials', 'Terms', 'Signature',
+  'Investment', 'Terms', 'Why Us', 'Testimonials', 'Signature',
 ];
 
 function getDefaultAboutText(yearsExperience?: number | null): string {
@@ -182,15 +182,50 @@ export default function ProposalEditor() {
 
   const removeService = async (serviceId: string) => {
     if (!proposal) return;
-    await supabase.from('proposal_services').delete().eq('id', serviceId);
+    const removedService = services.find(s => s.id === serviceId);
+    if (!removedService) return;
+
+    // Optimistically remove from UI
     const updated = services.filter(s => s.id !== serviceId);
     setServices(updated);
-    // Recalculate totals
     const newFixed = updated.filter(s => s.module?.pricing_model === 'fixed').reduce((sum, s) => sum + getServicePrice(s), 0);
     const newMonthly = updated.filter(s => s.module?.pricing_model === 'monthly').reduce((sum, s) => sum + getServicePrice(s), 0);
-    await supabase.from('proposals').update({ total_fixed: newFixed, total_monthly: newMonthly, grand_total: newFixed + newMonthly }).eq('id', proposal.id);
     setProposal(prev => prev ? { ...prev, total_fixed: newFixed, total_monthly: newMonthly, grand_total: newFixed + newMonthly } : prev);
-    toast.success('Service removed');
+
+    // Delete from DB
+    await supabase.from('proposal_services').delete().eq('id', serviceId);
+    await supabase.from('proposals').update({ total_fixed: newFixed, total_monthly: newMonthly, grand_total: newFixed + newMonthly }).eq('id', proposal.id);
+
+    // Undo toast
+    toast.success(`${removedService.module?.name || 'Service'} removed`, {
+      action: {
+        label: 'Undo',
+        onClick: async () => {
+          // Re-insert the service
+          const { data: restored } = await supabase.from('proposal_services').insert({
+            proposal_id: proposal.id,
+            module_id: removedService.module_id,
+            display_order: removedService.display_order,
+            is_addon: removedService.is_addon,
+            price_override: removedService.price_override,
+            custom_deliverables: removedService.custom_deliverables,
+            bundle_id: removedService.bundle_id,
+          }).select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, icon)').single();
+          if (restored) {
+            const mapped = { ...restored, module: restored.service_modules };
+            setServices(prev => [...prev, mapped].sort((a, b) => (a.display_order || 0) - (b.display_order || 0)));
+            // Recalculate totals
+            const restoredServices = [...updated, mapped];
+            const rFixed = restoredServices.filter(s => s.module?.pricing_model === 'fixed').reduce((sum, s) => sum + getServicePrice(s), 0);
+            const rMonthly = restoredServices.filter(s => s.module?.pricing_model === 'monthly').reduce((sum, s) => sum + getServicePrice(s), 0);
+            await supabase.from('proposals').update({ total_fixed: rFixed, total_monthly: rMonthly, grand_total: rFixed + rMonthly }).eq('id', proposal.id);
+            setProposal(prev => prev ? { ...prev, total_fixed: rFixed, total_monthly: rMonthly, grand_total: rFixed + rMonthly } : prev);
+            toast.success(`${removedService.module?.name || 'Service'} restored`);
+          }
+        },
+      },
+      duration: 6000,
+    });
   };
 
   const addService = async (mod: any) => {
@@ -647,13 +682,30 @@ export default function ProposalEditor() {
                 </div>
               </SectionWrapper>
 
-              {/* Section 5: Why Us */}
-              <SectionWrapper idx={5} hidden={hiddenSections.has(5)} onToggle={toggleSection} label="Why Us">
+              {/* Section 5: Terms */}
+              <SectionWrapper idx={5} hidden={hiddenSections.has(5)} onToggle={toggleSection} label="Terms & Conditions">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="06">
-                    <SectionHeader number="05" title="Why Us" subtitle="What sets us apart" />
+                    <SectionHeader number="05" title="Terms & Conditions" />
+                    {termsClauses.length === 0 ? (
+                      <div className="text-center py-16">
+                        <p className="text-muted-foreground" style={{ fontSize: '15px' }}>No terms & conditions configured.</p>
+                        <Link to="/settings" className="mt-2 inline-block text-sm text-brand hover:text-brand-hover">Add in Settings →</Link>
+                      </div>
+                    ) : (
+                      <TermsSection clauses={termsClauses.map(c => ({ title: c.title, content: c.content }))} />
+                    )}
+                  </PageWrapper>
+                </div>
+              </SectionWrapper>
+
+              {/* Section 6: Why Us */}
+              <SectionWrapper idx={6} hidden={hiddenSections.has(6)} onToggle={toggleSection} label="Why Us">
+                <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
+                  <PageWrapper pageNumber="07">
+                    <SectionHeader number="06" title="Why Us" subtitle="What sets us apart" />
                     
-                    {/* About text — editable, with default fallback */}
+                    {/* About text — editable, shared across proposals */}
                     <div className="mb-10">
                       <TextContent>
                         <EditableText
@@ -668,12 +720,15 @@ export default function ProposalEditor() {
                           className="min-h-[60px]"
                         />
                       </TextContent>
+                      <p className="mt-2 text-[10px] text-muted-foreground print:hidden">
+                        This text is shared across all proposals. <Link to="/settings/agency" className="underline hover:text-foreground">Edit in Settings</Link> to change it globally.
+                      </p>
                     </div>
 
                     {differentiators.length === 0 ? (
                       <div className="text-center py-16">
-                        <p className="text-[#999]" style={{ fontSize: '15px' }}>Add differentiators in Settings to build trust.</p>
-                        <Link to="/settings" className="mt-2 inline-block text-sm" style={{ color: agency?.brand_color || '#fc956e' }}>Settings →</Link>
+                        <p className="text-muted-foreground" style={{ fontSize: '15px' }}>Add differentiators in Settings to build trust.</p>
+                        <Link to="/settings" className="mt-2 inline-block text-sm text-brand hover:text-brand-hover">Settings →</Link>
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -694,15 +749,15 @@ export default function ProposalEditor() {
                 </div>
               </SectionWrapper>
 
-              {/* Section 6: Testimonials */}
-              <SectionWrapper idx={6} hidden={hiddenSections.has(6)} onToggle={toggleSection} label="Testimonials">
+              {/* Section 7: Testimonials */}
+              <SectionWrapper idx={7} hidden={hiddenSections.has(7)} onToggle={toggleSection} label="Testimonials">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
-                  <PageWrapper pageNumber="07">
-                    <SectionHeader number="06" title="What Our Clients Say" subtitle="Proof of impact" />
+                  <PageWrapper pageNumber="08">
+                    <SectionHeader number="07" title="What Our Clients Say" subtitle="Proof of impact" />
                     {testimonials.length === 0 ? (
                       <div className="text-center py-16">
-                        <p className="text-[#999]" style={{ fontSize: '15px' }}>Add testimonials in Settings to build credibility.</p>
-                        <Link to="/settings" className="mt-2 inline-block text-sm" style={{ color: agency?.brand_color || '#fc956e' }}>Settings →</Link>
+                        <p className="text-muted-foreground" style={{ fontSize: '15px' }}>Add testimonials in Settings to build credibility.</p>
+                        <Link to="/settings" className="mt-2 inline-block text-sm text-brand hover:text-brand-hover">Settings →</Link>
                       </div>
                     ) : (
                       <div className="space-y-6">
@@ -721,23 +776,6 @@ export default function ProposalEditor() {
                           />
                         ))}
                       </div>
-                    )}
-                  </PageWrapper>
-                </div>
-              </SectionWrapper>
-
-              {/* Section 7: Terms */}
-              <SectionWrapper idx={7} hidden={hiddenSections.has(7)} onToggle={toggleSection} label="Terms & Conditions">
-                <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
-                  <PageWrapper pageNumber="08">
-                    <SectionHeader number="07" title="Terms & Conditions" />
-                    {termsClauses.length === 0 ? (
-                      <div className="text-center py-16">
-                        <p className="text-[#999]" style={{ fontSize: '15px' }}>No terms & conditions configured.</p>
-                        <Link to="/settings" className="mt-2 inline-block text-sm" style={{ color: agency?.brand_color || '#fc956e' }}>Add in Settings →</Link>
-                      </div>
-                    ) : (
-                      <TermsSection clauses={termsClauses.map(c => ({ title: c.title, content: c.content }))} />
                     )}
                   </PageWrapper>
                 </div>
@@ -834,6 +872,8 @@ function ShareModal({ proposal, client, agency, onClose, onStatusUpdate }: {
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedEmail, setCopiedEmail] = useState(false);
+  const [linkError, setLinkError] = useState(false);
   const [showEmailComposer, setShowEmailComposer] = useState(false);
 
   const contactFirst = client?.contact_name?.split(' ')[0] || 'there';
@@ -846,24 +886,33 @@ function ShareModal({ proposal, client, agency, onClose, onStatusUpdate }: {
   const ensureShareLink = async (): Promise<string | null> => {
     if (shareUrl) return shareUrl;
     setGenerating(true);
-    const shareId = crypto.randomUUID().replace(/-/g, '').slice(0, 12);
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + (proposal.validity_days || 30));
-    const { error } = await supabase.from('proposal_shares').insert({
-      proposal_id: proposal.id,
-      share_id: shareId,
-      share_type: 'link',
-      expires_at: expiresAt.toISOString(),
-    });
-    if (error) { toast.error('Failed to generate link'); setGenerating(false); return null; }
-    const url = `${window.location.origin}/p/${shareId}`;
-    setShareUrl(url);
-    if (proposal.status === 'draft') {
-      await supabase.from('proposals').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', proposal.id);
-      onStatusUpdate('sent');
+    setLinkError(false);
+    try {
+      const shareId = crypto.randomUUID().replace(/-/g, '').slice(0, 12);
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + (proposal.validity_days || 30));
+      const { error } = await supabase.from('proposal_shares').insert({
+        proposal_id: proposal.id,
+        share_id: shareId,
+        share_type: 'link',
+        expires_at: expiresAt.toISOString(),
+      });
+      if (error) throw error;
+      const url = `${window.location.origin}/p/${shareId}`;
+      setShareUrl(url);
+      if (proposal.status === 'draft') {
+        await supabase.from('proposals').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', proposal.id);
+        onStatusUpdate('sent');
+      }
+      setGenerating(false);
+      return url;
+    } catch (err) {
+      console.error('Share link error:', err);
+      setLinkError(true);
+      setGenerating(false);
+      toast.error('Failed to generate share link. Please try again.');
+      return null;
     }
-    setGenerating(false);
-    return url;
   };
 
   const openEmailComposer = async () => {
@@ -885,6 +934,17 @@ ${agencyName}`);
   const handleSendEmail = () => {
     const mailto = `mailto:${encodeURIComponent(client?.contact_email || '')}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
     window.open(mailto, '_self');
+  };
+
+  const copyEmailBody = async () => {
+    try {
+      await navigator.clipboard.writeText(`Subject: ${emailSubject}\n\n${emailBody}`);
+      setCopiedEmail(true);
+      toast.success('Email copied to clipboard');
+      setTimeout(() => setCopiedEmail(false), 2000);
+    } catch {
+      toast.error('Failed to copy');
+    }
   };
 
   const copyLink = async () => {
@@ -924,10 +984,16 @@ ${agencyName}`);
           </div>
           <div className="flex items-center justify-between border-t border-border px-6 py-4">
             <button onClick={() => setShowEmailComposer(false)} className="text-sm text-muted-foreground hover:text-foreground">← Back</button>
-            <button onClick={handleSendEmail} disabled={!client?.contact_email}
-              className="flex items-center gap-2 rounded-lg bg-brand px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-hover disabled:opacity-50">
-              <Send className="h-3.5 w-3.5" /> Open in Email Client
-            </button>
+            <div className="flex items-center gap-2">
+              <button onClick={copyEmailBody}
+                className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted">
+                {copiedEmail ? <><Check className="h-3.5 w-3.5" /> Copied</> : <><LinkIcon className="h-3.5 w-3.5" /> Copy Email</>}
+              </button>
+              <button onClick={handleSendEmail} disabled={!client?.contact_email}
+                className="flex items-center gap-2 rounded-lg bg-brand px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-hover disabled:opacity-50">
+                <Send className="h-3.5 w-3.5" /> Open in Email Client
+              </button>
+            </div>
           </div>
         </div>
       </div>
