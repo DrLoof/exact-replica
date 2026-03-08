@@ -682,11 +682,28 @@ export default function ProposalEditor() {
                 </div>
               </SectionWrapper>
 
-              {/* Section 5: Why Us */}
-              <SectionWrapper idx={5} hidden={hiddenSections.has(5)} onToggle={toggleSection} label="Why Us">
+              {/* Section 5: Terms */}
+              <SectionWrapper idx={5} hidden={hiddenSections.has(5)} onToggle={toggleSection} label="Terms & Conditions">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="06">
-                    <SectionHeader number="05" title="Why Us" subtitle="What sets us apart" />
+                    <SectionHeader number="05" title="Terms & Conditions" />
+                    {termsClauses.length === 0 ? (
+                      <div className="text-center py-16">
+                        <p className="text-muted-foreground" style={{ fontSize: '15px' }}>No terms & conditions configured.</p>
+                        <Link to="/settings" className="mt-2 inline-block text-sm text-brand hover:text-brand-hover">Add in Settings →</Link>
+                      </div>
+                    ) : (
+                      <TermsSection clauses={termsClauses.map(c => ({ title: c.title, content: c.content }))} />
+                    )}
+                  </PageWrapper>
+                </div>
+              </SectionWrapper>
+
+              {/* Section 6: Why Us */}
+              <SectionWrapper idx={6} hidden={hiddenSections.has(6)} onToggle={toggleSection} label="Why Us">
+                <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
+                  <PageWrapper pageNumber="07">
+                    <SectionHeader number="06" title="Why Us" subtitle="What sets us apart" />
                     
                     {/* About text — editable, shared across proposals */}
                     <div className="mb-10">
@@ -710,8 +727,8 @@ export default function ProposalEditor() {
 
                     {differentiators.length === 0 ? (
                       <div className="text-center py-16">
-                        <p className="text-[#999]" style={{ fontSize: '15px' }}>Add differentiators in Settings to build trust.</p>
-                        <Link to="/settings" className="mt-2 inline-block text-sm" style={{ color: agency?.brand_color || '#fc956e' }}>Settings →</Link>
+                        <p className="text-muted-foreground" style={{ fontSize: '15px' }}>Add differentiators in Settings to build trust.</p>
+                        <Link to="/settings" className="mt-2 inline-block text-sm text-brand hover:text-brand-hover">Settings →</Link>
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -732,15 +749,15 @@ export default function ProposalEditor() {
                 </div>
               </SectionWrapper>
 
-              {/* Section 6: Testimonials */}
-              <SectionWrapper idx={6} hidden={hiddenSections.has(6)} onToggle={toggleSection} label="Testimonials">
+              {/* Section 7: Testimonials */}
+              <SectionWrapper idx={7} hidden={hiddenSections.has(7)} onToggle={toggleSection} label="Testimonials">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
-                  <PageWrapper pageNumber="07">
-                    <SectionHeader number="06" title="What Our Clients Say" subtitle="Proof of impact" />
+                  <PageWrapper pageNumber="08">
+                    <SectionHeader number="07" title="What Our Clients Say" subtitle="Proof of impact" />
                     {testimonials.length === 0 ? (
                       <div className="text-center py-16">
-                        <p className="text-[#999]" style={{ fontSize: '15px' }}>Add testimonials in Settings to build credibility.</p>
-                        <Link to="/settings" className="mt-2 inline-block text-sm" style={{ color: agency?.brand_color || '#fc956e' }}>Settings →</Link>
+                        <p className="text-muted-foreground" style={{ fontSize: '15px' }}>Add testimonials in Settings to build credibility.</p>
+                        <Link to="/settings" className="mt-2 inline-block text-sm text-brand hover:text-brand-hover">Settings →</Link>
                       </div>
                     ) : (
                       <div className="space-y-6">
@@ -759,23 +776,6 @@ export default function ProposalEditor() {
                           />
                         ))}
                       </div>
-                    )}
-                  </PageWrapper>
-                </div>
-              </SectionWrapper>
-
-              {/* Section 7: Terms */}
-              <SectionWrapper idx={7} hidden={hiddenSections.has(7)} onToggle={toggleSection} label="Terms & Conditions">
-                <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
-                  <PageWrapper pageNumber="08">
-                    <SectionHeader number="07" title="Terms & Conditions" />
-                    {termsClauses.length === 0 ? (
-                      <div className="text-center py-16">
-                        <p className="text-[#999]" style={{ fontSize: '15px' }}>No terms & conditions configured.</p>
-                        <Link to="/settings" className="mt-2 inline-block text-sm" style={{ color: agency?.brand_color || '#fc956e' }}>Add in Settings →</Link>
-                      </div>
-                    ) : (
-                      <TermsSection clauses={termsClauses.map(c => ({ title: c.title, content: c.content }))} />
                     )}
                   </PageWrapper>
                 </div>
