@@ -1,5 +1,8 @@
+import { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Menu, X } from 'lucide-react';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -7,12 +10,47 @@ interface AppShellProps {
 }
 
 export function AppShell({ children, hideHeader }: AppShellProps) {
+  const isMobile = useIsMobile();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex flex-1 flex-col pl-[236px]">
-        {!hideHeader && <Header />}
-        <main className="flex-1 px-8 py-6">
+      {/* Mobile overlay */}
+      {isMobile && sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={
+          isMobile
+            ? `fixed left-0 top-0 z-50 h-screen w-[236px] transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`
+            : ''
+        }
+      >
+        <Sidebar onClose={isMobile ? () => setSidebarOpen(false) : undefined} />
+      </div>
+
+      <div className={`flex flex-1 flex-col ${isMobile ? '' : 'pl-[236px]'}`}>
+        {!hideHeader && (
+          <Header
+            onMenuToggle={isMobile ? () => setSidebarOpen(!sidebarOpen) : undefined}
+            showMenuButton={isMobile}
+          />
+        )}
+        {/* Mobile: show hamburger if header is hidden */}
+        {hideHeader && isMobile && (
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="fixed left-4 top-4 z-30 flex h-10 w-10 items-center justify-center rounded-lg bg-background shadow-md border border-border"
+          >
+            <Menu className="h-5 w-5 text-foreground" />
+          </button>
+        )}
+        <main className={`flex-1 ${isMobile ? 'px-4 py-4' : 'px-8 py-6'}`}>
           <div className="mx-auto max-w-[1200px]">
             {children}
           </div>

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate, Link, useBeforeUnload } from 'react-router-dom';
 import {
   ArrowLeft, Eye, EyeOff, Share2, Download, Send, LinkIcon,
   ChevronDown, FileText, Check, DollarSign, Clock,
@@ -112,6 +112,16 @@ export default function ProposalEditor() {
   const [availableModules, setAvailableModules] = useState<any[]>([]);
   const [regenerating, setRegenerating] = useState(false);
   const currencySymbol = agency?.currency_symbol || '$';
+
+  // Warn user before leaving if an editable field is focused (unsaved inline edit)
+  useBeforeUnload(
+    useCallback((e) => {
+      const active = document.activeElement;
+      if (active && active.getAttribute('contenteditable') === 'true') {
+        e.preventDefault();
+      }
+    }, [])
+  );
 
   useEffect(() => {
     if (id) loadProposal();
@@ -337,12 +347,10 @@ export default function ProposalEditor() {
           >
             Dashboard
           </button>
-          <button
-            onClick={() => { toast.success('Draft saved'); }}
-            className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
-          >
-            Save Draft
-          </button>
+          <span className="flex items-center gap-1.5 rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground">
+            <Check className="h-3.5 w-3.5" />
+            Auto-saved
+          </span>
           <button
             onClick={() => setShowShareModal(true)}
             className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-hover"
