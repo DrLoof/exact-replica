@@ -210,19 +210,20 @@ export default function PublicProposal() {
         />
 
         {/* Section 2: Executive Summary */}
-        {proposal.executive_summary && (
-          <PageWrapper pageNumber="02">
-            <SectionHeader
-              number="01"
-              title="Executive Summary"
-              subtitle="An overview of our recommended approach and expected outcomes."
-            />
-            <div className="mb-10">
-              <TextContent>{proposal.executive_summary}</TextContent>
-            </div>
-            <HighlightPanel items={summaryHighlights} variant="accent" />
-          </PageWrapper>
-        )}
+        <PageWrapper pageNumber="02">
+          <SectionHeader
+            number="01"
+            title="Executive Summary"
+            subtitle="An overview of our recommended approach and expected outcomes."
+          />
+          <div className="mb-10">
+            <TextContent>
+              {proposal.executive_summary ||
+                `We're excited to present this proposal for ${client?.company_name || 'your organization'}. Based on our understanding of your needs, we've put together a tailored package of services designed to deliver measurable results and support your growth objectives.`}
+            </TextContent>
+          </div>
+          <HighlightPanel items={summaryHighlights} variant="accent" />
+        </PageWrapper>
 
         {/* Section 3: Scope of Services */}
         {services.length > 0 && (
