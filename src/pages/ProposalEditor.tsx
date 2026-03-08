@@ -84,7 +84,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 
 const sectionNames = [
   'Cover', 'Executive Summary', 'Scope of Services', 'Timeline',
-  'Investment', 'Why Us', 'Testimonials', 'Terms', 'Signature',
+  'Investment', 'Terms', 'Why Us', 'Testimonials', 'Signature',
 ];
 
 function getDefaultAboutText(yearsExperience?: number | null): string {
