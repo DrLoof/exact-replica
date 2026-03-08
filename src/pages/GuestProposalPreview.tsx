@@ -573,7 +573,7 @@ export default function GuestProposalPreview() {
                             isAddon={svc.service_type === 'addon'}
                             delay={i * 0.1}
                             onDescriptionEdit={(val) => handleServiceEdit(i, 'description', val)}
-                            onDeliverableEdit={(delIdx, val) => {
+                            onDeliverablesEdit={(delIdx, val) => {
                               const newDels = [...(svc.deliverables || [])];
                               newDels[delIdx] = val;
                               handleServiceEdit(i, 'deliverables', newDels);
