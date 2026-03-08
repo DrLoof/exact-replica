@@ -1,8 +1,12 @@
-import { Navigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { SignupGate } from '@/components/onboarding/SignupGate';
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { session, agency, loading } = useAuth();
+  const location = useLocation();
+  const [showSignupGate, setShowSignupGate] = useState(false);
 
   if (loading) {
     return (
@@ -13,6 +17,33 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!session) {
+    // If user has guest data, show signup gate instead of redirecting to login
+    const hasGuestData = !!localStorage.getItem('propopad_guest_proposal');
+    if (hasGuestData) {
+      if (showSignupGate) {
+        return (
+          <SignupGate
+            trigger="navigate"
+            onAuthenticated={() => {
+              setShowSignupGate(false);
+              window.location.reload();
+            }}
+            onCancel={() => {
+              // Go back to guest preview
+              window.location.href = '/proposals/preview';
+            }}
+          />
+        );
+      }
+      // Auto-show the gate
+      return (
+        <SignupGate
+          trigger="navigate"
+          onAuthenticated={() => window.location.reload()}
+          onCancel={() => { window.location.href = '/proposals/preview'; }}
+        />
+      );
+    }
     return <Navigate to="/login" replace />;
   }
 

@@ -1,8 +1,9 @@
 import { Link, Navigate } from 'react-router-dom';
 import propopadLogo from '@/assets/logo_propopad_small.svg';
-import { ArrowRight, Zap, Eye, FileText, Shield, BarChart3, Palette, Clock, Layers, Sparkles } from 'lucide-react';
+import { ArrowRight, Zap, Eye, FileText, Shield, BarChart3, Palette, Clock, Layers, Sparkles, PenLine } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAuth } from '@/hooks/useAuth';
+import { useState, useEffect } from 'react';
 
 const features = [
   { icon: Zap, title: 'Automated Setup', desc: 'Scan your website. We auto-detect your brand, services, testimonials, and more.' },
@@ -15,6 +16,11 @@ const features = [
 
 export default function Home() {
   const { session, loading } = useAuth();
+  const [hasGuestProposal, setHasGuestProposal] = useState(false);
+
+  useEffect(() => {
+    setHasGuestProposal(!!localStorage.getItem('propopad_guest_proposal'));
+  }, []);
 
   if (!loading && session) {
     return <Navigate to="/dashboard" replace />;
@@ -54,6 +60,23 @@ export default function Home() {
           transition={{ duration: 0.6 }}
         >
           <span className="label-overline text-brass">For agencies that mean business</span>
+
+          {/* Returning guest banner */}
+          {hasGuestProposal && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mx-auto mb-6 mt-2 max-w-md"
+            >
+              <Link
+                to="/proposals/preview"
+                className="flex items-center justify-center gap-2 rounded-xl border border-brass/30 bg-brass-glow px-5 py-3 text-sm font-semibold text-brass transition-colors hover:bg-brass/10"
+              >
+                <PenLine className="h-4 w-4" />
+                You have an unfinished proposal. Continue editing →
+              </Link>
+            </motion.div>
+          )}
           <h1 className="mt-4 font-display text-4xl font-bold leading-tight text-foreground md:text-5xl lg:text-6xl">
             Proposals that<br />
             <span className="text-brass">win clients</span>
