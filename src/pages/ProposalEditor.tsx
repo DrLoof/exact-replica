@@ -872,6 +872,8 @@ function ShareModal({ proposal, client, agency, onClose, onStatusUpdate }: {
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedEmail, setCopiedEmail] = useState(false);
+  const [linkError, setLinkError] = useState(false);
   const [showEmailComposer, setShowEmailComposer] = useState(false);
 
   const contactFirst = client?.contact_name?.split(' ')[0] || 'there';
