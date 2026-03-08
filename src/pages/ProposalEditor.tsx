@@ -688,7 +688,7 @@ export default function ProposalEditor() {
                   <PageWrapper pageNumber="06">
                     <SectionHeader number="05" title="Why Us" subtitle="What sets us apart" />
                     
-                    {/* About text — editable, with default fallback */}
+                    {/* About text — editable, shared across proposals */}
                     <div className="mb-10">
                       <TextContent>
                         <EditableText
@@ -703,6 +703,9 @@ export default function ProposalEditor() {
                           className="min-h-[60px]"
                         />
                       </TextContent>
+                      <p className="mt-2 text-[10px] text-muted-foreground print:hidden">
+                        This text is shared across all proposals. <Link to="/settings/agency" className="underline hover:text-foreground">Edit in Settings</Link> to change it globally.
+                      </p>
                     </div>
 
                     {differentiators.length === 0 ? (
