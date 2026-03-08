@@ -16,6 +16,11 @@ const features = [
 
 export default function Home() {
   const { session, loading } = useAuth();
+  const [hasGuestProposal, setHasGuestProposal] = useState(false);
+
+  useEffect(() => {
+    setHasGuestProposal(!!localStorage.getItem('propopad_guest_proposal'));
+  }, []);
 
   if (!loading && session) {
     return <Navigate to="/dashboard" replace />;
