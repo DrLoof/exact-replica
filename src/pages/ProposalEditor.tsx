@@ -182,15 +182,50 @@ export default function ProposalEditor() {
 
   const removeService = async (serviceId: string) => {
     if (!proposal) return;
-    await supabase.from('proposal_services').delete().eq('id', serviceId);
+    const removedService = services.find(s => s.id === serviceId);
+    if (!removedService) return;
+
+    // Optimistically remove from UI
     const updated = services.filter(s => s.id !== serviceId);
     setServices(updated);
-    // Recalculate totals
     const newFixed = updated.filter(s => s.module?.pricing_model === 'fixed').reduce((sum, s) => sum + getServicePrice(s), 0);
     const newMonthly = updated.filter(s => s.module?.pricing_model === 'monthly').reduce((sum, s) => sum + getServicePrice(s), 0);
-    await supabase.from('proposals').update({ total_fixed: newFixed, total_monthly: newMonthly, grand_total: newFixed + newMonthly }).eq('id', proposal.id);
     setProposal(prev => prev ? { ...prev, total_fixed: newFixed, total_monthly: newMonthly, grand_total: newFixed + newMonthly } : prev);
-    toast.success('Service removed');
+
+    // Delete from DB
+    await supabase.from('proposal_services').delete().eq('id', serviceId);
+    await supabase.from('proposals').update({ total_fixed: newFixed, total_monthly: newMonthly, grand_total: newFixed + newMonthly }).eq('id', proposal.id);
+
+    // Undo toast
+    toast.success(`${removedService.module?.name || 'Service'} removed`, {
+      action: {
+        label: 'Undo',
+        onClick: async () => {
+          // Re-insert the service
+          const { data: restored } = await supabase.from('proposal_services').insert({
+            proposal_id: proposal.id,
+            module_id: removedService.module_id,
+            display_order: removedService.display_order,
+            is_addon: removedService.is_addon,
+            price_override: removedService.price_override,
+            custom_deliverables: removedService.custom_deliverables,
+            bundle_id: removedService.bundle_id,
+          }).select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, icon)').single();
+          if (restored) {
+            const mapped = { ...restored, module: restored.service_modules };
+            setServices(prev => [...prev, mapped].sort((a, b) => (a.display_order || 0) - (b.display_order || 0)));
+            // Recalculate totals
+            const restoredServices = [...updated, mapped];
+            const rFixed = restoredServices.filter(s => s.module?.pricing_model === 'fixed').reduce((sum, s) => sum + getServicePrice(s), 0);
+            const rMonthly = restoredServices.filter(s => s.module?.pricing_model === 'monthly').reduce((sum, s) => sum + getServicePrice(s), 0);
+            await supabase.from('proposals').update({ total_fixed: rFixed, total_monthly: rMonthly, grand_total: rFixed + rMonthly }).eq('id', proposal.id);
+            setProposal(prev => prev ? { ...prev, total_fixed: rFixed, total_monthly: rMonthly, grand_total: rFixed + rMonthly } : prev);
+            toast.success(`${removedService.module?.name || 'Service'} restored`);
+          }
+        },
+      },
+      duration: 6000,
+    });
   };
 
   const addService = async (mod: any) => {
