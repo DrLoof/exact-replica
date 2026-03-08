@@ -1,7 +1,7 @@
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, Users, Layers, Package,
-  Building2, Palette, Receipt, UserPlus, LogOut, Zap,
+  Building2, Palette, Receipt, UserPlus, LogOut, Zap, X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import logoOrange from '@/assets/logo_propopad_small.svg';
@@ -23,7 +23,11 @@ const settingsNav = [
   { label: 'Team', icon: UserPlus, path: '/settings/team' },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+export function Sidebar({ onClose }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { userProfile, agency, signOut } = useAuth();
@@ -36,6 +40,10 @@ export function Sidebar() {
     navigate('/');
   };
 
+  const handleNav = () => {
+    onClose?.();
+  };
+
   const initials = userProfile?.full_name
     ? userProfile.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
     : '??';
@@ -44,20 +52,25 @@ export function Sidebar() {
 
   return (
     <aside className="fixed left-0 top-0 z-30 flex h-screen w-[236px] flex-col bg-ivory" style={{ borderRight: '1px solid hsl(var(--parchment))' }}>
-      {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 py-5">
-        <img src={logoOrange} alt="Propopad" className="h-7 w-7 rounded-[6px]" />
-        <span className="text-[14px] font-semibold tracking-[-0.01em] text-ink">Propopad</span>
+      {/* Logo + close button for mobile */}
+      <div className="flex items-center justify-between px-5 py-5">
+        <div className="flex items-center gap-2.5">
+          <img src={logoOrange} alt="Propopad" className="h-7 w-7 rounded-[6px]" />
+          <span className="text-[14px] font-semibold tracking-[-0.01em] text-ink">Propopad</span>
+        </div>
+        {onClose && (
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-muted hover:bg-parchment-soft hover:text-ink">
+            <X className="h-5 w-5" />
+          </button>
+        )}
       </div>
 
-      {/* Agency block — white card with shadow */}
+      {/* Agency block */}
       {agency?.name && (
         <div className="mx-3 mb-3 rounded-[10px] bg-paper p-2.5 shadow-card">
           <div className="flex items-center gap-2.5">
             {agency.logo_url ? (
-              <div
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] overflow-hidden bg-ink"
-              >
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] overflow-hidden bg-ink">
                 <img src={agency.logo_url} alt={agency.name} className="h-5 w-5 object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
               </div>
             ) : (
@@ -74,7 +87,7 @@ export function Sidebar() {
       )}
 
       {/* Main nav */}
-      <nav className="flex-1 px-3 py-2">
+      <nav className="flex-1 px-3 py-2 overflow-y-auto">
         <p className="label-overline mb-2 px-3">Main</p>
         <ul className="space-y-0.5">
           {mainNav.map((item) => {
@@ -83,6 +96,7 @@ export function Sidebar() {
               <li key={item.path}>
                 <Link
                   to={item.path}
+                  onClick={handleNav}
                   className={cn(
                     'relative flex items-center gap-3 rounded-[8px] px-3 py-2 text-sm transition-all duration-200',
                     active
@@ -116,6 +130,7 @@ export function Sidebar() {
               <li key={item.path}>
                 <Link
                   to={item.path}
+                  onClick={handleNav}
                   className={cn(
                     'relative flex items-center gap-3 rounded-[8px] px-3 py-2 text-sm transition-all duration-200',
                     active
@@ -132,9 +147,8 @@ export function Sidebar() {
         </ul>
       </nav>
 
-      {/* Upgrade CTA — White card with brass top line */}
+      {/* Upgrade CTA */}
       <div className="relative mx-3 mb-3 overflow-hidden rounded-[10px] bg-paper p-4 shadow-card">
-        {/* Brass top line */}
         <div className="absolute left-0 right-0 top-0 h-[2px]" style={{ background: 'linear-gradient(90deg, #BE8E5E, transparent)' }} />
         <div className="flex items-center gap-1.5 mb-1.5">
           <Zap className="h-3.5 w-3.5 text-brass" />
@@ -162,9 +176,9 @@ export function Sidebar() {
 
       {/* Legal links */}
       <div className="px-4 pb-3 text-center">
-        <Link to="/terms" className="text-[10px] hover:underline" style={{ color: '#B8B0A5' }}>Terms</Link>
+        <Link to="/terms" onClick={handleNav} className="text-[10px] hover:underline" style={{ color: '#B8B0A5' }}>Terms</Link>
         <span className="mx-1 text-[10px]" style={{ color: '#B8B0A5' }}>·</span>
-        <Link to="/privacy" className="text-[10px] hover:underline" style={{ color: '#B8B0A5' }}>Privacy</Link>
+        <Link to="/privacy" onClick={handleNav} className="text-[10px] hover:underline" style={{ color: '#B8B0A5' }}>Privacy</Link>
       </div>
     </aside>
   );

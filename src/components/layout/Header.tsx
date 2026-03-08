@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Bell, Plus, FileText, Eye, Check, X, Clock } from 'lucide-react';
+import { Bell, Plus, FileText, Eye, Check, X, Clock, Menu } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
@@ -12,7 +12,12 @@ const typeIcons: Record<string, { icon: typeof Eye; color: string }> = {
   expiring: { icon: Clock, color: 'text-status-warning' },
 };
 
-export function Header() {
+interface HeaderProps {
+  onMenuToggle?: () => void;
+  showMenuButton?: boolean;
+}
+
+export function Header({ onMenuToggle, showMenuButton }: HeaderProps) {
   const { agency, userProfile } = useAuth();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
@@ -23,7 +28,6 @@ export function Header() {
     if (!userProfile?.id) return;
     loadNotifications();
 
-    // Realtime subscription
     const channel = supabase
       .channel('notifications')
       .on('postgres_changes', {
@@ -69,17 +73,25 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-background/80 px-8 backdrop-blur-sm">
-      <div>
-        <h2 className="text-sm font-medium text-muted-foreground">{agency?.name || 'My Agency'}</h2>
-      </div>
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-background/80 px-4 sm:px-8 backdrop-blur-sm">
       <div className="flex items-center gap-3">
+        {showMenuButton && (
+          <button
+            onClick={onMenuToggle}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground hover:bg-muted"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        )}
+        <h2 className="text-sm font-medium text-muted-foreground hidden sm:block">{agency?.name || 'My Agency'}</h2>
+      </div>
+      <div className="flex items-center gap-2 sm:gap-3">
         <Link
           to="/proposals/new"
-          className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover"
+          className="flex items-center gap-2 rounded-lg bg-brand px-3 sm:px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover"
         >
           <Plus className="h-4 w-4" />
-          New Proposal
+          <span className="hidden sm:inline">New Proposal</span>
         </Link>
 
         {/* Notification Bell */}
