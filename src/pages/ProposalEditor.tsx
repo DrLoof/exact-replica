@@ -886,24 +886,33 @@ function ShareModal({ proposal, client, agency, onClose, onStatusUpdate }: {
   const ensureShareLink = async (): Promise<string | null> => {
     if (shareUrl) return shareUrl;
     setGenerating(true);
-    const shareId = crypto.randomUUID().replace(/-/g, '').slice(0, 12);
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + (proposal.validity_days || 30));
-    const { error } = await supabase.from('proposal_shares').insert({
-      proposal_id: proposal.id,
-      share_id: shareId,
-      share_type: 'link',
-      expires_at: expiresAt.toISOString(),
-    });
-    if (error) { toast.error('Failed to generate link'); setGenerating(false); return null; }
-    const url = `${window.location.origin}/p/${shareId}`;
-    setShareUrl(url);
-    if (proposal.status === 'draft') {
-      await supabase.from('proposals').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', proposal.id);
-      onStatusUpdate('sent');
+    setLinkError(false);
+    try {
+      const shareId = crypto.randomUUID().replace(/-/g, '').slice(0, 12);
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + (proposal.validity_days || 30));
+      const { error } = await supabase.from('proposal_shares').insert({
+        proposal_id: proposal.id,
+        share_id: shareId,
+        share_type: 'link',
+        expires_at: expiresAt.toISOString(),
+      });
+      if (error) throw error;
+      const url = `${window.location.origin}/p/${shareId}`;
+      setShareUrl(url);
+      if (proposal.status === 'draft') {
+        await supabase.from('proposals').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', proposal.id);
+        onStatusUpdate('sent');
+      }
+      setGenerating(false);
+      return url;
+    } catch (err) {
+      console.error('Share link error:', err);
+      setLinkError(true);
+      setGenerating(false);
+      toast.error('Failed to generate share link. Please try again.');
+      return null;
     }
-    setGenerating(false);
-    return url;
   };
 
   const openEmailComposer = async () => {
