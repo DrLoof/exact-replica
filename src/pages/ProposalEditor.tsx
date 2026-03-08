@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate, Link, useBeforeUnload } from 'react-router-dom';
 import {
   ArrowLeft, Eye, EyeOff, Share2, Download, Send, LinkIcon,
   ChevronDown, FileText, Check, DollarSign, Clock,
