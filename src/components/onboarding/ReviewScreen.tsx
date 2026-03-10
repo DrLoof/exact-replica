@@ -177,50 +177,143 @@ export function ReviewScreen({
     onTestimonialsChange(updated);
   };
 
+  const getDeliverables = (mod: any): string[] => deliverableOverrides[mod.key] ?? mod.deliverables ?? [];
+
+  const toggleServiceExpand = (key: string) => {
+    setExpandedServices(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
+
+  const updateDeliverable = (key: string, index: number, value: string) => {
+    const current = getDeliverables(allModules.find(m => m.key === key)!);
+    const updated = [...current];
+    updated[index] = value;
+    setDeliverableOverrides(prev => ({ ...prev, [key]: updated }));
+  };
+
+  const removeDeliverable = (key: string, index: number) => {
+    const current = getDeliverables(allModules.find(m => m.key === key)!);
+    setDeliverableOverrides(prev => ({ ...prev, [key]: current.filter((_, i) => i !== index) }));
+  };
+
+  const addDeliverable = (key: string) => {
+    const current = getDeliverables(allModules.find(m => m.key === key)!);
+    setDeliverableOverrides(prev => ({ ...prev, [key]: [...current, 'New deliverable'] }));
+    setEditingDeliverable({ key, index: current.length });
+    setDeliverableDraft('New deliverable');
+  };
+
   const renderServiceRow = (mod: any, isSelected: boolean) => {
     const price = getModulePrice(mod);
     const isEditing = editingPrice === mod.key;
     const isModified = priceOverrides[mod.key] !== undefined;
+    const isExpanded = expandedServices.has(mod.key);
+    const deliverables = getDeliverables(mod);
 
     return (
-      <div key={mod.key} className={cn("flex items-center justify-between py-2 border-b border-border last:border-0", !isSelected && "opacity-50")}>
-        <div className="flex items-center gap-3">
-          <button onClick={() => toggleModule(mod.key)} className={cn(
-            "flex h-5 w-5 shrink-0 items-center justify-center rounded border",
-            isSelected ? "border-ink bg-ink" : "border-muted-foreground/30"
-          )}>
-            {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
-          </button>
-          <span className={cn("text-sm", isSelected ? "text-foreground" : "text-muted-foreground")}>{mod.name}</span>
-          {isModified && <span className="text-[10px] text-brass font-medium">Modified</span>}
-        </div>
-        <div className="flex items-center gap-1">
-          {isEditing ? (
-            <input
-              type="number"
-              autoFocus
-              defaultValue={price}
-              onBlur={(e) => {
-                const val = parseFloat(e.target.value);
-                if (!isNaN(val) && val !== mod.price) {
-                  setPriceOverrides(prev => ({ ...prev, [mod.key]: val }));
-                } else if (val === mod.price) {
-                  setPriceOverrides(prev => { const n = { ...prev }; delete n[mod.key]; return n; });
-                }
-                setEditingPrice(null);
-              }}
-              onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
-              className="w-24 rounded border border-border bg-background px-2 py-0.5 text-right text-sm tabular-nums text-foreground focus:border-ink focus:outline-none"
-            />
-          ) : (
-            <button
-              onClick={() => isSelected && setEditingPrice(mod.key)}
-              className={cn("text-sm font-medium tabular-nums", isSelected ? "text-foreground hover:text-brass cursor-pointer" : "text-muted-foreground")}
-            >
-              ${price.toLocaleString()}{pricingLabel[mod.pricingModel]}
+      <div key={mod.key} className={cn("border-b border-border last:border-0", !isSelected && "opacity-50")}>
+        <div className="flex items-center justify-between py-2">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <button onClick={() => toggleModule(mod.key)} className={cn(
+              "flex h-5 w-5 shrink-0 items-center justify-center rounded border",
+              isSelected ? "border-ink bg-ink" : "border-muted-foreground/30"
+            )}>
+              {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
             </button>
-          )}
+            <button
+              onClick={() => isSelected && toggleServiceExpand(mod.key)}
+              className={cn("flex items-center gap-1 min-w-0", isSelected && "cursor-pointer")}
+            >
+              <span className={cn("text-sm", isSelected ? "text-foreground" : "text-muted-foreground")}>{mod.name}</span>
+              {isSelected && deliverables.length > 0 && (
+                <ChevronDown className={cn("h-3 w-3 shrink-0 text-muted-foreground/50 transition-transform", isExpanded && "rotate-180")} />
+              )}
+            </button>
+            {isModified && <span className="text-[10px] text-brass font-medium">Modified</span>}
+          </div>
+          <div className="flex items-center gap-1">
+            {isEditing ? (
+              <input
+                type="number"
+                autoFocus
+                defaultValue={price}
+                onBlur={(e) => {
+                  const val = parseFloat(e.target.value);
+                  if (!isNaN(val) && val !== mod.price) {
+                    setPriceOverrides(prev => ({ ...prev, [mod.key]: val }));
+                  } else if (val === mod.price) {
+                    setPriceOverrides(prev => { const n = { ...prev }; delete n[mod.key]; return n; });
+                  }
+                  setEditingPrice(null);
+                }}
+                onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+                className="w-24 rounded border border-border bg-background px-2 py-0.5 text-right text-sm tabular-nums text-foreground focus:border-ink focus:outline-none"
+              />
+            ) : (
+              <button
+                onClick={() => isSelected && setEditingPrice(mod.key)}
+                className={cn("text-sm font-medium tabular-nums", isSelected ? "text-foreground hover:text-brass cursor-pointer" : "text-muted-foreground")}
+              >
+                ${price.toLocaleString()}{pricingLabel[mod.pricingModel]}
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* Expandable deliverables */}
+        {isExpanded && isSelected && (
+          <div className="ml-8 pb-3 space-y-1">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-1">Deliverables</p>
+            {deliverables.map((d, idx) => {
+              const isEditingThis = editingDeliverable?.key === mod.key && editingDeliverable?.index === idx;
+              return (
+                <div key={idx} className="group flex items-center gap-2">
+                  <span className="h-1 w-1 shrink-0 rounded-full bg-muted-foreground/40" />
+                  {isEditingThis ? (
+                    <input
+                      autoFocus
+                      type="text"
+                      value={deliverableDraft}
+                      onChange={(e) => setDeliverableDraft(e.target.value)}
+                      onBlur={() => {
+                        if (deliverableDraft.trim()) updateDeliverable(mod.key, idx, deliverableDraft.trim());
+                        setEditingDeliverable(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') { if (deliverableDraft.trim()) updateDeliverable(mod.key, idx, deliverableDraft.trim()); setEditingDeliverable(null); }
+                        if (e.key === 'Escape') setEditingDeliverable(null);
+                      }}
+                      className="flex-1 rounded border border-brand bg-background px-1.5 py-0.5 text-xs text-foreground focus:outline-none"
+                    />
+                  ) : (
+                    <span
+                      className="flex-1 text-xs text-muted-foreground cursor-text hover:text-foreground transition-colors"
+                      onClick={() => { setEditingDeliverable({ key: mod.key, index: idx }); setDeliverableDraft(d); }}
+                    >
+                      {d}
+                    </span>
+                  )}
+                  <button
+                    onClick={() => removeDeliverable(mod.key, idx)}
+                    className="shrink-0 opacity-0 group-hover:opacity-100 rounded p-0.5 text-muted-foreground hover:text-destructive transition-all"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              );
+            })}
+            <button
+              onClick={() => addDeliverable(mod.key)}
+              className="flex items-center gap-1 mt-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Plus className="h-3 w-3" />
+              Add deliverable
+            </button>
+          </div>
+        )}
       </div>
     );
   };
