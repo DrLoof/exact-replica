@@ -50,6 +50,10 @@ export function ReviewScreen({
   const [editingPrice, setEditingPrice] = useState<string | null>(null);
   const [priceOverrides, setPriceOverrides] = useState<Record<string, number>>({});
   const [showStickyCta, setShowStickyCta] = useState(false);
+  const [expandedServices, setExpandedServices] = useState<Set<string>>(new Set());
+  const [editingDeliverable, setEditingDeliverable] = useState<{ key: string; index: number } | null>(null);
+  const [deliverableDraft, setDeliverableDraft] = useState('');
+  const [deliverableOverrides, setDeliverableOverrides] = useState<Record<string, string[]>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const agencyRef = useRef<HTMLElement>(null);
   const inlineCtaRef = useRef<HTMLDivElement>(null);
