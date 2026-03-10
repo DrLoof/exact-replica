@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, Pencil, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Check, Pencil, X, ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getDefaultModulesForGroup } from '@/lib/defaultModules';
 
@@ -9,6 +9,7 @@ export interface ModuleData {
   pricingModel: string;
   price: number;
   selected: boolean;
+  deliverables?: string[];
 }
 
 interface Step3ModulesProps {
@@ -23,6 +24,11 @@ interface Step3ModulesProps {
 export function Step3Modules({ selectedGroupNames, selectedModules, moduleOverrides, currencySymbol, onChange, onOverride }: Step3ModulesProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [expandedGroup, setExpandedGroup] = useState<string | null>(selectedGroupNames[0] || null);
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  const [editingPrice, setEditingPrice] = useState<string | null>(null);
+  const [priceDraft, setPriceDraft] = useState('');
+  const [editingDeliverable, setEditingDeliverable] = useState<{ moduleId: string; index: number } | null>(null);
+  const [deliverableDraft, setDeliverableDraft] = useState('');
 
   const allModules = selectedGroupNames.flatMap((gn) =>
     getDefaultModulesForGroup(gn).map((m, i) => ({
@@ -44,11 +50,48 @@ export function Step3Modules({ selectedGroupNames, selectedModules, moduleOverri
     onChange({ ...selectedModules, [id]: !selectedModules[id] });
   };
 
-  const updateOverride = (id: string, field: string, value: string | number) => {
+  const toggleModuleExpand = (id: string) => {
+    setExpandedModules(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const updateOverride = (id: string, field: string, value: string | number | string[]) => {
     onOverride({
       ...moduleOverrides,
       [id]: { ...moduleOverrides[id], [field]: value },
     });
+  };
+
+  const getDeliverables = (mod: any): string[] => {
+    return moduleOverrides[mod.id]?.deliverables ?? mod.deliverables ?? [];
+  };
+
+  const updateDeliverable = (moduleId: string, index: number, value: string) => {
+    const current = getDeliverables(allModules.find(m => m.id === moduleId)!);
+    const updated = [...current];
+    updated[index] = value;
+    updateOverride(moduleId, 'deliverables', updated);
+  };
+
+  const removeDeliverable = (moduleId: string, index: number) => {
+    const current = getDeliverables(allModules.find(m => m.id === moduleId)!);
+    updateOverride(moduleId, 'deliverables', current.filter((_, i) => i !== index));
+  };
+
+  const addDeliverable = (moduleId: string) => {
+    const current = getDeliverables(allModules.find(m => m.id === moduleId)!);
+    updateOverride(moduleId, 'deliverables', [...current, 'New deliverable']);
+    setEditingDeliverable({ moduleId, index: current.length });
+    setDeliverableDraft('New deliverable');
+  };
+
+  const commitPrice = (modId: string) => {
+    const num = parseFloat(priceDraft);
+    if (!isNaN(num) && num >= 0) updateOverride(modId, 'price', num);
+    setEditingPrice(null);
   };
 
   const selectedCount = Object.values(selectedModules).filter(Boolean).length;
@@ -63,7 +106,7 @@ export function Step3Modules({ selectedGroupNames, selectedModules, moduleOverri
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_300px]">
       <div>
         <h1 className="font-display text-2xl font-bold text-foreground">Customize your services</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Toggle, edit names, descriptions, and prices. Click the pencil to edit a service.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Toggle, edit names, descriptions, and prices. Click a price to edit it inline, or expand a service to manage deliverables.</p>
 
         <div className="mt-6 space-y-4">
           {selectedGroupNames.map((groupName) => {
@@ -94,6 +137,8 @@ export function Step3Modules({ selectedGroupNames, selectedModules, moduleOverri
                   <div className="p-2 space-y-1.5">
                     {modules.map((mod) => {
                       const isEditing = editingId === mod.id;
+                      const isModuleExpanded = expandedModules.has(mod.id);
+                      const deliverables = getDeliverables(mod);
 
                       return (
                         <div
@@ -105,6 +150,7 @@ export function Step3Modules({ selectedGroupNames, selectedModules, moduleOverri
                               : 'border-border bg-card opacity-60'
                           )}
                         >
+                          {/* Main row */}
                           <div className="flex items-center gap-3">
                             <button
                               onClick={() => toggleModule(mod.id)}
@@ -151,16 +197,50 @@ export function Step3Modules({ selectedGroupNames, selectedModules, moduleOverri
                                 </div>
                               </div>
                             ) : (
-                              <div className="flex-1 min-w-0">
+                              <button
+                                className="flex-1 min-w-0 text-left"
+                                onClick={() => toggleModuleExpand(mod.id)}
+                              >
                                 <p className="text-sm font-medium text-foreground">{mod.name}</p>
-                                <p className="text-xs text-muted-foreground truncate">{mod.shortDesc}</p>
-                              </div>
+                                <div className="flex items-center gap-1 mt-0.5">
+                                  <p className="text-xs text-muted-foreground truncate">{mod.shortDesc}</p>
+                                  <ChevronDown className={cn(
+                                    'h-3 w-3 shrink-0 text-muted-foreground transition-transform',
+                                    isModuleExpanded && 'rotate-180'
+                                  )} />
+                                </div>
+                              </button>
                             )}
 
+                            {/* Clickable price */}
                             {!isEditing && (
-                              <span className="shrink-0 rounded-lg bg-muted px-2 py-1 text-xs font-medium tabular-nums text-foreground">
-                                {currencySymbol}{mod.price.toLocaleString()}{pricingLabels[mod.pricingModel]}
-                              </span>
+                              editingPrice === mod.id ? (
+                                <input
+                                  autoFocus
+                                  type="number"
+                                  value={priceDraft}
+                                  onChange={(e) => setPriceDraft(e.target.value)}
+                                  onBlur={() => commitPrice(mod.id)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') commitPrice(mod.id);
+                                    if (e.key === 'Escape') setEditingPrice(null);
+                                  }}
+                                  className="w-24 shrink-0 rounded border border-brand bg-background px-2 py-1 text-right text-xs font-medium tabular-nums text-foreground focus:outline-none"
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                              ) : (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPriceDraft(String(mod.price));
+                                    setEditingPrice(mod.id);
+                                  }}
+                                  className="shrink-0 rounded-lg bg-muted px-2 py-1 text-xs font-medium tabular-nums text-foreground hover:bg-muted-foreground/20 transition-colors cursor-text"
+                                  title="Click to edit price"
+                                >
+                                  {currencySymbol}{mod.price.toLocaleString()}{pricingLabels[mod.pricingModel]}
+                                </button>
+                              )
                             )}
 
                             <button
@@ -170,6 +250,79 @@ export function Step3Modules({ selectedGroupNames, selectedModules, moduleOverri
                               {isEditing ? <X className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
                             </button>
                           </div>
+
+                          {/* Expandable deliverables */}
+                          {isModuleExpanded && !isEditing && deliverables.length > 0 && (
+                            <div className="mt-3 ml-8 border-t border-border pt-3 space-y-1">
+                              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Deliverables</p>
+                              {deliverables.map((d, idx) => {
+                                const isEditingThis = editingDeliverable?.moduleId === mod.id && editingDeliverable?.index === idx;
+
+                                return (
+                                  <div key={idx} className="group flex items-center gap-2">
+                                    <span className="h-1 w-1 shrink-0 rounded-full bg-muted-foreground/40" />
+                                    {isEditingThis ? (
+                                      <input
+                                        autoFocus
+                                        type="text"
+                                        value={deliverableDraft}
+                                        onChange={(e) => setDeliverableDraft(e.target.value)}
+                                        onBlur={() => {
+                                          if (deliverableDraft.trim()) updateDeliverable(mod.id, idx, deliverableDraft.trim());
+                                          setEditingDeliverable(null);
+                                        }}
+                                        onKeyDown={(e) => {
+                                          if (e.key === 'Enter') {
+                                            if (deliverableDraft.trim()) updateDeliverable(mod.id, idx, deliverableDraft.trim());
+                                            setEditingDeliverable(null);
+                                          }
+                                          if (e.key === 'Escape') setEditingDeliverable(null);
+                                        }}
+                                        className="flex-1 rounded border border-brand bg-background px-1.5 py-0.5 text-xs text-foreground focus:outline-none"
+                                      />
+                                    ) : (
+                                      <span
+                                        className="flex-1 text-xs text-muted-foreground cursor-text hover:text-foreground transition-colors"
+                                        onClick={() => {
+                                          setEditingDeliverable({ moduleId: mod.id, index: idx });
+                                          setDeliverableDraft(d);
+                                        }}
+                                      >
+                                        {d}
+                                      </span>
+                                    )}
+                                    <button
+                                      onClick={() => removeDeliverable(mod.id, idx)}
+                                      className="shrink-0 opacity-0 group-hover:opacity-100 rounded p-0.5 text-muted-foreground hover:text-destructive transition-all"
+                                      title="Remove deliverable"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                              <button
+                                onClick={() => addDeliverable(mod.id)}
+                                className="flex items-center gap-1 mt-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                <Plus className="h-3 w-3" />
+                                Add deliverable
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Show deliverables even if list was empty but module is expanded */}
+                          {isModuleExpanded && !isEditing && deliverables.length === 0 && (
+                            <div className="mt-3 ml-8 border-t border-border pt-3">
+                              <button
+                                onClick={() => addDeliverable(mod.id)}
+                                className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                <Plus className="h-3 w-3" />
+                                Add deliverable
+                              </button>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
