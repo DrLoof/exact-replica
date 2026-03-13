@@ -394,7 +394,12 @@ export function ReviewScreen({
               </div>
             )}
             <div className="min-w-0">
-              <p className="font-display text-lg font-bold text-foreground truncate">{agencyIdentity.name || 'Your Agency'}</p>
+              <input
+                value={agencyIdentity.name || ''}
+                onChange={(e) => onAgencyChange({ ...agencyIdentity, name: e.target.value })}
+                placeholder="Your Agency"
+                className="font-display text-lg font-bold text-foreground truncate bg-transparent border-b border-transparent focus:border-brass outline-none w-full"
+              />
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 {agencyIdentity.brand_color && (
                   <>
