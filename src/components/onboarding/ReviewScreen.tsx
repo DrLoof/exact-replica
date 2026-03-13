@@ -139,7 +139,8 @@ export function ReviewScreen({
       return { ...b, matchCount, missingCount };
     });
     const full = scored.filter(b => b.missingCount === 0).sort((a, b) => b.serviceNames.length - a.serviceNames.length);
-    const partial = scored.filter(b => b.missingCount <= 2 && b.matchCount >= 2).sort((a, b) => a.missingCount - b.missingCount || b.matchCount - a.matchCount);
+    const fullNames = new Set(full.map(b => b.name));
+    const partial = scored.filter(b => b.missingCount > 0 && b.missingCount <= 2 && b.matchCount >= 2 && !fullNames.has(b.name)).sort((a, b) => a.missingCount - b.missingCount || b.matchCount - a.matchCount);
     return [...full, ...partial].slice(0, 4);
   }, [selectedModuleNames.size]);
 
