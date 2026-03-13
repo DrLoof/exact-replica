@@ -704,7 +704,10 @@ export function ReviewScreen({
                     {/* Show add buttons for missing title/company */}
                     {!t.client_title && !t.client_company && (
                       <button
-                        onClick={() => updateTestimonial(idx, 'client_title', '')}
+                        onClick={() => {
+                          updateTestimonial(idx, 'client_title', 'Title');
+                          updateTestimonial(idx, 'client_company', 'Company');
+                        }}
                         className="ml-1 text-[11px] text-muted-foreground/50 hover:text-brass"
                       >
                         + add details
