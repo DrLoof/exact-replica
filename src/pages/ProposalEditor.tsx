@@ -835,7 +835,9 @@ export default function ProposalEditor() {
               <SectionWrapper idx={4} hidden={hiddenSections.has(4)} onToggle={toggleSection} label="Investment">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="05">
-                    <SectionHeader number="04" title="Investment" subtitle="Transparent pricing for every deliverable" />
+                    <SectionHeader number="04" title="Investment" subtitle="Transparent pricing for every deliverable"
+                      onTitleEdit={(val) => updateField('title', val)}
+                      onSubtitleEdit={(val) => updateField('subtitle', val)} />
                     <PricingSummary
                       items={pricingItems}
                       total={totalStr}
