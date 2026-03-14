@@ -441,7 +441,123 @@ export default function ProposalEditor() {
 
       <div className="flex">
         {/* Section Nav */}
-        <div className="sticky top-[57px] hidden h-[calc(100vh-57px)] w-48 flex-col gap-1 overflow-y-auto border-r border-border bg-background p-3 lg:flex print:hidden">
+        <div className="sticky top-[57px] hidden h-[calc(100vh-57px)] w-52 flex-col gap-1 overflow-y-auto border-r border-border bg-background p-3 lg:flex print:hidden">
+          {/* Template Picker */}
+          <div className="mb-3">
+            <span className="block px-2 mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Template</span>
+            <div className="flex gap-2">
+              {Object.values(templates).map((tmpl) => {
+                const isActive = templateId === tmpl.id;
+                const isLocked = tmpl.isPro;
+                return (
+                  <button
+                    key={tmpl.id}
+                    onClick={() => switchTemplate(tmpl.id)}
+                    className={cn(
+                      'flex-1 rounded-lg overflow-hidden border-2 transition-all',
+                      isActive ? 'border-brand ring-1 ring-brand/30' : 'border-border hover:border-muted-foreground/30'
+                    )}
+                  >
+                    <div className="h-8 relative" style={{ background: tmpl.colors.background }}>
+                      <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: tmpl.colors.primaryAccent }} />
+                      {isLocked && (
+                        <div className="absolute top-1 right-1 flex items-center gap-0.5 bg-foreground/80 text-background rounded px-1 py-0.5">
+                          <Lock className="h-2.5 w-2.5" />
+                          <span style={{ fontSize: '8px', fontWeight: 700 }}>PRO</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="px-2 py-1.5 bg-background">
+                      <span className={cn('block text-center', isActive ? 'text-foreground font-semibold' : 'text-muted-foreground')} style={{ fontSize: '11px' }}>
+                        {tmpl.name}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Color Customizer */}
+          <div className="mb-3 pb-3 border-b border-border">
+            <span className="block px-2 mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Colors</span>
+            <div className="flex items-center gap-3 px-2 relative" ref={colorPickerRef}>
+              {/* Primary swatch */}
+              <div className="flex flex-col items-center gap-1">
+                <button
+                  onClick={() => { setColorPickerOpen(colorPickerOpen === 'primaryAccent' ? null : 'primaryAccent'); setHexInput(activePrimary); }}
+                  className="w-6 h-6 rounded-full border-2 border-border hover:scale-110 transition-transform"
+                  style={{ background: activePrimary }}
+                  title="Primary accent"
+                />
+                <span className="text-muted-foreground" style={{ fontSize: '9px' }}>Primary</span>
+              </div>
+              {/* Secondary swatch */}
+              <div className="flex flex-col items-center gap-1">
+                <button
+                  onClick={() => { setColorPickerOpen(colorPickerOpen === 'secondaryAccent' ? null : 'secondaryAccent'); setHexInput(activeSecondary); }}
+                  className="w-6 h-6 rounded-full border-2 border-border hover:scale-110 transition-transform"
+                  style={{ background: activeSecondary }}
+                  title="Secondary accent"
+                />
+                <span className="text-muted-foreground" style={{ fontSize: '9px' }}>Secondary</span>
+              </div>
+              {/* Reset */}
+              {customColors && (
+                <button onClick={resetColors} className="text-muted-foreground hover:text-foreground ml-auto" style={{ fontSize: '10px' }}>
+                  Reset
+                </button>
+              )}
+
+              {/* Color picker popover */}
+              {colorPickerOpen && (
+                <div className="absolute left-0 top-full mt-2 z-50 bg-popover border border-border rounded-xl p-3 shadow-lg" style={{ width: '200px' }}>
+                  <div className="grid grid-cols-5 gap-2 mb-3">
+                    {PRESET_COLORS.map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => { updateCustomColor(colorPickerOpen, color); setColorPickerOpen(null); }}
+                        className={cn(
+                          'w-7 h-7 rounded-full border-2 transition-transform hover:scale-110',
+                          (colorPickerOpen === 'primaryAccent' ? activePrimary : activeSecondary) === color ? 'border-foreground scale-110' : 'border-transparent'
+                        )}
+                        style={{ background: color }}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={hexInput}
+                      onChange={(e) => setHexInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && /^#[0-9A-Fa-f]{6}$/.test(hexInput)) {
+                          updateCustomColor(colorPickerOpen, hexInput);
+                          setColorPickerOpen(null);
+                        }
+                      }}
+                      placeholder="#000000"
+                      className="flex-1 border border-border rounded-md px-2 py-1 text-xs bg-background text-foreground outline-none focus:border-brand"
+                      style={{ fontSize: '11px' }}
+                    />
+                    <button
+                      onClick={() => {
+                        if (/^#[0-9A-Fa-f]{6}$/.test(hexInput)) {
+                          updateCustomColor(colorPickerOpen, hexInput);
+                          setColorPickerOpen(null);
+                        }
+                      }}
+                      className="text-xs text-brand hover:text-brand-hover font-medium"
+                    >
+                      OK
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Section navigation */}
           {sectionNames.map((name, idx) => (
             <button
               key={idx}
