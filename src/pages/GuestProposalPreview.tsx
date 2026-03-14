@@ -826,7 +826,7 @@ export default function GuestProposalPreview() {
               )}
 
               {/* Section 4: Investment */}
-              {!hiddenSections.has(4) && (
+              {!deletedSections.has(4) && (
                 <div id="guest-section-4" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="05">
                     <SectionHeader number="04" title="Investment" subtitle="Transparent pricing for every deliverable" />
