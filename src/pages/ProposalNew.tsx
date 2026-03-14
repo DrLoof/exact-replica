@@ -733,10 +733,10 @@ export default function ProposalNew() {
           setClientChallenges={setClientChallenges}
           clientChallengeOther={clientChallengeOther}
           setClientChallengeOther={setClientChallengeOther}
-          clientGoal={clientGoal}
-          setClientGoal={setClientGoal}
-          clientGoalOther={clientGoalOther}
-          setClientGoalOther={setClientGoalOther}
+          selectedGoals={selectedGoals}
+          setSelectedGoals={setSelectedGoals}
+          goalOtherLabel={goalOtherLabel}
+          setGoalOtherLabel={setGoalOtherLabel}
           clientContextNote={clientContextNote}
           setClientContextNote={setClientContextNote}
         />
