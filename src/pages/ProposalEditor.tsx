@@ -979,6 +979,14 @@ export default function ProposalEditor() {
                             avatarUrl={t.avatar_url}
                             featured={i === 0}
                             delay={i * 0.1}
+                            onQuoteEdit={async (val) => {
+                              await supabase.from('testimonials').update({ quote: val }).eq('id', t.id);
+                              setTestimonials(prev => prev.map(x => x.id === t.id ? { ...x, quote: val } : x));
+                            }}
+                            onNameEdit={async (val) => {
+                              await supabase.from('testimonials').update({ client_name: val }).eq('id', t.id);
+                              setTestimonials(prev => prev.map(x => x.id === t.id ? { ...x, client_name: val } : x));
+                            }}
                           />
                         ))}
                       </div>
