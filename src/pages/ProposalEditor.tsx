@@ -884,7 +884,7 @@ export default function ProposalEditor() {
               </SectionWrapper>}
 
               {/* Section 4: Investment */}
-              <SectionWrapper idx={4} hidden={hiddenSections.has(4)} onToggle={toggleSection} label="Investment">
+              {!deletedSections.has(4) && <SectionWrapper idx={4} onDelete={deleteSection} label="Investment">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="05">
                     <SectionHeader number="04" title="Investment" subtitle="Transparent pricing for every deliverable"
