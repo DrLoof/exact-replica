@@ -55,6 +55,7 @@ interface ClientZoneProps {
   setNewContactName: (v: string) => void;
   newClientWebsite: string;
   setNewClientWebsite: (v: string) => void;
+  // These props are passed through but no longer used directly in ClientZone
   clientChallenges: string[];
   setClientChallenges: (v: string[]) => void;
   clientChallengeOther: string;
@@ -71,9 +72,6 @@ export function ClientZone({
   isGuestMode, clients, selectedClient, setSelectedClient,
   newClientName, setNewClientName, newContactName, setNewContactName,
   newClientWebsite, setNewClientWebsite,
-  clientChallenges, setClientChallenges, clientChallengeOther, setClientChallengeOther,
-  selectedGoals, setSelectedGoals, goalOtherLabel, setGoalOtherLabel,
-  clientContextNote, setClientContextNote,
 }: ClientZoneProps) {
   const [clientSearch, setClientSearch] = useState('');
   const [showClientDropdown, setShowClientDropdown] = useState(false);
