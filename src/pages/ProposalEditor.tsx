@@ -624,7 +624,9 @@ export default function ProposalEditor() {
               <SectionWrapper idx={1} hidden={hiddenSections.has(1)} onToggle={toggleSection} label="Executive Summary">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="02">
-                    <SectionHeader number="01" title="Executive Summary" subtitle="Our understanding and approach" />
+                    <SectionHeader number="01" title="Executive Summary" subtitle="Our understanding and approach"
+                      onTitleEdit={(val) => updateField('title', val)}
+                      onSubtitleEdit={(val) => updateField('subtitle', val)} />
                     <TextContent dropCap>
                       <EditableText
                         value={proposal.executive_summary || ''}
