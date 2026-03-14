@@ -100,7 +100,6 @@ function ModernHeroCover({
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8"
             style={{ background: "#34D39915", color: "#34D399", fontSize: "14px", fontWeight: 600 }}>
-            <Sparkles size={14} />
             Proposal for {clientName}
           </div>
 
