@@ -22,6 +22,7 @@ serve(async (req) => {
       clientChallenge,
       clientChallenges,
       clientGoal,
+      goals,
       clientContextNote,
     } = await req.json();
 
@@ -45,12 +46,16 @@ serve(async (req) => {
       if (challenges.length === 1) {
         contextBlock += `\n- Client's main challenge (from agency): ${challenges[0]}\n  USE THIS as the primary framing. It overrides the service context.`;
       } else {
-        contextBlock += `\n- Client's key challenges (from agency):\n${challenges.map(c => `  • ${c}`).join('\n')}\n  Address these challenges and connect them to the proposed services. Use the first 1-2 as primary framing.`;
+        contextBlock += `\n- Client's key challenges (from agency):\n${challenges.map((c: string) => `  • ${c}`).join('\n')}\n  Address these challenges and connect them to the proposed services. Use the first 1-2 as primary framing.`;
       }
     }
-    if (clientGoal) {
-      contextBlock += `\n- Client's primary goal (from agency): ${clientGoal}\n  USE THIS as the outcome framing.`;
+
+    // Support both old single clientGoal and new goals array
+    const goalsList: Array<{label: string; kpi: string}> = goals || (clientGoal ? [{ label: clientGoal, kpi: '' }] : []);
+    if (goalsList.length > 0) {
+      contextBlock += `\n- Proposal goals and KPI targets:\n${goalsList.map((g: any) => `  • ${g.label}${g.kpi ? ` (target: ${g.kpi})` : ''}`).join('\n')}\n  Reference these specific targets in the summary. Connect services to how they'll achieve these goals.`;
     }
+
     if (clientContextNote) {
       contextBlock += `\n- Additional context: ${clientContextNote}\n  Weave this in naturally. This is insider knowledge — use it to make the proposal feel like it came from a real conversation.`;
     }
