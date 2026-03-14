@@ -754,6 +754,8 @@ export default function ProposalNew() {
           setShowTimeline={setShowTimeline}
           startDate={startDate}
           setStartDate={setStartDate}
+          endDate={endDate}
+          setEndDate={setEndDate}
           hasServices={hasServices}
           estimatedDuration={estimatedDuration}
           phaseSummary={phaseSummary}
