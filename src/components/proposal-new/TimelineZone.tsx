@@ -5,6 +5,8 @@ interface TimelineZoneProps {
   setShowTimeline: (v: boolean) => void;
   startDate: string;
   setStartDate: (v: string) => void;
+  endDate: string;
+  setEndDate: (v: string) => void;
   hasServices: boolean;
   estimatedDuration: string | null;
   phaseSummary: { names: string; totalWeeks: number } | null;
@@ -14,9 +16,22 @@ interface TimelineZoneProps {
 export function TimelineZone({
   showTimeline, setShowTimeline,
   startDate, setStartDate,
+  endDate, setEndDate,
   hasServices, estimatedDuration, phaseSummary,
   timelinePhases,
 }: TimelineZoneProps) {
+  const displayDuration = (() => {
+    if (endDate && startDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const diffMs = end.getTime() - start.getTime();
+      if (diffMs <= 0) return null;
+      const diffWeeks = Math.round(diffMs / (7 * 86400000));
+      return diffWeeks > 0 ? `~${diffWeeks} weeks` : '< 1 week';
+    }
+    return estimatedDuration;
+  })();
+
   return (
     <section className="rounded-xl border border-parchment bg-card overflow-hidden shadow-card">
       <button
@@ -29,7 +44,7 @@ export function TimelineZone({
             <span className="text-sm font-semibold text-foreground">When does this start?</span>
             {hasServices && !showTimeline && (
               <p className="text-xs text-muted-foreground mt-0.5">
-                {estimatedDuration && `Estimated duration: ${estimatedDuration}`}
+                {displayDuration && `Estimated duration: ${displayDuration}`}
                 {phaseSummary && ` · ${phaseSummary.names}`}
               </p>
             )}
@@ -42,19 +57,39 @@ export function TimelineZone({
       </button>
       {showTimeline && (
         <div className="border-t border-parchment px-6 py-4 space-y-4">
-          <div>
-            <label className="mb-1.5 block text-xs text-muted-foreground">Project Start Date</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="rounded-lg border border-parchment bg-background px-3 py-2 text-sm text-foreground focus:border-foreground/30 focus:outline-none"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="mb-1.5 block text-xs text-muted-foreground">Project Start Date</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="rounded-lg border border-parchment bg-background px-3 py-2 text-sm text-foreground focus:border-foreground/30 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs text-muted-foreground">Project End Date <span className="text-muted-foreground/60">(optional)</span></label>
+              <input
+                type="date"
+                value={endDate}
+                min={startDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="rounded-lg border border-parchment bg-background px-3 py-2 text-sm text-foreground focus:border-foreground/30 focus:outline-none"
+              />
+              {endDate && (
+                <button
+                  onClick={() => setEndDate('')}
+                  className="mt-1 text-[11px] text-muted-foreground hover:text-foreground"
+                >
+                  Clear end date
+                </button>
+              )}
+            </div>
           </div>
 
-          {hasServices && estimatedDuration && (
+          {hasServices && displayDuration && (
             <div className="rounded-lg bg-muted/30 px-4 py-3">
-              <p className="text-xs text-muted-foreground">Estimated duration: <span className="font-medium text-foreground">{estimatedDuration}</span></p>
+              <p className="text-xs text-muted-foreground">Estimated duration: <span className="font-medium text-foreground">{displayDuration}</span></p>
               {phaseSummary && <p className="text-xs text-muted-foreground mt-1">{phaseSummary.names}</p>}
             </div>
           )}

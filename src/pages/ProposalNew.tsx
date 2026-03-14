@@ -112,6 +112,7 @@ export default function ProposalNew() {
     d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7));
     return d.toISOString().split('T')[0];
   });
+  const [endDate, setEndDate] = useState('');
 
   const [saving, setSaving] = useState(false);
   const [showSignupGate, setShowSignupGate] = useState(false);
@@ -294,10 +295,15 @@ export default function ProposalNew() {
       const selectedModsList = Array.from(selectedModuleIds).map(id => modules.find((m: any) => m.id === id)).filter(Boolean);
 
       let totalDurationWeeks = 0;
-      selectedModsList.forEach((m: any) => {
-        const match = m.default_timeline?.match(/(\d+)/);
-        totalDurationWeeks += match ? parseInt(match[1]) : 2;
-      });
+      if (endDate && startDate) {
+        const diffMs = new Date(endDate).getTime() - new Date(startDate).getTime();
+        totalDurationWeeks = Math.max(1, Math.round(diffMs / (7 * 86400000)));
+      } else {
+        selectedModsList.forEach((m: any) => {
+          const match = m.default_timeline?.match(/(\d+)/);
+          totalDurationWeeks += match ? parseInt(match[1]) : 2;
+        });
+      }
       totalDurationWeeks = Math.max(totalDurationWeeks, 4);
       const durationStr = `${totalDurationWeeks} weeks`;
 
@@ -753,6 +759,8 @@ export default function ProposalNew() {
           setShowTimeline={setShowTimeline}
           startDate={startDate}
           setStartDate={setStartDate}
+          endDate={endDate}
+          setEndDate={setEndDate}
           hasServices={hasServices}
           estimatedDuration={estimatedDuration}
           phaseSummary={phaseSummary}
