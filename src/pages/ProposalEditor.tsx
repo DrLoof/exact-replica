@@ -26,6 +26,7 @@ import {
   HighlightPanel,
   EditableText,
 } from '@/components/proposal-template';
+import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 
 
 interface ProposalData {
