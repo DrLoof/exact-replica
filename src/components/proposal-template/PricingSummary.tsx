@@ -112,6 +112,9 @@ export function PricingSummary({
 }: PricingSummaryProps) {
   const template = useTemplate();
   const isModern = template.id === 'modern';
+  const accent = template.colors.primaryAccent;
+  const secondary = template.colors.secondaryAccent;
+  const dark = template.colors.primaryDark;
   const uniqueModels = new Set(items.map((i) => i.model || "fixed"));
   const isMixed = uniqueModels.size > 1;
   const displayGroups = groups || (isMixed ? autoGroupItems(items) : null);
@@ -147,17 +150,17 @@ export function PricingSummary({
               <div key={idx} className="px-8 py-5 flex items-center justify-between"
                 style={{ borderTop: "1px dashed #E5E7EB" }}>
                 <div className="flex items-center gap-3">
-                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: `rgba(37,99,235,${dotOpacity})` }} />
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: accent, opacity: dotOpacity }} />
                   <div>
-                    <span className="block" style={{ fontSize: "16px", fontWeight: 600, color: "#1E1B4B" }}>
+                    <span className="block" style={{ fontSize: "16px", fontWeight: 600, color: dark }}>
                       {item.service}
                       {item.isAddon && (
-                        <span className="ml-2 uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600, color: "#34D399" }}>
+                        <span className="ml-2 uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600, color: secondary }}>
                           Add-on
                         </span>
                       )}
                       {item.isBundled && (
-                        <span className="ml-2 uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600, color: "#2563EB" }}>
+                        <span className="ml-2 uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600, color: accent }}>
                           Bundled
                         </span>
                       )}
@@ -169,7 +172,7 @@ export function PricingSummary({
                     )}
                   </div>
                 </div>
-                <span style={{ fontSize: "16px", fontWeight: 700, color: "#1E1B4B" }}>
+                <span style={{ fontSize: "16px", fontWeight: 700, color: dark }}>
                   {onPriceEdit ? (
                     <EditablePrice price={item.price} onEdit={(v) => onPriceEdit(originalIdx, v)} />
                   ) : item.price}
@@ -180,17 +183,17 @@ export function PricingSummary({
 
           {/* Bundle savings */}
           {bundleSavings && (
-            <div className="px-8 py-4 flex items-center justify-between" style={{ borderTop: "1px dashed #E5E7EB", background: "#34D39908" }}>
+            <div className="px-8 py-4 flex items-center justify-between" style={{ borderTop: "1px dashed #E5E7EB", background: `${secondary}08` }}>
               <div className="flex items-center gap-3">
-                <span className="w-2 h-2 rounded-full" style={{ background: "#34D399" }} />
-                <span style={{ fontSize: "14px", fontWeight: 500, color: "#1E1B4B" }}>
+                <span className="w-2 h-2 rounded-full" style={{ background: secondary }} />
+                <span style={{ fontSize: "14px", fontWeight: 500, color: dark }}>
                   {bundleSavings.bundleName} bundle discount
                 </span>
                 <span className="line-through" style={{ fontSize: "13px", fontWeight: 400, color: "#D1D5DB" }}>
                   {bundleSavings.individualTotal}
                 </span>
               </div>
-              <span style={{ fontSize: "14px", fontWeight: 700, color: "#34D399" }}>
+              <span style={{ fontSize: "14px", fontWeight: 700, color: secondary }}>
                 {bundleSavings.savings}
               </span>
             </div>
@@ -198,7 +201,7 @@ export function PricingSummary({
 
           {/* Total row - gradient */}
           <div className="px-8 py-7 flex items-center justify-between"
-            style={{ background: "linear-gradient(135deg, #2563EB, #34D399)" }}>
+            style={{ background: `linear-gradient(135deg, ${accent}, ${secondary})` }}>
             <div>
               <span style={{ fontSize: "13px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(255,255,255,0.7)" }}>
                 Total Investment
@@ -225,7 +228,7 @@ export function PricingSummary({
             style={{ background: "white", border: "2px dashed #E5E7EB" }}
           >
             <h4 className="mb-4 uppercase tracking-[0.15em]"
-              style={{ fontSize: "12px", fontWeight: 600, color: "#1E1B4B" }}>
+              style={{ fontSize: "12px", fontWeight: 600, color: dark }}>
               Payment Terms
             </h4>
             <div className="space-y-3">
@@ -235,13 +238,13 @@ export function PricingSummary({
                 return (
                   <div key={idx} className="flex items-start gap-3">
                     <span className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-                      style={{ fontSize: "11px", fontWeight: 700, backgroundColor: "#2563EB12", color: "#2563EB" }}>
+                      style={{ fontSize: "11px", fontWeight: 700, backgroundColor: `${accent}12`, color: accent }}>
                       {idx + 1}
                     </span>
                     <div className="flex-1 flex items-start justify-between gap-4">
                       <span style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6, color: "#6B7280" }}>{termText}</span>
                       {termAmount && (
-                        <span className="shrink-0" style={{ fontSize: "14px", fontWeight: 600, color: "#1E1B4B" }}>{termAmount}</span>
+                        <span className="shrink-0" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>{termAmount}</span>
                       )}
                     </div>
                   </div>
@@ -255,7 +258,7 @@ export function PricingSummary({
         {validUntil && (
           <div className="mt-6 text-center">
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full"
-              style={{ background: "#34D39915", color: "#34D399", fontSize: "13px", fontWeight: 600 }}>
+              style={{ background: `${secondary}15`, color: secondary, fontSize: "13px", fontWeight: 600 }}>
               Valid until {validUntil}
             </span>
           </div>
