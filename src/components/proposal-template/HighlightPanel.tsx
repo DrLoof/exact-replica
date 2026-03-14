@@ -15,23 +15,26 @@ export function HighlightPanel({
   const brand = useBrand();
   const template = useTemplate();
   const isModern = template.id === 'modern';
+  const accent = template.colors.primaryAccent;
+  const secondary = template.colors.secondaryAccent;
+  const dark = template.colors.primaryDark;
 
   if (isModern) {
     const modernStyles = {
       default: {
         bg: "white", border: "2px dashed #E5E7EB",
-        textColor: "#1E1B4B", labelColor: "#9CA3AF",
-        accentColor: "#2563EB", shadow: "none",
+        textColor: dark, labelColor: "#9CA3AF",
+        accentColor: accent, shadow: "none",
       },
       accent: {
-        bg: "linear-gradient(135deg, #2563EB, #34D399)", border: "none",
+        bg: `linear-gradient(135deg, ${accent}, ${secondary})`, border: "none",
         textColor: "white", labelColor: "rgba(255,255,255,0.6)",
-        accentColor: "white", shadow: "0 8px 30px rgba(37,99,235,0.25)",
+        accentColor: "white", shadow: `0 8px 30px ${accent}40`,
       },
       dark: {
-        bg: "#1E1B4B", border: "none",
+        bg: dark, border: "none",
         textColor: "white", labelColor: "rgba(255,255,255,0.45)",
-        accentColor: "#93C5FD", shadow: "0 8px 30px rgba(30,27,75,0.15)",
+        accentColor: secondary, shadow: `0 8px 30px ${dark}26`,
       },
     };
 

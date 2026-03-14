@@ -42,6 +42,9 @@ export function ServiceCard({
   const brand = useBrand();
   const template = useTemplate();
   const isModern = template.id === 'modern';
+  const accent = template.colors.primaryAccent;
+  const secondary = template.colors.secondaryAccent;
+  const dark = template.colors.primaryDark;
   const suffix = pricingModel ? MODEL_LABELS[pricingModel] || "" : "";
   const [newItem, setNewItem] = useState("");
   const [adding, setAdding] = useState(false);
@@ -109,7 +112,7 @@ export function ServiceCard({
         {/* Price Badge */}
         <div className="absolute -top-3 -right-2 z-10">
           <div className="px-4 py-2 rounded-2xl"
-            style={{ background: "#1E1B4B", color: "white", fontSize: "14px", fontWeight: 700, boxShadow: "3px 3px 0px #2563EB" }}>
+            style={{ background: dark, color: "white", fontSize: "14px", fontWeight: 700, boxShadow: `3px 3px 0px ${accent}` }}>
             {price}{suffix && <span style={{ fontWeight: 400, opacity: 0.6 }}>{suffix}</span>}
           </div>
         </div>
@@ -117,14 +120,14 @@ export function ServiceCard({
         {/* Add-on tag */}
         {isAddon && (
           <span className="inline-block px-3 py-1 rounded-full mb-3 uppercase tracking-wider"
-            style={{ background: "#34D39918", color: "#34D399", fontSize: "10px", fontWeight: 700 }}>
+            style={{ background: `${secondary}18`, color: secondary, fontSize: "10px", fontWeight: 700 }}>
             Add-on
           </span>
         )}
 
         {/* Icon */}
         <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
-          style={{ background: "#2563EB10", color: "#2563EB" }}>
+          style={{ background: `${accent}10`, color: accent }}>
           {icon}
         </div>
 
@@ -132,9 +135,9 @@ export function ServiceCard({
         {onNameEdit ? (
           <EditableText value={name} placeholder="Service name..." onSave={onNameEdit} as="h3"
             className="mb-3"
-            style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, lineHeight: 1.2, color: "#1E1B4B" }} />
+            style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, lineHeight: 1.2, color: dark }} />
         ) : (
-          <h3 className="mb-3" style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, lineHeight: 1.2, color: "#1E1B4B" }}>
+          <h3 className="mb-3" style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, lineHeight: 1.2, color: dark }}>
             {name}
           </h3>
         )}
@@ -152,11 +155,11 @@ export function ServiceCard({
         {/* Deliverables */}
         <div className="pt-5" style={{ borderTop: "2px dashed #E5E7EB" }}>
           <span className="block mb-3 uppercase tracking-widest"
-            style={{ fontSize: "10px", fontWeight: 700, color: "#2563EB" }}>Deliverables</span>
+            style={{ fontSize: "10px", fontWeight: 700, color: accent }}>Deliverables</span>
           <ul className="space-y-2">
             {deliverables.map((item, idx) => (
               <li key={idx} className="group/del flex items-start gap-2.5">
-                <span className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: "#2563EB" }} />
+                <span className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: accent }} />
                 {editable ? (
                   <EditableText value={item} placeholder="Deliverable..." onSave={(val) => handleItemEdit(idx, val)} as="span"
                     className="flex-1" style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.5, color: "#6B7280" }} />

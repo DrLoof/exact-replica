@@ -30,6 +30,8 @@ export function TimelineStep({
   const brand = useBrand();
   const template = useTemplate();
   const isModern = template.id === 'modern';
+  const accent = template.colors.primaryAccent;
+  const dark = template.colors.primaryDark;
 
   if (isModern) {
     return (
@@ -42,7 +44,7 @@ export function TimelineStep({
       >
         <div className="flex flex-col items-center shrink-0">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center relative z-10"
-            style={{ background: "#2563EB", boxShadow: "4px 4px 0px #1E1B4B" }}>
+            style={{ background: accent, boxShadow: `4px 4px 0px ${dark}` }}>
             <span className="text-white"
               style={{ fontSize: "20px", fontWeight: 800, fontFamily: "'Fraunces', serif" }}>
               {String(number).padStart(2, "0")}
@@ -50,26 +52,26 @@ export function TimelineStep({
           </div>
           {!isLast && (
             <div className="w-0.5 flex-1 min-h-[50px]"
-              style={{ background: "repeating-linear-gradient(to bottom, #2563EB40 0, #2563EB40 6px, transparent 6px, transparent 12px)" }} />
+              style={{ background: `repeating-linear-gradient(to bottom, ${accent}40 0, ${accent}40 6px, transparent 6px, transparent 12px)` }} />
           )}
         </div>
         <div className={`pb-10 ${isLast ? "pb-0" : ""}`}>
           <div className="flex flex-wrap items-center gap-3 mb-3">
             {onNameEdit ? (
               <EditableText value={name} placeholder="Phase name..." onSave={onNameEdit} as="h3"
-                style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, lineHeight: 1.2, color: "#1E1B4B" }} />
+                style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, lineHeight: 1.2, color: dark }} />
             ) : (
-              <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, lineHeight: 1.2, color: "#1E1B4B" }}>
+              <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, lineHeight: 1.2, color: dark }}>
                 {name}
               </h3>
             )}
             {onDurationEdit ? (
               <EditableText value={duration} placeholder="Duration..." onSave={onDurationEdit} as="span"
                 className="inline-block px-3 py-1 rounded-full"
-                style={{ background: "#2563EB12", color: "#2563EB", fontSize: "12px", fontWeight: 600 }} />
+                style={{ background: `${accent}12`, color: accent, fontSize: "12px", fontWeight: 600 }} />
             ) : (
               <span className="inline-block px-3 py-1 rounded-full"
-                style={{ background: "#2563EB12", color: "#2563EB", fontSize: "12px", fontWeight: 600 }}>
+                style={{ background: `${accent}12`, color: accent, fontSize: "12px", fontWeight: 600 }}>
                 {duration}
               </span>
             )}

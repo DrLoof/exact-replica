@@ -26,15 +26,19 @@ function ModernHeroCover({
   onSubtitleEdit,
 }: HeroCoverProps) {
   const brand = useBrand();
+  const template = useTemplate();
+  const accent = template.colors.primaryAccent;
+  const secondary = template.colors.secondaryAccent;
+  const dark = template.colors.primaryDark;
   const displayDate = date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
-  // Render title with "&" in green
+  // Render title with "&" in secondary color
   const renderTitle = (text: string) => {
     if (!text.includes("&")) return text;
     return text.split("&").map((part, i, arr) => (
       <React.Fragment key={i}>
         {part}
-        {i < arr.length - 1 && <span style={{ color: "#34D399" }}>&amp;</span>}
+        {i < arr.length - 1 && <span style={{ color: secondary }}>&amp;</span>}
       </React.Fragment>
     ));
   };
@@ -47,19 +51,19 @@ function ModernHeroCover({
       {/* Floating decorative blurred circles */}
       <motion.div
         className="absolute top-[10%] right-[15%] w-72 h-72 rounded-full pointer-events-none"
-        style={{ background: "#2563EB", opacity: 0.05, filter: "blur(80px)" }}
+        style={{ background: accent, opacity: 0.05, filter: "blur(80px)" }}
         animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
         className="absolute bottom-[20%] left-[10%] w-96 h-96 rounded-full pointer-events-none"
-        style={{ background: "#2563EB", opacity: 0.03, filter: "blur(100px)" }}
+        style={{ background: accent, opacity: 0.03, filter: "blur(100px)" }}
         animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
         className="absolute top-[50%] left-[50%] w-56 h-56 rounded-full pointer-events-none"
-        style={{ background: "#34D399", opacity: 0.04, filter: "blur(90px)" }}
+        style={{ background: secondary, opacity: 0.04, filter: "blur(90px)" }}
         animate={{ y: [0, -15, 0] }}
         transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
       />
@@ -72,20 +76,26 @@ function ModernHeroCover({
         className="relative z-10 flex items-center justify-between px-8 pt-8 lg:px-14 lg:pt-12"
       >
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-            style={{ background: "#1E1B4B" }}>
-            <span className="text-white" style={{ fontSize: "16px", fontWeight: 800 }}>
-              {brand.agencyName?.charAt(0) || 'A'}
-            </span>
-          </div>
-          <span className="tracking-wide uppercase"
-            style={{ fontSize: "14px", fontWeight: 700, color: "#1E1B4B" }}>
-            {brand.agencyName}
-          </span>
+          {brand.logoUrl ? (
+            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain" />
+          ) : (
+            <>
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                style={{ background: dark }}>
+                <span className="text-white" style={{ fontSize: "16px", fontWeight: 800 }}>
+                  {brand.agencyName?.charAt(0) || 'A'}
+                </span>
+              </div>
+              <span className="tracking-wide uppercase"
+                style={{ fontSize: "14px", fontWeight: 700, color: dark }}>
+                {brand.agencyName}
+              </span>
+            </>
+          )}
         </div>
         {proposalNumber && (
           <div className="px-4 py-1.5 rounded-full"
-            style={{ background: "#2563EB15", color: "#2563EB", fontSize: "12px", fontWeight: 600 }}>
+            style={{ background: `${accent}15`, color: accent, fontSize: "12px", fontWeight: 600 }}>
             {proposalNumber}
           </div>
         )}
@@ -99,7 +109,7 @@ function ModernHeroCover({
           transition={{ delay: 0.3, duration: 0.7, ease: "easeOut" }}
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8"
-            style={{ background: "#34D39915", color: "#34D399", fontSize: "14px", fontWeight: 600 }}>
+            style={{ background: `${secondary}15`, color: secondary, fontSize: "14px", fontWeight: 600 }}>
             Proposal for {clientName}
           </div>
 
@@ -113,14 +123,14 @@ function ModernHeroCover({
               style={{
                 fontFamily: "'Fraunces', serif",
                 fontSize: "clamp(40px, 6vw, 72px)",
-                fontWeight: 800, lineHeight: 1.05, color: "#1E1B4B", letterSpacing: "-0.02em",
+                fontWeight: 800, lineHeight: 1.05, color: dark, letterSpacing: "-0.02em",
               }}
             />
           ) : (
             <h1 style={{
               fontFamily: "'Fraunces', serif",
               fontSize: "clamp(40px, 6vw, 72px)",
-              fontWeight: 800, lineHeight: 1.05, color: "#1E1B4B", letterSpacing: "-0.02em",
+              fontWeight: 800, lineHeight: 1.05, color: dark, letterSpacing: "-0.02em",
             }}>
               {renderTitle(proposalTitle)}
             </h1>
@@ -153,16 +163,16 @@ function ModernHeroCover({
           className="mt-14 flex flex-wrap items-center gap-4"
         >
           <div className="px-6 py-4 rounded-2xl"
-            style={{ background: "white", boxShadow: "0 2px 20px rgba(30,27,75,0.06)" }}>
+            style={{ background: "white", boxShadow: `0 2px 20px ${dark}0F` }}>
             <span className="block uppercase tracking-wider mb-1"
-              style={{ fontSize: "10px", fontWeight: 600, color: "#2563EB" }}>Prepared for</span>
-            <span style={{ fontSize: "16px", fontWeight: 700, color: "#1E1B4B" }}>{clientName}</span>
+              style={{ fontSize: "10px", fontWeight: 600, color: accent }}>Prepared for</span>
+            <span style={{ fontSize: "16px", fontWeight: 700, color: dark }}>{clientName}</span>
           </div>
           <div className="px-6 py-4 rounded-2xl"
-            style={{ background: "white", boxShadow: "0 2px 20px rgba(30,27,75,0.06)" }}>
+            style={{ background: "white", boxShadow: `0 2px 20px ${dark}0F` }}>
             <span className="block uppercase tracking-wider mb-1"
-              style={{ fontSize: "10px", fontWeight: 600, color: "#2563EB" }}>Date</span>
-            <span style={{ fontSize: "16px", fontWeight: 700, color: "#1E1B4B" }}>{displayDate}</span>
+              style={{ fontSize: "10px", fontWeight: 600, color: accent }}>Date</span>
+            <span style={{ fontSize: "16px", fontWeight: 700, color: dark }}>{displayDate}</span>
           </div>
         </motion.div>
       </div>
@@ -176,7 +186,7 @@ function ModernHeroCover({
       >
         <div className="flex items-center gap-1.5">
           {[0.15, 0.3, 0.45, 0.6, 0.8].map((opacity, i) => (
-            <div key={i} className="w-2 h-2 rounded-full" style={{ backgroundColor: `rgba(37,99,235,${opacity})` }} />
+            <div key={i} className="w-2 h-2 rounded-full" style={{ backgroundColor: accent, opacity }} />
           ))}
         </div>
         <span style={{ fontSize: "11px", fontWeight: 500, color: "#9CA3AF" }}>
