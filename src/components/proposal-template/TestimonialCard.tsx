@@ -318,7 +318,7 @@ export function TestimonialCard({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.5, ease: "easeOut" }}
         className="rounded-3xl p-8 transition-transform duration-300 hover:-translate-y-1"
-        style={{ fontFamily: "'Outfit', sans-serif", background: "white", border: "2px solid #E5E7EB", boxShadow: "0 2px 12px rgba(30,27,75,0.04)" }}
+        style={{ fontFamily: "'Outfit', sans-serif", background: template.colors.cardBackground, border: `2px solid ${template.colors.border}`, boxShadow: `0 2px 12px ${dark}0A` }}
       >
         <Quote size={20} style={{ color: accent, opacity: 0.3 }} className="mb-4" />
         {onQuoteEdit ? (
