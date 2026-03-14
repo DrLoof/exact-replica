@@ -116,6 +116,8 @@ export default function GuestProposalPreview() {
       setLocalServices(guestProposal.services || []);
       setLocalPhases(guestProposal.phases || []);
       setLocalAboutText(guestProposal.aboutText || guestOnboarding?.agencyIdentity?.about_text || '');
+      if (guestProposal.templateId) setTemplateId(guestProposal.templateId);
+      if (guestProposal.customColors) setCustomColors(guestProposal.customColors);
     }
   }, []);
 
