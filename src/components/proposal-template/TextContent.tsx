@@ -20,9 +20,9 @@ export function TextContent({
   const accent = template.colors.primaryAccent;
 
   const bodyFont = isSoft ? "'DM Sans', sans-serif" : isElegant ? "'DM Sans', sans-serif" : isModern ? "'Outfit', sans-serif" : "'Inter', sans-serif";
-  const bodyColor = isSoft ? template.colors.textBody : isElegant ? template.colors.textBody : isModern ? "#6B7280" : "#555";
+  const bodyColor = isSoft ? template.colors.textBody : isElegant ? template.colors.textBody : isModern ? template.colors.textBody : "#555";
   const dropCapFont = isSoft ? "'DM Sans', sans-serif" : isElegant ? "'Fraunces', serif" : isModern ? "'Fraunces', serif" : "'Space Grotesk', sans-serif";
-  const dropCapColor = isSoft ? accent : isElegant ? accent : isModern ? accent : brand.primaryColor;
+  const dropCapColor = isSoft ? accent : isElegant ? accent : isModern ? secondary : brand.primaryColor;
   const dropCapSize = isSoft ? "60px" : isElegant ? "60px" : isModern ? "64px" : "56px";
   const dropCapWeight = isSoft ? 600 : isElegant ? 600 : isModern ? 800 : 700;
   const lineHeight = isSoft ? 1.85 : isElegant ? 1.85 : 1.8;
