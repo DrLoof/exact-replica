@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
+import { useTemplate } from "./TemplateProvider";
 
 interface SectionHeaderProps {
   number: string;
@@ -16,7 +17,54 @@ export function SectionHeader({
   align = "left",
 }: SectionHeaderProps) {
   const brand = useBrand();
+  const template = useTemplate();
+  const isModern = template.id === 'modern';
   const isCenter = align === "center";
+
+  if (isModern) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className={`mb-12 ${isCenter ? "text-center" : ""}`}
+        style={{ fontFamily: "'Outfit', sans-serif" }}
+      >
+        <div className={`flex items-start gap-5 ${isCenter ? "justify-center" : ""}`}>
+          <div className="shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center"
+            style={{
+              background: "#2563EB", color: "white",
+              fontSize: "24px", fontWeight: 800,
+              fontFamily: "'Fraunces', serif",
+              boxShadow: "4px 4px 0px #1E1B4B",
+            }}>
+            {number}
+          </div>
+          <div className="pt-1">
+            <h2 className="tracking-tight" style={{
+              fontFamily: "'Fraunces', serif",
+              fontSize: "clamp(28px, 3.5vw, 44px)",
+              fontWeight: 700, lineHeight: 1.1, color: "#1E1B4B",
+            }}>
+              {title}
+            </h2>
+            {subtitle && (
+              <p className="mt-3 max-w-xl"
+                style={{ fontSize: "16px", fontWeight: 400, lineHeight: 1.6, color: "#9CA3AF" }}>
+                {subtitle}
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="mt-8">
+          <svg width="100%" height="6" viewBox="0 0 400 6" preserveAspectRatio="none">
+            <path d="M0 3 Q10 0 20 3 Q30 6 40 3 Q50 0 60 3 Q70 6 80 3 Q90 0 100 3 Q110 6 120 3 Q130 0 140 3 Q150 6 160 3 Q170 0 180 3 Q190 6 200 3 Q210 0 220 3 Q230 6 240 3 Q250 0 260 3 Q270 6 280 3 Q290 0 300 3 Q310 6 320 3 Q330 0 340 3 Q350 6 360 3 Q370 0 380 3 Q390 6 400 3"
+              fill="none" stroke="#2563EB" strokeWidth="1.5" strokeOpacity="0.15" />
+          </svg>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
