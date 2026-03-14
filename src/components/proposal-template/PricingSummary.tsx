@@ -361,13 +361,13 @@ export function PricingSummary({
         className="w-full"
         style={{ fontFamily: "'Outfit', sans-serif" }}
       >
-        <div className="rounded-3xl overflow-hidden" style={{ border: "2px solid #E5E7EB" }}>
+        <div className="rounded-3xl overflow-hidden" style={{ border: `2px solid ${template.colors.border}` }}>
           {/* Header row */}
-          <div className="px-8 py-4 flex items-center justify-between" style={{ background: "#F9FAFB" }}>
-            <span className="uppercase tracking-[0.2em]" style={{ fontSize: "11px", fontWeight: 600, color: "#9CA3AF" }}>
+          <div className="px-8 py-4 flex items-center justify-between" style={{ background: `${template.colors.background}` }}>
+            <span className="uppercase tracking-[0.2em]" style={{ fontSize: "11px", fontWeight: 600, color: template.colors.textMuted }}>
               Service
             </span>
-            <span className="uppercase tracking-[0.2em]" style={{ fontSize: "11px", fontWeight: 600, color: "#9CA3AF" }}>
+            <span className="uppercase tracking-[0.2em]" style={{ fontSize: "11px", fontWeight: 600, color: template.colors.textMuted }}>
               Investment
             </span>
           </div>
@@ -381,9 +381,9 @@ export function PricingSummary({
             const dotOpacity = Math.min(0.3 + idx * 0.15, 1);
             return (
               <div key={idx} className="px-8 py-5 flex items-center justify-between"
-                style={{ borderTop: "1px dashed #E5E7EB" }}>
+                style={{ borderTop: `1px dashed ${template.colors.border}` }}>
                 <div className="flex items-center gap-3">
-                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: accent, opacity: dotOpacity }} />
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: accent }} />
                   <div>
                     <span className="block" style={{ fontSize: "16px", fontWeight: 600, color: dark }}>
                       {item.service}
@@ -398,8 +398,8 @@ export function PricingSummary({
                         </span>
                       )}
                     </span>
-                    {item.note && (
-                      <span className="block mt-0.5" style={{ fontSize: "13px", fontWeight: 400, color: "#D1D5DB" }}>
+                     {item.note && (
+                      <span className="block mt-0.5" style={{ fontSize: "13px", fontWeight: 400, color: template.colors.textFaint }}>
                         {item.note}
                       </span>
                     )}
@@ -416,13 +416,13 @@ export function PricingSummary({
 
           {/* Bundle savings */}
           {bundleSavings && (
-            <div className="px-8 py-4 flex items-center justify-between" style={{ borderTop: "1px dashed #E5E7EB", background: `${secondary}08` }}>
+            <div className="px-8 py-4 flex items-center justify-between" style={{ borderTop: `1px dashed ${template.colors.border}`, background: `${secondary}08` }}>
               <div className="flex items-center gap-3">
                 <span className="w-2 h-2 rounded-full" style={{ background: secondary }} />
                 <span style={{ fontSize: "14px", fontWeight: 500, color: dark }}>
                   {bundleSavings.bundleName} bundle discount
                 </span>
-                <span className="line-through" style={{ fontSize: "13px", fontWeight: 400, color: "#D1D5DB" }}>
+                <span className="line-through" style={{ fontSize: "13px", fontWeight: 400, color: template.colors.textFaint }}>
                   {bundleSavings.individualTotal}
                 </span>
               </div>
@@ -458,7 +458,7 @@ export function PricingSummary({
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.5 }}
             className="mt-8 rounded-2xl p-8"
-            style={{ background: "white", border: "2px dashed #E5E7EB" }}
+            style={{ background: template.colors.cardBackground, border: `2px dashed ${template.colors.border}` }}
           >
             <h4 className="mb-4 uppercase tracking-[0.15em]"
               style={{ fontSize: "12px", fontWeight: 600, color: dark }}>
@@ -475,7 +475,7 @@ export function PricingSummary({
                       {idx + 1}
                     </span>
                     <div className="flex-1 flex items-start justify-between gap-4">
-                      <span style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6, color: "#6B7280" }}>{termText}</span>
+                      <span style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6, color: template.colors.textBody }}>{termText}</span>
                       {termAmount && (
                         <span className="shrink-0" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>{termAmount}</span>
                       )}

@@ -268,6 +268,9 @@ export function ServiceCard({
   }
 
   if (isModern) {
+    const borderColor = template.colors.border;
+    const muted = template.colors.textMuted;
+    const body = template.colors.textBody;
     return (
       <motion.div
         initial={{ opacity: 0, y: 24 }}
@@ -275,9 +278,9 @@ export function ServiceCard({
         transition={{ delay, duration: 0.5, ease: "easeOut" }}
         className="group relative rounded-3xl p-7 transition-transform duration-300 hover:-translate-y-1"
         style={{
-          background: "white", fontFamily: "'Outfit', sans-serif",
-          border: "2px solid #E5E7EB",
-          boxShadow: "0 2px 12px rgba(30,27,75,0.04)",
+          background: template.colors.cardBackground, fontFamily: "'Outfit', sans-serif",
+          border: `2px solid ${borderColor}`,
+          boxShadow: `0 2px 12px ${dark}0A`,
         }}
       >
         <div className="absolute -top-3 -right-2 z-10">
@@ -307,13 +310,13 @@ export function ServiceCard({
         )}
         {onDescriptionEdit ? (
           <EditableText value={description} placeholder="Click to add a description..." onSave={onDescriptionEdit} as="p"
-            className="mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }} />
+            className="mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: muted }} />
         ) : (
-          <p className="mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }}>
+          <p className="mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: muted }}>
             {description}
           </p>
         )}
-        <div className="pt-5" style={{ borderTop: "2px dashed #E5E7EB" }}>
+        <div className="pt-5" style={{ borderTop: `2px dashed ${borderColor}` }}>
           <span className="block mb-3 uppercase tracking-widest"
             style={{ fontSize: "10px", fontWeight: 700, color: accent }}>Deliverables</span>
           <ul className="space-y-2">
@@ -322,9 +325,9 @@ export function ServiceCard({
                 <span className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: accent }} />
                 {editable ? (
                   <EditableText value={item} placeholder="Deliverable..." onSave={(val) => handleItemEdit(idx, val)} as="span"
-                    className="flex-1" style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.5, color: "#6B7280" }} />
+                    className="flex-1" style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.5, color: body }} />
                 ) : (
-                  <span style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.5, color: "#6B7280" }}>{item}</span>
+                  <span style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.5, color: body }}>{item}</span>
                 )}
                 {editable && (
                   <button onClick={() => handleRemove(idx)}

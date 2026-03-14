@@ -300,10 +300,10 @@ export function SignatureBlock({
           {onSubtitleEdit ? (
             <EditableText value={subtitle} placeholder="Subtitle..." onSave={onSubtitleEdit} as="p"
               className="max-w-md mx-auto mt-4"
-              style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }} />
+              style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textMuted }} />
           ) : (
             <p className="max-w-md mx-auto mt-4"
-              style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }}>
+              style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textMuted }}>
               {subtitle}
             </p>
           )}
@@ -317,7 +317,7 @@ export function SignatureBlock({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 + idx * 0.15, duration: 0.5 }}
               className="rounded-3xl p-8 lg:p-10"
-              style={{ background: "white", border: "2px solid #E5E7EB" }}
+              style={{ background: template.colors.cardBackground, border: `2px solid ${template.colors.border}` }}
             >
               <span className="inline-block px-3 py-1.5 rounded-full mb-6 uppercase tracking-wider"
                 style={{ fontSize: "11px", fontWeight: 600, background: `${accent}12`, color: accent }}>
@@ -328,28 +328,28 @@ export function SignatureBlock({
                   {party.companyName}
                 </span>
                 {party.personName && (
-                  <span className="block" style={{ fontSize: "14px", fontWeight: 400, color: "#9CA3AF" }}>
+                <span className="block" style={{ fontSize: "14px", fontWeight: 400, color: template.colors.textMuted }}>
                     {party.personName}{party.title ? ` — ${party.title}` : ""}
                   </span>
                 )}
               </div>
               <div className="space-y-6">
                 <div>
-                  <div className="h-16 mb-2 rounded-lg" style={{ background: `${accent}06`, borderBottom: `3px solid ${accent}` }} />
-                  <span className="uppercase tracking-[0.15em]" style={{ fontSize: "10px", fontWeight: 500, color: "#D1D5DB" }}>
+                  <div className="h-16 mb-2 rounded-lg" style={{ background: `${accent}0A`, borderBottom: `3px solid ${accent}` }} />
+                  <span className="uppercase tracking-[0.15em]" style={{ fontSize: "10px", fontWeight: 500, color: template.colors.textFaint }}>
                     Signature
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <div className="h-10 mb-2" style={{ borderBottom: "2px dashed #E5E7EB" }} />
-                    <span className="uppercase tracking-[0.15em]" style={{ fontSize: "10px", fontWeight: 500, color: "#D1D5DB" }}>
+                    <div className="h-10 mb-2" style={{ borderBottom: `2px dashed ${template.colors.border}` }} />
+                    <span className="uppercase tracking-[0.15em]" style={{ fontSize: "10px", fontWeight: 500, color: template.colors.textFaint }}>
                       Printed Name
                     </span>
                   </div>
                   <div>
-                    <div className="h-10 mb-2" style={{ borderBottom: "2px dashed #E5E7EB" }} />
-                    <span className="uppercase tracking-[0.15em]" style={{ fontSize: "10px", fontWeight: 500, color: "#D1D5DB" }}>
+                    <div className="h-10 mb-2" style={{ borderBottom: `2px dashed ${template.colors.border}` }} />
+                    <span className="uppercase tracking-[0.15em]" style={{ fontSize: "10px", fontWeight: 500, color: template.colors.textFaint }}>
                       Date
                     </span>
                   </div>
@@ -374,7 +374,7 @@ export function SignatureBlock({
             <p className="mb-2" style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, color: dark }}>
               Thank you for considering {brand.agencyFullName}.
             </p>
-            <p style={{ fontSize: "14px", fontWeight: 400, color: "#9CA3AF" }}>
+            <p style={{ fontSize: "14px", fontWeight: 400, color: template.colors.textMuted }}>
               We're excited about the possibility of working together.
             </p>
             <div className="mt-6 flex items-center justify-center gap-3 flex-wrap">
@@ -398,7 +398,7 @@ export function SignatureBlock({
         </div>
 
         <div className="mt-10 text-center">
-          <p style={{ fontSize: "12px", fontWeight: 400, color: "#D1D5DB" }}>
+          <p style={{ fontSize: "12px", fontWeight: 400, color: template.colors.textFaint }}>
             This document constitutes a binding agreement upon signature by both parties.
           </p>
         </div>

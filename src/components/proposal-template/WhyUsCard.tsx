@@ -167,8 +167,8 @@ export function WhyUsCard({
         transition={{ delay, duration: 0.5, ease: "easeOut" }}
         className="group relative rounded-3xl p-8 h-full flex flex-col transition-transform duration-300 hover:-translate-y-1.5"
         style={{
-          background: "white", border: "2px solid #E5E7EB",
-          boxShadow: "0 2px 12px rgba(30,27,75,0.04)", fontFamily: "'Outfit', sans-serif",
+          background: template.colors.cardBackground, border: `2px solid ${template.colors.border}`,
+          boxShadow: `0 2px 12px ${dark}0A`, fontFamily: "'Outfit', sans-serif",
         }}
       >
         {statValue && (
@@ -200,17 +200,13 @@ export function WhyUsCard({
         )}
         {onDescriptionEdit ? (
           <EditableText value={description} placeholder="Description..." onSave={onDescriptionEdit} as="p"
-            className="flex-1" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }} />
+            className="flex-1" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textMuted }} />
         ) : (
-          <p className="flex-1" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }}>
+          <p className="flex-1" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textMuted }}>
             {description}
           </p>
         )}
-        <div className="mt-6 pt-4 flex items-center gap-1.5" style={{ borderTop: "2px dashed #E5E7EB" }}>
-          {[0.15, 0.25, 0.4, 0.55, 0.7].map((opacity, i) => (
-            <div key={i} className="w-2 h-2 rounded-full" style={{ background: accent, opacity }} />
-          ))}
-        </div>
+        <div className="mt-6 pt-4" style={{ borderTop: `2px dashed ${template.colors.border}` }} />
       </motion.div>
     );
   }

@@ -153,9 +153,10 @@ function ModernHeroCover({
   const accent = template.colors.primaryAccent;
   const secondary = template.colors.secondaryAccent;
   const dark = template.colors.primaryDark;
+  const textBody = template.colors.textBody;
+  const textFaint = template.colors.textFaint;
   const displayDate = date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
-  // Render title with "&" in secondary color
   const renderTitle = (text: string) => {
     if (!text.includes("&")) return text;
     return text.split("&").map((part, i, arr) => (
@@ -171,24 +172,38 @@ function ModernHeroCover({
       className="relative min-h-screen w-full overflow-hidden flex flex-col"
       style={{ background: "#FAFAF8", fontFamily: "'Outfit', sans-serif" }}
     >
-      {/* Floating decorative blurred circles */}
+      {/* Large decorative blurred circles */}
       <motion.div
-        className="absolute top-[10%] right-[15%] w-72 h-72 rounded-full pointer-events-none"
-        style={{ background: accent, opacity: 0.05, filter: "blur(80px)" }}
+        className="absolute -top-[10%] -right-[5%] rounded-full pointer-events-none"
+        style={{ width: "600px", height: "600px", background: accent, opacity: 0.08, filter: "blur(100px)" }}
         animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute bottom-[20%] left-[10%] w-96 h-96 rounded-full pointer-events-none"
-        style={{ background: accent, opacity: 0.03, filter: "blur(100px)" }}
+        className="absolute bottom-[5%] right-[10%] rounded-full pointer-events-none"
+        style={{ width: "500px", height: "500px", background: accent, opacity: 0.06, filter: "blur(120px)" }}
         animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute top-[50%] left-[50%] w-56 h-56 rounded-full pointer-events-none"
-        style={{ background: secondary, opacity: 0.04, filter: "blur(90px)" }}
+        className="absolute bottom-[20%] -left-[5%] rounded-full pointer-events-none"
+        style={{ width: "400px", height: "400px", background: secondary, opacity: 0.04, filter: "blur(90px)" }}
         animate={{ y: [0, -15, 0] }}
         transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* Small decorative shapes */}
+      <motion.div
+        className="absolute top-[30%] left-[8%] pointer-events-none"
+        style={{ width: "16px", height: "16px", background: `${accent}30`, borderRadius: "3px" }}
+        animate={{ rotate: [0, 90, 180, 270, 360] }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+      />
+      <motion.div
+        className="absolute top-[55%] left-[12%] rounded-full pointer-events-none"
+        style={{ width: "10px", height: "10px", background: `${accent}33` }}
+        animate={{ scale: [1, 1.4, 1], opacity: [0.2, 0.35, 0.2] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
       />
 
       {/* Top bar */}
@@ -267,11 +282,11 @@ function ModernHeroCover({
                 onSave={onSubtitleEdit}
                 as="p"
                 className="max-w-lg mt-6"
-                style={{ fontSize: "18px", fontWeight: 400, lineHeight: 1.7, color: "#6B7280", fontFamily: "'Outfit', sans-serif" }}
+                style={{ fontSize: "18px", fontWeight: 400, lineHeight: 1.7, color: textBody, fontFamily: "'Outfit', sans-serif" }}
               />
             ) : (
               <p className="max-w-lg mt-6"
-                style={{ fontSize: "18px", fontWeight: 400, lineHeight: 1.7, color: "#6B7280" }}>
+                style={{ fontSize: "18px", fontWeight: 400, lineHeight: 1.7, color: textBody }}>
                 {subtitle}
               </p>
             )
@@ -286,7 +301,7 @@ function ModernHeroCover({
           className="mt-14 flex flex-wrap items-center gap-4"
         >
           <div className="px-6 py-4 rounded-2xl"
-            style={{ background: "white", boxShadow: `0 2px 20px ${dark}0F` }}>
+            style={{ background: template.colors.cardBackground, boxShadow: `0 2px 20px ${dark}0F` }}>
             <span className="block uppercase tracking-wider mb-1"
               style={{ fontSize: "10px", fontWeight: 600, color: accent }}>Prepared for</span>
             {onClientNameEdit ? (
@@ -297,7 +312,7 @@ function ModernHeroCover({
             )}
           </div>
           <div className="px-6 py-4 rounded-2xl"
-            style={{ background: "white", boxShadow: `0 2px 20px ${dark}0F` }}>
+            style={{ background: template.colors.cardBackground, boxShadow: `0 2px 20px ${dark}0F` }}>
             <span className="block uppercase tracking-wider mb-1"
               style={{ fontSize: "10px", fontWeight: 600, color: accent }}>Date</span>
             {onDateEdit ? (
@@ -307,6 +322,11 @@ function ModernHeroCover({
               <span style={{ fontSize: "16px", fontWeight: 700, color: dark }}>{displayDate}</span>
             )}
           </div>
+          <div className="px-6 py-4 rounded-2xl flex items-center gap-2 cursor-pointer transition-transform hover:scale-105"
+            style={{ background: secondary, color: "white", boxShadow: `0 4px 20px ${secondary}40` }}>
+            <span style={{ fontSize: "14px", fontWeight: 600 }}>Let's go</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </div>
         </motion.div>
       </div>
 
@@ -315,14 +335,9 @@ function ModernHeroCover({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8, duration: 0.5 }}
-        className="relative z-10 px-8 lg:px-14 pb-8 flex items-center justify-between"
+        className="relative z-10 px-8 lg:px-14 pb-8 flex items-center justify-end"
       >
-        <div className="flex items-center gap-1.5">
-          {[0.15, 0.3, 0.45, 0.6, 0.8].map((opacity, i) => (
-            <div key={i} className="w-2 h-2 rounded-full" style={{ backgroundColor: accent, opacity }} />
-          ))}
-        </div>
-        <span style={{ fontSize: "11px", fontWeight: 500, color: "#9CA3AF" }}>
+        <span style={{ fontSize: "11px", fontWeight: 500, color: textFaint }}>
           Page 01 of 09
         </span>
       </motion.div>

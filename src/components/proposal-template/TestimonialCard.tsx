@@ -318,16 +318,16 @@ export function TestimonialCard({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.5, ease: "easeOut" }}
         className="rounded-3xl p-8 transition-transform duration-300 hover:-translate-y-1"
-        style={{ fontFamily: "'Outfit', sans-serif", background: "white", border: "2px solid #E5E7EB", boxShadow: "0 2px 12px rgba(30,27,75,0.04)" }}
+        style={{ fontFamily: "'Outfit', sans-serif", background: template.colors.cardBackground, border: `2px solid ${template.colors.border}`, boxShadow: `0 2px 12px ${dark}0A` }}
       >
-        <Quote size={20} style={{ color: accent, opacity: 0.3 }} className="mb-4" />
+        <Quote size={20} style={{ color: `${accent}30` }} className="mb-4" />
         {onQuoteEdit ? (
           <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
             className="mb-6"
-            style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: "#6B7280", fontFamily: "'Fraunces', serif", fontStyle: "italic" }} />
+            style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textBody, fontFamily: "'Fraunces', serif", fontStyle: "italic" }} />
         ) : (
           <blockquote className="mb-6"
-            style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: "#6B7280", fontFamily: "'Fraunces', serif", fontStyle: "italic" }}>
+            style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textBody, fontFamily: "'Fraunces', serif", fontStyle: "italic" }}>
             "{quote}"
           </blockquote>
         )}
@@ -337,7 +337,7 @@ export function TestimonialCard({
             {metricLabel && <span style={{ fontSize: "10px", fontWeight: 500, color: accent, textTransform: "uppercase", letterSpacing: "0.05em" }}>{metricLabel}</span>}
           </div>
         )}
-        <div className="pt-5" style={{ borderTop: "2px dashed #E5E7EB" }}>
+        <div className="pt-5" style={{ borderTop: `2px dashed ${template.colors.border}` }}>
           <div className="flex items-center gap-3">
             {avatarUrl ? (
               <img src={avatarUrl} alt={clientName} className="w-10 h-10 rounded-full object-cover" />
@@ -350,7 +350,7 @@ export function TestimonialCard({
             <div>
               <span className="block" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>{onNameEdit ? renderName() : clientName}</span>
               {(clientTitle || clientCompany) && (
-                <span className="block" style={{ fontSize: "12px", fontWeight: 400, color: "#D1D5DB" }}>
+                <span className="block" style={{ fontSize: "12px", fontWeight: 400, color: template.colors.textFaint }}>
                   {clientTitle}{clientTitle && clientCompany ? " · " : ""}{clientCompany}
                 </span>
               )}
