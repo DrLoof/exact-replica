@@ -115,6 +115,10 @@ export default function ProposalEditor() {
   const [availableModules, setAvailableModules] = useState<any[]>([]);
   const [regenerating, setRegenerating] = useState(false);
   const [templateId, setTemplateId] = useState<string>('classic');
+  const [customColors, setCustomColors] = useState<Record<string, string> | null>(null);
+  const [colorPickerOpen, setColorPickerOpen] = useState<string | null>(null);
+  const [hexInput, setHexInput] = useState('');
+  const colorPickerRef = useRef<HTMLDivElement>(null);
   const currencySymbol = agency?.currency_symbol || '$';
 
   // Warn user before leaving if an editable field is focused (unsaved inline edit)
