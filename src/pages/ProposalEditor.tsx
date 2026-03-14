@@ -946,7 +946,7 @@ export default function ProposalEditor() {
               </SectionWrapper>}
 
               {/* Section 6: Why Us */}
-              <SectionWrapper idx={6} hidden={hiddenSections.has(6)} onToggle={toggleSection} label="Why Us">
+              {!deletedSections.has(6) && <SectionWrapper idx={6} onDelete={deleteSection} label="Why Us">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="07">
                     <SectionHeader number="06" title="Why Us" subtitle="What sets us apart"
