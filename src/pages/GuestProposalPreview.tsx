@@ -878,7 +878,7 @@ export default function GuestProposalPreview() {
               )}
 
               {/* Section 7: Terms */}
-              {!hiddenSections.has(7) && (
+              {!deletedSections.has(7) && (
                 <div id="guest-section-7" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="08">
                     <SectionHeader number="07" title="Terms & Conditions" />
