@@ -106,12 +106,22 @@ function ElegantHeroCover({
           <div className="mt-16 flex items-center gap-10" style={{ fontFamily: "'DM Sans', sans-serif" }}>
             <div>
               <span className="block mb-1" style={{ fontSize: "12px", fontWeight: 500, letterSpacing: "0.05em", color: muted }}>Prepared for</span>
-              <span style={{ fontSize: "16px", fontWeight: 600, color: dark }}>{clientName}</span>
+              {onClientNameEdit ? (
+                <EditableText value={clientName} placeholder="Client name" onSave={onClientNameEdit} as="span"
+                  style={{ fontSize: "16px", fontWeight: 600, color: dark }} />
+              ) : (
+                <span style={{ fontSize: "16px", fontWeight: 600, color: dark }}>{clientName}</span>
+              )}
             </div>
             <div className="w-px h-8" style={{ background: border }} />
             <div>
               <span className="block mb-1" style={{ fontSize: "12px", fontWeight: 500, letterSpacing: "0.05em", color: muted }}>Date</span>
-              <span style={{ fontSize: "16px", fontWeight: 600, color: dark }}>{displayDate}</span>
+              {onDateEdit ? (
+                <EditableText value={displayDate} placeholder="Date" onSave={onDateEdit} as="span"
+                  style={{ fontSize: "16px", fontWeight: 600, color: dark }} />
+              ) : (
+                <span style={{ fontSize: "16px", fontWeight: 600, color: dark }}>{displayDate}</span>
+              )}
             </div>
           </div>
         </motion.div>
