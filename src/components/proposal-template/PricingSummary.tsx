@@ -398,8 +398,8 @@ export function PricingSummary({
                         </span>
                       )}
                     </span>
-                    {item.note && (
-                      <span className="block mt-0.5" style={{ fontSize: "13px", fontWeight: 400, color: "#D1D5DB" }}>
+                     {item.note && (
+                      <span className="block mt-0.5" style={{ fontSize: "13px", fontWeight: 400, color: template.colors.textFaint }}>
                         {item.note}
                       </span>
                     )}
