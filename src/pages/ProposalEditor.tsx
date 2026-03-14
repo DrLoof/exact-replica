@@ -422,7 +422,7 @@ export default function ProposalEditor() {
     return <FileText size={22} />;
   };
 
-  const proposalDate = new Date(proposal.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const proposalDate = proposal.project_start_date || new Date(proposal.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
@@ -668,6 +668,14 @@ export default function ProposalEditor() {
                     proposalNumber={proposal.reference_number}
                     onTitleEdit={(val) => updateField('title', val)}
                     onSubtitleEdit={(val) => updateField('subtitle', val)}
+                    onClientNameEdit={client ? async (val) => {
+                      await supabase.from('clients').update({ company_name: val }).eq('id', client.id);
+                      setClient({ ...client, company_name: val });
+                    } : undefined}
+                    onDateEdit={(val) => {
+                      updateField('project_start_date', val);
+                      setProposal({ ...proposal, project_start_date: val });
+                    }}
                   />
                 </div>
               </SectionWrapper>}
