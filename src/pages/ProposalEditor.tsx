@@ -594,7 +594,7 @@ export default function ProposalEditor() {
           <BrandProvider brand={{
             agencyName: (agency?.name || 'Agency').toUpperCase(),
             agencyFullName: agency?.name || 'Agency',
-            primaryColor: agency?.brand_color || '#fc956e',
+            primaryColor: customColors?.primaryAccent || agency?.brand_color || '#fc956e',
             darkColor: agency?.dark_color || '#0A0A0A',
             logoUrl: agency?.logo_url || null,
             logoInitial: (agency?.name || 'A').charAt(0).toUpperCase(),

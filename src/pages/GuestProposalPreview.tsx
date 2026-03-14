@@ -653,7 +653,7 @@ export default function GuestProposalPreview() {
           <BrandProvider brand={{
             agencyName: agencyName.toUpperCase(),
             agencyFullName: agencyName,
-            primaryColor: brandColor,
+            primaryColor: customColors?.primaryAccent || brandColor,
             darkColor: '#0A0A0A',
             logoUrl: identity.logo_url || null,
             logoInitial: (agencyName || 'A').charAt(0).toUpperCase(),
