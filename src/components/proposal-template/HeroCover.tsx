@@ -20,7 +20,7 @@ interface HeroCoverProps {
 
 function ElegantHeroCover({
   proposalTitle, subtitle, clientName, date, proposalNumber,
-  onTitleEdit, onSubtitleEdit,
+  onTitleEdit, onSubtitleEdit, onClientNameEdit, onDateEdit,
 }: HeroCoverProps) {
   const brand = useBrand();
   const template = useTemplate();
