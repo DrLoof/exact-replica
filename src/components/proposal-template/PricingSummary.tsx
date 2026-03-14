@@ -381,9 +381,9 @@ export function PricingSummary({
             const dotOpacity = Math.min(0.3 + idx * 0.15, 1);
             return (
               <div key={idx} className="px-8 py-5 flex items-center justify-between"
-                style={{ borderTop: "1px dashed #E5E7EB" }}>
+                style={{ borderTop: `1px dashed ${template.colors.border}` }}>
                 <div className="flex items-center gap-3">
-                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: accent, opacity: dotOpacity }} />
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: accent }} />
                   <div>
                     <span className="block" style={{ fontSize: "16px", fontWeight: 600, color: dark }}>
                       {item.service}
