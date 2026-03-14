@@ -30,6 +30,7 @@ export function SignatureBlock({
   const template = useTemplate();
   const isModern = template.id === 'modern';
   const isElegant = template.id === 'elegant';
+  const isSoft = template.id === 'soft';
   const accent = template.colors.primaryAccent;
   const secondary = template.colors.secondaryAccent;
   const dark = template.colors.primaryDark;
