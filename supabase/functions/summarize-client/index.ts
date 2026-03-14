@@ -42,11 +42,11 @@ serve(async (req) => {
             role: "system",
             content: `You are summarizing a company's publicly available website for use as context in a business proposal.
 
-Write a 2-3 sentence business summary of this company. Focus on: what the company does, who they serve, and their market position. Write in third person, professional tone. Write entirely in your own words — do not copy any sentences verbatim from the source. Do NOT include lists of services detected, do NOT include raw data dumps.
+Return a JSON object with two fields:
+1. "summary": A 2-3 sentence business summary of this company. Focus on: what the company does, who they serve, and their market position. Write in third person, professional tone. Write entirely in your own words — do not copy any sentences verbatim from the source. Do NOT include lists of services detected, do NOT include raw data dumps. Always write in English regardless of the source language.
+2. "industry": The best matching industry from this list: Technology, Healthcare, Finance, E-commerce, Education, Real Estate, Manufacturing, Media, Non-profit, Professional Services, Retail, Other. Pick exactly one.
 
-Always write in English regardless of the source language.
-
-Return ONLY the summary, nothing else.`,
+Return ONLY valid JSON, nothing else.`,
           },
           {
             role: "user",
@@ -54,7 +54,7 @@ Return ONLY the summary, nothing else.`,
           },
         ],
         temperature: 0.4,
-        max_tokens: 300,
+        max_tokens: 400,
       }),
     });
 
@@ -65,7 +65,20 @@ Return ONLY the summary, nothing else.`,
     }
 
     const aiData = await aiResponse.json();
-    const summary = aiData.choices?.[0]?.message?.content?.trim() || scraped_text.slice(0, 300);
+    const rawContent = aiData.choices?.[0]?.message?.content?.trim() || "";
+    
+    let summary = scraped_text.slice(0, 300);
+    let industry = "";
+    
+    try {
+      const cleaned = rawContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const parsed = JSON.parse(cleaned);
+      summary = parsed.summary || summary;
+      industry = parsed.industry || "";
+    } catch {
+      // If JSON parsing fails, use raw content as summary
+      summary = rawContent || summary;
+    }
 
     return new Response(JSON.stringify({ summary }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
