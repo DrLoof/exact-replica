@@ -446,8 +446,11 @@ export default function ProposalNew() {
       setSaving(true);
 
       let executiveSummary: string | null = null;
-      const resolvedChallenges = clientChallenges.map(c => c === 'Other' ? clientChallengeOther : c).filter(Boolean);
-      const resolvedGoal = clientGoal === 'Other' ? clientGoalOther : clientGoal;
+      const resolvedChallenges2 = clientChallenges.map(c => c === 'Other' ? clientChallengeOther : c).filter(Boolean);
+      const resolvedGoals2 = selectedGoals.map(g => ({
+        ...g,
+        label: g.id === 'other' ? (goalOtherLabel || 'Other') : g.label,
+      }));
       try {
         const { data: summaryData } = await supabase.functions.invoke('generate-executive-summary', {
           body: {
