@@ -300,10 +300,10 @@ export function SignatureBlock({
           {onSubtitleEdit ? (
             <EditableText value={subtitle} placeholder="Subtitle..." onSave={onSubtitleEdit} as="p"
               className="max-w-md mx-auto mt-4"
-              style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }} />
+              style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textMuted }} />
           ) : (
             <p className="max-w-md mx-auto mt-4"
-              style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }}>
+              style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textMuted }}>
               {subtitle}
             </p>
           )}
