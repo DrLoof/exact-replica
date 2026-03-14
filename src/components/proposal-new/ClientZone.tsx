@@ -290,42 +290,160 @@ export function ClientZone({
         )}
       </section>
 
-      {/* Client Context Section */}
-      {(selectedClient || newClientName.trim()) && (
-        <section className="rounded-xl border border-parchment bg-card p-6 shadow-card">
-          <p className="mb-1 text-[14px] font-semibold text-foreground">Client context</p>
-          <p className="mb-4 text-xs text-muted-foreground">Optional — makes the proposal more specific to this client</p>
-          
-          <div className="space-y-4">
-            {/* Multi-select challenges */}
-            <div>
-              <label className="mb-2 block text-xs font-medium text-muted-foreground">Key challenges <span className="text-muted-foreground/60">(select all that apply)</span></label>
-              
-              {clientChallenges.length > 0 && (
-                <div className="mb-2 flex flex-wrap gap-1.5">
-                  {clientChallenges.map(challenge => (
-                    <span
-                      key={challenge}
-                      className="inline-flex items-center gap-1 rounded-full border border-brand/20 bg-brand/5 px-2.5 py-1 text-[11px] font-medium text-foreground"
-                    >
-                      {challenge === 'Other' ? (clientChallengeOther || 'Other') : challenge}
-                      <button onClick={() => toggleChallenge(challenge)} className="ml-0.5 rounded-full p-0.5 hover:bg-foreground/10">
-                        <X className="h-2.5 w-2.5" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
+    </>
+  );
+}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
-                {challengeOptions.map(option => {
-                  const isSelected = clientChallenges.includes(option);
-                  return (
+/* ── Client Context Zone (challenges, goals, quick note) ── */
+interface ClientContextZoneProps {
+  visible: boolean;
+  clientChallenges: string[];
+  setClientChallenges: (v: string[]) => void;
+  clientChallengeOther: string;
+  setClientChallengeOther: (v: string) => void;
+  selectedGoals: SelectedGoal[];
+  setSelectedGoals: (v: SelectedGoal[]) => void;
+  goalOtherLabel: string;
+  setGoalOtherLabel: (v: string) => void;
+  clientContextNote: string;
+  setClientContextNote: (v: string) => void;
+}
+
+export function ClientContextZone({
+  visible,
+  clientChallenges, setClientChallenges, clientChallengeOther, setClientChallengeOther,
+  selectedGoals, setSelectedGoals, goalOtherLabel, setGoalOtherLabel,
+  clientContextNote, setClientContextNote,
+}: ClientContextZoneProps) {
+  const toggleChallenge = (challenge: string) => {
+    setClientChallenges(
+      clientChallenges.includes(challenge)
+        ? clientChallenges.filter(c => c !== challenge)
+        : [...clientChallenges, challenge]
+    );
+  };
+
+  const toggleGoal = (goalOpt: GoalOption) => {
+    const existing = selectedGoals.find(g => g.id === goalOpt.id);
+    if (existing) {
+      setSelectedGoals(selectedGoals.filter(g => g.id !== goalOpt.id));
+    } else {
+      setSelectedGoals([...selectedGoals, { id: goalOpt.id, label: goalOpt.label, kpi: goalOpt.defaultKpi }]);
+    }
+  };
+
+  const updateGoalKpi = (goalId: string, kpi: string) => {
+    setSelectedGoals(selectedGoals.map(g => g.id === goalId ? { ...g, kpi } : g));
+  };
+
+  if (!visible) return null;
+
+  return (
+    <section className="rounded-xl border border-parchment bg-card p-6 shadow-card">
+      <p className="mb-1 text-[14px] font-semibold text-foreground">Client context</p>
+      <p className="mb-4 text-xs text-muted-foreground">Optional — makes the proposal more specific to this client</p>
+      
+      <div className="space-y-4">
+        {/* Multi-select challenges */}
+        <div>
+          <label className="mb-2 block text-xs font-medium text-muted-foreground">Key challenges <span className="text-muted-foreground/60">(select all that apply)</span></label>
+          
+          {clientChallenges.length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-1.5">
+              {clientChallenges.map(challenge => (
+                <span
+                  key={challenge}
+                  className="inline-flex items-center gap-1 rounded-full border border-brand/20 bg-brand/5 px-2.5 py-1 text-[11px] font-medium text-foreground"
+                >
+                  {challenge === 'Other' ? (clientChallengeOther || 'Other') : challenge}
+                  <button onClick={() => toggleChallenge(challenge)} className="ml-0.5 rounded-full p-0.5 hover:bg-foreground/10">
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+            {challengeOptions.map(option => {
+              const isSelected = clientChallenges.includes(option);
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => toggleChallenge(option)}
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left text-xs transition-colors ${
+                    isSelected ? 'bg-brand/5 text-foreground font-medium' : 'text-foreground/70 hover:bg-muted/50'
+                  }`}
+                >
+                  <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
+                    isSelected ? 'border-brand bg-brand text-white' : 'border-foreground/20'
+                  }`}>
+                    {isSelected && <Check className="h-2.5 w-2.5" />}
+                  </div>
+                  {option}
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              onClick={() => toggleChallenge('Other')}
+              className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left text-xs transition-colors ${
+                clientChallenges.includes('Other') ? 'bg-brand/5 text-foreground font-medium' : 'text-foreground/70 hover:bg-muted/50'
+              }`}
+            >
+              <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
+                clientChallenges.includes('Other') ? 'border-brand bg-brand text-white' : 'border-foreground/20'
+              }`}>
+                {clientChallenges.includes('Other') && <Check className="h-2.5 w-2.5" />}
+              </div>
+              Other
+            </button>
+          </div>
+          {clientChallenges.includes('Other') && (
+            <input
+              type="text"
+              placeholder="Describe the challenge..."
+              maxLength={100}
+              value={clientChallengeOther}
+              onChange={(e) => setClientChallengeOther(e.target.value)}
+              className="mt-2 w-full rounded-lg border border-parchment bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
+            />
+          )}
+        </div>
+
+        {/* Multi-select goals with KPI targets */}
+        <div>
+          <label className="mb-2 block text-xs font-medium text-muted-foreground">Goals <span className="text-muted-foreground/60">(select all that apply)</span></label>
+          
+          {selectedGoals.length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-1.5">
+              {selectedGoals.map(goal => (
+                <span
+                  key={goal.id}
+                  className="inline-flex items-center gap-1 rounded-full border border-brand/20 bg-brand/5 px-2.5 py-1 text-[11px] font-medium text-foreground"
+                >
+                  {goal.id === 'other' ? (goalOtherLabel || 'Other') : goal.label}
+                  {goal.kpi && <span className="text-brand font-semibold">{goal.kpi}</span>}
+                  <button onClick={() => toggleGoal(goalOptionsList.find(g => g.id === goal.id)!)} className="ml-0.5 rounded-full p-0.5 hover:bg-foreground/10">
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="space-y-0.5">
+            {goalOptionsList.map(goalOpt => {
+              const isSelected = selectedGoals.some(g => g.id === goalOpt.id);
+              const selectedGoal = selectedGoals.find(g => g.id === goalOpt.id);
+              return (
+                <div key={goalOpt.id}>
+                  <div className="flex items-center gap-2">
                     <button
-                      key={option}
                       type="button"
-                      onClick={() => toggleChallenge(option)}
-                      className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left text-xs transition-colors ${
+                      onClick={() => toggleGoal(goalOpt)}
+                      className={`flex flex-1 items-center gap-2 rounded-lg px-3 py-2 text-left text-xs transition-colors ${
                         isSelected ? 'bg-brand/5 text-foreground font-medium' : 'text-foreground/70 hover:bg-muted/50'
                       }`}
                     >
@@ -334,129 +452,56 @@ export function ClientZone({
                       }`}>
                         {isSelected && <Check className="h-2.5 w-2.5" />}
                       </div>
-                      {option}
+                      {goalOpt.id === 'other' ? 'Other' : goalOpt.label}
                     </button>
-                  );
-                })}
-                <button
-                  type="button"
-                  onClick={() => toggleChallenge('Other')}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left text-xs transition-colors ${
-                    clientChallenges.includes('Other') ? 'bg-brand/5 text-foreground font-medium' : 'text-foreground/70 hover:bg-muted/50'
-                  }`}
-                >
-                  <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
-                    clientChallenges.includes('Other') ? 'border-brand bg-brand text-white' : 'border-foreground/20'
-                  }`}>
-                    {clientChallenges.includes('Other') && <Check className="h-2.5 w-2.5" />}
+                    {isSelected && goalOpt.id !== 'other' && (
+                      <input
+                        type="text"
+                        value={selectedGoal?.kpi || ''}
+                        onChange={(e) => updateGoalKpi(goalOpt.id, e.target.value)}
+                        placeholder={goalOpt.defaultKpi}
+                        className="w-20 rounded-md border border-parchment bg-background px-2 py-1.5 text-xs text-center text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
+                      />
+                    )}
                   </div>
-                  Other
-                </button>
-              </div>
-              {clientChallenges.includes('Other') && (
-                <input
-                  type="text"
-                  placeholder="Describe the challenge..."
-                  maxLength={100}
-                  value={clientChallengeOther}
-                  onChange={(e) => setClientChallengeOther(e.target.value)}
-                  className="mt-2 w-full rounded-lg border border-parchment bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
-                />
-              )}
-            </div>
-
-            {/* Multi-select goals with KPI targets */}
-            <div>
-              <label className="mb-2 block text-xs font-medium text-muted-foreground">Goals <span className="text-muted-foreground/60">(select all that apply)</span></label>
-              
-              {selectedGoals.length > 0 && (
-                <div className="mb-2 flex flex-wrap gap-1.5">
-                  {selectedGoals.map(goal => (
-                    <span
-                      key={goal.id}
-                      className="inline-flex items-center gap-1 rounded-full border border-brand/20 bg-brand/5 px-2.5 py-1 text-[11px] font-medium text-foreground"
-                    >
-                      {goal.id === 'other' ? (goalOtherLabel || 'Other') : goal.label}
-                      {goal.kpi && <span className="text-brand font-semibold">{goal.kpi}</span>}
-                      <button onClick={() => toggleGoal(goalOptionsList.find(g => g.id === goal.id)!)} className="ml-0.5 rounded-full p-0.5 hover:bg-foreground/10">
-                        <X className="h-2.5 w-2.5" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <div className="space-y-0.5">
-                {goalOptionsList.map(goalOpt => {
-                  const isSelected = selectedGoals.some(g => g.id === goalOpt.id);
-                  const selectedGoal = selectedGoals.find(g => g.id === goalOpt.id);
-                  return (
-                    <div key={goalOpt.id}>
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => toggleGoal(goalOpt)}
-                          className={`flex flex-1 items-center gap-2 rounded-lg px-3 py-2 text-left text-xs transition-colors ${
-                            isSelected ? 'bg-brand/5 text-foreground font-medium' : 'text-foreground/70 hover:bg-muted/50'
-                          }`}
-                        >
-                          <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
-                            isSelected ? 'border-brand bg-brand text-white' : 'border-foreground/20'
-                          }`}>
-                            {isSelected && <Check className="h-2.5 w-2.5" />}
-                          </div>
-                          {goalOpt.id === 'other' ? 'Other' : goalOpt.label}
-                        </button>
-                        {isSelected && goalOpt.id !== 'other' && (
-                          <input
-                            type="text"
-                            value={selectedGoal?.kpi || ''}
-                            onChange={(e) => updateGoalKpi(goalOpt.id, e.target.value)}
-                            placeholder={goalOpt.defaultKpi}
-                            className="w-20 rounded-md border border-parchment bg-background px-2 py-1.5 text-xs text-center text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
-                          />
-                        )}
-                      </div>
-                      {isSelected && goalOpt.id === 'other' && (
-                        <div className="ml-9 mt-1 flex gap-2">
-                          <input
-                            type="text"
-                            placeholder="Goal name..."
-                            maxLength={80}
-                            value={goalOtherLabel}
-                            onChange={(e) => setGoalOtherLabel(e.target.value)}
-                            className="flex-1 rounded-md border border-parchment bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
-                          />
-                          <input
-                            type="text"
-                            placeholder="KPI target"
-                            value={selectedGoal?.kpi || ''}
-                            onChange={(e) => updateGoalKpi('other', e.target.value)}
-                            className="w-20 rounded-md border border-parchment bg-background px-2 py-1.5 text-xs text-center text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
-                          />
-                        </div>
-                      )}
+                  {isSelected && goalOpt.id === 'other' && (
+                    <div className="ml-9 mt-1 flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Goal name..."
+                        maxLength={80}
+                        value={goalOtherLabel}
+                        onChange={(e) => setGoalOtherLabel(e.target.value)}
+                        className="flex-1 rounded-md border border-parchment bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        placeholder="KPI target"
+                        value={selectedGoal?.kpi || ''}
+                        onChange={(e) => updateGoalKpi('other', e.target.value)}
+                        className="w-20 rounded-md border border-parchment bg-background px-2 py-1.5 text-xs text-center text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
+                      />
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Quick note */}
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Quick note</label>
-              <input
-                type="text"
-                placeholder="e.g. They just raised a round and need to scale quickly"
-                maxLength={200}
-                value={clientContextNote}
-                onChange={(e) => setClientContextNote(e.target.value)}
-                className="w-full rounded-lg border border-parchment bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
-              />
-            </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
-        </section>
-      )}
-    </>
+        </div>
+
+        {/* Quick note */}
+        <div>
+          <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Quick note</label>
+          <input
+            type="text"
+            placeholder="e.g. They just raised a round and need to scale quickly"
+            maxLength={200}
+            value={clientContextNote}
+            onChange={(e) => setClientContextNote(e.target.value)}
+            className="w-full rounded-lg border border-parchment bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
+          />
+        </div>
+      </div>
+    </section>
   );
 }
