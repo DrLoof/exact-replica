@@ -4,9 +4,11 @@ import {
   ArrowLeft, Eye, EyeOff, Share2, Download, Send, LinkIcon,
   ChevronDown, FileText, Check, DollarSign, Clock,
   RefreshCw, MoreHorizontal, Plus, X, Search, RotateCcw, Loader2,
+  Lock,
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { templates } from '@/lib/proposalTemplates';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
