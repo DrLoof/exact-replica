@@ -734,7 +734,7 @@ export default function GuestProposalPreview() {
               )}
 
               {/* Section 1: Executive Summary */}
-              {!hiddenSections.has(1) && (
+              {!deletedSections.has(1) && (
                 <div id="guest-section-1" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="02">
                     <div className="flex items-center justify-between mb-2">
