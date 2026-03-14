@@ -152,10 +152,10 @@ export function SectionHeader({
               onSubtitleEdit ? (
                 <EditableText value={subtitle || ''} placeholder="Click to add a subtitle..." onSave={onSubtitleEdit} as="p"
                   className="mt-3 max-w-xl"
-                  style={{ fontSize: "16px", fontWeight: 400, lineHeight: 1.6, color: "#9CA3AF" }} />
+                  style={{ fontSize: "16px", fontWeight: 400, lineHeight: 1.6, color: template.colors.textMuted }} />
               ) : (
                 <p className="mt-3 max-w-xl"
-                  style={{ fontSize: "16px", fontWeight: 400, lineHeight: 1.6, color: "#9CA3AF" }}>
+                  style={{ fontSize: "16px", fontWeight: 400, lineHeight: 1.6, color: template.colors.textMuted }}>
                   {subtitle}
                 </p>
               )

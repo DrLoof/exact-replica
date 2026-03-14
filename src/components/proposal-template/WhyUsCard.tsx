@@ -167,8 +167,8 @@ export function WhyUsCard({
         transition={{ delay, duration: 0.5, ease: "easeOut" }}
         className="group relative rounded-3xl p-8 h-full flex flex-col transition-transform duration-300 hover:-translate-y-1.5"
         style={{
-          background: "white", border: "2px solid #E5E7EB",
-          boxShadow: "0 2px 12px rgba(30,27,75,0.04)", fontFamily: "'Outfit', sans-serif",
+          background: template.colors.cardBackground, border: `2px solid ${template.colors.border}`,
+          boxShadow: `0 2px 12px ${dark}0A`, fontFamily: "'Outfit', sans-serif",
         }}
       >
         {statValue && (

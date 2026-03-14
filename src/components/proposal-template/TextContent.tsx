@@ -35,7 +35,7 @@ export function TextContent({
       className={columns === 2 ? "columns-1 md:columns-2 gap-10" : ""}
       style={{
         fontFamily: bodyFont,
-        fontSize: "15px",
+        fontSize: isModern ? "16px" : "15px",
         fontWeight: 400,
         lineHeight,
         color: bodyColor,

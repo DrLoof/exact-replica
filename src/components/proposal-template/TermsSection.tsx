@@ -223,14 +223,14 @@ export function TermsSection({ clauses, onClauseEdit }: TermsSectionProps) {
                   >
                     <div className="px-6 pb-5" style={{ paddingLeft: "76px" }}>
                       {onClauseEdit ? (
-                        <EditableText value={clause.content} placeholder="Clause content..." onSave={(val) => onClauseEdit(idx, 'content', val)} as="p"
-                          style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }} />
+                         <EditableText value={clause.content} placeholder="Clause content..." onSave={(val) => onClauseEdit(idx, 'content', val)} as="p"
+                          style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textMuted }} />
                       ) : (
-                        <p style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }}>
+                        <p style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textMuted }}>
                           {clause.content}
                         </p>
                       )}
-                      <p className="mt-3" style={{ fontSize: "13px", color: "#D1D5DB" }}>
+                      <p className="mt-3" style={{ fontSize: "13px", color: template.colors.textFaint }}>
                         <span style={{ color: accent }}>*</span> Standard terms apply
                       </p>
                     </div>

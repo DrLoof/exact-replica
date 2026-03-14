@@ -475,7 +475,7 @@ export function PricingSummary({
                       {idx + 1}
                     </span>
                     <div className="flex-1 flex items-start justify-between gap-4">
-                      <span style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6, color: "#6B7280" }}>{termText}</span>
+                      <span style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6, color: template.colors.textBody }}>{termText}</span>
                       {termAmount && (
                         <span className="shrink-0" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>{termAmount}</span>
                       )}

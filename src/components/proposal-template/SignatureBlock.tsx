@@ -398,7 +398,7 @@ export function SignatureBlock({
         </div>
 
         <div className="mt-10 text-center">
-          <p style={{ fontSize: "12px", fontWeight: 400, color: "#D1D5DB" }}>
+          <p style={{ fontSize: "12px", fontWeight: 400, color: template.colors.textFaint }}>
             This document constitutes a binding agreement upon signature by both parties.
           </p>
         </div>

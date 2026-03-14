@@ -337,7 +337,7 @@ export function TestimonialCard({
             {metricLabel && <span style={{ fontSize: "10px", fontWeight: 500, color: accent, textTransform: "uppercase", letterSpacing: "0.05em" }}>{metricLabel}</span>}
           </div>
         )}
-        <div className="pt-5" style={{ borderTop: "2px dashed #E5E7EB" }}>
+        <div className="pt-5" style={{ borderTop: `2px dashed ${template.colors.border}` }}>
           <div className="flex items-center gap-3">
             {avatarUrl ? (
               <img src={avatarUrl} alt={clientName} className="w-10 h-10 rounded-full object-cover" />
@@ -350,7 +350,7 @@ export function TestimonialCard({
             <div>
               <span className="block" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>{onNameEdit ? renderName() : clientName}</span>
               {(clientTitle || clientCompany) && (
-                <span className="block" style={{ fontSize: "12px", fontWeight: 400, color: "#D1D5DB" }}>
+                <span className="block" style={{ fontSize: "12px", fontWeight: 400, color: template.colors.textFaint }}>
                   {clientTitle}{clientTitle && clientCompany ? " · " : ""}{clientCompany}
                 </span>
               )}

@@ -53,12 +53,12 @@ export function PageWrapper({ children, pageNumber }: PageWrapperProps) {
 
   if (isModern) {
     return (
-      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#FAFAF8" }}>
+      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: template.colors.background }}>
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-20 -right-20 w-[300px] h-[300px] rounded-full"
-            style={{ background: accent, opacity: 0.03, filter: "blur(60px)" }} />
-          <div className="absolute bottom-[20%] -left-10 w-[200px] h-[200px] rounded-full"
-            style={{ background: accent, opacity: 0.025, filter: "blur(50px)" }} />
+          <div className="absolute -top-20 -right-20 rounded-full"
+            style={{ width: "500px", height: "500px", background: accent, opacity: 0.03, filter: "blur(80px)" }} />
+          <div className="absolute bottom-[20%] -left-10 rounded-full"
+            style={{ width: "400px", height: "400px", background: accent, opacity: 0.025, filter: "blur(70px)" }} />
         </div>
         <div className="relative z-10 px-8 py-14 lg:px-16 lg:py-20 max-w-5xl mx-auto">
           {children}

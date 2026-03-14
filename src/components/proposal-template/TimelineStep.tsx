@@ -195,9 +195,9 @@ export function TimelineStep({
             onDescriptionEdit ? (
               <EditableText value={description || ''} placeholder="Click to add a description..." onSave={onDescriptionEdit} as="p"
                 className="max-w-lg"
-                style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }} />
+                style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textMuted }} />
             ) : (
-              <p className="max-w-lg" style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }}>
+              <p className="max-w-lg" style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textMuted }}>
                 {description}
               </p>
             )
