@@ -17,11 +17,12 @@ export function TextContent({
   const brand = useBrand();
   const template = useTemplate();
   const isModern = template.id === 'modern';
+  const accent = template.colors.primaryAccent;
 
   const bodyFont = isModern ? "'Outfit', sans-serif" : "'Inter', sans-serif";
   const bodyColor = isModern ? "#6B7280" : "#555";
   const dropCapFont = isModern ? "'Fraunces', serif" : "'Space Grotesk', sans-serif";
-  const dropCapColor = isModern ? "#34D399" : brand.primaryColor;
+  const dropCapColor = isModern ? accent : brand.primaryColor;
   const dropCapSize = isModern ? "64px" : "56px";
   const dropCapWeight = isModern ? 800 : 700;
 
