@@ -95,10 +95,13 @@ export default function ProposalNew() {
   // Service state
   const [selectedModuleIds, setSelectedModuleIds] = useState<Set<string>>(() => {
     if (isGuestMode && guestData) {
-      return new Set(guestData.virtualModules.map((m: any) => m.id));
+      // Pre-select only the top 3 services during onboarding
+      const top3 = guestData.virtualModules.slice(0, 3).map((m: any) => m.id);
+      return new Set(top3);
     }
     const servicesParam = searchParams.get('services');
     if (servicesParam) return new Set(servicesParam.split(',').filter(Boolean));
+    // Logged-in: start empty, user picks manually
     return new Set<string>();
   });
   const [selectedBundleId, setSelectedBundleId] = useState<string | null>(() => searchParams.get('bundle'));
