@@ -787,7 +787,7 @@ export default function ProposalEditor() {
               </SectionWrapper>}
 
               {/* Section 3: Timeline */}
-              <SectionWrapper idx={3} hidden={hiddenSections.has(3)} onToggle={toggleSection} label="Timeline">
+              {!deletedSections.has(3) && <SectionWrapper idx={3} onDelete={deleteSection} label="Timeline">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="04">
                     <SectionHeader number="03" title="Timeline" subtitle="How we'll get there"
