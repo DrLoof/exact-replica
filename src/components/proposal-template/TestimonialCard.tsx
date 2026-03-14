@@ -320,14 +320,14 @@ export function TestimonialCard({
         className="rounded-3xl p-8 transition-transform duration-300 hover:-translate-y-1"
         style={{ fontFamily: "'Outfit', sans-serif", background: template.colors.cardBackground, border: `2px solid ${template.colors.border}`, boxShadow: `0 2px 12px ${dark}0A` }}
       >
-        <Quote size={20} style={{ color: accent, opacity: 0.3 }} className="mb-4" />
+        <Quote size={20} style={{ color: `${accent}30` }} className="mb-4" />
         {onQuoteEdit ? (
           <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
             className="mb-6"
-            style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: "#6B7280", fontFamily: "'Fraunces', serif", fontStyle: "italic" }} />
+            style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textBody, fontFamily: "'Fraunces', serif", fontStyle: "italic" }} />
         ) : (
           <blockquote className="mb-6"
-            style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: "#6B7280", fontFamily: "'Fraunces', serif", fontStyle: "italic" }}>
+            style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textBody, fontFamily: "'Fraunces', serif", fontStyle: "italic" }}>
             "{quote}"
           </blockquote>
         )}
