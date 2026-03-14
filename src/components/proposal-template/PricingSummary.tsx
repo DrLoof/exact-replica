@@ -112,12 +112,139 @@ export function PricingSummary({
 }: PricingSummaryProps) {
   const template = useTemplate();
   const isModern = template.id === 'modern';
+  const isElegant = template.id === 'elegant';
   const accent = template.colors.primaryAccent;
   const secondary = template.colors.secondaryAccent;
   const dark = template.colors.primaryDark;
   const uniqueModels = new Set(items.map((i) => i.model || "fixed"));
   const isMixed = uniqueModels.size > 1;
   const displayGroups = groups || (isMixed ? autoGroupItems(items) : null);
+
+  if (isElegant) {
+    const border = template.colors.border;
+    const accentTint = `${accent}0F`;
+    const muted = template.colors.textMuted;
+    const faint = template.colors.textFaint;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="w-full"
+        style={{ fontFamily: "'DM Sans', sans-serif" }}
+      >
+        <div className="rounded-3xl overflow-hidden" style={{ border: `1px solid ${border}` }}>
+          {/* Header */}
+          <div className="px-8 py-4 flex items-center justify-between" style={{ background: accentTint }}>
+            <span className="uppercase tracking-[0.2em]" style={{ fontSize: "11px", fontWeight: 600, color: muted }}>Service</span>
+            <span className="uppercase tracking-[0.2em]" style={{ fontSize: "11px", fontWeight: 600, color: muted }}>Investment</span>
+          </div>
+
+          {/* Items */}
+          {(displayGroups ? displayGroups.flatMap(g => g.items) : items).map((item, idx) => {
+            const originalIdx = items.indexOf(item);
+            return (
+              <div key={idx} className="px-8 py-5 flex items-center justify-between transition-colors"
+                style={{ borderTop: `1px solid ${border}` }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = `${accent}08`; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+              >
+                <div>
+                  <span className="block" style={{ fontSize: "16px", fontWeight: 500, color: dark }}>
+                    {item.service}
+                    {item.isAddon && (
+                      <span className="ml-2 uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600, color: secondary }}>Add-on</span>
+                    )}
+                    {item.isBundled && (
+                      <span className="ml-2 uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600, color: accent }}>Bundled</span>
+                    )}
+                  </span>
+                  {item.note && <span className="block mt-0.5" style={{ fontSize: "13px", fontWeight: 400, color: faint }}>{item.note}</span>}
+                </div>
+                <span style={{ fontFamily: "'Fraunces', serif", fontSize: "15px", fontWeight: 500, color: dark }}>
+                  {onPriceEdit ? <EditablePrice price={item.price} onEdit={(v) => onPriceEdit(originalIdx, v)} /> : item.price}
+                </span>
+              </div>
+            );
+          })}
+
+          {/* Bundle savings */}
+          {bundleSavings && (
+            <div className="px-8 py-4 flex items-center justify-between" style={{ borderTop: `1px solid ${border}`, background: `${secondary}0D` }}>
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full" style={{ background: secondary }} />
+                <span style={{ fontSize: "14px", fontWeight: 500, color: dark }}>{bundleSavings.bundleName} bundle discount</span>
+                <span className="line-through" style={{ fontSize: "13px", fontWeight: 400, color: faint }}>{bundleSavings.individualTotal}</span>
+              </div>
+              <span style={{ fontSize: "14px", fontWeight: 600, color: secondary }}>{bundleSavings.savings}</span>
+            </div>
+          )}
+
+          {/* Total row - solid accent */}
+          <div className="px-8 py-7 flex items-center justify-between" style={{ background: accent }}>
+            <div>
+              <span style={{ fontSize: "13px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(255,255,255,0.7)" }}>
+                Total Investment
+              </span>
+              {totalBreakdown && (
+                <span className="block mt-1" style={{ fontSize: "13px", fontWeight: 400, color: "rgba(255,255,255,0.5)" }}>
+                  {totalBreakdown}
+                </span>
+              )}
+            </div>
+            <span style={{ fontSize: "32px", fontWeight: 500, color: "white", fontFamily: "'Fraunces', serif" }}>
+              {total}
+            </span>
+          </div>
+        </div>
+
+        {/* Payment terms */}
+        {paymentTerms && paymentTerms.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="mt-8 rounded-3xl p-8"
+            style={{ background: accentTint }}
+          >
+            <h4 className="mb-4 uppercase tracking-[0.15em]"
+              style={{ fontSize: "12px", fontWeight: 600, color: dark }}>
+              Payment Terms
+            </h4>
+            <div className="space-y-3">
+              {paymentTerms.map((term, idx) => {
+                const termText = typeof term === "string" ? term : term.label;
+                const termAmount = typeof term === "string" ? undefined : term.amount;
+                return (
+                  <div key={idx} className="flex items-start gap-3">
+                    <span className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                      style={{ fontSize: "11px", fontWeight: 700, backgroundColor: "white", color: accent }}>
+                      {idx + 1}
+                    </span>
+                    <div className="flex-1 flex items-start justify-between gap-4">
+                      <span style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6, color: template.colors.textBody }}>{termText}</span>
+                      {termAmount && <span className="shrink-0" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>{termAmount}</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Valid until */}
+        {validUntil && (
+          <div className="mt-6 text-center">
+            <span style={{ fontSize: "13px", fontWeight: 400, color: faint }}>
+              This proposal is valid until{" "}
+              <span style={{ fontWeight: 600, color: accent }}>{validUntil}</span>
+            </span>
+          </div>
+        )}
+      </motion.div>
+    );
+  }
 
   if (isModern) {
     return (
