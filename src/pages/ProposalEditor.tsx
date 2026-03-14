@@ -702,6 +702,12 @@ export default function ProposalEditor() {
                                 deliverables={svc.custom_deliverables || svc.module?.deliverables || []}
                                 isAddon={svc.is_addon || false}
                                 delay={i * 0.1}
+                                onNameEdit={async (val) => {
+                                  if (svc.module_id) {
+                                    await supabase.from('service_modules').update({ name: val }).eq('id', svc.module_id);
+                                  }
+                                  setServices(prev => prev.map(s => s.id === svc.id ? { ...s, module: s.module ? { ...s.module, name: val } : s.module } : s));
+                                }}
                                 onDescriptionEdit={async (val) => {
                                   await supabase.from('proposal_services').update({ custom_description: val }).eq('id', svc.id);
                                   setServices(prev => prev.map(s => s.id === svc.id ? { ...s, module: s.module ? { ...s.module, description: val } : s.module } : s));
