@@ -624,7 +624,9 @@ export default function ProposalEditor() {
               <SectionWrapper idx={1} hidden={hiddenSections.has(1)} onToggle={toggleSection} label="Executive Summary">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="02">
-                    <SectionHeader number="01" title="Executive Summary" subtitle="Our understanding and approach" />
+                    <SectionHeader number="01" title="Executive Summary" subtitle="Our understanding and approach"
+                      onTitleEdit={(val) => updateField('title', val)}
+                      onSubtitleEdit={(val) => updateField('subtitle', val)} />
                     <TextContent dropCap>
                       <EditableText
                         value={proposal.executive_summary || ''}
@@ -669,7 +671,9 @@ export default function ProposalEditor() {
               <SectionWrapper idx={2} hidden={hiddenSections.has(2)} onToggle={toggleSection} label="Scope of Services">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="03">
-                    <SectionHeader number="02" title="Scope of Services" subtitle="What we'll deliver for you" />
+                    <SectionHeader number="02" title="Scope of Services" subtitle="What we'll deliver for you"
+                      onTitleEdit={(val) => updateField('title', val)}
+                      onSubtitleEdit={(val) => updateField('subtitle', val)} />
                     {services.length === 0 ? (
                       <div className="text-center py-16">
                         <p className="text-[#999]" style={{ fontSize: '15px' }}>No services added yet.</p>
@@ -698,6 +702,12 @@ export default function ProposalEditor() {
                                 deliverables={svc.custom_deliverables || svc.module?.deliverables || []}
                                 isAddon={svc.is_addon || false}
                                 delay={i * 0.1}
+                                onNameEdit={async (val) => {
+                                  if (svc.module_id) {
+                                    await supabase.from('service_modules').update({ name: val }).eq('id', svc.module_id);
+                                  }
+                                  setServices(prev => prev.map(s => s.id === svc.id ? { ...s, module: s.module ? { ...s.module, name: val } : s.module } : s));
+                                }}
                                 onDescriptionEdit={async (val) => {
                                   await supabase.from('proposal_services').update({ custom_description: val }).eq('id', svc.id);
                                   setServices(prev => prev.map(s => s.id === svc.id ? { ...s, module: s.module ? { ...s.module, description: val } : s.module } : s));
@@ -728,7 +738,9 @@ export default function ProposalEditor() {
               <SectionWrapper idx={3} hidden={hiddenSections.has(3)} onToggle={toggleSection} label="Timeline">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="04">
-                    <SectionHeader number="03" title="Timeline" subtitle="How we'll get there" />
+                    <SectionHeader number="03" title="Timeline" subtitle="How we'll get there"
+                      onTitleEdit={(val) => updateField('title', val)}
+                      onSubtitleEdit={(val) => updateField('subtitle', val)} />
                     
                     {/* Stat bar */}
                     {(() => {
@@ -823,7 +835,9 @@ export default function ProposalEditor() {
               <SectionWrapper idx={4} hidden={hiddenSections.has(4)} onToggle={toggleSection} label="Investment">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="05">
-                    <SectionHeader number="04" title="Investment" subtitle="Transparent pricing for every deliverable" />
+                    <SectionHeader number="04" title="Investment" subtitle="Transparent pricing for every deliverable"
+                      onTitleEdit={(val) => updateField('title', val)}
+                      onSubtitleEdit={(val) => updateField('subtitle', val)} />
                     <PricingSummary
                       items={pricingItems}
                       total={totalStr}
@@ -857,14 +871,23 @@ export default function ProposalEditor() {
               <SectionWrapper idx={5} hidden={hiddenSections.has(5)} onToggle={toggleSection} label="Terms & Conditions">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="06">
-                    <SectionHeader number="05" title="Terms & Conditions" />
+                    <SectionHeader number="05" title="Terms & Conditions"
+                      onTitleEdit={(val) => updateField('title', val)} />
                     {termsClauses.length === 0 ? (
                       <div className="text-center py-16">
                         <p className="text-muted-foreground" style={{ fontSize: '15px' }}>No terms & conditions configured.</p>
                         <Link to="/settings" className="mt-2 inline-block text-sm text-brand hover:text-brand-hover">Add in Settings →</Link>
                       </div>
                     ) : (
-                      <TermsSection clauses={termsClauses.map(c => ({ title: c.title, content: c.content }))} />
+                      <TermsSection
+                        clauses={termsClauses.map(c => ({ title: c.title, content: c.content }))}
+                        onClauseEdit={async (index, field, value) => {
+                          const clause = termsClauses[index];
+                          if (!clause) return;
+                          await supabase.from('terms_clauses').update({ [field]: value }).eq('id', clause.id);
+                          setTermsClauses(prev => prev.map((c, i) => i === index ? { ...c, [field]: value } : c));
+                        }}
+                      />
                     )}
                   </PageWrapper>
                 </div>
@@ -874,7 +897,9 @@ export default function ProposalEditor() {
               <SectionWrapper idx={6} hidden={hiddenSections.has(6)} onToggle={toggleSection} label="Why Us">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="07">
-                    <SectionHeader number="06" title="Why Us" subtitle="What sets us apart" />
+                    <SectionHeader number="06" title="Why Us" subtitle="What sets us apart"
+                      onTitleEdit={(val) => updateField('title', val)}
+                      onSubtitleEdit={(val) => updateField('subtitle', val)} />
                     
                     {/* About text — editable, shared across proposals */}
                     <div className="mb-10">
@@ -912,6 +937,14 @@ export default function ProposalEditor() {
                             statLabel={d.stat_label}
                             icon={d.icon}
                             delay={i * 0.1}
+                            onTitleEdit={async (val) => {
+                              await supabase.from('differentiators').update({ title: val }).eq('id', d.id);
+                              setDifferentiators(prev => prev.map(x => x.id === d.id ? { ...x, title: val } : x));
+                            }}
+                            onDescriptionEdit={async (val) => {
+                              await supabase.from('differentiators').update({ description: val }).eq('id', d.id);
+                              setDifferentiators(prev => prev.map(x => x.id === d.id ? { ...x, description: val } : x));
+                            }}
                           />
                         ))}
                       </div>
@@ -924,7 +957,9 @@ export default function ProposalEditor() {
               <SectionWrapper idx={7} hidden={hiddenSections.has(7)} onToggle={toggleSection} label="Testimonials">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="08">
-                    <SectionHeader number="07" title="What Our Clients Say" subtitle="Proof of impact" />
+                    <SectionHeader number="07" title="What Our Clients Say" subtitle="Proof of impact"
+                      onTitleEdit={(val) => updateField('title', val)}
+                      onSubtitleEdit={(val) => updateField('subtitle', val)} />
                     {testimonials.length === 0 ? (
                       <div className="text-center py-16">
                         <p className="text-muted-foreground" style={{ fontSize: '15px' }}>Add testimonials in Settings to build credibility.</p>
@@ -944,6 +979,14 @@ export default function ProposalEditor() {
                             avatarUrl={t.avatar_url}
                             featured={i === 0}
                             delay={i * 0.1}
+                            onQuoteEdit={async (val) => {
+                              await supabase.from('testimonials').update({ quote: val }).eq('id', t.id);
+                              setTestimonials(prev => prev.map(x => x.id === t.id ? { ...x, quote: val } : x));
+                            }}
+                            onNameEdit={async (val) => {
+                              await supabase.from('testimonials').update({ client_name: val }).eq('id', t.id);
+                              setTestimonials(prev => prev.map(x => x.id === t.id ? { ...x, client_name: val } : x));
+                            }}
                           />
                         ))}
                       </div>
@@ -967,6 +1010,8 @@ export default function ProposalEditor() {
                         role: 'Agency',
                         companyName: agency?.name || 'Agency',
                       }}
+                      onHeadingEdit={(val) => updateField('title', val)}
+                      onSubtitleEdit={(val) => updateField('subtitle', val)}
                     />
                   </PageWrapper>
                 </div>

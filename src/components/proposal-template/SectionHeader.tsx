@@ -2,12 +2,15 @@ import React from "react";
 import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
+import { EditableText } from "./EditableText";
 
 interface SectionHeaderProps {
   number: string;
   title: string;
   subtitle?: string;
   align?: "left" | "center";
+  onTitleEdit?: (value: string) => void;
+  onSubtitleEdit?: (value: string) => void;
 }
 
 export function SectionHeader({
@@ -15,6 +18,8 @@ export function SectionHeader({
   title,
   subtitle,
   align = "left",
+  onTitleEdit,
+  onSubtitleEdit,
 }: SectionHeaderProps) {
   const brand = useBrand();
   const template = useTemplate();
@@ -43,18 +48,33 @@ export function SectionHeader({
             {number}
           </div>
           <div className="pt-1">
-            <h2 className="tracking-tight" style={{
-              fontFamily: "'Fraunces', serif",
-              fontSize: "clamp(28px, 3.5vw, 44px)",
-              fontWeight: 700, lineHeight: 1.1, color: dark,
-            }}>
-              {title}
-            </h2>
-            {subtitle && (
-              <p className="mt-3 max-w-xl"
-                style={{ fontSize: "16px", fontWeight: 400, lineHeight: 1.6, color: "#9CA3AF" }}>
-                {subtitle}
-              </p>
+            {onTitleEdit ? (
+              <EditableText value={title} placeholder="Section title..." onSave={onTitleEdit} as="h1"
+                className="tracking-tight" style={{
+                  fontFamily: "'Fraunces', serif",
+                  fontSize: "clamp(28px, 3.5vw, 44px)",
+                  fontWeight: 700, lineHeight: 1.1, color: dark,
+                }} />
+            ) : (
+              <h2 className="tracking-tight" style={{
+                fontFamily: "'Fraunces', serif",
+                fontSize: "clamp(28px, 3.5vw, 44px)",
+                fontWeight: 700, lineHeight: 1.1, color: dark,
+              }}>
+                {title}
+              </h2>
+            )}
+            {(subtitle || onSubtitleEdit) && (
+              onSubtitleEdit ? (
+                <EditableText value={subtitle || ''} placeholder="Click to add a subtitle..." onSave={onSubtitleEdit} as="p"
+                  className="mt-3 max-w-xl"
+                  style={{ fontSize: "16px", fontWeight: 400, lineHeight: 1.6, color: "#9CA3AF" }} />
+              ) : (
+                <p className="mt-3 max-w-xl"
+                  style={{ fontSize: "16px", fontWeight: 400, lineHeight: 1.6, color: "#9CA3AF" }}>
+                  {subtitle}
+                </p>
+              )
             )}
           </div>
         </div>
@@ -96,24 +116,38 @@ export function SectionHeader({
             isCenter ? {} : { borderColor: brand.primaryColor }
           }
         >
-          <h2
-            className="tracking-tight"
-            style={{
-              fontSize: "clamp(28px, 3vw, 42px)",
-              fontWeight: 700,
-              lineHeight: 1.1,
-              color: brand.darkColor,
-            }}
-          >
-            {title}
-          </h2>
-          {subtitle && (
-            <p
-              className="text-[#888] mt-2 max-w-xl"
-              style={{ fontSize: "16px", fontWeight: 300, lineHeight: 1.6 }}
+          {onTitleEdit ? (
+            <EditableText value={title} placeholder="Section title..." onSave={onTitleEdit} as="h1"
+              className="tracking-tight" style={{
+                fontSize: "clamp(28px, 3vw, 42px)",
+                fontWeight: 700, lineHeight: 1.1, color: brand.darkColor,
+              }} />
+          ) : (
+            <h2
+              className="tracking-tight"
+              style={{
+                fontSize: "clamp(28px, 3vw, 42px)",
+                fontWeight: 700,
+                lineHeight: 1.1,
+                color: brand.darkColor,
+              }}
             >
-              {subtitle}
-            </p>
+              {title}
+            </h2>
+          )}
+          {(subtitle || onSubtitleEdit) && (
+            onSubtitleEdit ? (
+              <EditableText value={subtitle || ''} placeholder="Click to add a subtitle..." onSave={onSubtitleEdit} as="p"
+                className="text-[#888] mt-2 max-w-xl"
+                style={{ fontSize: "16px", fontWeight: 300, lineHeight: 1.6 }} />
+            ) : (
+              <p
+                className="text-[#888] mt-2 max-w-xl"
+                style={{ fontSize: "16px", fontWeight: 300, lineHeight: 1.6 }}
+              >
+                {subtitle}
+              </p>
+            )
           )}
         </div>
       </div>

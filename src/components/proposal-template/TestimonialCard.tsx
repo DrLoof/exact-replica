@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
+import { EditableText } from "./EditableText";
 import { Quote } from "lucide-react";
 
 interface TestimonialCardProps {
@@ -14,6 +15,8 @@ interface TestimonialCardProps {
   avatarUrl?: string;
   featured?: boolean;
   delay?: number;
+  onQuoteEdit?: (value: string) => void;
+  onNameEdit?: (value: string) => void;
 }
 
 export function TestimonialCard({
@@ -26,6 +29,8 @@ export function TestimonialCard({
   avatarUrl,
   featured = false,
   delay = 0,
+  onQuoteEdit,
+  onNameEdit,
 }: TestimonialCardProps) {
   const brand = useBrand();
   const template = useTemplate();
@@ -33,6 +38,10 @@ export function TestimonialCard({
   const accent = template.colors.primaryAccent;
   const secondary = template.colors.secondaryAccent;
   const dark = template.colors.primaryDark;
+
+  const renderName = () => onNameEdit ? (
+    <EditableText value={clientName} placeholder="Client name..." onSave={onNameEdit} as="span" />
+  ) : clientName;
 
   if (isModern && featured) {
     return (
@@ -48,10 +57,16 @@ export function TestimonialCard({
         }}
       >
         <Quote size={28} style={{ color: secondary }} className="mb-6" />
-        <blockquote className="mb-8"
-          style={{ fontSize: "18px", fontWeight: 400, lineHeight: 1.7, color: "rgba(255,255,255,0.85)", fontFamily: "'Fraunces', serif", fontStyle: "italic" }}>
-          "{quote}"
-        </blockquote>
+        {onQuoteEdit ? (
+          <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
+            className="mb-8"
+            style={{ fontSize: "18px", fontWeight: 400, lineHeight: 1.7, color: "rgba(255,255,255,0.85)", fontFamily: "'Fraunces', serif", fontStyle: "italic" }} />
+        ) : (
+          <blockquote className="mb-8"
+            style={{ fontSize: "18px", fontWeight: 400, lineHeight: 1.7, color: "rgba(255,255,255,0.85)", fontFamily: "'Fraunces', serif", fontStyle: "italic" }}>
+            "{quote}"
+          </blockquote>
+        )}
 
         {metricValue && (
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
@@ -78,7 +93,7 @@ export function TestimonialCard({
               </div>
             )}
             <div>
-              <span className="block text-white" style={{ fontSize: "15px", fontWeight: 600 }}>{clientName}</span>
+              <span className="block text-white" style={{ fontSize: "15px", fontWeight: 600 }}>{onNameEdit ? renderName() : clientName}</span>
               {(clientTitle || clientCompany) && (
                 <span className="block" style={{ fontSize: "13px", fontWeight: 400, color: "rgba(255,255,255,0.45)" }}>
                   {clientTitle}{clientTitle && clientCompany ? " · " : ""}{clientCompany}
@@ -105,10 +120,16 @@ export function TestimonialCard({
         }}
       >
         <Quote size={20} style={{ color: accent, opacity: 0.3 }} className="mb-4" />
-        <blockquote className="mb-6"
-          style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: "#6B7280", fontFamily: "'Fraunces', serif", fontStyle: "italic" }}>
-          "{quote}"
-        </blockquote>
+        {onQuoteEdit ? (
+          <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
+            className="mb-6"
+            style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: "#6B7280", fontFamily: "'Fraunces', serif", fontStyle: "italic" }} />
+        ) : (
+          <blockquote className="mb-6"
+            style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: "#6B7280", fontFamily: "'Fraunces', serif", fontStyle: "italic" }}>
+            "{quote}"
+          </blockquote>
+        )}
 
         {metricValue && (
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5"
@@ -135,7 +156,7 @@ export function TestimonialCard({
               </div>
             )}
             <div>
-              <span className="block" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>{clientName}</span>
+              <span className="block" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>{onNameEdit ? renderName() : clientName}</span>
               {(clientTitle || clientCompany) && (
                 <span className="block" style={{ fontSize: "12px", fontWeight: 400, color: "#D1D5DB" }}>
                   {clientTitle}{clientTitle && clientCompany ? " · " : ""}{clientCompany}
@@ -148,7 +169,7 @@ export function TestimonialCard({
     );
   }
 
-  // Classic rendering (unchanged)
+  // Classic featured
   if (featured) {
     return (
       <motion.div
@@ -159,9 +180,15 @@ export function TestimonialCard({
         style={{ fontFamily: "'Space Grotesk', sans-serif", backgroundColor: brand.darkColor }}
       >
         <Quote size={28} className="text-white/20 mb-6" />
-        <blockquote className="text-white mb-8" style={{ fontSize: "20px", fontWeight: 400, lineHeight: 1.6 }}>
-          "{quote}"
-        </blockquote>
+        {onQuoteEdit ? (
+          <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
+            className="text-white mb-8"
+            style={{ fontSize: "20px", fontWeight: 400, lineHeight: 1.6 }} />
+        ) : (
+          <blockquote className="text-white mb-8" style={{ fontSize: "20px", fontWeight: 400, lineHeight: 1.6 }}>
+            "{quote}"
+          </blockquote>
+        )}
         <div className="flex items-center gap-4">
           {avatarUrl ? (
             <img src={avatarUrl} alt={clientName} className="w-12 h-12 rounded-full object-cover" />
@@ -171,7 +198,7 @@ export function TestimonialCard({
             </div>
           )}
           <div>
-            <span className="block text-white" style={{ fontSize: "15px", fontWeight: 600 }}>{clientName}</span>
+            <span className="block text-white" style={{ fontSize: "15px", fontWeight: 600 }}>{onNameEdit ? renderName() : clientName}</span>
             {(clientTitle || clientCompany) && (
               <span className="block text-white/50" style={{ fontSize: "13px", fontWeight: 400 }}>
                 {clientTitle}{clientTitle && clientCompany ? " · " : ""}{clientCompany}
@@ -191,6 +218,7 @@ export function TestimonialCard({
     );
   }
 
+  // Classic non-featured
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -200,9 +228,15 @@ export function TestimonialCard({
       style={{ fontFamily: "'Space Grotesk', sans-serif" }}
     >
       <Quote size={20} style={{ color: `${brand.primaryColor}40` }} className="mb-4" />
-      <blockquote className="text-[#555] mb-6" style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.6, fontFamily: "'Inter', sans-serif" }}>
-        "{quote}"
-      </blockquote>
+      {onQuoteEdit ? (
+        <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
+          className="text-[#555] mb-6"
+          style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.6, fontFamily: "'Inter', sans-serif" }} />
+      ) : (
+        <blockquote className="text-[#555] mb-6" style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.6, fontFamily: "'Inter', sans-serif" }}>
+          "{quote}"
+        </blockquote>
+      )}
       <div className="flex items-center gap-3">
         {avatarUrl ? (
           <img src={avatarUrl} alt={clientName} className="w-10 h-10 rounded-full object-cover" />
@@ -213,7 +247,7 @@ export function TestimonialCard({
           </div>
         )}
         <div>
-          <span className="block" style={{ fontSize: "14px", fontWeight: 600, color: brand.darkColor }}>{clientName}</span>
+          <span className="block" style={{ fontSize: "14px", fontWeight: 600, color: brand.darkColor }}>{onNameEdit ? renderName() : clientName}</span>
           {(clientTitle || clientCompany) && (
             <span className="block text-[#999]" style={{ fontSize: "12px", fontWeight: 400 }}>
               {clientTitle}{clientTitle && clientCompany ? " · " : ""}{clientCompany}
