@@ -1,7 +1,9 @@
 import React from "react";
 import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
+import { useTemplate } from "./TemplateProvider";
 import { EditableText } from "./EditableText";
+import { Sparkles } from "lucide-react";
 
 interface HeroCoverProps {
   proposalTitle: string;
@@ -14,16 +16,190 @@ interface HeroCoverProps {
   onSubtitleEdit?: (value: string) => void;
 }
 
-export function HeroCover({
+function ModernHeroCover({
   proposalTitle,
   subtitle,
   clientName,
   date,
   proposalNumber,
-  confidential = true,
   onTitleEdit,
   onSubtitleEdit,
 }: HeroCoverProps) {
+  const brand = useBrand();
+  const displayDate = date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+  // Render title with "&" in green
+  const renderTitle = (text: string) => {
+    if (!text.includes("&")) return text;
+    return text.split("&").map((part, i, arr) => (
+      <React.Fragment key={i}>
+        {part}
+        {i < arr.length - 1 && <span style={{ color: "#34D399" }}>&amp;</span>}
+      </React.Fragment>
+    ));
+  };
+
+  return (
+    <div
+      className="relative min-h-screen w-full overflow-hidden flex flex-col"
+      style={{ background: "#FAFAF8", fontFamily: "'Outfit', sans-serif" }}
+    >
+      {/* Floating decorative blurred circles */}
+      <motion.div
+        className="absolute top-[10%] right-[15%] w-72 h-72 rounded-full pointer-events-none"
+        style={{ background: "#2563EB", opacity: 0.05, filter: "blur(80px)" }}
+        animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute bottom-[20%] left-[10%] w-96 h-96 rounded-full pointer-events-none"
+        style={{ background: "#2563EB", opacity: 0.03, filter: "blur(100px)" }}
+        animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute top-[50%] left-[50%] w-56 h-56 rounded-full pointer-events-none"
+        style={{ background: "#34D399", opacity: 0.04, filter: "blur(90px)" }}
+        animate={{ y: [0, -15, 0] }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* Top bar */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+        className="relative z-10 flex items-center justify-between px-8 pt-8 lg:px-14 lg:pt-12"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+            style={{ background: "#1E1B4B" }}>
+            <span className="text-white" style={{ fontSize: "16px", fontWeight: 800 }}>
+              {brand.agencyName?.charAt(0) || 'A'}
+            </span>
+          </div>
+          <span className="tracking-wide uppercase"
+            style={{ fontSize: "14px", fontWeight: 700, color: "#1E1B4B" }}>
+            {brand.agencyName}
+          </span>
+        </div>
+        {proposalNumber && (
+          <div className="px-4 py-1.5 rounded-full"
+            style={{ background: "#2563EB15", color: "#2563EB", fontSize: "12px", fontWeight: 600 }}>
+            {proposalNumber}
+          </div>
+        )}
+      </motion.div>
+
+      {/* Main content area */}
+      <div className="relative z-10 flex-1 flex flex-col justify-center px-8 lg:px-14 max-w-3xl">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.7, ease: "easeOut" }}
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8"
+            style={{ background: "#34D39915", color: "#34D399", fontSize: "14px", fontWeight: 600 }}>
+            <Sparkles size={14} />
+            Proposal for {clientName}
+          </div>
+
+          {onTitleEdit ? (
+            <EditableText
+              value={proposalTitle}
+              placeholder="Enter proposal title..."
+              onSave={onTitleEdit}
+              as="h1"
+              className="mb-4"
+              style={{
+                fontFamily: "'Fraunces', serif",
+                fontSize: "clamp(40px, 6vw, 72px)",
+                fontWeight: 800, lineHeight: 1.05, color: "#1E1B4B", letterSpacing: "-0.02em",
+              }}
+            />
+          ) : (
+            <h1 style={{
+              fontFamily: "'Fraunces', serif",
+              fontSize: "clamp(40px, 6vw, 72px)",
+              fontWeight: 800, lineHeight: 1.05, color: "#1E1B4B", letterSpacing: "-0.02em",
+            }}>
+              {renderTitle(proposalTitle)}
+            </h1>
+          )}
+
+          {(subtitle || onSubtitleEdit) && (
+            onSubtitleEdit ? (
+              <EditableText
+                value={subtitle || ''}
+                placeholder="Click to add a subtitle..."
+                onSave={onSubtitleEdit}
+                as="p"
+                className="max-w-lg mt-6"
+                style={{ fontSize: "18px", fontWeight: 400, lineHeight: 1.7, color: "#6B7280", fontFamily: "'Outfit', sans-serif" }}
+              />
+            ) : (
+              <p className="max-w-lg mt-6"
+                style={{ fontSize: "18px", fontWeight: 400, lineHeight: 1.7, color: "#6B7280" }}>
+                {subtitle}
+              </p>
+            )
+          )}
+        </motion.div>
+
+        {/* Bottom info cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.6 }}
+          className="mt-14 flex flex-wrap items-center gap-4"
+        >
+          <div className="px-6 py-4 rounded-2xl"
+            style={{ background: "white", boxShadow: "0 2px 20px rgba(30,27,75,0.06)" }}>
+            <span className="block uppercase tracking-wider mb-1"
+              style={{ fontSize: "10px", fontWeight: 600, color: "#2563EB" }}>Prepared for</span>
+            <span style={{ fontSize: "16px", fontWeight: 700, color: "#1E1B4B" }}>{clientName}</span>
+          </div>
+          <div className="px-6 py-4 rounded-2xl"
+            style={{ background: "white", boxShadow: "0 2px 20px rgba(30,27,75,0.06)" }}>
+            <span className="block uppercase tracking-wider mb-1"
+              style={{ fontSize: "10px", fontWeight: 600, color: "#2563EB" }}>Date</span>
+            <span style={{ fontSize: "16px", fontWeight: 700, color: "#1E1B4B" }}>{displayDate}</span>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Bottom bar */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8, duration: 0.5 }}
+        className="relative z-10 px-8 lg:px-14 pb-8 flex items-center justify-between"
+      >
+        <div className="flex items-center gap-1.5">
+          {[0.15, 0.3, 0.45, 0.6, 0.8].map((opacity, i) => (
+            <div key={i} className="w-2 h-2 rounded-full" style={{ backgroundColor: `rgba(37,99,235,${opacity})` }} />
+          ))}
+        </div>
+        <span style={{ fontSize: "11px", fontWeight: 500, color: "#9CA3AF" }}>
+          Page 01 of 09
+        </span>
+      </motion.div>
+    </div>
+  );
+}
+
+export function HeroCover(props: HeroCoverProps) {
+  const template = useTemplate();
+
+  if (template.id === 'modern') {
+    return <ModernHeroCover {...props} />;
+  }
+
+  // Classic rendering (unchanged)
+  const {
+    proposalTitle, subtitle, clientName, date, proposalNumber,
+    confidential = true, onTitleEdit, onSubtitleEdit,
+  } = props;
   const brand = useBrand();
 
   return (
@@ -70,21 +246,10 @@ export function HeroCover({
           className="flex items-center gap-3"
         >
           {brand.logoUrl ? (
-            <img
-              src={brand.logoUrl}
-              alt={brand.agencyName}
-              className="h-32 w-auto object-contain"
-            />
+            <img src={brand.logoUrl} alt={brand.agencyName} className="h-32 w-auto object-contain" />
           ) : (
-            <span
-              className="tracking-[0.15em] uppercase"
-              style={{
-                fontSize: "18px",
-                fontWeight: 700,
-                color: brand.darkColor,
-                letterSpacing: "0.08em",
-              }}
-            >
+            <span className="tracking-[0.15em] uppercase"
+              style={{ fontSize: "18px", fontWeight: 700, color: brand.darkColor, letterSpacing: "0.08em" }}>
               {brand.agencyFullName}
             </span>
           )}
@@ -109,58 +274,26 @@ export function HeroCover({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.7, ease: "easeOut" }}
         >
-          <span
-            className="inline-block uppercase tracking-[0.25em] mb-6"
-            style={{
-              fontSize: "13px",
-              fontWeight: 600,
-              color: brand.primaryColor,
-            }}
-          >
+          <span className="inline-block uppercase tracking-[0.25em] mb-6"
+            style={{ fontSize: "13px", fontWeight: 600, color: brand.primaryColor }}>
             Proposal for
           </span>
           {onTitleEdit ? (
-            <EditableText
-              value={proposalTitle}
-              placeholder="Enter proposal title..."
-              onSave={onTitleEdit}
-              as="h1"
+            <EditableText value={proposalTitle} placeholder="Enter proposal title..." onSave={onTitleEdit} as="h1"
               className="mb-4 tracking-tight"
-              style={{
-                fontSize: "clamp(36px, 5vw, 64px)",
-                fontWeight: 700,
-                lineHeight: 1.05,
-                color: brand.darkColor,
-              }}
-            />
+              style={{ fontSize: "clamp(36px, 5vw, 64px)", fontWeight: 700, lineHeight: 1.05, color: brand.darkColor }} />
           ) : (
-            <h1
-              className="mb-4 tracking-tight"
-              style={{
-                fontSize: "clamp(36px, 5vw, 64px)",
-                fontWeight: 700,
-                lineHeight: 1.05,
-                color: brand.darkColor,
-              }}
-            >
+            <h1 className="mb-4 tracking-tight"
+              style={{ fontSize: "clamp(36px, 5vw, 64px)", fontWeight: 700, lineHeight: 1.05, color: brand.darkColor }}>
               {proposalTitle}
             </h1>
           )}
           {(subtitle || onSubtitleEdit) && (
             onSubtitleEdit ? (
-              <EditableText
-                value={subtitle || ''}
-                placeholder="Click to add a subtitle..."
-                onSave={onSubtitleEdit}
-                as="p"
-                className="max-w-lg mt-4"
-                style={{ fontSize: "18px", fontWeight: 300, lineHeight: 1.6, color: "#666" }}
-              />
+              <EditableText value={subtitle || ''} placeholder="Click to add a subtitle..." onSave={onSubtitleEdit} as="p"
+                className="max-w-lg mt-4" style={{ fontSize: "18px", fontWeight: 300, lineHeight: 1.6, color: "#666" }} />
             ) : (
-              <p
-                className="text-[#666] max-w-lg mt-4"
-                style={{ fontSize: "18px", fontWeight: 300, lineHeight: 1.6 }}
-              >
+              <p className="text-[#666] max-w-lg mt-4" style={{ fontSize: "18px", fontWeight: 300, lineHeight: 1.6 }}>
                 {subtitle}
               </p>
             )
@@ -174,37 +307,17 @@ export function HeroCover({
           className="mt-16 flex items-center gap-8"
         >
           <div>
-            <span
-              className="block text-[#999] uppercase tracking-[0.15em] mb-1"
-              style={{ fontSize: "11px", fontWeight: 500 }}
-            >
+            <span className="block text-[#999] uppercase tracking-[0.15em] mb-1" style={{ fontSize: "11px", fontWeight: 500 }}>
               Prepared for
             </span>
-            <span
-              style={{
-                fontSize: "18px",
-                fontWeight: 600,
-                color: brand.darkColor,
-              }}
-            >
-              {clientName}
-            </span>
+            <span style={{ fontSize: "18px", fontWeight: 600, color: brand.darkColor }}>{clientName}</span>
           </div>
           <div className="w-px h-10 bg-[#E0E0E0]" />
           <div>
-            <span
-              className="block text-[#999] uppercase tracking-[0.15em] mb-1"
-              style={{ fontSize: "11px", fontWeight: 500 }}
-            >
+            <span className="block text-[#999] uppercase tracking-[0.15em] mb-1" style={{ fontSize: "11px", fontWeight: 500 }}>
               Date
             </span>
-            <span
-              style={{
-                fontSize: "18px",
-                fontWeight: 600,
-                color: brand.darkColor,
-              }}
-            >
+            <span style={{ fontSize: "18px", fontWeight: 600, color: brand.darkColor }}>
               {date || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
             </span>
           </div>
@@ -225,17 +338,11 @@ export function HeroCover({
         className="relative z-10 px-12 lg:px-16 pb-10 flex items-center justify-between"
       >
         {confidential && (
-          <span
-            className="text-[#BBB] uppercase tracking-[0.15em]"
-            style={{ fontSize: "11px" }}
-          >
+          <span className="text-[#BBB] uppercase tracking-[0.15em]" style={{ fontSize: "11px" }}>
             Confidential
           </span>
         )}
-        <span
-          className="text-[#BBB] uppercase tracking-[0.15em]"
-          style={{ fontSize: "11px" }}
-        >
+        <span className="text-[#BBB] uppercase tracking-[0.15em]" style={{ fontSize: "11px" }}>
           Page 01
         </span>
       </motion.div>
