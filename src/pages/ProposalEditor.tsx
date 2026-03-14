@@ -303,6 +303,19 @@ export default function ProposalEditor() {
     });
   };
 
+  const switchTemplate = async (newId: string) => {
+    const tmpl = templates[newId];
+    if (!tmpl) return;
+    if (tmpl.isPro) {
+      toast.error('This template is available on the Pro plan. Upgrade to unlock all templates.');
+      return;
+    }
+    setTemplateId(newId);
+    if (proposal) {
+      await supabase.from('proposals').update({ template_id: newId }).eq('id', proposal.id);
+    }
+  };
+
   const getServicePrice = (s: ProposalService) => {
     if (s.price_override != null) return s.price_override;
     const mod = s.module;
