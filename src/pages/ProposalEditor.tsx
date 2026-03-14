@@ -671,7 +671,9 @@ export default function ProposalEditor() {
               <SectionWrapper idx={2} hidden={hiddenSections.has(2)} onToggle={toggleSection} label="Scope of Services">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="03">
-                    <SectionHeader number="02" title="Scope of Services" subtitle="What we'll deliver for you" />
+                    <SectionHeader number="02" title="Scope of Services" subtitle="What we'll deliver for you"
+                      onTitleEdit={(val) => updateField('title', val)}
+                      onSubtitleEdit={(val) => updateField('subtitle', val)} />
                     {services.length === 0 ? (
                       <div className="text-center py-16">
                         <p className="text-[#999]" style={{ fontSize: '15px' }}>No services added yet.</p>
