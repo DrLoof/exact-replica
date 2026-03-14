@@ -937,6 +937,14 @@ export default function ProposalEditor() {
                             statLabel={d.stat_label}
                             icon={d.icon}
                             delay={i * 0.1}
+                            onTitleEdit={async (val) => {
+                              await supabase.from('differentiators').update({ title: val }).eq('id', d.id);
+                              setDifferentiators(prev => prev.map(x => x.id === d.id ? { ...x, title: val } : x));
+                            }}
+                            onDescriptionEdit={async (val) => {
+                              await supabase.from('differentiators').update({ description: val }).eq('id', d.id);
+                              setDifferentiators(prev => prev.map(x => x.id === d.id ? { ...x, description: val } : x));
+                            }}
                           />
                         ))}
                       </div>
