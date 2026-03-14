@@ -199,7 +199,7 @@ export default function PublicProposal() {
   ];
 
   return (
-    <TemplateProvider templateId={proposal?.template_id || 'classic'}>
+    <TemplateProvider templateId={proposal?.template_id || 'classic'} customColors={proposal?.custom_colors || null}>
     <BrandProvider brand={brandData}>
       <div className="min-h-screen bg-white">
         {/* Section 1: Cover */}
