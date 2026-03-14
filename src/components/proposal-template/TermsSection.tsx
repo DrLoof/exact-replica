@@ -12,6 +12,8 @@ export function TermsSection({ clauses }: TermsSectionProps) {
   const brand = useBrand();
   const template = useTemplate();
   const isModern = template.id === 'modern';
+  const accent = template.colors.primaryAccent;
+  const dark = template.colors.primaryDark;
   const [openIndex, setOpenIndex] = useState<number | null>(isModern ? 0 : null);
 
   if (isModern) {
@@ -27,7 +29,7 @@ export function TermsSection({ clauses }: TermsSectionProps) {
           const isOpen = openIndex === idx;
           return (
             <div key={idx} className="rounded-2xl overflow-hidden transition-colors duration-200"
-              style={{ border: `2px solid ${isOpen ? '#2563EB30' : '#F3F4F6'}` }}>
+              style={{ border: `2px solid ${isOpen ? `${accent}30` : '#F3F4F6'}` }}>
               <button
                 onClick={() => setOpenIndex(isOpen ? null : idx)}
                 className="w-full flex items-center gap-4 px-6 py-4 text-left transition-colors"
@@ -35,16 +37,16 @@ export function TermsSection({ clauses }: TermsSectionProps) {
                 <span className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200"
                   style={{
                     fontSize: "12px", fontWeight: 700,
-                    backgroundColor: isOpen ? "#2563EB" : "#F9FAFB",
+                    backgroundColor: isOpen ? accent : "#F9FAFB",
                     color: isOpen ? "#FFFFFF" : "#D1D5DB",
-                    boxShadow: isOpen ? "2px 2px 0px #1E1B4B" : "none",
+                    boxShadow: isOpen ? `2px 2px 0px ${dark}` : "none",
                   }}>
                   {idx + 1}
                 </span>
                 <span className="flex-1" style={{
                   fontSize: "16px",
                   fontWeight: isOpen ? 700 : 500,
-                  color: isOpen ? "#1E1B4B" : "#6B7280",
+                  color: isOpen ? dark : "#6B7280",
                 }}>
                   {clause.title}
                 </span>
@@ -52,7 +54,7 @@ export function TermsSection({ clauses }: TermsSectionProps) {
                   className="shrink-0 transition-transform duration-200"
                   style={{
                     transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                    color: isOpen ? "#2563EB" : "#D1D5DB",
+                    color: isOpen ? accent : "#D1D5DB",
                   }} />
               </button>
               <AnimatePresence>
@@ -69,7 +71,7 @@ export function TermsSection({ clauses }: TermsSectionProps) {
                         {clause.content}
                       </p>
                       <p className="mt-3" style={{ fontSize: "13px", color: "#D1D5DB" }}>
-                        <span style={{ color: "#2563EB" }}>*</span> Standard terms apply
+                        <span style={{ color: accent }}>*</span> Standard terms apply
                       </p>
                     </div>
                   </motion.div>
