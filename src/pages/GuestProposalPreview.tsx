@@ -34,7 +34,8 @@ export default function GuestProposalPreview() {
   const [signupTrigger, setSignupTrigger] = useState<SignupTrigger>('share');
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState(0);
-  const [hiddenSections, setHiddenSections] = useState<Set<number>>(new Set());
+  const [deletedSections, setDeletedSections] = useState<Set<number>>(new Set());
+  const [showAddPage, setShowAddPage] = useState(false);
   const [showAutoSaved, setShowAutoSaved] = useState(false);
   const [showNudge, setShowNudge] = useState(false);
   const [nudgeDismissed, setNudgeDismissed] = useState(() => !!localStorage.getItem('propopad_nudge_dismissed'));
