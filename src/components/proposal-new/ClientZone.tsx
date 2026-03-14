@@ -16,17 +16,31 @@ const challengeOptions = [
   'Can\'t measure what\'s working',
 ];
 
-const goalOptions = [
-  'Get more leads',
-  'Increase website traffic',
-  'Build brand awareness',
-  'Launch or relaunch a brand',
-  'Grow social media following',
-  'Increase online sales or revenue',
-  'Build a marketing foundation',
-  'Improve marketing ROI',
-  'Enter a new market',
+export interface GoalOption {
+  id: string;
+  label: string;
+  defaultKpi: string;
+  relatedServices: string[];
+}
+
+export const goalOptionsList: GoalOption[] = [
+  { id: "website_traffic", label: "Increase website traffic", defaultKpi: "+200%", relatedServices: ["SEO", "Content Marketing", "PPC / Digital Advertising", "SEO & Organic Growth", "Content & Copywriting", "Paid Advertising"] },
+  { id: "lead_generation", label: "Generate more leads", defaultKpi: "3x", relatedServices: ["PPC / Digital Advertising", "Marketing Automation", "Email Marketing", "SEO", "Paid Advertising", "Marketing Automation & CRM", "Email Marketing", "SEO & Organic Growth"] },
+  { id: "brand_awareness", label: "Improve brand awareness", defaultKpi: "+40%", relatedServices: ["Brand Identity", "Social Media Management", "Content Marketing", "Brand & Creative", "Social Media", "Content & Copywriting"] },
+  { id: "conversion_rate", label: "Boost conversion rate", defaultKpi: "2x", relatedServices: ["Website Design", "PPC / Digital Advertising", "Email Marketing", "Website & Digital", "Paid Advertising", "Conversion Rate Optimization"] },
+  { id: "cost_per_acquisition", label: "Reduce cost per acquisition", defaultKpi: "-40%", relatedServices: ["PPC / Digital Advertising", "Marketing Automation", "Paid Advertising", "Marketing Automation & CRM", "Analytics & Reporting"] },
+  { id: "social_growth", label: "Grow social media presence", defaultKpi: "+80%", relatedServices: ["Social Media Management", "Content Marketing", "Social Media", "Content & Copywriting"] },
+  { id: "email_engagement", label: "Increase email engagement", defaultKpi: "+60%", relatedServices: ["Email Marketing", "Marketing Automation", "Marketing Automation & CRM"] },
+  { id: "client_retention", label: "Improve client retention", defaultKpi: "95%", relatedServices: ["Email Marketing", "Marketing Automation", "Analytics & Reporting", "Marketing Automation & CRM"] },
+  { id: "thought_leadership", label: "Build thought leadership", defaultKpi: "Top 10", relatedServices: ["Content Marketing", "SEO", "Social Media Management", "Content & Copywriting", "SEO & Organic Growth", "Social Media"] },
+  { id: "other", label: "Other", defaultKpi: "", relatedServices: [] },
 ];
+
+export interface SelectedGoal {
+  id: string;
+  label: string;
+  kpi: string;
+}
 
 const industryOptions = ['Technology', 'Healthcare', 'Finance', 'E-commerce', 'Education', 'Real Estate', 'Manufacturing', 'Media', 'Non-profit', 'Professional Services', 'Retail', 'Other'];
 
@@ -45,10 +59,10 @@ interface ClientZoneProps {
   setClientChallenges: (v: string[]) => void;
   clientChallengeOther: string;
   setClientChallengeOther: (v: string) => void;
-  clientGoal: string;
-  setClientGoal: (v: string) => void;
-  clientGoalOther: string;
-  setClientGoalOther: (v: string) => void;
+  selectedGoals: SelectedGoal[];
+  setSelectedGoals: (v: SelectedGoal[]) => void;
+  goalOtherLabel: string;
+  setGoalOtherLabel: (v: string) => void;
   clientContextNote: string;
   setClientContextNote: (v: string) => void;
 }
@@ -58,7 +72,7 @@ export function ClientZone({
   newClientName, setNewClientName, newContactName, setNewContactName,
   newClientWebsite, setNewClientWebsite,
   clientChallenges, setClientChallenges, clientChallengeOther, setClientChallengeOther,
-  clientGoal, setClientGoal, clientGoalOther, setClientGoalOther,
+  selectedGoals, setSelectedGoals, goalOtherLabel, setGoalOtherLabel,
   clientContextNote, setClientContextNote,
 }: ClientZoneProps) {
   const [clientSearch, setClientSearch] = useState('');
@@ -79,6 +93,19 @@ export function ClientZone({
         ? clientChallenges.filter(c => c !== challenge)
         : [...clientChallenges, challenge]
     );
+  };
+
+  const toggleGoal = (goalOpt: GoalOption) => {
+    const existing = selectedGoals.find(g => g.id === goalOpt.id);
+    if (existing) {
+      setSelectedGoals(selectedGoals.filter(g => g.id !== goalOpt.id));
+    } else {
+      setSelectedGoals([...selectedGoals, { id: goalOpt.id, label: goalOpt.label, kpi: goalOpt.defaultKpi }]);
+    }
+  };
+
+  const updateGoalKpi = (goalId: string, kpi: string) => {
+    setSelectedGoals(selectedGoals.map(g => g.id === goalId ? { ...g, kpi } : g));
   };
 
   const handleAutoFill = async () => {
@@ -274,7 +301,6 @@ export function ClientZone({
             <div>
               <label className="mb-2 block text-xs font-medium text-muted-foreground">Key challenges <span className="text-muted-foreground/60">(select all that apply)</span></label>
               
-              {/* Selected pills */}
               {clientChallenges.length > 0 && (
                 <div className="mb-2 flex flex-wrap gap-1.5">
                   {clientChallenges.map(challenge => (
@@ -283,10 +309,7 @@ export function ClientZone({
                       className="inline-flex items-center gap-1 rounded-full border border-brand/20 bg-brand/5 px-2.5 py-1 text-[11px] font-medium text-foreground"
                     >
                       {challenge === 'Other' ? (clientChallengeOther || 'Other') : challenge}
-                      <button
-                        onClick={() => toggleChallenge(challenge)}
-                        className="ml-0.5 rounded-full p-0.5 hover:bg-foreground/10"
-                      >
+                      <button onClick={() => toggleChallenge(challenge)} className="ml-0.5 rounded-full p-0.5 hover:bg-foreground/10">
                         <X className="h-2.5 w-2.5" />
                       </button>
                     </span>
@@ -294,7 +317,6 @@ export function ClientZone({
                 </div>
               )}
 
-              {/* Checkbox list */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                 {challengeOptions.map(option => {
                   const isSelected = clientChallenges.includes(option);
@@ -304,15 +326,11 @@ export function ClientZone({
                       type="button"
                       onClick={() => toggleChallenge(option)}
                       className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left text-xs transition-colors ${
-                        isSelected
-                          ? 'bg-brand/5 text-foreground font-medium'
-                          : 'text-foreground/70 hover:bg-muted/50'
+                        isSelected ? 'bg-brand/5 text-foreground font-medium' : 'text-foreground/70 hover:bg-muted/50'
                       }`}
                     >
                       <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
-                        isSelected
-                          ? 'border-brand bg-brand text-white'
-                          : 'border-foreground/20'
+                        isSelected ? 'border-brand bg-brand text-white' : 'border-foreground/20'
                       }`}>
                         {isSelected && <Check className="h-2.5 w-2.5" />}
                       </div>
@@ -320,20 +338,15 @@ export function ClientZone({
                     </button>
                   );
                 })}
-                {/* "Other" option */}
                 <button
                   type="button"
                   onClick={() => toggleChallenge('Other')}
                   className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left text-xs transition-colors ${
-                    clientChallenges.includes('Other')
-                      ? 'bg-brand/5 text-foreground font-medium'
-                      : 'text-foreground/70 hover:bg-muted/50'
+                    clientChallenges.includes('Other') ? 'bg-brand/5 text-foreground font-medium' : 'text-foreground/70 hover:bg-muted/50'
                   }`}
                 >
                   <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
-                    clientChallenges.includes('Other')
-                      ? 'border-brand bg-brand text-white'
-                      : 'border-foreground/20'
+                    clientChallenges.includes('Other') ? 'border-brand bg-brand text-white' : 'border-foreground/20'
                   }`}>
                     {clientChallenges.includes('Other') && <Check className="h-2.5 w-2.5" />}
                   </div>
@@ -352,30 +365,81 @@ export function ClientZone({
               )}
             </div>
 
-            {/* Primary goal — single select */}
+            {/* Multi-select goals with KPI targets */}
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Primary goal</label>
-              <select
-                value={clientGoal}
-                onChange={(e) => setClientGoal(e.target.value)}
-                className="w-full rounded-lg border border-parchment bg-background px-3 py-2.5 text-sm text-foreground focus:border-foreground/30 focus:outline-none"
-              >
-                <option value="">Select one...</option>
-                {goalOptions.map(opt => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-                <option value="Other">Other</option>
-              </select>
-              {clientGoal === 'Other' && (
-                <input
-                  type="text"
-                  placeholder="Describe the goal..."
-                  maxLength={100}
-                  value={clientGoalOther}
-                  onChange={(e) => setClientGoalOther(e.target.value)}
-                  className="mt-2 w-full rounded-lg border border-parchment bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
-                />
+              <label className="mb-2 block text-xs font-medium text-muted-foreground">Goals <span className="text-muted-foreground/60">(select all that apply)</span></label>
+              
+              {selectedGoals.length > 0 && (
+                <div className="mb-2 flex flex-wrap gap-1.5">
+                  {selectedGoals.map(goal => (
+                    <span
+                      key={goal.id}
+                      className="inline-flex items-center gap-1 rounded-full border border-brand/20 bg-brand/5 px-2.5 py-1 text-[11px] font-medium text-foreground"
+                    >
+                      {goal.id === 'other' ? (goalOtherLabel || 'Other') : goal.label}
+                      {goal.kpi && <span className="text-brand font-semibold">{goal.kpi}</span>}
+                      <button onClick={() => toggleGoal(goalOptionsList.find(g => g.id === goal.id)!)} className="ml-0.5 rounded-full p-0.5 hover:bg-foreground/10">
+                        <X className="h-2.5 w-2.5" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
               )}
+
+              <div className="space-y-0.5">
+                {goalOptionsList.map(goalOpt => {
+                  const isSelected = selectedGoals.some(g => g.id === goalOpt.id);
+                  const selectedGoal = selectedGoals.find(g => g.id === goalOpt.id);
+                  return (
+                    <div key={goalOpt.id}>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => toggleGoal(goalOpt)}
+                          className={`flex flex-1 items-center gap-2 rounded-lg px-3 py-2 text-left text-xs transition-colors ${
+                            isSelected ? 'bg-brand/5 text-foreground font-medium' : 'text-foreground/70 hover:bg-muted/50'
+                          }`}
+                        >
+                          <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
+                            isSelected ? 'border-brand bg-brand text-white' : 'border-foreground/20'
+                          }`}>
+                            {isSelected && <Check className="h-2.5 w-2.5" />}
+                          </div>
+                          {goalOpt.id === 'other' ? 'Other' : goalOpt.label}
+                        </button>
+                        {isSelected && goalOpt.id !== 'other' && (
+                          <input
+                            type="text"
+                            value={selectedGoal?.kpi || ''}
+                            onChange={(e) => updateGoalKpi(goalOpt.id, e.target.value)}
+                            placeholder={goalOpt.defaultKpi}
+                            className="w-20 rounded-md border border-parchment bg-background px-2 py-1.5 text-xs text-center text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
+                          />
+                        )}
+                      </div>
+                      {isSelected && goalOpt.id === 'other' && (
+                        <div className="ml-9 mt-1 flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Goal name..."
+                            maxLength={80}
+                            value={goalOtherLabel}
+                            onChange={(e) => setGoalOtherLabel(e.target.value)}
+                            className="flex-1 rounded-md border border-parchment bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
+                          />
+                          <input
+                            type="text"
+                            placeholder="KPI target"
+                            value={selectedGoal?.kpi || ''}
+                            onChange={(e) => updateGoalKpi('other', e.target.value)}
+                            className="w-20 rounded-md border border-parchment bg-background px-2 py-1.5 text-xs text-center text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Quick note */}

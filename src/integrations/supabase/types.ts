@@ -617,6 +617,7 @@ export type Database = {
           estimated_duration: string | null
           executive_summary: string | null
           executive_summary_tone: string | null
+          goals: Json | null
           grand_total: number | null
           id: string
           notice_period: string | null
@@ -656,6 +657,7 @@ export type Database = {
           estimated_duration?: string | null
           executive_summary?: string | null
           executive_summary_tone?: string | null
+          goals?: Json | null
           grand_total?: number | null
           id?: string
           notice_period?: string | null
@@ -695,6 +697,7 @@ export type Database = {
           estimated_duration?: string | null
           executive_summary?: string | null
           executive_summary_tone?: string | null
+          goals?: Json | null
           grand_total?: number | null
           id?: string
           notice_period?: string | null
