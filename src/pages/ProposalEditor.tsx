@@ -581,22 +581,62 @@ export default function ProposalEditor() {
 
           {/* Section navigation */}
           {sectionNames.map((name, idx) => (
-            <button
-              key={idx}
-              onClick={() => {
-                setActiveSection(idx);
-                document.getElementById(`section-${idx}`)?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className={cn(
-                'flex items-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors text-left',
-                activeSection === idx ? 'bg-accent font-medium text-accent-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
-                hiddenSections.has(idx) && 'opacity-40'
-              )}
-            >
-              {hiddenSections.has(idx) && <EyeOff className="h-3 w-3" />}
-              {name}
-            </button>
+            !deletedSections.has(idx) && (
+              <div
+                key={idx}
+                className="group/nav flex items-center gap-1"
+              >
+                <button
+                  onClick={() => {
+                    setActiveSection(idx);
+                    document.getElementById(`section-${idx}`)?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className={cn(
+                    'flex-1 flex items-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors text-left',
+                    activeSection === idx ? 'bg-accent font-medium text-accent-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                  )}
+                >
+                  {name}
+                </button>
+                <button
+                  onClick={() => deleteSection(idx)}
+                  className="opacity-0 group-hover/nav:opacity-100 p-1 rounded text-muted-foreground hover:text-destructive transition-all"
+                  title={`Remove ${name}`}
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )
           ))}
+
+          {/* Add page button */}
+          {deletedSections.size > 0 && (
+            <div className="relative mt-2">
+              <button
+                onClick={() => setShowAddPage(!showAddPage)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 w-full text-left transition-colors"
+              >
+                <Plus className="h-3 w-3" />
+                Add page
+              </button>
+              {showAddPage && (
+                <div className="absolute left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-30 py-1">
+                  {sectionNames.map((name, idx) => (
+                    deletedSections.has(idx) && (
+                      <button
+                        key={idx}
+                        onClick={() => { restoreSection(idx); setShowAddPage(false); }}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-left text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                      >
+                        <Plus className="h-3 w-3" />
+                        {name}
+                      </button>
+                    )
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Proposal Content — rendered with template components */}
