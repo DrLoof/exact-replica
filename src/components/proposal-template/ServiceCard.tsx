@@ -27,21 +27,14 @@ const MODEL_LABELS: Record<string, string> = {
 };
 
 export function ServiceCard({
-  icon,
-  name,
-  price,
-  pricingModel,
-  description,
-  deliverables,
-  isAddon = false,
-  delay = 0,
-  onNameEdit,
-  onDescriptionEdit,
-  onDeliverablesEdit,
+  icon, name, price, pricingModel, description, deliverables,
+  isAddon = false, delay = 0,
+  onNameEdit, onDescriptionEdit, onDeliverablesEdit,
 }: ServiceCardProps) {
   const brand = useBrand();
   const template = useTemplate();
   const isModern = template.id === 'modern';
+  const isElegant = template.id === 'elegant';
   const accent = template.colors.primaryAccent;
   const secondary = template.colors.secondaryAccent;
   const dark = template.colors.primaryDark;
@@ -69,7 +62,6 @@ export function ServiceCard({
     onDeliverablesEdit(updated);
   };
 
-  // Shared deliverables editing UI
   const renderDeliverablesEdit = () => (
     editable && (
       <div className="mt-3 print:hidden">
@@ -96,6 +88,106 @@ export function ServiceCard({
     )
   );
 
+  if (isElegant) {
+    const accentTint = `${accent}0F`;
+    const secondaryTint = `${secondary}26`;
+    const border = template.colors.border;
+    const muted = template.colors.textMuted;
+    const faint = template.colors.textFaint;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay, duration: 0.5, ease: "easeOut" }}
+        className="group relative rounded-3xl p-8 transition-all duration-300"
+        style={{
+          background: "white", fontFamily: "'DM Sans', sans-serif",
+          border: `1px solid ${border}`,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = `${accent}40`;
+          e.currentTarget.style.boxShadow = `0 20px 40px -10px ${accent}0D`;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = border;
+          e.currentTarget.style.boxShadow = "none";
+        }}
+      >
+        {/* Price Badge */}
+        <div className="absolute top-6 right-6">
+          <div className="px-4 py-1.5 rounded-full"
+            style={{ background: isAddon ? secondaryTint : accentTint, color: isAddon ? secondary : accent, fontSize: "13px", fontWeight: 600 }}>
+            {price}{suffix && <span style={{ fontWeight: 400, opacity: 0.6 }}>{suffix}</span>}
+          </div>
+        </div>
+
+        {/* Add-on tag */}
+        {isAddon && (
+          <span className="inline-block px-3 py-1 rounded-full mb-3 uppercase tracking-wider"
+            style={{ background: secondaryTint, color: secondary, fontSize: "10px", fontWeight: 600 }}>
+            Add-on
+          </span>
+        )}
+
+        {/* Icon */}
+        <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 transition-all duration-300"
+          style={{ background: accentTint, color: accent }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = accent; e.currentTarget.style.color = "white"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = accentTint; e.currentTarget.style.color = accent; }}
+        >
+          {icon}
+        </div>
+
+        {/* Name */}
+        {onNameEdit ? (
+          <EditableText value={name} placeholder="Service name..." onSave={onNameEdit} as="h3"
+            className="mb-3"
+            style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 500, lineHeight: 1.2, color: dark }} />
+        ) : (
+          <h3 className="mb-3" style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 500, lineHeight: 1.2, color: dark }}>
+            {name}
+          </h3>
+        )}
+
+        {/* Description */}
+        {onDescriptionEdit ? (
+          <EditableText value={description} placeholder="Click to add a description..." onSave={onDescriptionEdit} as="p"
+            className="mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: muted }} />
+        ) : (
+          <p className="mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: muted }}>
+            {description}
+          </p>
+        )}
+
+        {/* Deliverables */}
+        <div className="pt-5" style={{ borderTop: `1px solid ${border}` }}>
+          <span className="block mb-3 uppercase tracking-widest"
+            style={{ fontSize: "10px", fontWeight: 600, color: faint }}>Deliverables</span>
+          <ul className="space-y-2">
+            {deliverables.map((item, idx) => (
+              <li key={idx} className="group/del flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: `${accent}66` }} />
+                {editable ? (
+                  <EditableText value={item} placeholder="Deliverable..." onSave={(val) => handleItemEdit(idx, val)} as="span"
+                    className="flex-1" style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.5, color: template.colors.textBody }} />
+                ) : (
+                  <span style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.5, color: template.colors.textBody }}>{item}</span>
+                )}
+                {editable && (
+                  <button onClick={() => handleRemove(idx)}
+                    className="shrink-0 mt-0.5 opacity-0 group-hover/del:opacity-100 transition-opacity text-[#CCC] hover:text-red-400 print:hidden"
+                    title="Remove deliverable"><X className="h-3.5 w-3.5" /></button>
+                )}
+              </li>
+            ))}
+          </ul>
+          {renderDeliverablesEdit()}
+        </div>
+      </motion.div>
+    );
+  }
+
   if (isModern) {
     return (
       <motion.div
@@ -109,29 +201,22 @@ export function ServiceCard({
           boxShadow: "0 2px 12px rgba(30,27,75,0.04)",
         }}
       >
-        {/* Price Badge */}
         <div className="absolute -top-3 -right-2 z-10">
           <div className="px-4 py-2 rounded-2xl"
             style={{ background: dark, color: "white", fontSize: "14px", fontWeight: 700, boxShadow: `3px 3px 0px ${accent}` }}>
             {price}{suffix && <span style={{ fontWeight: 400, opacity: 0.6 }}>{suffix}</span>}
           </div>
         </div>
-
-        {/* Add-on tag */}
         {isAddon && (
           <span className="inline-block px-3 py-1 rounded-full mb-3 uppercase tracking-wider"
             style={{ background: `${secondary}18`, color: secondary, fontSize: "10px", fontWeight: 700 }}>
             Add-on
           </span>
         )}
-
-        {/* Icon */}
         <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
           style={{ background: `${accent}10`, color: accent }}>
           {icon}
         </div>
-
-        {/* Name */}
         {onNameEdit ? (
           <EditableText value={name} placeholder="Service name..." onSave={onNameEdit} as="h3"
             className="mb-3"
@@ -141,8 +226,6 @@ export function ServiceCard({
             {name}
           </h3>
         )}
-
-        {/* Description */}
         {onDescriptionEdit ? (
           <EditableText value={description} placeholder="Click to add a description..." onSave={onDescriptionEdit} as="p"
             className="mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }} />
@@ -151,8 +234,6 @@ export function ServiceCard({
             {description}
           </p>
         )}
-
-        {/* Deliverables */}
         <div className="pt-5" style={{ borderTop: "2px dashed #E5E7EB" }}>
           <span className="block mb-3 uppercase tracking-widest"
             style={{ fontSize: "10px", fontWeight: 700, color: accent }}>Deliverables</span>
@@ -197,29 +278,22 @@ export function ServiceCard({
         e.currentTarget.style.boxShadow = "none";
       }}
     >
-      {/* Price badge */}
       <div className="absolute top-6 right-6">
         <span className="inline-block text-white px-4 py-1.5 rounded-full"
           style={{ fontSize: "13px", fontWeight: 600, backgroundColor: brand.darkColor }}>
           {price}{suffix && <span style={{ fontWeight: 400, opacity: 0.6 }}>{suffix}</span>}
         </span>
       </div>
-
-      {/* Add-on badge */}
       {isAddon && (
         <span className="inline-block px-3 py-1 rounded-full mb-4 uppercase tracking-[0.15em]"
           style={{ fontSize: "10px", fontWeight: 600, backgroundColor: `${brand.primaryColor}15`, color: brand.primaryColor }}>
           Add-on
         </span>
       )}
-
-      {/* Icon */}
       <div className="w-12 h-12 rounded-xl border flex items-center justify-center mb-5 transition-all duration-300"
         style={{ backgroundColor: "#FAFAFA", borderColor: "#EBEBEB", color: brand.darkColor }}>
         {icon}
       </div>
-
-      {/* Name & description */}
       {onNameEdit ? (
         <EditableText value={name} placeholder="Service name..." onSave={onNameEdit} as="h3"
           className="mb-3 tracking-tight"
@@ -233,8 +307,6 @@ export function ServiceCard({
       ) : (
         <p className="text-[#888] mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6 }}>{description}</p>
       )}
-
-      {/* Deliverables */}
       <div className="border-t border-[#F0F0F0] pt-5">
         <span className="block text-[#BBB] uppercase tracking-[0.2em] mb-3" style={{ fontSize: "10px", fontWeight: 600 }}>
           Deliverables

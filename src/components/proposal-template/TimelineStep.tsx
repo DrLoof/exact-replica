@@ -17,21 +17,78 @@ interface TimelineStepProps {
 }
 
 export function TimelineStep({
-  number,
-  name,
-  duration,
-  description,
-  isLast = false,
-  delay = 0,
-  onNameEdit,
-  onDurationEdit,
-  onDescriptionEdit,
+  number, name, duration, description, isLast = false, delay = 0,
+  onNameEdit, onDurationEdit, onDescriptionEdit,
 }: TimelineStepProps) {
   const brand = useBrand();
   const template = useTemplate();
   const isModern = template.id === 'modern';
+  const isElegant = template.id === 'elegant';
   const accent = template.colors.primaryAccent;
+  const secondary = template.colors.secondaryAccent;
   const dark = template.colors.primaryDark;
+
+  if (isElegant) {
+    const accentTint = `${accent}0F`;
+    const border = template.colors.border;
+    const muted = template.colors.textMuted;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay, duration: 0.5, ease: "easeOut" }}
+        className="relative flex gap-6 lg:gap-10"
+        style={{ fontFamily: "'DM Sans', sans-serif" }}
+      >
+        <div className="flex flex-col items-center shrink-0">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center relative z-10"
+            style={{ background: accentTint, border: `1px solid ${accent}26`, color: accent }}>
+            <span style={{ fontSize: "18px", fontWeight: 500, fontFamily: "'Fraunces', serif" }}>
+              {String(number).padStart(2, "0")}
+            </span>
+          </div>
+          {!isLast && (
+            <div className="w-px flex-1 min-h-[50px]"
+              style={{ background: `linear-gradient(to bottom, ${accent}40, ${border})` }} />
+          )}
+        </div>
+        <div className={`pb-10 ${isLast ? "pb-0" : ""}`}>
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            {onNameEdit ? (
+              <EditableText value={name} placeholder="Phase name..." onSave={onNameEdit} as="h3"
+                style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 500, lineHeight: 1.2, color: dark }} />
+            ) : (
+              <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 500, lineHeight: 1.2, color: dark }}>
+                {name}
+              </h3>
+            )}
+            {onDurationEdit ? (
+              <EditableText value={duration} placeholder="Duration..." onSave={onDurationEdit} as="span"
+                className="inline-block px-3 py-1 rounded-full"
+                style={{ background: `${secondary}26`, color: secondary, fontSize: "11px", fontWeight: 600 }} />
+            ) : (
+              <span className="inline-block px-3 py-1 rounded-full"
+                style={{ background: `${secondary}26`, color: secondary, fontSize: "11px", fontWeight: 600 }}>
+                {duration}
+              </span>
+            )}
+          </div>
+          {(description || onDescriptionEdit) && (
+            onDescriptionEdit ? (
+              <EditableText value={description || ''} placeholder="Click to add a description..." onSave={onDescriptionEdit} as="p"
+                className="max-w-lg"
+                style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: muted }} />
+            ) : (
+              <p className="max-w-lg" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: muted }}>
+                {description}
+              </p>
+            )
+          )}
+        </div>
+      </motion.div>
+    );
+  }
 
   if (isModern) {
     return (
