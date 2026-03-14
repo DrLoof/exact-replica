@@ -10,21 +10,21 @@ interface TextContentProps {
 }
 
 export function TextContent({
-  children,
-  dropCap = false,
-  columns = 1,
+  children, dropCap = false, columns = 1,
 }: TextContentProps) {
   const brand = useBrand();
   const template = useTemplate();
   const isModern = template.id === 'modern';
+  const isElegant = template.id === 'elegant';
   const accent = template.colors.primaryAccent;
 
-  const bodyFont = isModern ? "'Outfit', sans-serif" : "'Inter', sans-serif";
-  const bodyColor = isModern ? "#6B7280" : "#555";
-  const dropCapFont = isModern ? "'Fraunces', serif" : "'Space Grotesk', sans-serif";
-  const dropCapColor = isModern ? accent : brand.primaryColor;
-  const dropCapSize = isModern ? "64px" : "56px";
-  const dropCapWeight = isModern ? 800 : 700;
+  const bodyFont = isElegant ? "'DM Sans', sans-serif" : isModern ? "'Outfit', sans-serif" : "'Inter', sans-serif";
+  const bodyColor = isElegant ? template.colors.textBody : isModern ? "#6B7280" : "#555";
+  const dropCapFont = isElegant ? "'Fraunces', serif" : isModern ? "'Fraunces', serif" : "'Space Grotesk', sans-serif";
+  const dropCapColor = isElegant ? accent : isModern ? accent : brand.primaryColor;
+  const dropCapSize = isElegant ? "60px" : isModern ? "64px" : "56px";
+  const dropCapWeight = isElegant ? 600 : isModern ? 800 : 700;
+  const lineHeight = isElegant ? 1.85 : 1.8;
 
   return (
     <motion.div
@@ -36,7 +36,7 @@ export function TextContent({
         fontFamily: bodyFont,
         fontSize: "15px",
         fontWeight: 400,
-        lineHeight: 1.8,
+        lineHeight,
         color: bodyColor,
       }}
     >

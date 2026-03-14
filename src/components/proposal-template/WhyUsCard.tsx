@@ -17,24 +17,96 @@ interface WhyUsCardProps {
 }
 
 export function WhyUsCard({
-  title,
-  description,
-  statValue,
-  statLabel,
-  icon,
-  delay = 0,
-  onTitleEdit,
-  onDescriptionEdit,
+  title, description, statValue, statLabel, icon, delay = 0,
+  onTitleEdit, onDescriptionEdit,
 }: WhyUsCardProps) {
   const brand = useBrand();
   const template = useTemplate();
   const isModern = template.id === 'modern';
+  const isElegant = template.id === 'elegant';
   const accent = template.colors.primaryAccent;
   const dark = template.colors.primaryDark;
 
   const IconComponent = icon && (LucideIcons as any)[icon]
     ? (LucideIcons as any)[icon]
     : LucideIcons.Star;
+
+  if (isElegant) {
+    const accentTint = `${accent}0F`;
+    const border = template.colors.border;
+    const muted = template.colors.textMuted;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay, duration: 0.5, ease: "easeOut" }}
+        className="group relative rounded-3xl p-8 h-full flex flex-col transition-all duration-300"
+        style={{
+          background: "white", border: `1px solid ${border}`,
+          fontFamily: "'DM Sans', sans-serif",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = `${accent}40`;
+          e.currentTarget.style.boxShadow = `0 20px 40px -10px ${accent}0D`;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = border;
+          e.currentTarget.style.boxShadow = "none";
+        }}
+      >
+        {/* Stat above icon */}
+        {statValue && (
+          <div className="mb-4">
+            <span style={{ fontFamily: "'Fraunces', serif", fontSize: "32px", fontWeight: 500, color: accent }}>
+              {statValue}
+            </span>
+            {statLabel && (
+              <span className="block mt-0.5" style={{ fontSize: "11px", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.1em", color: muted }}>
+                {statLabel}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Icon */}
+        <div className="w-11 h-11 rounded-2xl flex items-center justify-center mb-5 transition-all duration-300"
+          style={{ background: accentTint, color: accent }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = accent; e.currentTarget.style.color = "white"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = accentTint; e.currentTarget.style.color = accent; }}
+        >
+          <IconComponent size={20} />
+        </div>
+
+        {onTitleEdit ? (
+          <EditableText value={title} placeholder="Title..." onSave={onTitleEdit} as="h3"
+            className="mb-3" style={{ fontFamily: "'Fraunces', serif", fontSize: "18px", fontWeight: 500, lineHeight: 1.2, color: dark }} />
+        ) : (
+          <h3 className="mb-3" style={{ fontFamily: "'Fraunces', serif", fontSize: "18px", fontWeight: 500, lineHeight: 1.2, color: dark }}>
+            {title}
+          </h3>
+        )}
+
+        {onDescriptionEdit ? (
+          <EditableText value={description} placeholder="Description..." onSave={onDescriptionEdit} as="p"
+            className="flex-1" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: muted }} />
+        ) : (
+          <p className="flex-1" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: muted }}>
+            {description}
+          </p>
+        )}
+
+        {/* Expanding bar accent */}
+        <div className="mt-6 pt-4" style={{ borderTop: `1px solid ${border}` }}>
+          <div className="h-2 rounded-full transition-all duration-300 group-hover:w-14"
+            style={{ width: "32px", background: `${accent}33` }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = `${accent}80`; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = `${accent}33`; }}
+          />
+        </div>
+      </motion.div>
+    );
+  }
 
   if (isModern) {
     return (
@@ -63,12 +135,10 @@ export function WhyUsCard({
             </div>
           </div>
         )}
-
         <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
           style={{ background: `${accent}10`, color: accent }}>
           <IconComponent size={22} />
         </div>
-
         {onTitleEdit ? (
           <EditableText value={title} placeholder="Title..." onSave={onTitleEdit} as="h3"
             className="mb-3" style={{ fontFamily: "'Fraunces', serif", fontSize: "18px", fontWeight: 700, lineHeight: 1.2, color: dark }} />
@@ -77,7 +147,6 @@ export function WhyUsCard({
             {title}
           </h3>
         )}
-
         {onDescriptionEdit ? (
           <EditableText value={description} placeholder="Description..." onSave={onDescriptionEdit} as="p"
             className="flex-1" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }} />
@@ -86,7 +155,6 @@ export function WhyUsCard({
             {description}
           </p>
         )}
-
         <div className="mt-6 pt-4 flex items-center gap-1.5" style={{ borderTop: "2px dashed #E5E7EB" }}>
           {[0.15, 0.25, 0.4, 0.55, 0.7].map((opacity, i) => (
             <div key={i} className="w-2 h-2 rounded-full" style={{ background: accent, opacity }} />
