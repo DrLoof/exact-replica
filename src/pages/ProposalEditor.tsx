@@ -658,7 +658,7 @@ export default function ProposalEditor() {
               
 
               {/* Section 0: Cover */}
-              <SectionWrapper idx={0} hidden={hiddenSections.has(0)} onToggle={toggleSection} label="Cover">
+              {!deletedSections.has(0) && <SectionWrapper idx={0} onDelete={deleteSection} label="Cover">
                 <div className="rounded-2xl overflow-hidden shadow-lg">
                   <HeroCover
                     proposalTitle={proposal.title || 'Proposal Title'}
