@@ -330,7 +330,7 @@ export default function ProposalNew() {
             clientName: clientDisplayName,
             serviceNames: realSelectedModules.map((m: any) => m.name),
             serviceContexts: realSelectedModules.map((m: any) => m.ai_context).filter(Boolean),
-            clientChallenge: resolvedChallenge || null,
+            clientChallenges: resolvedChallenges.length > 0 ? resolvedChallenges : null,
             clientGoal: resolvedGoal || null,
             clientContextNote: clientContextNote || null,
           },
