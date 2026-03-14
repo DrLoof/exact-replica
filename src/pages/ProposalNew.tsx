@@ -85,7 +85,7 @@ export default function ProposalNew() {
   const [newClientName, setNewClientName] = useState('');
   const [newContactName, setNewContactName] = useState('');
   const [newClientWebsite, setNewClientWebsite] = useState('');
-  const [clientChallenge, setClientChallenge] = useState('');
+  const [clientChallenges, setClientChallenges] = useState<string[]>([]);
   const [clientChallengeOther, setClientChallengeOther] = useState('');
   const [clientGoal, setClientGoal] = useState('');
   const [clientGoalOther, setClientGoalOther] = useState('');
@@ -317,7 +317,7 @@ export default function ProposalNew() {
 
       // Generate executive summary
       let executiveSummary: string | null = null;
-      const resolvedChallenge = clientChallenge === 'Other' ? clientChallengeOther : clientChallenge;
+      const resolvedChallenges = clientChallenges.map(c => c === 'Other' ? clientChallengeOther : c).filter(Boolean);
       const resolvedGoal = clientGoal === 'Other' ? clientGoalOther : clientGoal;
       try {
         const realSelectedModules = selectedModsList.map((m: any) => {
@@ -330,7 +330,7 @@ export default function ProposalNew() {
             clientName: clientDisplayName,
             serviceNames: realSelectedModules.map((m: any) => m.name),
             serviceContexts: realSelectedModules.map((m: any) => m.ai_context).filter(Boolean),
-            clientChallenge: resolvedChallenge || null,
+            clientChallenges: resolvedChallenges.length > 0 ? resolvedChallenges : null,
             clientGoal: resolvedGoal || null,
             clientContextNote: clientContextNote || null,
           },
@@ -392,7 +392,7 @@ export default function ProposalNew() {
         bundle_savings: bundleSavings,
         phases: generatedPhases,
         executive_summary: executiveSummary,
-        client_challenge: resolvedChallenge || null,
+        client_challenge: resolvedChallenges.length > 0 ? JSON.stringify(resolvedChallenges) : null,
         client_goal: resolvedGoal || null,
         client_context_note: clientContextNote || null,
         template_id: (agency as any).default_template || 'classic',
@@ -442,7 +442,7 @@ export default function ProposalNew() {
       setSaving(true);
 
       let executiveSummary: string | null = null;
-      const resolvedChallenge = clientChallenge === 'Other' ? clientChallengeOther : clientChallenge;
+      const resolvedChallenges = clientChallenges.map(c => c === 'Other' ? clientChallengeOther : c).filter(Boolean);
       const resolvedGoal = clientGoal === 'Other' ? clientGoalOther : clientGoal;
       try {
         const { data: summaryData } = await supabase.functions.invoke('generate-executive-summary', {
@@ -451,7 +451,7 @@ export default function ProposalNew() {
             clientName: clientDisplayName,
             serviceNames: selectedMods.map((m: any) => m.name),
             serviceContexts: selectedMods.map((m: any) => m.ai_context).filter(Boolean),
-            clientChallenge: resolvedChallenge || null,
+            clientChallenges: resolvedChallenges.length > 0 ? resolvedChallenges : null,
             clientGoal: resolvedGoal || null,
             clientContextNote: clientContextNote || null,
           },
@@ -482,7 +482,7 @@ export default function ProposalNew() {
         currencySymbol,
         executiveSummary,
         title: generatedTitle,
-        clientChallenge: resolvedChallenge || null,
+        clientChallenge: resolvedChallenges.length > 0 ? JSON.stringify(resolvedChallenges) : null,
         clientGoal: resolvedGoal || null,
         clientContextNote: clientContextNote || null,
       };
@@ -722,8 +722,8 @@ export default function ProposalNew() {
           setNewContactName={setNewContactName}
           newClientWebsite={newClientWebsite}
           setNewClientWebsite={setNewClientWebsite}
-          clientChallenge={clientChallenge}
-          setClientChallenge={setClientChallenge}
+          clientChallenges={clientChallenges}
+          setClientChallenges={setClientChallenges}
           clientChallengeOther={clientChallengeOther}
           setClientChallengeOther={setClientChallengeOther}
           clientGoal={clientGoal}

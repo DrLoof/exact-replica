@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Globe, Loader2 } from 'lucide-react';
+import { Search, Globe, Loader2, X, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -41,8 +41,8 @@ interface ClientZoneProps {
   setNewContactName: (v: string) => void;
   newClientWebsite: string;
   setNewClientWebsite: (v: string) => void;
-  clientChallenge: string;
-  setClientChallenge: (v: string) => void;
+  clientChallenges: string[];
+  setClientChallenges: (v: string[]) => void;
   clientChallengeOther: string;
   setClientChallengeOther: (v: string) => void;
   clientGoal: string;
@@ -57,7 +57,7 @@ export function ClientZone({
   isGuestMode, clients, selectedClient, setSelectedClient,
   newClientName, setNewClientName, newContactName, setNewContactName,
   newClientWebsite, setNewClientWebsite,
-  clientChallenge, setClientChallenge, clientChallengeOther, setClientChallengeOther,
+  clientChallenges, setClientChallenges, clientChallengeOther, setClientChallengeOther,
   clientGoal, setClientGoal, clientGoalOther, setClientGoalOther,
   clientContextNote, setClientContextNote,
 }: ClientZoneProps) {
@@ -72,6 +72,14 @@ export function ClientZone({
   const filteredClients = clientSearch.length > 0
     ? clients.filter((c: any) => c.company_name.toLowerCase().includes(clientSearch.toLowerCase()))
     : [];
+
+  const toggleChallenge = (challenge: string) => {
+    setClientChallenges(
+      clientChallenges.includes(challenge)
+        ? clientChallenges.filter(c => c !== challenge)
+        : [...clientChallenges, challenge]
+    );
+  };
 
   const handleAutoFill = async () => {
     if (!newClientWebsite.trim()) return;
@@ -260,21 +268,79 @@ export function ClientZone({
         <section className="rounded-xl border border-parchment bg-card p-6 shadow-card">
           <p className="mb-1 text-[14px] font-semibold text-foreground">Client context</p>
           <p className="mb-4 text-xs text-muted-foreground">Optional — makes the proposal more specific to this client</p>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          
+          <div className="space-y-4">
+            {/* Multi-select challenges */}
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Main challenge</label>
-              <select
-                value={clientChallenge}
-                onChange={(e) => setClientChallenge(e.target.value)}
-                className="w-full rounded-lg border border-parchment bg-background px-3 py-2.5 text-sm text-foreground focus:border-foreground/30 focus:outline-none"
-              >
-                <option value="">Select one...</option>
-                {challengeOptions.map(opt => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-                <option value="Other">Other</option>
-              </select>
-              {clientChallenge === 'Other' && (
+              <label className="mb-2 block text-xs font-medium text-muted-foreground">Key challenges <span className="text-muted-foreground/60">(select all that apply)</span></label>
+              
+              {/* Selected pills */}
+              {clientChallenges.length > 0 && (
+                <div className="mb-2 flex flex-wrap gap-1.5">
+                  {clientChallenges.map(challenge => (
+                    <span
+                      key={challenge}
+                      className="inline-flex items-center gap-1 rounded-full border border-brand/20 bg-brand/5 px-2.5 py-1 text-[11px] font-medium text-foreground"
+                    >
+                      {challenge === 'Other' ? (clientChallengeOther || 'Other') : challenge}
+                      <button
+                        onClick={() => toggleChallenge(challenge)}
+                        className="ml-0.5 rounded-full p-0.5 hover:bg-foreground/10"
+                      >
+                        <X className="h-2.5 w-2.5" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Checkbox list */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                {challengeOptions.map(option => {
+                  const isSelected = clientChallenges.includes(option);
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => toggleChallenge(option)}
+                      className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left text-xs transition-colors ${
+                        isSelected
+                          ? 'bg-brand/5 text-foreground font-medium'
+                          : 'text-foreground/70 hover:bg-muted/50'
+                      }`}
+                    >
+                      <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
+                        isSelected
+                          ? 'border-brand bg-brand text-white'
+                          : 'border-foreground/20'
+                      }`}>
+                        {isSelected && <Check className="h-2.5 w-2.5" />}
+                      </div>
+                      {option}
+                    </button>
+                  );
+                })}
+                {/* "Other" option */}
+                <button
+                  type="button"
+                  onClick={() => toggleChallenge('Other')}
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left text-xs transition-colors ${
+                    clientChallenges.includes('Other')
+                      ? 'bg-brand/5 text-foreground font-medium'
+                      : 'text-foreground/70 hover:bg-muted/50'
+                  }`}
+                >
+                  <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
+                    clientChallenges.includes('Other')
+                      ? 'border-brand bg-brand text-white'
+                      : 'border-foreground/20'
+                  }`}>
+                    {clientChallenges.includes('Other') && <Check className="h-2.5 w-2.5" />}
+                  </div>
+                  Other
+                </button>
+              </div>
+              {clientChallenges.includes('Other') && (
                 <input
                   type="text"
                   placeholder="Describe the challenge..."
@@ -285,6 +351,8 @@ export function ClientZone({
                 />
               )}
             </div>
+
+            {/* Primary goal — single select */}
             <div>
               <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Primary goal</label>
               <select
@@ -309,17 +377,19 @@ export function ClientZone({
                 />
               )}
             </div>
-          </div>
-          <div className="mt-3">
-            <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Quick note</label>
-            <input
-              type="text"
-              placeholder="e.g. They just raised a round and need to scale quickly"
-              maxLength={200}
-              value={clientContextNote}
-              onChange={(e) => setClientContextNote(e.target.value)}
-              className="w-full rounded-lg border border-parchment bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
-            />
+
+            {/* Quick note */}
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Quick note</label>
+              <input
+                type="text"
+                placeholder="e.g. They just raised a round and need to scale quickly"
+                maxLength={200}
+                value={clientContextNote}
+                onChange={(e) => setClientContextNote(e.target.value)}
+                className="w-full rounded-lg border border-parchment bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-foreground/30 focus:outline-none"
+              />
+            </div>
           </div>
         </section>
       )}
