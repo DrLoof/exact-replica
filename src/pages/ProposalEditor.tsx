@@ -881,7 +881,7 @@ export default function ProposalEditor() {
                     )}
                   </PageWrapper>
                 </div>
-              </SectionWrapper>
+              </SectionWrapper>}
 
               {/* Section 4: Investment */}
               <SectionWrapper idx={4} hidden={hiddenSections.has(4)} onToggle={toggleSection} label="Investment">
