@@ -871,7 +871,8 @@ export default function ProposalEditor() {
               <SectionWrapper idx={5} hidden={hiddenSections.has(5)} onToggle={toggleSection} label="Terms & Conditions">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="06">
-                    <SectionHeader number="05" title="Terms & Conditions" />
+                    <SectionHeader number="05" title="Terms & Conditions"
+                      onTitleEdit={(val) => updateField('title', val)} />
                     {termsClauses.length === 0 ? (
                       <div className="text-center py-16">
                         <p className="text-muted-foreground" style={{ fontSize: '15px' }}>No terms & conditions configured.</p>
