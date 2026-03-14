@@ -2,15 +2,18 @@ import React from "react";
 import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
+import { EditableText } from "./EditableText";
 
 interface HighlightPanelProps {
   items: { label: string; value: string; accent?: boolean }[];
   variant?: "default" | "accent" | "dark";
+  onItemEdit?: (index: number, field: 'label' | 'value', newValue: string) => void;
 }
 
 export function HighlightPanel({
   items,
   variant = "default",
+  onItemEdit,
 }: HighlightPanelProps) {
   const brand = useBrand();
   const template = useTemplate();
@@ -56,29 +59,26 @@ export function HighlightPanel({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 text-center">
           {items.map((item, idx) => (
             <div key={idx}>
-              <span
-                className="block uppercase tracking-[0.2em] mb-2"
-                style={{
-                  fontFamily: "'Outfit', sans-serif",
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  color: ms.labelColor,
-                }}
-              >
-                {item.label}
-              </span>
-              <span
-                className="block"
-                style={{
-                  fontFamily: "'Fraunces', serif",
-                  fontSize: "28px",
-                  fontWeight: 800,
-                  lineHeight: 1.2,
-                  color: item.accent ? ms.accentColor : ms.textColor,
-                }}
-              >
-                {item.value}
-              </span>
+              {onItemEdit ? (
+                <EditableText value={item.label} placeholder="Label..." onSave={(val) => onItemEdit(idx, 'label', val)} as="span"
+                  className="block uppercase tracking-[0.2em] mb-2"
+                  style={{ fontFamily: "'Outfit', sans-serif", fontSize: "11px", fontWeight: 600, color: ms.labelColor }} />
+              ) : (
+                <span className="block uppercase tracking-[0.2em] mb-2"
+                  style={{ fontFamily: "'Outfit', sans-serif", fontSize: "11px", fontWeight: 600, color: ms.labelColor }}>
+                  {item.label}
+                </span>
+              )}
+              {onItemEdit ? (
+                <EditableText value={item.value} placeholder="Value..." onSave={(val) => onItemEdit(idx, 'value', val)} as="span"
+                  className="block"
+                  style={{ fontFamily: "'Fraunces', serif", fontSize: "28px", fontWeight: 800, lineHeight: 1.2, color: item.accent ? ms.accentColor : ms.textColor }} />
+              ) : (
+                <span className="block"
+                  style={{ fontFamily: "'Fraunces', serif", fontSize: "28px", fontWeight: 800, lineHeight: 1.2, color: item.accent ? ms.accentColor : ms.textColor }}>
+                  {item.value}
+                </span>
+              )}
             </div>
           ))}
         </div>
@@ -127,33 +127,28 @@ export function HighlightPanel({
           <div
             key={idx}
             className={idx > 0 ? "sm:pl-8" : ""}
-            style={
-              idx > 0
-                ? { borderLeft: `1px solid ${s.border}` }
-                : {}
-            }
+            style={idx > 0 ? { borderLeft: `1px solid ${s.border}` } : {}}
           >
-            <span
-              className="block uppercase tracking-[0.2em] mb-2"
-              style={{
-                fontSize: "11px",
-                fontWeight: 500,
-                color: s.label,
-              }}
-            >
-              {item.label}
-            </span>
-            <span
-              className="block"
-              style={{
-                fontSize: "24px",
-                fontWeight: 700,
-                lineHeight: 1.2,
-                color: item.accent ? brand.primaryColor : s.text,
-              }}
-            >
-              {item.value}
-            </span>
+            {onItemEdit ? (
+              <EditableText value={item.label} placeholder="Label..." onSave={(val) => onItemEdit(idx, 'label', val)} as="span"
+                className="block uppercase tracking-[0.2em] mb-2"
+                style={{ fontSize: "11px", fontWeight: 500, color: s.label }} />
+            ) : (
+              <span className="block uppercase tracking-[0.2em] mb-2"
+                style={{ fontSize: "11px", fontWeight: 500, color: s.label }}>
+                {item.label}
+              </span>
+            )}
+            {onItemEdit ? (
+              <EditableText value={item.value} placeholder="Value..." onSave={(val) => onItemEdit(idx, 'value', val)} as="span"
+                className="block"
+                style={{ fontSize: "24px", fontWeight: 700, lineHeight: 1.2, color: item.accent ? brand.primaryColor : s.text }} />
+            ) : (
+              <span className="block"
+                style={{ fontSize: "24px", fontWeight: 700, lineHeight: 1.2, color: item.accent ? brand.primaryColor : s.text }}>
+                {item.value}
+              </span>
+            )}
           </div>
         ))}
       </div>

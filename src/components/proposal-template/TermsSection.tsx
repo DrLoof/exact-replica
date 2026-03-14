@@ -3,12 +3,14 @@ import { motion, AnimatePresence } from "motion/react";
 import { ChevronDown } from "lucide-react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
+import { EditableText } from "./EditableText";
 
 interface TermsSectionProps {
   clauses: { title: string; content: string }[];
+  onClauseEdit?: (index: number, field: 'title' | 'content', value: string) => void;
 }
 
-export function TermsSection({ clauses }: TermsSectionProps) {
+export function TermsSection({ clauses, onClauseEdit }: TermsSectionProps) {
   const brand = useBrand();
   const template = useTemplate();
   const isModern = template.id === 'modern';
@@ -48,7 +50,9 @@ export function TermsSection({ clauses }: TermsSectionProps) {
                   fontWeight: isOpen ? 700 : 500,
                   color: isOpen ? dark : "#6B7280",
                 }}>
-                  {clause.title}
+                  {onClauseEdit ? (
+                    <EditableText value={clause.title} placeholder="Clause title..." onSave={(val) => onClauseEdit(idx, 'title', val)} as="span" />
+                  ) : clause.title}
                 </span>
                 <ChevronDown size={18}
                   className="shrink-0 transition-transform duration-200"
@@ -67,9 +71,14 @@ export function TermsSection({ clauses }: TermsSectionProps) {
                     className="overflow-hidden"
                   >
                     <div className="px-6 pb-5" style={{ paddingLeft: "76px" }}>
-                      <p style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }}>
-                        {clause.content}
-                      </p>
+                      {onClauseEdit ? (
+                        <EditableText value={clause.content} placeholder="Clause content..." onSave={(val) => onClauseEdit(idx, 'content', val)} as="p"
+                          style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }} />
+                      ) : (
+                        <p style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }}>
+                          {clause.content}
+                        </p>
+                      )}
                       <p className="mt-3" style={{ fontSize: "13px", color: "#D1D5DB" }}>
                         <span style={{ color: accent }}>*</span> Standard terms apply
                       </p>
@@ -111,7 +120,9 @@ export function TermsSection({ clauses }: TermsSectionProps) {
                   {idx + 1}
                 </span>
                 <span style={{ fontSize: "16px", fontWeight: 600, color: brand.darkColor }}>
-                  {clause.title}
+                  {onClauseEdit ? (
+                    <EditableText value={clause.title} placeholder="Clause title..." onSave={(val) => onClauseEdit(idx, 'title', val)} as="span" />
+                  ) : clause.title}
                 </span>
               </div>
               <ChevronDown size={18}
@@ -128,9 +139,15 @@ export function TermsSection({ clauses }: TermsSectionProps) {
                   className="overflow-hidden"
                 >
                   <div className="px-8 pb-6 pl-20">
-                    <p className="text-[#666]" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, fontFamily: "'Inter', sans-serif" }}>
-                      {clause.content}
-                    </p>
+                    {onClauseEdit ? (
+                      <EditableText value={clause.content} placeholder="Clause content..." onSave={(val) => onClauseEdit(idx, 'content', val)} as="p"
+                        className="text-[#666]"
+                        style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, fontFamily: "'Inter', sans-serif" }} />
+                    ) : (
+                      <p className="text-[#666]" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, fontFamily: "'Inter', sans-serif" }}>
+                        {clause.content}
+                      </p>
+                    )}
                   </div>
                 </motion.div>
               )}

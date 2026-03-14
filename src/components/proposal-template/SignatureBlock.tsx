@@ -2,6 +2,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
+import { EditableText } from "./EditableText";
 import { Pen } from "lucide-react";
 
 interface SignatureParty {
@@ -16,6 +17,8 @@ interface SignatureBlockProps {
   subtitle?: string;
   client: SignatureParty;
   agency?: SignatureParty;
+  onHeadingEdit?: (value: string) => void;
+  onSubtitleEdit?: (value: string) => void;
 }
 
 export function SignatureBlock({
@@ -23,6 +26,8 @@ export function SignatureBlock({
   subtitle = "By signing below, both parties agree to the terms outlined in this proposal.",
   client,
   agency,
+  onHeadingEdit,
+  onSubtitleEdit,
 }: SignatureBlockProps) {
   const brand = useBrand();
   const template = useTemplate();
@@ -45,24 +50,38 @@ export function SignatureBlock({
         className="w-full"
         style={{ fontFamily: "'Outfit', sans-serif" }}
       >
-        {/* Header */}
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
             style={{ background: `${secondary}15`, color: secondary, fontSize: "13px", fontWeight: 600 }}>
             <Pen size={13} />
             Ready to sign
           </div>
-          <h2 style={{
-            fontFamily: "'Fraunces', serif",
-            fontSize: "clamp(28px, 3.5vw, 44px)",
-            fontWeight: 700, lineHeight: 1.1, color: dark,
-          }}>
-            {heading}
-          </h2>
-          <p className="max-w-md mx-auto mt-4"
-            style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }}>
-            {subtitle}
-          </p>
+          {onHeadingEdit ? (
+            <EditableText value={heading} placeholder="Heading..." onSave={onHeadingEdit} as="h1"
+              style={{
+                fontFamily: "'Fraunces', serif",
+                fontSize: "clamp(28px, 3.5vw, 44px)",
+                fontWeight: 700, lineHeight: 1.1, color: dark,
+              }} />
+          ) : (
+            <h2 style={{
+              fontFamily: "'Fraunces', serif",
+              fontSize: "clamp(28px, 3.5vw, 44px)",
+              fontWeight: 700, lineHeight: 1.1, color: dark,
+            }}>
+              {heading}
+            </h2>
+          )}
+          {onSubtitleEdit ? (
+            <EditableText value={subtitle} placeholder="Subtitle..." onSave={onSubtitleEdit} as="p"
+              className="max-w-md mx-auto mt-4"
+              style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }} />
+          ) : (
+            <p className="max-w-md mx-auto mt-4"
+              style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }}>
+              {subtitle}
+            </p>
+          )}
         </div>
 
         {/* Signature cards */}
@@ -76,13 +95,10 @@ export function SignatureBlock({
               className="rounded-3xl p-8 lg:p-10"
               style={{ background: "white", border: "2px solid #E5E7EB" }}
             >
-              {/* Role label */}
               <span className="inline-block px-3 py-1.5 rounded-full mb-6 uppercase tracking-wider"
                 style={{ fontSize: "11px", fontWeight: 600, background: `${accent}12`, color: accent }}>
                 {party.role}
               </span>
-
-              {/* Company & person */}
               <div className="mb-8">
                 <span className="block mb-1" style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, color: dark }}>
                   {party.companyName}
@@ -93,8 +109,6 @@ export function SignatureBlock({
                   </span>
                 )}
               </div>
-
-              {/* Signature line */}
               <div className="space-y-6">
                 <div>
                   <div className="h-16 mb-2 rounded-lg" style={{ background: `${accent}06`, borderBottom: `3px solid ${accent}` }} />
@@ -121,7 +135,6 @@ export function SignatureBlock({
           ))}
         </div>
 
-        {/* Thank you / closing */}
         <div className="mt-20 text-center">
           <div className="inline-block">
             {brand.logoUrl ? (
@@ -169,7 +182,7 @@ export function SignatureBlock({
     );
   }
 
-  // Classic rendering (unchanged)
+  // Classic rendering
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -179,13 +192,25 @@ export function SignatureBlock({
       style={{ fontFamily: "'Space Grotesk', sans-serif" }}
     >
       <div className="text-center mb-14">
-        <h2 className="tracking-tight mb-3"
-          style={{ fontSize: "clamp(28px, 3vw, 40px)", fontWeight: 700, lineHeight: 1.1, color: brand.darkColor }}>
-          {heading}
-        </h2>
-        <p className="text-[#888] max-w-md mx-auto" style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.6 }}>
-          {subtitle}
-        </p>
+        {onHeadingEdit ? (
+          <EditableText value={heading} placeholder="Heading..." onSave={onHeadingEdit} as="h1"
+            className="tracking-tight mb-3"
+            style={{ fontSize: "clamp(28px, 3vw, 40px)", fontWeight: 700, lineHeight: 1.1, color: brand.darkColor }} />
+        ) : (
+          <h2 className="tracking-tight mb-3"
+            style={{ fontSize: "clamp(28px, 3vw, 40px)", fontWeight: 700, lineHeight: 1.1, color: brand.darkColor }}>
+            {heading}
+          </h2>
+        )}
+        {onSubtitleEdit ? (
+          <EditableText value={subtitle} placeholder="Subtitle..." onSave={onSubtitleEdit} as="p"
+            className="text-[#888] max-w-md mx-auto"
+            style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.6 }} />
+        ) : (
+          <p className="text-[#888] max-w-md mx-auto" style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.6 }}>
+            {subtitle}
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
