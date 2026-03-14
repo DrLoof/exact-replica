@@ -317,7 +317,7 @@ export function SignatureBlock({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 + idx * 0.15, duration: 0.5 }}
               className="rounded-3xl p-8 lg:p-10"
-              style={{ background: "white", border: "2px solid #E5E7EB" }}
+              style={{ background: template.colors.cardBackground, border: `2px solid ${template.colors.border}` }}
             >
               <span className="inline-block px-3 py-1.5 rounded-full mb-6 uppercase tracking-wider"
                 style={{ fontSize: "11px", fontWeight: 600, background: `${accent}12`, color: accent }}>
