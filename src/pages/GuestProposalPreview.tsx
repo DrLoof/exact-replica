@@ -13,6 +13,7 @@ import {
   WhyUsCard, TestimonialCard, TermsSection, SignatureBlock,
   TextContent, PageWrapper, HighlightPanel, EditableText, TimelineStep,
 } from '@/components/proposal-template';
+import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 
 
 function getDefaultAboutText(yearsExperience?: number | null): string {
