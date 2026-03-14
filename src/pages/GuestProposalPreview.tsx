@@ -162,6 +162,9 @@ export default function GuestProposalPreview() {
   const clientName = guestProposal.clientName || 'Client';
   const agencyName = identity.name || 'Your Agency';
   const brandColor = identity.brand_color || '#E8825C';
+  // Brand color is the universal default; custom picks override it across all templates
+  const activePrimary = customColors?.primaryAccent || brandColor;
+  const activeSecondary = customColors?.secondaryAccent || currentTemplate.colors.secondaryAccent;
 
   const totalFixed = localServices.reduce((sum: number, s: any) => {
     if (s.pricing_model === 'fixed' || !s.pricing_model) return sum + (s.priceOverride ?? s.price_fixed ?? 0);
