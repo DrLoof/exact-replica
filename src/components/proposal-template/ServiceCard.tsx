@@ -2,6 +2,7 @@ import React, { type ReactNode, useState } from "react";
 import { motion } from "motion/react";
 import { Plus, X } from "lucide-react";
 import { useBrand } from "./BrandTheme";
+import { useTemplate } from "./TemplateProvider";
 import { EditableText } from "./EditableText";
 
 interface ServiceCardProps {
@@ -39,6 +40,8 @@ export function ServiceCard({
   onDeliverablesEdit,
 }: ServiceCardProps) {
   const brand = useBrand();
+  const template = useTemplate();
+  const isModern = template.id === 'modern';
   const suffix = pricingModel ? MODEL_LABELS[pricingModel] || "" : "";
   const [newItem, setNewItem] = useState("");
   const [adding, setAdding] = useState(false);
@@ -46,8 +49,7 @@ export function ServiceCard({
 
   const handleRemove = (idx: number) => {
     if (!onDeliverablesEdit) return;
-    const updated = deliverables.filter((_, i) => i !== idx);
-    onDeliverablesEdit(updated);
+    onDeliverablesEdit(deliverables.filter((_, i) => i !== idx));
   };
 
   const handleAdd = () => {
@@ -64,6 +66,118 @@ export function ServiceCard({
     onDeliverablesEdit(updated);
   };
 
+  // Shared deliverables editing UI
+  const renderDeliverablesEdit = () => (
+    editable && (
+      <div className="mt-3 print:hidden">
+        {adding ? (
+          <div className="flex items-center gap-2">
+            <input
+              type="text" value={newItem} onChange={(e) => setNewItem(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') { setAdding(false); setNewItem(''); } }}
+              placeholder="New deliverable..." autoFocus
+              className="flex-1 border border-[#E0E0E0] rounded-lg px-3 py-1.5 text-[#555] outline-none focus:border-[#BBB]"
+              style={{ fontSize: "13px" }}
+            />
+            <button onClick={handleAdd} className="text-[#888] hover:text-[#555] text-xs font-medium">Add</button>
+            <button onClick={() => { setAdding(false); setNewItem(''); }} className="text-[#CCC] hover:text-[#888]">
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : (
+          <button onClick={() => setAdding(true)} className="flex items-center gap-1.5 text-[#BBB] hover:text-[#888] transition-colors" style={{ fontSize: "12px" }}>
+            <Plus className="h-3 w-3" /> Add deliverable
+          </button>
+        )}
+      </div>
+    )
+  );
+
+  if (isModern) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay, duration: 0.5, ease: "easeOut" }}
+        className="group relative rounded-3xl p-7 transition-transform duration-300 hover:-translate-y-1"
+        style={{
+          background: "white", fontFamily: "'Outfit', sans-serif",
+          border: "2px solid #E5E7EB",
+          boxShadow: "0 2px 12px rgba(30,27,75,0.04)",
+        }}
+      >
+        {/* Price Badge */}
+        <div className="absolute -top-3 -right-2 z-10">
+          <div className="px-4 py-2 rounded-2xl"
+            style={{ background: "#1E1B4B", color: "white", fontSize: "14px", fontWeight: 700, boxShadow: "3px 3px 0px #2563EB" }}>
+            {price}{suffix && <span style={{ fontWeight: 400, opacity: 0.6 }}>{suffix}</span>}
+          </div>
+        </div>
+
+        {/* Add-on tag */}
+        {isAddon && (
+          <span className="inline-block px-3 py-1 rounded-full mb-3 uppercase tracking-wider"
+            style={{ background: "#34D39918", color: "#34D399", fontSize: "10px", fontWeight: 700 }}>
+            Add-on
+          </span>
+        )}
+
+        {/* Icon */}
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
+          style={{ background: "#2563EB10", color: "#2563EB" }}>
+          {icon}
+        </div>
+
+        {/* Name */}
+        {onNameEdit ? (
+          <EditableText value={name} placeholder="Service name..." onSave={onNameEdit} as="h3"
+            className="mb-3"
+            style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, lineHeight: 1.2, color: "#1E1B4B" }} />
+        ) : (
+          <h3 className="mb-3" style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, lineHeight: 1.2, color: "#1E1B4B" }}>
+            {name}
+          </h3>
+        )}
+
+        {/* Description */}
+        {onDescriptionEdit ? (
+          <EditableText value={description} placeholder="Click to add a description..." onSave={onDescriptionEdit} as="p"
+            className="mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }} />
+        ) : (
+          <p className="mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: "#9CA3AF" }}>
+            {description}
+          </p>
+        )}
+
+        {/* Deliverables */}
+        <div className="pt-5" style={{ borderTop: "2px dashed #E5E7EB" }}>
+          <span className="block mb-3 uppercase tracking-widest"
+            style={{ fontSize: "10px", fontWeight: 700, color: "#2563EB" }}>Deliverables</span>
+          <ul className="space-y-2">
+            {deliverables.map((item, idx) => (
+              <li key={idx} className="group/del flex items-start gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: "#2563EB" }} />
+                {editable ? (
+                  <EditableText value={item} placeholder="Deliverable..." onSave={(val) => handleItemEdit(idx, val)} as="span"
+                    className="flex-1" style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.5, color: "#6B7280" }} />
+                ) : (
+                  <span style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.5, color: "#6B7280" }}>{item}</span>
+                )}
+                {editable && (
+                  <button onClick={() => handleRemove(idx)}
+                    className="shrink-0 mt-0.5 opacity-0 group-hover/del:opacity-100 transition-opacity text-[#CCC] hover:text-red-400 print:hidden"
+                    title="Remove deliverable"><X className="h-3.5 w-3.5" /></button>
+                )}
+              </li>
+            ))}
+          </ul>
+          {renderDeliverablesEdit()}
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Classic rendering (unchanged)
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -82,30 +196,23 @@ export function ServiceCard({
     >
       {/* Price badge */}
       <div className="absolute top-6 right-6">
-        <span
-          className="inline-block text-white px-4 py-1.5 rounded-full"
-          style={{ fontSize: "13px", fontWeight: 600, backgroundColor: brand.darkColor }}
-        >
-          {price}
-          {suffix && <span style={{ fontWeight: 400, opacity: 0.6 }}>{suffix}</span>}
+        <span className="inline-block text-white px-4 py-1.5 rounded-full"
+          style={{ fontSize: "13px", fontWeight: 600, backgroundColor: brand.darkColor }}>
+          {price}{suffix && <span style={{ fontWeight: 400, opacity: 0.6 }}>{suffix}</span>}
         </span>
       </div>
 
       {/* Add-on badge */}
       {isAddon && (
-        <span
-          className="inline-block px-3 py-1 rounded-full mb-4 uppercase tracking-[0.15em]"
-          style={{ fontSize: "10px", fontWeight: 600, backgroundColor: `${brand.primaryColor}15`, color: brand.primaryColor }}
-        >
+        <span className="inline-block px-3 py-1 rounded-full mb-4 uppercase tracking-[0.15em]"
+          style={{ fontSize: "10px", fontWeight: 600, backgroundColor: `${brand.primaryColor}15`, color: brand.primaryColor }}>
           Add-on
         </span>
       )}
 
       {/* Icon */}
-      <div
-        className="w-12 h-12 rounded-xl border flex items-center justify-center mb-5 transition-all duration-300"
-        style={{ backgroundColor: "#FAFAFA", borderColor: "#EBEBEB", color: brand.darkColor }}
-      >
+      <div className="w-12 h-12 rounded-xl border flex items-center justify-center mb-5 transition-all duration-300"
+        style={{ backgroundColor: "#FAFAFA", borderColor: "#EBEBEB", color: brand.darkColor }}>
         {icon}
       </div>
 
@@ -113,15 +220,13 @@ export function ServiceCard({
       {onNameEdit ? (
         <EditableText value={name} placeholder="Service name..." onSave={onNameEdit} as="h3"
           className="mb-3 tracking-tight"
-          style={{ fontSize: "20px", fontWeight: 700, lineHeight: 1.2, color: brand.darkColor }}
-        />
+          style={{ fontSize: "20px", fontWeight: 700, lineHeight: 1.2, color: brand.darkColor }} />
       ) : (
         <h3 className="mb-3 tracking-tight" style={{ fontSize: "20px", fontWeight: 700, lineHeight: 1.2, color: brand.darkColor }}>{name}</h3>
       )}
       {onDescriptionEdit ? (
         <EditableText value={description} placeholder="Click to add a description..." onSave={onDescriptionEdit} as="p"
-          className="text-[#888] mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6 }}
-        />
+          className="text-[#888] mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6 }} />
       ) : (
         <p className="text-[#888] mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6 }}>{description}</p>
       )}
@@ -136,61 +241,20 @@ export function ServiceCard({
             <li key={idx} className="group/del flex items-start gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: brand.primaryColor }} />
               {editable ? (
-                <EditableText
-                  value={item}
-                  placeholder="Deliverable..."
-                  onSave={(val) => handleItemEdit(idx, val)}
-                  as="span"
-                  className="text-[#555] flex-1"
-                  style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.5 }}
-                />
+                <EditableText value={item} placeholder="Deliverable..." onSave={(val) => handleItemEdit(idx, val)} as="span"
+                  className="text-[#555] flex-1" style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.5 }} />
               ) : (
                 <span className="text-[#555]" style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.5 }}>{item}</span>
               )}
               {editable && (
-                <button
-                  onClick={() => handleRemove(idx)}
+                <button onClick={() => handleRemove(idx)}
                   className="shrink-0 mt-0.5 opacity-0 group-hover/del:opacity-100 transition-opacity text-[#CCC] hover:text-red-400 print:hidden"
-                  title="Remove deliverable"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
+                  title="Remove deliverable"><X className="h-3.5 w-3.5" /></button>
               )}
             </li>
           ))}
         </ul>
-
-        {/* Add deliverable */}
-        {editable && (
-          <div className="mt-3 print:hidden">
-            {adding ? (
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={newItem}
-                  onChange={(e) => setNewItem(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') { setAdding(false); setNewItem(''); } }}
-                  placeholder="New deliverable..."
-                  autoFocus
-                  className="flex-1 border border-[#E0E0E0] rounded-lg px-3 py-1.5 text-[#555] outline-none focus:border-[#BBB]"
-                  style={{ fontSize: "13px" }}
-                />
-                <button onClick={handleAdd} className="text-[#888] hover:text-[#555] text-xs font-medium">Add</button>
-                <button onClick={() => { setAdding(false); setNewItem(''); }} className="text-[#CCC] hover:text-[#888]">
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setAdding(true)}
-                className="flex items-center gap-1.5 text-[#BBB] hover:text-[#888] transition-colors"
-                style={{ fontSize: "12px" }}
-              >
-                <Plus className="h-3 w-3" /> Add deliverable
-              </button>
-            )}
-          </div>
-        )}
+        {renderDeliverablesEdit()}
       </div>
     </motion.div>
   );

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "motion/react";
+import { useTemplate } from "./TemplateProvider";
 
 type PricingModel = "fixed" | "monthly" | "hourly" | "per_unit";
 
@@ -62,7 +63,6 @@ function autoGroupItems(items: PricingItem[]): PricingGroup[] {
     .sort(([a], [b]) => (GROUP_CONFIG[a as PricingModel]?.order ?? 99) - (GROUP_CONFIG[b as PricingModel]?.order ?? 99))
     .map(([model, groupItems]) => {
       const config = GROUP_CONFIG[model as PricingModel] || { label: model, sublabel: "" };
-      // Calculate subtotal from price strings
       const numericSum = groupItems.reduce((sum, item) => {
         const num = parseFloat(item.price.replace(/[^0-9.-]/g, ''));
         return sum + (isNaN(num) ? 0 : num);
@@ -83,50 +83,188 @@ function EditablePrice({ price, onEdit }: { price: string; onEdit?: (newPrice: n
   const numericValue = parseFloat(price.replace(/[^0-9.-]/g, ''));
 
   if (!onEdit) {
-    return <span className="text-[#0A0A0A] shrink-0 ml-4" style={{ fontSize: "16px", fontWeight: 600 }}>{price}</span>;
+    return <span className="shrink-0 ml-4" style={{ fontSize: "16px", fontWeight: 600 }}>{price}</span>;
   }
 
   if (editing) {
     return (
       <input
-        autoFocus
-        type="number"
-        defaultValue={numericValue}
+        autoFocus type="number" defaultValue={numericValue}
         onBlur={(e) => { setEditing(false); const v = parseFloat(e.target.value); if (!isNaN(v)) onEdit(v); }}
         onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditing(false); }}
-        className="w-28 rounded border border-[#DDD] bg-white px-2 py-1 text-right text-[15px] font-semibold text-[#0A0A0A] outline-none focus:border-[#fc956e] print:hidden"
+        className="w-28 rounded border border-[#DDD] bg-white px-2 py-1 text-right text-[15px] font-semibold outline-none focus:border-[#fc956e] print:hidden"
         style={{ fontFamily: "'Space Grotesk', sans-serif" }}
       />
     );
   }
 
   return (
-    <span
-      onClick={() => setEditing(true)}
-      className="text-[#0A0A0A] shrink-0 ml-4 cursor-pointer hover:underline hover:decoration-dashed hover:underline-offset-4 print:no-underline"
-      style={{ fontSize: "16px", fontWeight: 600 }}
-      title="Click to edit price"
-    >
+    <span onClick={() => setEditing(true)}
+      className="shrink-0 ml-4 cursor-pointer hover:underline hover:decoration-dashed hover:underline-offset-4 print:no-underline"
+      style={{ fontSize: "16px", fontWeight: 600 }} title="Click to edit price">
       {price}
     </span>
   );
 }
 
 export function PricingSummary({
-  items,
-  groups,
-  total,
-  totalBreakdown,
-  paymentTerms,
-  validUntil,
-  bundleSavings,
-  brandColor = "#fc956e",
-  onPriceEdit,
+  items, groups, total, totalBreakdown, paymentTerms, validUntil, bundleSavings, brandColor = "#fc956e", onPriceEdit,
 }: PricingSummaryProps) {
+  const template = useTemplate();
+  const isModern = template.id === 'modern';
   const uniqueModels = new Set(items.map((i) => i.model || "fixed"));
   const isMixed = uniqueModels.size > 1;
   const displayGroups = groups || (isMixed ? autoGroupItems(items) : null);
 
+  if (isModern) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="w-full"
+        style={{ fontFamily: "'Outfit', sans-serif" }}
+      >
+        <div className="rounded-3xl overflow-hidden" style={{ border: "2px solid #E5E7EB" }}>
+          {/* Header row */}
+          <div className="px-8 py-4 flex items-center justify-between" style={{ background: "#F9FAFB" }}>
+            <span className="uppercase tracking-[0.2em]" style={{ fontSize: "11px", fontWeight: 600, color: "#9CA3AF" }}>
+              Service
+            </span>
+            <span className="uppercase tracking-[0.2em]" style={{ fontSize: "11px", fontWeight: 600, color: "#9CA3AF" }}>
+              Investment
+            </span>
+          </div>
+
+          {/* Items */}
+          {(displayGroups
+            ? displayGroups.flatMap(g => g.items)
+            : items
+          ).map((item, idx) => {
+            const originalIdx = items.indexOf(item);
+            const dotOpacity = Math.min(0.3 + idx * 0.15, 1);
+            return (
+              <div key={idx} className="px-8 py-5 flex items-center justify-between"
+                style={{ borderTop: "1px dashed #E5E7EB" }}>
+                <div className="flex items-center gap-3">
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: `rgba(37,99,235,${dotOpacity})` }} />
+                  <div>
+                    <span className="block" style={{ fontSize: "16px", fontWeight: 600, color: "#1E1B4B" }}>
+                      {item.service}
+                      {item.isAddon && (
+                        <span className="ml-2 uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600, color: "#34D399" }}>
+                          Add-on
+                        </span>
+                      )}
+                      {item.isBundled && (
+                        <span className="ml-2 uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600, color: "#2563EB" }}>
+                          Bundled
+                        </span>
+                      )}
+                    </span>
+                    {item.note && (
+                      <span className="block mt-0.5" style={{ fontSize: "13px", fontWeight: 400, color: "#D1D5DB" }}>
+                        {item.note}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <span style={{ fontSize: "16px", fontWeight: 700, color: "#1E1B4B" }}>
+                  {onPriceEdit ? (
+                    <EditablePrice price={item.price} onEdit={(v) => onPriceEdit(originalIdx, v)} />
+                  ) : item.price}
+                </span>
+              </div>
+            );
+          })}
+
+          {/* Bundle savings */}
+          {bundleSavings && (
+            <div className="px-8 py-4 flex items-center justify-between" style={{ borderTop: "1px dashed #E5E7EB", background: "#34D39908" }}>
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full" style={{ background: "#34D399" }} />
+                <span style={{ fontSize: "14px", fontWeight: 500, color: "#1E1B4B" }}>
+                  {bundleSavings.bundleName} bundle discount
+                </span>
+                <span className="line-through" style={{ fontSize: "13px", fontWeight: 400, color: "#D1D5DB" }}>
+                  {bundleSavings.individualTotal}
+                </span>
+              </div>
+              <span style={{ fontSize: "14px", fontWeight: 700, color: "#34D399" }}>
+                {bundleSavings.savings}
+              </span>
+            </div>
+          )}
+
+          {/* Total row - gradient */}
+          <div className="px-8 py-7 flex items-center justify-between"
+            style={{ background: "linear-gradient(135deg, #2563EB, #34D399)" }}>
+            <div>
+              <span style={{ fontSize: "13px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(255,255,255,0.7)" }}>
+                Total Investment
+              </span>
+              {totalBreakdown && (
+                <span className="block mt-1" style={{ fontSize: "13px", fontWeight: 400, color: "rgba(255,255,255,0.5)" }}>
+                  {totalBreakdown}
+                </span>
+              )}
+            </div>
+            <span style={{ fontSize: "36px", fontWeight: 800, color: "white", fontFamily: "'Fraunces', serif" }}>
+              {total}
+            </span>
+          </div>
+        </div>
+
+        {/* Payment terms */}
+        {paymentTerms && paymentTerms.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="mt-8 rounded-2xl p-8"
+            style={{ background: "white", border: "2px dashed #E5E7EB" }}
+          >
+            <h4 className="mb-4 uppercase tracking-[0.15em]"
+              style={{ fontSize: "12px", fontWeight: 600, color: "#1E1B4B" }}>
+              Payment Terms
+            </h4>
+            <div className="space-y-3">
+              {paymentTerms.map((term, idx) => {
+                const termText = typeof term === "string" ? term : term.label;
+                const termAmount = typeof term === "string" ? undefined : term.amount;
+                return (
+                  <div key={idx} className="flex items-start gap-3">
+                    <span className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                      style={{ fontSize: "11px", fontWeight: 700, backgroundColor: "#2563EB12", color: "#2563EB" }}>
+                      {idx + 1}
+                    </span>
+                    <div className="flex-1 flex items-start justify-between gap-4">
+                      <span style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6, color: "#6B7280" }}>{termText}</span>
+                      {termAmount && (
+                        <span className="shrink-0" style={{ fontSize: "14px", fontWeight: 600, color: "#1E1B4B" }}>{termAmount}</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Valid until */}
+        {validUntil && (
+          <div className="mt-6 text-center">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full"
+              style={{ background: "#34D39915", color: "#34D399", fontSize: "13px", fontWeight: 600 }}>
+              Valid until {validUntil}
+            </span>
+          </div>
+        )}
+      </motion.div>
+    );
+  }
+
+  // Classic rendering (unchanged)
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -138,12 +276,8 @@ export function PricingSummary({
       <div className="border border-[#EBEBEB] rounded-2xl overflow-hidden">
         {/* Column headers */}
         <div className="bg-[#FAFAFA] px-8 py-4 flex items-center justify-between border-b border-[#EBEBEB]">
-          <span className="text-[#999] uppercase tracking-[0.2em]" style={{ fontSize: "11px", fontWeight: 600 }}>
-            Service
-          </span>
-          <span className="text-[#999] uppercase tracking-[0.2em]" style={{ fontSize: "11px", fontWeight: 600 }}>
-            Investment
-          </span>
+          <span className="text-[#999] uppercase tracking-[0.2em]" style={{ fontSize: "11px", fontWeight: 600 }}>Service</span>
+          <span className="text-[#999] uppercase tracking-[0.2em]" style={{ fontSize: "11px", fontWeight: 600 }}>Investment</span>
         </div>
 
         {displayGroups
@@ -153,85 +287,46 @@ export function PricingSummary({
                   <div className="flex items-center gap-3">
                     <div className="w-1 h-6 rounded-full" style={{ backgroundColor: brandColor }} />
                     <div>
-                      <span className="text-[#0A0A0A] block" style={{ fontSize: "13px", fontWeight: 700 }}>
-                        {group.label}
-                      </span>
-                      <span className="text-[#BBB] block" style={{ fontSize: "11px", fontWeight: 400 }}>
-                        {group.sublabel}
-                      </span>
+                      <span className="text-[#0A0A0A] block" style={{ fontSize: "13px", fontWeight: 700 }}>{group.label}</span>
+                      <span className="text-[#BBB] block" style={{ fontSize: "11px", fontWeight: 400 }}>{group.sublabel}</span>
                     </div>
                   </div>
                 </div>
-
                 {group.items.map((item, idx) => {
                   const originalIdx = items.indexOf(item);
                   return (
-                  <div
-                    key={idx}
-                    className={`px-8 py-5 flex items-center justify-between ${
-                      idx < group.items.length - 1 ? "border-b border-[#F0F0F0]" : ""
-                    } hover:bg-[#FAFAFA]/50 transition-colors`}
-                  >
-                    <div className="pl-4">
-                      <span className="text-[#0A0A0A] block" style={{ fontSize: "16px", fontWeight: 600 }}>
-                        {item.service}
-                        {item.isAddon && (
-                          <span className="ml-2 text-[#999] uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600 }}>
-                            Add-on
-                          </span>
-                        )}
-                        {item.isBundled && (
-                          <span className="ml-2 uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600, color: brandColor }}>
-                            Bundled
-                          </span>
-                        )}
-                      </span>
-                      {item.note && (
-                        <span className="text-[#BBB] block mt-0.5" style={{ fontSize: "13px", fontWeight: 400 }}>
-                          {item.note}
+                    <div key={idx}
+                      className={`px-8 py-5 flex items-center justify-between ${idx < group.items.length - 1 ? "border-b border-[#F0F0F0]" : ""} hover:bg-[#FAFAFA]/50 transition-colors`}>
+                      <div className="pl-4">
+                        <span className="text-[#0A0A0A] block" style={{ fontSize: "16px", fontWeight: 600 }}>
+                          {item.service}
+                          {item.isAddon && <span className="ml-2 text-[#999] uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600 }}>Add-on</span>}
+                          {item.isBundled && <span className="ml-2 uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600, color: brandColor }}>Bundled</span>}
                         </span>
-                      )}
+                        {item.note && <span className="text-[#BBB] block mt-0.5" style={{ fontSize: "13px", fontWeight: 400 }}>{item.note}</span>}
+                      </div>
+                      <EditablePrice price={item.price} onEdit={onPriceEdit ? (v) => onPriceEdit(originalIdx, v) : undefined} />
                     </div>
-                    <EditablePrice price={item.price} onEdit={onPriceEdit ? (v) => onPriceEdit(originalIdx, v) : undefined} />
-                  </div>
                   );
                 })}
-
                 {group.subtotal && (
                   <div className="px-8 py-3 bg-[#FAFAFA] border-t border-[#EBEBEB] flex items-center justify-between">
-                    <span className="text-[#999] uppercase tracking-[0.15em] pl-4" style={{ fontSize: "11px", fontWeight: 600 }}>
-                      Subtotal — {group.label}
-                    </span>
-                    <span className="text-[#0A0A0A]" style={{ fontSize: "16px", fontWeight: 700 }}>
-                      {group.subtotal}
-                    </span>
+                    <span className="text-[#999] uppercase tracking-[0.15em] pl-4" style={{ fontSize: "11px", fontWeight: 600 }}>Subtotal — {group.label}</span>
+                    <span className="text-[#0A0A0A]" style={{ fontSize: "16px", fontWeight: 700 }}>{group.subtotal}</span>
                   </div>
                 )}
-
                 {gIdx < displayGroups.length - 1 && <div className="border-b-2 border-[#EBEBEB]" />}
               </div>
             ))
           : items.map((item, idx) => (
-              <div
-                key={idx}
-                className={`px-8 py-5 flex items-center justify-between ${
-                  idx < items.length - 1 ? "border-b border-[#F0F0F0]" : ""
-                } hover:bg-[#FAFAFA]/50 transition-colors`}
-              >
+              <div key={idx}
+                className={`px-8 py-5 flex items-center justify-between ${idx < items.length - 1 ? "border-b border-[#F0F0F0]" : ""} hover:bg-[#FAFAFA]/50 transition-colors`}>
                 <div>
                   <span className="text-[#0A0A0A] block" style={{ fontSize: "16px", fontWeight: 600 }}>
                     {item.service}
-                    {item.isAddon && (
-                      <span className="ml-2 text-[#999] uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600 }}>
-                        Add-on
-                      </span>
-                    )}
+                    {item.isAddon && <span className="ml-2 text-[#999] uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600 }}>Add-on</span>}
                   </span>
-                  {item.note && (
-                    <span className="text-[#BBB] block mt-0.5" style={{ fontSize: "13px", fontWeight: 400 }}>
-                      {item.note}
-                    </span>
-                  )}
+                  {item.note && <span className="text-[#BBB] block mt-0.5" style={{ fontSize: "13px", fontWeight: 400 }}>{item.note}</span>}
                 </div>
                 <EditablePrice price={item.price} onEdit={onPriceEdit ? (v) => onPriceEdit(idx, v) : undefined} />
               </div>
@@ -239,80 +334,45 @@ export function PricingSummary({
 
         {/* Bundle savings */}
         {bundleSavings && (
-          <div
-            className="px-8 py-4 flex items-center justify-between border-t border-[#EBEBEB]"
-            style={{ backgroundColor: `${brandColor}08` }}
-          >
+          <div className="px-8 py-4 flex items-center justify-between border-t border-[#EBEBEB]"
+            style={{ backgroundColor: `${brandColor}08` }}>
             <div className="flex items-center gap-3">
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: brandColor }} />
-              <span className="text-[#555]" style={{ fontSize: "14px", fontWeight: 500 }}>
-                {bundleSavings.bundleName} bundle discount
-              </span>
-              <span className="text-[#BBB] line-through" style={{ fontSize: "13px", fontWeight: 400 }}>
-                {bundleSavings.individualTotal}
-              </span>
+              <span className="text-[#555]" style={{ fontSize: "14px", fontWeight: 500 }}>{bundleSavings.bundleName} bundle discount</span>
+              <span className="text-[#BBB] line-through" style={{ fontSize: "13px", fontWeight: 400 }}>{bundleSavings.individualTotal}</span>
             </div>
-            <span style={{ fontSize: "14px", fontWeight: 700, color: brandColor }}>
-              {bundleSavings.savings}
-            </span>
+            <span style={{ fontSize: "14px", fontWeight: 700, color: brandColor }}>{bundleSavings.savings}</span>
           </div>
         )}
 
         {/* Total bar */}
         <div className="bg-[#0A0A0A] px-8 py-6 flex items-center justify-between">
           <div>
-            <span className="text-white/60 uppercase tracking-[0.2em] block" style={{ fontSize: "12px", fontWeight: 500 }}>
-              Total Investment
-            </span>
-            {totalBreakdown && (
-              <span className="text-white/40 block mt-1" style={{ fontSize: "13px", fontWeight: 400 }}>
-                {totalBreakdown}
-              </span>
-            )}
+            <span className="text-white/60 uppercase tracking-[0.2em] block" style={{ fontSize: "12px", fontWeight: 500 }}>Total Investment</span>
+            {totalBreakdown && <span className="text-white/40 block mt-1" style={{ fontSize: "13px", fontWeight: 400 }}>{totalBreakdown}</span>}
           </div>
-          <span className="text-white" style={{ fontSize: "32px", fontWeight: 700 }}>
-            {total}
-          </span>
+          <span className="text-white" style={{ fontSize: "32px", fontWeight: 700 }}>{total}</span>
         </div>
       </div>
 
       {/* Payment terms */}
       {paymentTerms && paymentTerms.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
-          className="mt-8 bg-[#FAFAFA] rounded-2xl p-8 border border-[#EBEBEB]"
-        >
-          <h4 className="text-[#0A0A0A] mb-4 uppercase tracking-[0.15em]" style={{ fontSize: "12px", fontWeight: 600 }}>
-            Payment Terms
-          </h4>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3, duration: 0.5 }}
+          className="mt-8 bg-[#FAFAFA] rounded-2xl p-8 border border-[#EBEBEB]">
+          <h4 className="text-[#0A0A0A] mb-4 uppercase tracking-[0.15em]" style={{ fontSize: "12px", fontWeight: 600 }}>Payment Terms</h4>
           <div className="space-y-3">
             {paymentTerms.map((term, idx) => {
               const termText = typeof term === "string" ? term : term.label;
               const termAmount = typeof term === "string" ? undefined : term.amount;
               return (
                 <div key={idx} className="flex items-start gap-3">
-                  <span
-                    className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-                    style={{
-                      fontSize: "11px",
-                      fontWeight: 700,
-                      backgroundColor: `${brandColor}15`,
-                      color: brandColor,
-                    }}
-                  >
+                  <span className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                    style={{ fontSize: "11px", fontWeight: 700, backgroundColor: `${brandColor}15`, color: brandColor }}>
                     {idx + 1}
                   </span>
                   <div className="flex-1 flex items-start justify-between gap-4">
-                    <span className="text-[#555]" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6 }}>
-                      {termText}
-                    </span>
-                    {termAmount && (
-                      <span className="text-[#0A0A0A] shrink-0" style={{ fontSize: "14px", fontWeight: 600 }}>
-                        {termAmount}
-                      </span>
-                    )}
+                    <span className="text-[#555]" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6 }}>{termText}</span>
+                    {termAmount && <span className="text-[#0A0A0A] shrink-0" style={{ fontSize: "14px", fontWeight: 600 }}>{termAmount}</span>}
                   </div>
                 </div>
               );
@@ -326,9 +386,7 @@ export function PricingSummary({
         <div className="mt-6 text-center">
           <span className="text-[#BBB]" style={{ fontSize: "13px", fontWeight: 400 }}>
             This proposal is valid until{" "}
-            <span style={{ fontWeight: 600, color: brandColor }}>
-              {validUntil}
-            </span>
+            <span style={{ fontWeight: 600, color: brandColor }}>{validUntil}</span>
           </span>
         </div>
       )}
