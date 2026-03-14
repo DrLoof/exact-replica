@@ -321,6 +321,28 @@ export default function ProposalEditor() {
     }
   };
 
+  const updateCustomColor = async (key: string, value: string) => {
+    const updated = { ...(customColors || {}), [key]: value };
+    setCustomColors(updated);
+    if (proposal) {
+      await supabase.from('proposals').update({ custom_colors: updated } as any).eq('id', proposal.id);
+    }
+  };
+
+  const resetColors = async () => {
+    setCustomColors(null);
+    setColorPickerOpen(null);
+    if (proposal) {
+      await supabase.from('proposals').update({ custom_colors: null } as any).eq('id', proposal.id);
+    }
+  };
+
+  const PRESET_COLORS = ['#E8825C', '#2563EB', '#34D399', '#f9b564', '#8B5CF6', '#EC4899', '#14B8A6', '#F59E0B', '#EF4444', '#1E1B4B'];
+
+  const currentTemplate = templates[templateId] || templates.classic;
+  const activePrimary = customColors?.primaryAccent || currentTemplate.colors.primaryAccent;
+  const activeSecondary = customColors?.secondaryAccent || currentTemplate.colors.secondaryAccent;
+
   const getServicePrice = (s: ProposalService) => {
     if (s.price_override != null) return s.price_override;
     const mod = s.module;
