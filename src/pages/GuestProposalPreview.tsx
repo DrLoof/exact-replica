@@ -863,7 +863,7 @@ export default function GuestProposalPreview() {
               )}
 
               {/* Section 6: Testimonials */}
-              {!hiddenSections.has(6) && testimonials.length > 0 && (
+              {!deletedSections.has(6) && testimonials.length > 0 && (
                 <div id="guest-section-6" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="07">
                     <SectionHeader number="06" title="What Our Clients Say" subtitle="Proof of impact" />
