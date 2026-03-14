@@ -605,7 +605,19 @@ export default function GuestProposalPreview() {
 
         {/* Proposal Content */}
         <div className="flex-1">
-          <TemplateProvider templateId={templateId} customColors={customColors}>
+          {/* Pro template preview banner */}
+          {isPreviewingPro && (
+            <div className="sticky top-[57px] z-20 flex items-center justify-center gap-3 bg-foreground/90 text-background px-4 py-2 text-xs backdrop-blur print:hidden">
+              <span>Previewing <strong>{currentTemplate.name}</strong> template. Upgrade to send proposals with this template.</span>
+              <button
+                onClick={() => navigate('/pricing')}
+                className="rounded-md bg-background/20 hover:bg-background/30 px-3 py-1 text-xs font-medium transition-colors"
+              >
+                See plans
+              </button>
+            </div>
+          )}
+          <TemplateProvider templateId={templateId} customColors={isPreviewingPro ? null : customColors}>
           <BrandProvider brand={{
             agencyName: agencyName.toUpperCase(),
             agencyFullName: agencyName,
