@@ -114,6 +114,7 @@ export default function ProposalEditor() {
   const [addServiceSearch, setAddServiceSearch] = useState('');
   const [availableModules, setAvailableModules] = useState<any[]>([]);
   const [regenerating, setRegenerating] = useState(false);
+  const [templateId, setTemplateId] = useState<string>('classic');
   const currencySymbol = agency?.currency_symbol || '$';
 
   // Warn user before leaving if an editable field is focused (unsaved inline edit)
