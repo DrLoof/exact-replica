@@ -416,13 +416,13 @@ export function PricingSummary({
 
           {/* Bundle savings */}
           {bundleSavings && (
-            <div className="px-8 py-4 flex items-center justify-between" style={{ borderTop: "1px dashed #E5E7EB", background: `${secondary}08` }}>
+            <div className="px-8 py-4 flex items-center justify-between" style={{ borderTop: `1px dashed ${template.colors.border}`, background: `${secondary}08` }}>
               <div className="flex items-center gap-3">
                 <span className="w-2 h-2 rounded-full" style={{ background: secondary }} />
                 <span style={{ fontSize: "14px", fontWeight: 500, color: dark }}>
                   {bundleSavings.bundleName} bundle discount
                 </span>
-                <span className="line-through" style={{ fontSize: "13px", fontWeight: 400, color: "#D1D5DB" }}>
+                <span className="line-through" style={{ fontSize: "13px", fontWeight: 400, color: template.colors.textFaint }}>
                   {bundleSavings.individualTotal}
                 </span>
               </div>
