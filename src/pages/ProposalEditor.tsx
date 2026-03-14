@@ -579,7 +579,7 @@ export default function ProposalEditor() {
 
         {/* Proposal Content — rendered with template components */}
          <div className="flex-1 overflow-y-auto">
-          <TemplateProvider templateId={(proposal as any).template_id || 'classic'}>
+          <TemplateProvider templateId={templateId} customColors={customColors}>
           <BrandProvider brand={{
             agencyName: (agency?.name || 'Agency').toUpperCase(),
             agencyFullName: agency?.name || 'Agency',
