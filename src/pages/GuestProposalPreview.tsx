@@ -54,15 +54,17 @@ export default function GuestProposalPreview() {
   const activePrimary = customColors?.primaryAccent || currentTemplate.colors.primaryAccent;
   const activeSecondary = customColors?.secondaryAccent || currentTemplate.colors.secondaryAccent;
 
+  // Free users can preview Pro templates but can't save/send with them
+  const isPreviewingPro = !!(templates[templateId]?.isPro);
+
   const switchTemplate = (newId: string) => {
     const tmpl = templates[newId];
     if (!tmpl) return;
-    if (tmpl.isPro) {
-      toast.error('This template is available on the Pro plan.');
-      return;
-    }
     setTemplateId(newId);
-    saveToLocalStorage({ templateId: newId });
+    // Only save non-Pro templates to localStorage
+    if (!tmpl.isPro) {
+      saveToLocalStorage({ templateId: newId });
+    }
   };
 
   const updateCustomColor = (key: string, value: string) => {
