@@ -722,8 +722,8 @@ export default function ProposalNew() {
           setNewContactName={setNewContactName}
           newClientWebsite={newClientWebsite}
           setNewClientWebsite={setNewClientWebsite}
-          clientChallenge={clientChallenge}
-          setClientChallenge={setClientChallenge}
+          clientChallenges={clientChallenges}
+          setClientChallenges={setClientChallenges}
           clientChallengeOther={clientChallengeOther}
           setClientChallengeOther={setClientChallengeOther}
           clientGoal={clientGoal}
