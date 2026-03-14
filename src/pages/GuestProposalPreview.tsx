@@ -54,15 +54,17 @@ export default function GuestProposalPreview() {
   const activePrimary = customColors?.primaryAccent || currentTemplate.colors.primaryAccent;
   const activeSecondary = customColors?.secondaryAccent || currentTemplate.colors.secondaryAccent;
 
+  // Free users can preview Pro templates but can't save/send with them
+  const isPreviewingPro = !!(templates[templateId]?.isPro);
+
   const switchTemplate = (newId: string) => {
     const tmpl = templates[newId];
     if (!tmpl) return;
-    if (tmpl.isPro) {
-      toast.error('This template is available on the Pro plan.');
-      return;
-    }
     setTemplateId(newId);
-    saveToLocalStorage({ templateId: newId });
+    // Only save non-Pro templates to localStorage
+    if (!tmpl.isPro) {
+      saveToLocalStorage({ templateId: newId });
+    }
   };
 
   const updateCustomColor = (key: string, value: string) => {
@@ -553,77 +555,31 @@ export default function GuestProposalPreview() {
             </div>
           </div>
 
-          {/* Color Customizer */}
+          {/* Color Customizer — locked for free users */}
           <div className="mb-3 pb-3 border-b border-border">
-            <span className="block px-2 mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Colors</span>
-            <div className="flex items-center gap-3 px-2 relative" ref={colorPickerRef}>
+            <div className="flex items-center gap-2 px-2 mb-2">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Colors</span>
+              <span className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground/60 bg-muted rounded px-1.5 py-0.5">Starter</span>
+            </div>
+            <div className="flex items-center gap-3 px-2 relative">
               <div className="flex flex-col items-center gap-1">
                 <button
-                  onClick={() => { setColorPickerOpen(colorPickerOpen === 'primaryAccent' ? null : 'primaryAccent'); setHexInput(activePrimary); }}
-                  className="w-6 h-6 rounded-full border-2 border-border hover:scale-110 transition-transform"
+                  onClick={() => toast('Upgrade to Starter to customize proposal colors.', { action: { label: 'See plans', onClick: () => navigate('/pricing') } })}
+                  className="w-6 h-6 rounded-full border-2 border-border opacity-50 cursor-not-allowed"
                   style={{ background: activePrimary }}
-                  title="Primary accent"
+                  title="Primary accent — upgrade to customize"
                 />
-                <span className="text-muted-foreground" style={{ fontSize: '9px' }}>Primary</span>
+                <span className="text-muted-foreground/50" style={{ fontSize: '9px' }}>Primary</span>
               </div>
               <div className="flex flex-col items-center gap-1">
                 <button
-                  onClick={() => { setColorPickerOpen(colorPickerOpen === 'secondaryAccent' ? null : 'secondaryAccent'); setHexInput(activeSecondary); }}
-                  className="w-6 h-6 rounded-full border-2 border-border hover:scale-110 transition-transform"
+                  onClick={() => toast('Upgrade to Starter to customize proposal colors.', { action: { label: 'See plans', onClick: () => navigate('/pricing') } })}
+                  className="w-6 h-6 rounded-full border-2 border-border opacity-50 cursor-not-allowed"
                   style={{ background: activeSecondary }}
-                  title="Secondary accent"
+                  title="Secondary accent — upgrade to customize"
                 />
-                <span className="text-muted-foreground" style={{ fontSize: '9px' }}>Secondary</span>
+                <span className="text-muted-foreground/50" style={{ fontSize: '9px' }}>Secondary</span>
               </div>
-              {customColors && (
-                <button onClick={resetColors} className="text-muted-foreground hover:text-foreground ml-auto" style={{ fontSize: '10px' }}>
-                  Reset
-                </button>
-              )}
-              {colorPickerOpen && (
-                <div className="absolute left-0 top-full mt-2 z-50 bg-popover border border-border rounded-xl p-3 shadow-lg" style={{ width: '200px' }}>
-                  <div className="grid grid-cols-5 gap-2 mb-3">
-                    {PRESET_COLORS.map((color) => (
-                      <button
-                        key={color}
-                        onClick={() => { updateCustomColor(colorPickerOpen, color); setColorPickerOpen(null); }}
-                        className={cn(
-                          'w-7 h-7 rounded-full border-2 transition-transform hover:scale-110',
-                          (colorPickerOpen === 'primaryAccent' ? activePrimary : activeSecondary) === color ? 'border-foreground scale-110' : 'border-transparent'
-                        )}
-                        style={{ background: color }}
-                      />
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={hexInput}
-                      onChange={(e) => setHexInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && /^#[0-9A-Fa-f]{6}$/.test(hexInput)) {
-                          updateCustomColor(colorPickerOpen, hexInput);
-                          setColorPickerOpen(null);
-                        }
-                      }}
-                      placeholder="#000000"
-                      className="flex-1 border border-border rounded-md px-2 py-1 text-xs bg-background text-foreground outline-none focus:border-brand"
-                      style={{ fontSize: '11px' }}
-                    />
-                    <button
-                      onClick={() => {
-                        if (/^#[0-9A-Fa-f]{6}$/.test(hexInput)) {
-                          updateCustomColor(colorPickerOpen, hexInput);
-                          setColorPickerOpen(null);
-                        }
-                      }}
-                      className="text-xs text-brand hover:text-brand-hover font-medium"
-                    >
-                      OK
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
@@ -649,7 +605,19 @@ export default function GuestProposalPreview() {
 
         {/* Proposal Content */}
         <div className="flex-1">
-          <TemplateProvider templateId={templateId} customColors={customColors}>
+          {/* Pro template preview banner */}
+          {isPreviewingPro && (
+            <div className="sticky top-[57px] z-20 flex items-center justify-center gap-3 bg-foreground/90 text-background px-4 py-2 text-xs backdrop-blur print:hidden">
+              <span>Previewing <strong>{currentTemplate.name}</strong> template. Upgrade to send proposals with this template.</span>
+              <button
+                onClick={() => navigate('/pricing')}
+                className="rounded-md bg-background/20 hover:bg-background/30 px-3 py-1 text-xs font-medium transition-colors"
+              >
+                See plans
+              </button>
+            </div>
+          )}
+          <TemplateProvider templateId={templateId} customColors={isPreviewingPro ? null : customColors}>
           <BrandProvider brand={{
             agencyName: agencyName.toUpperCase(),
             agencyFullName: agencyName,

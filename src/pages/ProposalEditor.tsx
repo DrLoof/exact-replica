@@ -322,10 +322,7 @@ export default function ProposalEditor() {
   const switchTemplate = async (newId: string) => {
     const tmpl = templates[newId];
     if (!tmpl) return;
-    if (tmpl.isPro) {
-      toast.error('This template is available on the Pro plan. Upgrade to unlock all templates.');
-      return;
-    }
+    // Logged-in users can use all templates (treat as paid for now)
     setTemplateId(newId);
     if (proposal) {
       await supabase.from('proposals').update({ template_id: newId }).eq('id', proposal.id);
