@@ -920,7 +920,7 @@ export default function ProposalEditor() {
               </SectionWrapper>}
 
               {/* Section 5: Terms */}
-              <SectionWrapper idx={5} hidden={hiddenSections.has(5)} onToggle={toggleSection} label="Terms & Conditions">
+              {!deletedSections.has(5) && <SectionWrapper idx={5} onDelete={deleteSection} label="Terms & Conditions">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="06">
                     <SectionHeader number="05" title="Terms & Conditions"
