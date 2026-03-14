@@ -215,7 +215,7 @@ export function ClientZone({
                           type="button"
                           onClick={handleAutoFill}
                           disabled={scraping}
-                          className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1 rounded-md bg-foreground/5 px-2 py-1 text-[10px] font-medium text-foreground/60 hover:bg-foreground/10 disabled:opacity-50"
+                          className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1 rounded-md bg-brand px-2.5 py-1 text-[10px] font-medium text-white hover:bg-brand/90 disabled:opacity-50"
                         >
                           {scraping ? <Loader2 className="h-3 w-3 animate-spin" /> : <Globe className="h-3 w-3" />}
                           {scraping ? 'Scanning...' : 'Auto-fill'}
