@@ -42,6 +42,52 @@ export default function GuestProposalPreview() {
   const editCountRef = useRef(0);
   const startTimeRef = useRef(Date.now());
 
+  // Template & color state
+  const [templateId, setTemplateId] = useState<string>('classic');
+  const [customColors, setCustomColors] = useState<Record<string, string> | null>(null);
+  const [colorPickerOpen, setColorPickerOpen] = useState<string | null>(null);
+  const [hexInput, setHexInput] = useState('');
+  const colorPickerRef = useRef<HTMLDivElement>(null);
+
+  const PRESET_COLORS = ['#E8825C', '#2563EB', '#34D399', '#f9b564', '#8B5CF6', '#EC4899', '#14B8A6', '#F59E0B', '#EF4444', '#1E1B4B'];
+  const currentTemplate = templates[templateId] || templates.classic;
+  const activePrimary = customColors?.primaryAccent || currentTemplate.colors.primaryAccent;
+  const activeSecondary = customColors?.secondaryAccent || currentTemplate.colors.secondaryAccent;
+
+  const switchTemplate = (newId: string) => {
+    const tmpl = templates[newId];
+    if (!tmpl) return;
+    if (tmpl.isPro) {
+      toast.error('This template is available on the Pro plan.');
+      return;
+    }
+    setTemplateId(newId);
+    saveToLocalStorage({ templateId: newId });
+  };
+
+  const updateCustomColor = (key: string, value: string) => {
+    const updated = { ...(customColors || {}), [key]: value };
+    setCustomColors(updated);
+    saveToLocalStorage({ customColors: updated });
+  };
+
+  const resetColors = () => {
+    setCustomColors(null);
+    setColorPickerOpen(null);
+    saveToLocalStorage({ customColors: null });
+  };
+
+  // Close color picker on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (colorPickerRef.current && !colorPickerRef.current.contains(e.target as Node)) {
+        setColorPickerOpen(null);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   // Editable local state
   const [proposalTitle, setProposalTitle] = useState('');
   const [executiveSummary, setExecutiveSummary] = useState('');
