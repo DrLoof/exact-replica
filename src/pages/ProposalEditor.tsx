@@ -738,7 +738,9 @@ export default function ProposalEditor() {
               <SectionWrapper idx={3} hidden={hiddenSections.has(3)} onToggle={toggleSection} label="Timeline">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="04">
-                    <SectionHeader number="03" title="Timeline" subtitle="How we'll get there" />
+                    <SectionHeader number="03" title="Timeline" subtitle="How we'll get there"
+                      onTitleEdit={(val) => updateField('title', val)}
+                      onSubtitleEdit={(val) => updateField('subtitle', val)} />
                     
                     {/* Stat bar */}
                     {(() => {
