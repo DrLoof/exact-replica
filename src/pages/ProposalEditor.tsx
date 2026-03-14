@@ -312,10 +312,21 @@ export default function ProposalEditor() {
     setRegenerating(false);
   };
 
-  const toggleSection = (idx: number) => {
-    setHiddenSections(prev => {
+  const deleteSection = (idx: number) => {
+    setDeletedSections(prev => {
       const next = new Set(prev);
-      if (next.has(idx)) next.delete(idx); else next.add(idx);
+      next.add(idx);
+      return next;
+    });
+    toast.success(`${sectionNames[idx]} page removed`, {
+      action: { label: 'Undo', onClick: () => restoreSection(idx) },
+    });
+  };
+
+  const restoreSection = (idx: number) => {
+    setDeletedSections(prev => {
+      const next = new Set(prev);
+      next.delete(idx);
       return next;
     });
   };
