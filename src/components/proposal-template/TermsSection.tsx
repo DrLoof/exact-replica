@@ -15,9 +15,81 @@ export function TermsSection({ clauses, onClauseEdit }: TermsSectionProps) {
   const template = useTemplate();
   const isModern = template.id === 'modern';
   const isElegant = template.id === 'elegant';
+  const isSoft = template.id === 'soft';
   const accent = template.colors.primaryAccent;
   const dark = template.colors.primaryDark;
-  const [openIndex, setOpenIndex] = useState<number | null>(isModern || isElegant ? 0 : null);
+  const [openIndex, setOpenIndex] = useState<number | null>(isModern || isElegant || isSoft ? 0 : null);
+
+  if (isSoft) {
+    const border = template.colors.border;
+    const bg = template.colors.background;
+    const faint = template.colors.textFaint;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="rounded-2xl overflow-hidden"
+        style={{ fontFamily: "'DM Sans', sans-serif", border: `1px solid ${border}`, background: "white" }}
+      >
+        {clauses.map((clause, idx) => {
+          const isOpen = openIndex === idx;
+          return (
+            <div key={idx} style={idx < clauses.length - 1 ? { borderBottom: `1px solid ${border}` } : {}}>
+              <button
+                onClick={() => setOpenIndex(isOpen ? null : idx)}
+                className="w-full flex items-center gap-4 px-6 py-5 text-left transition-colors"
+                style={{ background: isOpen ? `${bg}66` : "transparent" }}
+                onMouseEnter={(e) => { if (!isOpen) e.currentTarget.style.background = `${bg}66`; }}
+                onMouseLeave={(e) => { if (!isOpen) e.currentTarget.style.background = isOpen ? `${bg}66` : "transparent"; }}
+              >
+                <span className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200"
+                  style={{
+                    fontSize: "12px", fontWeight: 700,
+                    backgroundColor: isOpen ? accent : bg,
+                    color: isOpen ? "#FFFFFF" : accent,
+                  }}>
+                  {idx + 1}
+                </span>
+                <span className="flex-1" style={{
+                  fontSize: "16px", fontWeight: isOpen ? 600 : 500,
+                  color: isOpen ? dark : template.colors.textBody,
+                }}>
+                  {onClauseEdit ? (
+                    <EditableText value={clause.title} placeholder="Clause title..." onSave={(val) => onClauseEdit(idx, 'title', val)} as="span" />
+                  ) : clause.title}
+                </span>
+                <ChevronDown size={16}
+                  className="shrink-0 transition-transform duration-200"
+                  style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", color: isOpen ? accent : faint }} />
+              </button>
+              <AnimatePresence>
+                {isOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-6 pb-5" style={{ paddingLeft: "68px" }}>
+                      {onClauseEdit ? (
+                        <EditableText value={clause.content} placeholder="Clause content..." onSave={(val) => onClauseEdit(idx, 'content', val)} as="p"
+                          style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textBody }} />
+                      ) : (
+                        <p style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textBody }}>{clause.content}</p>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
+      </motion.div>
+    );
+  }
 
   if (isElegant) {
     const border = template.colors.border;

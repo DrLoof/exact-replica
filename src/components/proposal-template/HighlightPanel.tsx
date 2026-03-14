@@ -17,9 +17,71 @@ export function HighlightPanel({
   const template = useTemplate();
   const isModern = template.id === 'modern';
   const isElegant = template.id === 'elegant';
+  const isSoft = template.id === 'soft';
   const accent = template.colors.primaryAccent;
   const secondary = template.colors.secondaryAccent;
   const dark = template.colors.primaryDark;
+
+  if (isSoft) {
+    const softStyles = {
+      default: {
+        bg: template.colors.background, border: `1px solid ${accent}26`,
+        textColor: dark, labelColor: template.colors.textBody,
+        accentColor: accent,
+      },
+      accent: {
+        bg: accent, border: "none",
+        textColor: "white", labelColor: "rgba(255,255,255,0.6)",
+        accentColor: "white",
+      },
+      dark: {
+        bg: dark, border: "none",
+        textColor: "white", labelColor: "rgba(255,255,255,0.6)",
+        accentColor: "white",
+      },
+    };
+    const ss = softStyles[variant];
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="rounded-2xl p-8 lg:p-10"
+        style={{ backgroundColor: ss.bg, border: ss.border }}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {items.map((item, idx) => (
+            <div key={idx}
+              className={idx > 0 ? "sm:pl-8" : ""}
+              style={idx > 0 ? { borderLeft: `1px solid ${variant === 'default' ? `${accent}26` : variant === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.15)'}` } : {}}
+            >
+              {onItemEdit ? (
+                <EditableText value={item.label} placeholder="Label..." onSave={(val) => onItemEdit(idx, 'label', val)} as="span"
+                  className="block uppercase tracking-[0.2em] mb-2"
+                  style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 600, color: ss.labelColor }} />
+              ) : (
+                <span className="block uppercase tracking-[0.2em] mb-2"
+                  style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "11px", fontWeight: 600, color: ss.labelColor }}>
+                  {item.label}
+                </span>
+              )}
+              {onItemEdit ? (
+                <EditableText value={item.value} placeholder="Value..." onSave={(val) => onItemEdit(idx, 'value', val)} as="span"
+                  className="block"
+                  style={{ fontSize: "24px", fontWeight: 600, lineHeight: 1.2, color: item.accent ? ss.accentColor : ss.textColor }} />
+              ) : (
+                <span className="block"
+                  style={{ fontSize: "24px", fontWeight: 600, lineHeight: 1.2, color: item.accent ? ss.accentColor : ss.textColor }}>
+                  {item.value}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      </motion.div>
+    );
+  }
 
   if (isElegant) {
     const accentTint = `${accent}0F`;

@@ -16,15 +16,16 @@ export function TextContent({
   const template = useTemplate();
   const isModern = template.id === 'modern';
   const isElegant = template.id === 'elegant';
+  const isSoft = template.id === 'soft';
   const accent = template.colors.primaryAccent;
 
-  const bodyFont = isElegant ? "'DM Sans', sans-serif" : isModern ? "'Outfit', sans-serif" : "'Inter', sans-serif";
-  const bodyColor = isElegant ? template.colors.textBody : isModern ? "#6B7280" : "#555";
-  const dropCapFont = isElegant ? "'Fraunces', serif" : isModern ? "'Fraunces', serif" : "'Space Grotesk', sans-serif";
-  const dropCapColor = isElegant ? accent : isModern ? accent : brand.primaryColor;
-  const dropCapSize = isElegant ? "60px" : isModern ? "64px" : "56px";
-  const dropCapWeight = isElegant ? 600 : isModern ? 800 : 700;
-  const lineHeight = isElegant ? 1.85 : 1.8;
+  const bodyFont = isSoft ? "'DM Sans', sans-serif" : isElegant ? "'DM Sans', sans-serif" : isModern ? "'Outfit', sans-serif" : "'Inter', sans-serif";
+  const bodyColor = isSoft ? template.colors.textBody : isElegant ? template.colors.textBody : isModern ? "#6B7280" : "#555";
+  const dropCapFont = isSoft ? "'DM Sans', sans-serif" : isElegant ? "'Fraunces', serif" : isModern ? "'Fraunces', serif" : "'Space Grotesk', sans-serif";
+  const dropCapColor = isSoft ? accent : isElegant ? accent : isModern ? accent : brand.primaryColor;
+  const dropCapSize = isSoft ? "60px" : isElegant ? "60px" : isModern ? "64px" : "56px";
+  const dropCapWeight = isSoft ? 600 : isElegant ? 600 : isModern ? 800 : 700;
+  const lineHeight = isSoft ? 1.85 : isElegant ? 1.85 : 1.8;
 
   return (
     <motion.div

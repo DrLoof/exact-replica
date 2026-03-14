@@ -30,6 +30,7 @@ export function SignatureBlock({
   const template = useTemplate();
   const isModern = template.id === 'modern';
   const isElegant = template.id === 'elegant';
+  const isSoft = template.id === 'soft';
   const accent = template.colors.primaryAccent;
   const secondary = template.colors.secondaryAccent;
   const dark = template.colors.primaryDark;
@@ -38,6 +39,107 @@ export function SignatureBlock({
     role: "Agency",
     companyName: brand.agencyFullName,
   };
+
+  if (isSoft) {
+    const border = template.colors.border;
+    const muted = template.colors.textMuted;
+    const faint = template.colors.textFaint;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="w-full"
+        style={{ fontFamily: "'DM Sans', sans-serif" }}
+      >
+        <div className="text-center mb-14">
+          {onHeadingEdit ? (
+            <EditableText value={heading} placeholder="Heading..." onSave={onHeadingEdit} as="h1"
+              style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 600, lineHeight: 1.1, color: dark }} />
+          ) : (
+            <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 600, lineHeight: 1.1, color: dark }}>{heading}</h2>
+          )}
+          {onSubtitleEdit ? (
+            <EditableText value={subtitle} placeholder="Subtitle..." onSave={onSubtitleEdit} as="p"
+              className="max-w-md mx-auto mt-4"
+              style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: muted }} />
+          ) : (
+            <p className="max-w-md mx-auto mt-4" style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: muted }}>{subtitle}</p>
+          )}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+          {[client, agencyParty].map((party, idx) => (
+            <motion.div key={idx}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 + idx * 0.15, duration: 0.5 }}
+              className="rounded-2xl p-8 lg:p-10"
+              style={{ background: "white", border: `1px solid ${border}` }}
+            >
+              <span className="inline-block mb-6 uppercase tracking-[0.2em]"
+                style={{ fontSize: "11px", fontWeight: 600, color: accent }}>
+                {party.role}
+              </span>
+              <div className="mb-8">
+                <span className="block mb-1" style={{ fontSize: "20px", fontWeight: 600, color: dark }}>{party.companyName}</span>
+                {party.personName && (
+                  <span className="block" style={{ fontSize: "14px", fontWeight: 400, color: muted }}>
+                    {party.personName}{party.title ? ` — ${party.title}` : ""}
+                  </span>
+                )}
+              </div>
+              <div className="space-y-6">
+                <div>
+                  <div className="h-16 mb-2" style={{ borderBottom: `2px solid ${accent}66` }} />
+                  <span className="uppercase tracking-[0.15em]" style={{ fontSize: "10px", fontWeight: 500, color: faint }}>Signature</span>
+                </div>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <div className="h-10 mb-2" style={{ borderBottom: `1px solid ${border}` }} />
+                    <span className="uppercase tracking-[0.15em]" style={{ fontSize: "10px", fontWeight: 500, color: faint }}>Printed Name</span>
+                  </div>
+                  <div>
+                    <div className="h-10 mb-2" style={{ borderBottom: `1px solid ${border}` }} />
+                    <span className="uppercase tracking-[0.15em]" style={{ fontSize: "10px", fontWeight: 500, color: faint }}>Date</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+        <div className="mt-20 text-center">
+          <div className="inline-block">
+            {brand.logoUrl ? (
+              <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain mx-auto mb-4" />
+            ) : (
+              <span className="block mb-4 uppercase tracking-[0.15em]" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>
+                {brand.agencyName}
+              </span>
+            )}
+            <p className="mb-2" style={{ fontSize: "20px", fontWeight: 600, color: dark }}>
+              Thank you for considering {brand.agencyFullName}.
+            </p>
+            <p style={{ fontSize: "14px", fontWeight: 400, color: muted }}>
+              We're excited about the possibility of working together.
+            </p>
+            <div className="mt-6 flex items-center justify-center gap-6">
+              {brand.contactEmail && <span style={{ fontSize: "13px", color: faint }}>{brand.contactEmail}</span>}
+              {brand.contactEmail && brand.contactWebsite && <span style={{ color: border }}>|</span>}
+              {brand.contactWebsite && <span style={{ fontSize: "13px", color: faint }}>{brand.contactWebsite}</span>}
+              {brand.contactWebsite && brand.contactPhone && <span style={{ color: border }}>|</span>}
+              {brand.contactPhone && <span style={{ fontSize: "13px", color: faint }}>{brand.contactPhone}</span>}
+            </div>
+          </div>
+        </div>
+        <div className="mt-10 text-center">
+          <p style={{ fontSize: "12px", fontWeight: 400, color: faint }}>
+            This document constitutes a binding agreement upon signature by both parties.
+          </p>
+        </div>
+      </motion.div>
+    );
+  }
 
   if (isElegant) {
     const border = template.colors.border;

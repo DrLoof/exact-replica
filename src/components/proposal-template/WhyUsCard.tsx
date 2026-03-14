@@ -24,12 +24,63 @@ export function WhyUsCard({
   const template = useTemplate();
   const isModern = template.id === 'modern';
   const isElegant = template.id === 'elegant';
+  const isSoft = template.id === 'soft';
   const accent = template.colors.primaryAccent;
   const dark = template.colors.primaryDark;
 
   const IconComponent = icon && (LucideIcons as any)[icon]
     ? (LucideIcons as any)[icon]
     : LucideIcons.Star;
+
+  if (isSoft) {
+    const bg = template.colors.background;
+    const border = template.colors.border;
+    const muted = template.colors.textBody;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay, duration: 0.5, ease: "easeOut" }}
+        className="group relative rounded-2xl p-8 h-full flex flex-col transition-all duration-300"
+        style={{ background: "white", border: `1px solid ${border}`, fontFamily: "'DM Sans', sans-serif" }}
+        onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${accent}40`; e.currentTarget.style.boxShadow = `0 10px 30px -5px ${accent}1A`; }}
+        onMouseLeave={(e) => { e.currentTarget.style.borderColor = border; e.currentTarget.style.boxShadow = "none"; }}
+      >
+        {statValue && (
+          <div className="mb-4">
+            <span style={{ fontSize: "32px", fontWeight: 600, color: accent }}>{statValue}</span>
+            {statLabel && (
+              <span className="block mt-0.5" style={{ fontSize: "11px", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.1em", color: template.colors.textMuted }}>{statLabel}</span>
+            )}
+          </div>
+        )}
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-105"
+          style={{ background: bg, color: accent }}>
+          <IconComponent size={20} />
+        </div>
+        {onTitleEdit ? (
+          <EditableText value={title} placeholder="Title..." onSave={onTitleEdit} as="h3"
+            className="mb-3" style={{ fontSize: "18px", fontWeight: 600, lineHeight: 1.2, color: dark }} />
+        ) : (
+          <h3 className="mb-3" style={{ fontSize: "18px", fontWeight: 600, lineHeight: 1.2, color: dark }}>{title}</h3>
+        )}
+        {onDescriptionEdit ? (
+          <EditableText value={description} placeholder="Description..." onSave={onDescriptionEdit} as="p"
+            className="flex-1" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: muted }} />
+        ) : (
+          <p className="flex-1" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: muted }}>{description}</p>
+        )}
+        <div className="mt-6 pt-4" style={{ borderTop: `1px solid ${border}` }}>
+          <div className="h-2 rounded-full transition-all duration-300 group-hover:w-14"
+            style={{ width: "32px", background: `${accent}4D` }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = accent; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = `${accent}4D`; }}
+          />
+        </div>
+      </motion.div>
+    );
+  }
 
   if (isElegant) {
     const accentTint = `${accent}0F`;
