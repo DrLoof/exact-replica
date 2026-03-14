@@ -784,7 +784,7 @@ export default function ProposalEditor() {
                     )}
                   </PageWrapper>
                 </div>
-              </SectionWrapper>
+              </SectionWrapper>}
 
               {/* Section 3: Timeline */}
               <SectionWrapper idx={3} hidden={hiddenSections.has(3)} onToggle={toggleSection} label="Timeline">
