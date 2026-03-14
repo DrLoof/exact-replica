@@ -1010,6 +1010,8 @@ export default function ProposalEditor() {
                         role: 'Agency',
                         companyName: agency?.name || 'Agency',
                       }}
+                      onHeadingEdit={(val) => updateField('title', val)}
+                      onSubtitleEdit={(val) => updateField('subtitle', val)}
                     />
                   </PageWrapper>
                 </div>
