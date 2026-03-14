@@ -374,7 +374,7 @@ export function SignatureBlock({
             <p className="mb-2" style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, color: dark }}>
               Thank you for considering {brand.agencyFullName}.
             </p>
-            <p style={{ fontSize: "14px", fontWeight: 400, color: "#9CA3AF" }}>
+            <p style={{ fontSize: "14px", fontWeight: 400, color: template.colors.textMuted }}>
               We're excited about the possibility of working together.
             </p>
             <div className="mt-6 flex items-center justify-center gap-3 flex-wrap">
