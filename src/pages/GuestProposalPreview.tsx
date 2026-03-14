@@ -837,7 +837,7 @@ export default function GuestProposalPreview() {
               )}
 
               {/* Section 5: Why Us */}
-              {!hiddenSections.has(5) && differentiators.length > 0 && (
+              {!deletedSections.has(5) && differentiators.length > 0 && (
                 <div id="guest-section-5" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="06">
                     <SectionHeader number="05" title="Why Us" subtitle="What sets us apart" />
