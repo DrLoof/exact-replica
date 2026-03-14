@@ -348,7 +348,9 @@ export default function ProposalEditor() {
   const PRESET_COLORS = ['#E8825C', '#2563EB', '#34D399', '#f9b564', '#8B5CF6', '#EC4899', '#14B8A6', '#F59E0B', '#EF4444', '#1E1B4B'];
 
   const currentTemplate = templates[templateId] || templates.classic;
-  const activePrimary = customColors?.primaryAccent || currentTemplate.colors.primaryAccent;
+  // Brand color is the universal default; custom picks override it across all templates
+  const brandColor = agency?.brand_color || '#fc956e';
+  const activePrimary = customColors?.primaryAccent || brandColor;
   const activeSecondary = customColors?.secondaryAccent || currentTemplate.colors.secondaryAccent;
 
   const getServicePrice = (s: ProposalService) => {
