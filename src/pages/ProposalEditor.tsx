@@ -670,7 +670,7 @@ export default function ProposalEditor() {
                     onSubtitleEdit={(val) => updateField('subtitle', val)}
                   />
                 </div>
-              </SectionWrapper>
+              </SectionWrapper>}
 
               {/* Section 1: Executive Summary */}
               <SectionWrapper idx={1} hidden={hiddenSections.has(1)} onToggle={toggleSection} label="Executive Summary">
