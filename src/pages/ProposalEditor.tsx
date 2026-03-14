@@ -1048,7 +1048,7 @@ export default function ProposalEditor() {
               </SectionWrapper>}
 
               {/* Section 8: Signature */}
-              <SectionWrapper idx={8} hidden={hiddenSections.has(8)} onToggle={toggleSection} label="Signature">
+              {!deletedSections.has(8) && <SectionWrapper idx={8} onDelete={deleteSection} label="Signature">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="09">
                     <SignatureBlock
