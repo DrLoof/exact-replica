@@ -464,6 +464,7 @@ export default function PublicProposal() {
         </div>
       </div>
     </BrandProvider>
+    </TemplateProvider>
   );
 }
 

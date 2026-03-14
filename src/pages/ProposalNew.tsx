@@ -389,6 +389,7 @@ export default function ProposalNew() {
         client_challenge: resolvedChallenge || null,
         client_goal: resolvedGoal || null,
         client_context_note: clientContextNote || null,
+        template_id: (agency as any).default_template || 'classic',
       } as any).select('id').single();
       if (pError) throw pError;
 
