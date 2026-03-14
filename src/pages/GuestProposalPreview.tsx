@@ -489,6 +489,7 @@ export default function GuestProposalPreview() {
 
         {/* Proposal Content */}
         <div className="flex-1">
+          <TemplateProvider templateId="classic">
           <BrandProvider brand={{
             agencyName: agencyName.toUpperCase(),
             agencyFullName: agencyName,
