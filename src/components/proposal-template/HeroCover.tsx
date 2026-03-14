@@ -456,16 +456,26 @@ export function HeroCover(props: HeroCoverProps) {
             <span className="block text-[#999] uppercase tracking-[0.15em] mb-1" style={{ fontSize: "11px", fontWeight: 500 }}>
               Prepared for
             </span>
-            <span style={{ fontSize: "18px", fontWeight: 600, color: brand.darkColor }}>{clientName}</span>
+            {props.onClientNameEdit ? (
+              <EditableText value={clientName} placeholder="Client name" onSave={props.onClientNameEdit} as="span"
+                style={{ fontSize: "18px", fontWeight: 600, color: brand.darkColor }} />
+            ) : (
+              <span style={{ fontSize: "18px", fontWeight: 600, color: brand.darkColor }}>{clientName}</span>
+            )}
           </div>
           <div className="w-px h-10 bg-[#E0E0E0]" />
           <div>
             <span className="block text-[#999] uppercase tracking-[0.15em] mb-1" style={{ fontSize: "11px", fontWeight: 500 }}>
               Date
             </span>
-            <span style={{ fontSize: "18px", fontWeight: 600, color: brand.darkColor }}>
-              {date || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-            </span>
+            {props.onDateEdit ? (
+              <EditableText value={date || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} placeholder="Date" onSave={props.onDateEdit} as="span"
+                style={{ fontSize: "18px", fontWeight: 600, color: brand.darkColor }} />
+            ) : (
+              <span style={{ fontSize: "18px", fontWeight: 600, color: brand.darkColor }}>
+                {date || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </span>
+            )}
           </div>
         </motion.div>
       </div>
