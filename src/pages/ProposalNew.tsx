@@ -9,7 +9,7 @@ import { SignupGate } from '@/components/onboarding/SignupGate';
 import { defaultModulesByGroup, type DefaultModule } from '@/lib/defaultModules';
 import { generateProposalTitle } from '@/lib/proposalTitleGenerator';
 import { GenerationScreen } from '@/components/proposal-new/GenerationScreen';
-import { ClientZone, type SelectedGoal, goalOptionsList } from '@/components/proposal-new/ClientZone';
+import { ClientZone, ClientContextZone, type SelectedGoal, goalOptionsList } from '@/components/proposal-new/ClientZone';
 import { ServiceZone } from '@/components/proposal-new/ServiceZone';
 import { TimelineZone } from '@/components/proposal-new/TimelineZone';
 
@@ -759,6 +759,20 @@ export default function ProposalNew() {
           totalStr={totalStr}
           bundleSavings={bundleSavings}
           addonCount={addonCount}
+        />
+
+        <ClientContextZone
+          visible={!!(selectedClient || newClientName.trim())}
+          clientChallenges={clientChallenges}
+          setClientChallenges={setClientChallenges}
+          clientChallengeOther={clientChallengeOther}
+          setClientChallengeOther={setClientChallengeOther}
+          selectedGoals={selectedGoals}
+          setSelectedGoals={setSelectedGoals}
+          goalOtherLabel={goalOtherLabel}
+          setGoalOtherLabel={setGoalOtherLabel}
+          clientContextNote={clientContextNote}
+          setClientContextNote={setClientContextNote}
         />
 
         <TimelineZone
