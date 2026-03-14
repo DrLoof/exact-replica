@@ -361,13 +361,13 @@ export function PricingSummary({
         className="w-full"
         style={{ fontFamily: "'Outfit', sans-serif" }}
       >
-        <div className="rounded-3xl overflow-hidden" style={{ border: "2px solid #E5E7EB" }}>
+        <div className="rounded-3xl overflow-hidden" style={{ border: `2px solid ${template.colors.border}` }}>
           {/* Header row */}
-          <div className="px-8 py-4 flex items-center justify-between" style={{ background: "#F9FAFB" }}>
-            <span className="uppercase tracking-[0.2em]" style={{ fontSize: "11px", fontWeight: 600, color: "#9CA3AF" }}>
+          <div className="px-8 py-4 flex items-center justify-between" style={{ background: `${template.colors.background}` }}>
+            <span className="uppercase tracking-[0.2em]" style={{ fontSize: "11px", fontWeight: 600, color: template.colors.textMuted }}>
               Service
             </span>
-            <span className="uppercase tracking-[0.2em]" style={{ fontSize: "11px", fontWeight: 600, color: "#9CA3AF" }}>
+            <span className="uppercase tracking-[0.2em]" style={{ fontSize: "11px", fontWeight: 600, color: template.colors.textMuted }}>
               Investment
             </span>
           </div>
