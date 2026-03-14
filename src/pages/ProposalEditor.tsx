@@ -668,6 +668,14 @@ export default function ProposalEditor() {
                     proposalNumber={proposal.reference_number}
                     onTitleEdit={(val) => updateField('title', val)}
                     onSubtitleEdit={(val) => updateField('subtitle', val)}
+                    onClientNameEdit={client ? async (val) => {
+                      await supabase.from('clients').update({ company_name: val }).eq('id', client.id);
+                      setClient({ ...client, company_name: val });
+                    } : undefined}
+                    onDateEdit={(val) => {
+                      updateField('project_start_date', val);
+                      setProposal({ ...proposal, project_start_date: val });
+                    }}
                   />
                 </div>
               </SectionWrapper>}
