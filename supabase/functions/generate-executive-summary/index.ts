@@ -20,6 +20,7 @@ serve(async (req) => {
       serviceNames,
       serviceContexts,
       clientChallenge,
+      clientChallenges,
       clientGoal,
       clientContextNote,
     } = await req.json();
@@ -36,9 +37,16 @@ serve(async (req) => {
     const servicesStr = (serviceNames || []).join(", ");
     const contextsStr = (serviceContexts || []).join("\n");
 
+    // Support both old single clientChallenge and new clientChallenges array
+    const challenges: string[] = clientChallenges || (clientChallenge ? [clientChallenge] : []);
+
     let contextBlock = "";
-    if (clientChallenge) {
-      contextBlock += `\n- Client's main challenge (from agency): ${clientChallenge}\n  USE THIS as the primary framing. It overrides the service context.`;
+    if (challenges.length > 0) {
+      if (challenges.length === 1) {
+        contextBlock += `\n- Client's main challenge (from agency): ${challenges[0]}\n  USE THIS as the primary framing. It overrides the service context.`;
+      } else {
+        contextBlock += `\n- Client's key challenges (from agency):\n${challenges.map(c => `  • ${c}`).join('\n')}\n  Address these challenges and connect them to the proposed services. Use the first 1-2 as primary framing.`;
+      }
     }
     if (clientGoal) {
       contextBlock += `\n- Client's primary goal (from agency): ${clientGoal}\n  USE THIS as the outcome framing.`;
