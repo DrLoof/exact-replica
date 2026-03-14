@@ -24,6 +24,7 @@ export function WhyUsCard({
   const template = useTemplate();
   const isModern = template.id === 'modern';
   const isElegant = template.id === 'elegant';
+  const isSoft = template.id === 'soft';
   const accent = template.colors.primaryAccent;
   const dark = template.colors.primaryDark;
 
