@@ -121,6 +121,111 @@ export function PricingSummary({
   const isMixed = uniqueModels.size > 1;
   const displayGroups = groups || (isMixed ? autoGroupItems(items) : null);
 
+  if (isSoft) {
+    const border = template.colors.border;
+    const bg = template.colors.background;
+    const muted = template.colors.textMuted;
+    const faint = template.colors.textFaint;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="w-full"
+        style={{ fontFamily: "'DM Sans', sans-serif" }}
+      >
+        <div className="rounded-2xl overflow-hidden shadow-sm" style={{ border: `1px solid ${border}` }}>
+          <div className="px-8 py-4 flex items-center justify-between" style={{ background: bg }}>
+            <span className="uppercase tracking-[0.2em]" style={{ fontSize: "11px", fontWeight: 600, color: template.colors.textBody }}>Service</span>
+            <span className="uppercase tracking-[0.2em]" style={{ fontSize: "11px", fontWeight: 600, color: template.colors.textBody }}>Investment</span>
+          </div>
+          {(displayGroups ? displayGroups.flatMap(g => g.items) : items).map((item, idx) => {
+            const originalIdx = items.indexOf(item);
+            return (
+              <div key={idx} className="px-8 py-5 flex items-center justify-between transition-colors"
+                style={{ borderTop: `1px solid ${border}` }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = `${bg}4D`; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+              >
+                <div>
+                  <span className="block" style={{ fontSize: "16px", fontWeight: 500, color: dark }}>
+                    {item.service}
+                    {item.isAddon && <span className="ml-2 uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600, color: accent }}>Add-on</span>}
+                    {item.isBundled && <span className="ml-2 uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600, color: accent }}>Bundled</span>}
+                  </span>
+                  {item.note && <span className="block mt-0.5" style={{ fontSize: "13px", fontWeight: 400, color: faint }}>{item.note}</span>}
+                </div>
+                <span style={{ fontSize: "15px", fontWeight: 600, color: dark }}>
+                  {onPriceEdit ? <EditablePrice price={item.price} onEdit={(v) => onPriceEdit(originalIdx, v)} /> : item.price}
+                </span>
+              </div>
+            );
+          })}
+          {bundleSavings && (
+            <div className="px-8 py-4 flex items-center justify-between" style={{ borderTop: `1px solid ${border}`, background: `${accent}0D` }}>
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full" style={{ background: accent }} />
+                <span style={{ fontSize: "14px", fontWeight: 500, color: dark }}>{bundleSavings.bundleName} bundle discount</span>
+                <span className="line-through" style={{ fontSize: "13px", fontWeight: 400, color: faint }}>{bundleSavings.individualTotal}</span>
+              </div>
+              <span style={{ fontSize: "14px", fontWeight: 600, color: accent }}>{bundleSavings.savings}</span>
+            </div>
+          )}
+          <div className="px-8 py-7 flex items-center justify-between" style={{ background: accent }}>
+            <div>
+              <span style={{ fontSize: "13px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(255,255,255,0.8)" }}>
+                Total Investment
+              </span>
+              {totalBreakdown && (
+                <span className="block mt-1" style={{ fontSize: "13px", fontWeight: 400, color: "rgba(255,255,255,0.5)" }}>
+                  {totalBreakdown}
+                </span>
+              )}
+            </div>
+            <span style={{ fontSize: "28px", fontWeight: 600, color: "white" }}>{total}</span>
+          </div>
+        </div>
+
+        {paymentTerms && paymentTerms.length > 0 && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3, duration: 0.5 }}
+            className="mt-8 rounded-2xl p-8"
+            style={{ background: "white", border: `1px solid ${border}` }}
+          >
+            <h4 className="mb-4 uppercase tracking-[0.15em]" style={{ fontSize: "12px", fontWeight: 600, color: dark }}>Payment Terms</h4>
+            <div className="space-y-3">
+              {paymentTerms.map((term, idx) => {
+                const termText = typeof term === "string" ? term : term.label;
+                const termAmount = typeof term === "string" ? undefined : term.amount;
+                return (
+                  <div key={idx} className="flex items-start gap-3">
+                    <span className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                      style={{ fontSize: "11px", fontWeight: 700, backgroundColor: bg, color: accent }}>
+                      {idx + 1}
+                    </span>
+                    <div className="flex-1 flex items-start justify-between gap-4">
+                      <span style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.6, color: template.colors.textBody }}>{termText}</span>
+                      {termAmount && <span className="shrink-0" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>{termAmount}</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {validUntil && (
+          <div className="mt-6 text-center">
+            <span style={{ fontSize: "13px", fontWeight: 400, color: muted }}>
+              This proposal is valid until{" "}
+              <span style={{ fontWeight: 600, color: accent }}>{validUntil}</span>
+            </span>
+          </div>
+        )}
+      </motion.div>
+    );
+  }
+
   if (isElegant) {
     const border = template.colors.border;
     const accentTint = `${accent}0F`;

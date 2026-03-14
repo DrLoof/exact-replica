@@ -37,8 +37,108 @@ export function TestimonialCard({
     <EditableText value={clientName} placeholder="Client name..." onSave={onNameEdit} as="span" />
   ) : clientName;
 
+  // Soft featured
+  if (isSoft && featured) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay, duration: 0.6, ease: "easeOut" }}
+        className="rounded-2xl p-10"
+        style={{ fontFamily: "'DM Sans', sans-serif", backgroundColor: accent }}
+      >
+        <Quote size={28} style={{ color: "rgba(255,255,255,0.25)" }} className="mb-6" />
+        {onQuoteEdit ? (
+          <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
+            className="mb-8"
+            style={{ fontSize: "17px", fontWeight: 400, lineHeight: 1.7, color: "rgba(255,255,255,0.9)" }} />
+        ) : (
+          <blockquote className="mb-8" style={{ fontSize: "17px", fontWeight: 400, lineHeight: 1.7, color: "rgba(255,255,255,0.9)" }}>
+            "{quote}"
+          </blockquote>
+        )}
+        {metricValue && (
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6" style={{ background: "rgba(255,255,255,0.15)" }}>
+            <span style={{ fontSize: "18px", fontWeight: 600, color: "white" }}>{metricValue}</span>
+            {metricLabel && <span style={{ fontSize: "11px", fontWeight: 500, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{metricLabel}</span>}
+          </div>
+        )}
+        <div className="pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}>
+          <div className="flex items-center gap-4">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={clientName} className="w-12 h-12 rounded-xl object-cover" />
+            ) : (
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>
+                <span className="text-white" style={{ fontSize: "16px", fontWeight: 600 }}>{clientName.charAt(0)}</span>
+              </div>
+            )}
+            <div>
+              <span className="block text-white" style={{ fontSize: "15px", fontWeight: 600 }}>{onNameEdit ? renderName() : clientName}</span>
+              {(clientTitle || clientCompany) && (
+                <span className="block" style={{ fontSize: "13px", fontWeight: 400, color: "rgba(255,255,255,0.5)" }}>
+                  {clientTitle}{clientTitle && clientCompany ? " · " : ""}{clientCompany}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Soft non-featured
+  if (isSoft) {
+    const border = template.colors.border;
+    const bg = template.colors.background;
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay, duration: 0.5, ease: "easeOut" }}
+        className="rounded-2xl p-8 transition-all duration-300"
+        style={{ fontFamily: "'DM Sans', sans-serif", background: "white", border: `1px solid ${border}` }}
+        onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${accent}40`; }}
+        onMouseLeave={(e) => { e.currentTarget.style.borderColor = border; }}
+      >
+        <Quote size={20} style={{ color: `${accent}33` }} className="mb-4" />
+        {onQuoteEdit ? (
+          <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
+            className="mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textBody }} />
+        ) : (
+          <blockquote className="mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textBody }}>
+            "{quote}"
+          </blockquote>
+        )}
+        {metricValue && (
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5" style={{ background: bg }}>
+            <span style={{ fontSize: "14px", fontWeight: 600, color: accent }}>{metricValue}</span>
+            {metricLabel && <span style={{ fontSize: "10px", fontWeight: 500, color: accent, textTransform: "uppercase", letterSpacing: "0.05em" }}>{metricLabel}</span>}
+          </div>
+        )}
+        <div className="pt-5" style={{ borderTop: `1px solid ${border}` }}>
+          <div className="flex items-center gap-3">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={clientName} className="w-10 h-10 rounded-xl object-cover" />
+            ) : (
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: bg, color: accent }}>
+                <span style={{ fontSize: "14px", fontWeight: 600 }}>{clientName.charAt(0)}</span>
+              </div>
+            )}
+            <div>
+              <span className="block" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>{onNameEdit ? renderName() : clientName}</span>
+              {(clientTitle || clientCompany) && (
+                <span className="block" style={{ fontSize: "12px", fontWeight: 400, color: template.colors.textFaint }}>
+                  {clientTitle}{clientTitle && clientCompany ? " · " : ""}{clientCompany}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   // Elegant featured
-  if (isElegant && featured) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 24 }}
