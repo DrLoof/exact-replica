@@ -170,38 +170,38 @@ function ModernHeroCover({
       className="relative min-h-screen w-full overflow-hidden flex flex-col"
       style={{ background: "#FAFAF8", fontFamily: "'Outfit', sans-serif" }}
     >
-      {/* Large decorative blurred circles */}
-      <motion.div
-        className="absolute -top-[10%] -right-[5%] rounded-full pointer-events-none"
-        style={{ width: "600px", height: "600px", background: accent, opacity: 0.08, filter: "blur(100px)" }}
-        animate={{ y: [0, -20, 0], x: [0, 10, 0] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute bottom-[5%] right-[10%] rounded-full pointer-events-none"
-        style={{ width: "500px", height: "500px", background: accent, opacity: 0.06, filter: "blur(120px)" }}
-        animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute bottom-[20%] -left-[5%] rounded-full pointer-events-none"
-        style={{ width: "400px", height: "400px", background: secondary, opacity: 0.04, filter: "blur(90px)" }}
-        animate={{ y: [0, -15, 0] }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-      />
+      {/* Background blobs — clearly visible, not barely-there */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Large circle top-right — most prominent */}
+        <div
+          className="absolute -top-[10%] -right-[10%] w-[500px] h-[500px] rounded-full"
+          style={{ background: accent, opacity: 0.08, filter: 'blur(80px)' }}
+        />
+        {/* Large circle bottom-right */}
+        <div
+          className="absolute bottom-[5%] right-[5%] w-[400px] h-[400px] rounded-full"
+          style={{ background: accent, opacity: 0.06, filter: 'blur(80px)' }}
+        />
+        {/* Medium circle left side */}
+        <div
+          className="absolute top-[40%] -left-[5%] w-[300px] h-[300px] rounded-full"
+          style={{ background: accent, opacity: 0.05, filter: 'blur(60px)' }}
+        />
+        {/* Small accent circle */}
+        <div
+          className="absolute bottom-[15%] right-[25%] w-[200px] h-[200px] rounded-full"
+          style={{ background: secondary, opacity: 0.04, filter: 'blur(60px)' }}
+        />
+      </div>
 
       {/* Small decorative shapes */}
-      <motion.div
-        className="absolute top-[30%] left-[8%] pointer-events-none"
-        style={{ width: "16px", height: "16px", background: `${accent}30`, borderRadius: "3px" }}
-        animate={{ rotate: [0, 90, 180, 270, 360] }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+      <div
+        className="absolute top-[20%] left-[8%] w-3 h-3 rounded-sm pointer-events-none"
+        style={{ background: accent, opacity: 0.2, animation: 'spin 20s linear infinite' }}
       />
-      <motion.div
-        className="absolute top-[55%] left-[12%] rounded-full pointer-events-none"
-        style={{ width: "10px", height: "10px", background: `${accent}33` }}
-        animate={{ scale: [1, 1.4, 1], opacity: [0.2, 0.35, 0.2] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      <div
+        className="absolute top-[55%] left-[5%] w-2.5 h-2.5 rounded-full pointer-events-none"
+        style={{ background: accent, opacity: 0.25, animation: 'pulse 3s ease-in-out infinite' }}
       />
 
       {/* Top bar */}
