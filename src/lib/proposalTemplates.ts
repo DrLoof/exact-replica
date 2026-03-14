@@ -104,7 +104,7 @@ export const templates: Record<string, ProposalTemplate> = {
     fonts: {
       heading: "'Fraunces', serif",
       body: "'DM Sans', sans-serif",
-      googleFontsUrl: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=DM+Sans:wght@300;400;500;600;700&display=swap",
+      googleFontsUrl: "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap",
     },
     colors: {
       background: '#FAFAF8',
