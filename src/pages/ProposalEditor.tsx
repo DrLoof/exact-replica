@@ -1045,7 +1045,7 @@ export default function ProposalEditor() {
                     )}
                   </PageWrapper>
                 </div>
-              </SectionWrapper>
+              </SectionWrapper>}
 
               {/* Section 8: Signature */}
               <SectionWrapper idx={8} hidden={hiddenSections.has(8)} onToggle={toggleSection} label="Signature">
