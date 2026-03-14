@@ -1330,29 +1330,16 @@ ${agencyName}`);
   );
 }
 
-function SectionWrapper({ idx, hidden, onToggle, label, children }: {
-  idx: number; hidden: boolean; onToggle: (idx: number) => void; label: string; children: React.ReactNode;
+function SectionWrapper({ idx, onDelete, label, children }: {
+  idx: number; onDelete: (idx: number) => void; label: string; children: React.ReactNode;
 }) {
-  if (hidden) {
-    return (
-      <div id={`section-${idx}`} className="rounded-xl border border-dashed border-border bg-muted/20 p-4 flex items-center justify-between print:hidden">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <EyeOff className="h-4 w-4" />
-          <span className="text-sm">{label}</span>
-          <span className="text-xs">(hidden from PDF)</span>
-        </div>
-        <button onClick={() => onToggle(idx)} className="text-xs text-brand hover:text-brand-hover">Show</button>
-      </div>
-    );
-  }
-
   return (
     <div id={`section-${idx}`} className="group relative">
       <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center gap-3 rounded-full bg-card border border-border px-4 py-1.5 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 z-20 print:hidden">
         <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{label}</span>
         <div className="w-px h-4 bg-border" />
-        <button onClick={() => onToggle(idx)} className="text-muted-foreground hover:text-foreground" title="Hide section">
-          <Eye className="h-3.5 w-3.5" />
+        <button onClick={() => onDelete(idx)} className="text-muted-foreground hover:text-destructive" title="Remove page">
+          <X className="h-3.5 w-3.5" />
         </button>
       </div>
       {children}
