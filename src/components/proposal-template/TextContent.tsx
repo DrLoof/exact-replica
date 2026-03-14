@@ -15,6 +15,7 @@ export function TextContent({
   const brand = useBrand();
   const template = useTemplate();
   const isModern = template.id === 'modern';
+  const secondaryColor = template.colors.secondaryAccent;
   const isElegant = template.id === 'elegant';
   const isSoft = template.id === 'soft';
   const accent = template.colors.primaryAccent;
