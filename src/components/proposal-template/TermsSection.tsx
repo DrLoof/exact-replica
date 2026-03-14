@@ -182,7 +182,7 @@ export function TermsSection({ clauses, onClauseEdit }: TermsSectionProps) {
           const isOpen = openIndex === idx;
           return (
             <div key={idx} className="rounded-2xl overflow-hidden transition-colors duration-200"
-              style={{ border: `2px solid ${isOpen ? `${accent}30` : '#F3F4F6'}` }}>
+              style={{ border: `2px solid ${isOpen ? `${accent}30` : template.colors.border}` }}>
               <button
                 onClick={() => setOpenIndex(isOpen ? null : idx)}
                 className="w-full flex items-center gap-4 px-6 py-4 text-left transition-colors"
@@ -190,8 +190,8 @@ export function TermsSection({ clauses, onClauseEdit }: TermsSectionProps) {
                 <span className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200"
                   style={{
                     fontSize: "12px", fontWeight: 700,
-                    backgroundColor: isOpen ? accent : "#F9FAFB",
-                    color: isOpen ? "#FFFFFF" : "#D1D5DB",
+                    backgroundColor: isOpen ? accent : `${template.colors.background}`,
+                    color: isOpen ? "#FFFFFF" : template.colors.textFaint,
                     boxShadow: isOpen ? `2px 2px 0px ${dark}` : "none",
                   }}>
                   {idx + 1}
@@ -199,7 +199,7 @@ export function TermsSection({ clauses, onClauseEdit }: TermsSectionProps) {
                 <span className="flex-1" style={{
                   fontSize: "16px",
                   fontWeight: isOpen ? 700 : 500,
-                  color: isOpen ? dark : "#6B7280",
+                  color: isOpen ? dark : template.colors.textBody,
                 }}>
                   {onClauseEdit ? (
                     <EditableText value={clause.title} placeholder="Clause title..." onSave={(val) => onClauseEdit(idx, 'title', val)} as="span" />
@@ -209,7 +209,7 @@ export function TermsSection({ clauses, onClauseEdit }: TermsSectionProps) {
                   className="shrink-0 transition-transform duration-200"
                   style={{
                     transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                    color: isOpen ? accent : "#D1D5DB",
+                    color: isOpen ? accent : template.colors.textFaint,
                   }} />
               </button>
               <AnimatePresence>
