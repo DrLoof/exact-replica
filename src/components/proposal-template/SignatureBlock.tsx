@@ -335,21 +335,21 @@ export function SignatureBlock({
               </div>
               <div className="space-y-6">
                 <div>
-                  <div className="h-16 mb-2 rounded-lg" style={{ background: `${accent}06`, borderBottom: `3px solid ${accent}` }} />
-                  <span className="uppercase tracking-[0.15em]" style={{ fontSize: "10px", fontWeight: 500, color: "#D1D5DB" }}>
+                  <div className="h-16 mb-2 rounded-lg" style={{ background: `${accent}0A`, borderBottom: `3px solid ${accent}` }} />
+                  <span className="uppercase tracking-[0.15em]" style={{ fontSize: "10px", fontWeight: 500, color: template.colors.textFaint }}>
                     Signature
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <div className="h-10 mb-2" style={{ borderBottom: "2px dashed #E5E7EB" }} />
-                    <span className="uppercase tracking-[0.15em]" style={{ fontSize: "10px", fontWeight: 500, color: "#D1D5DB" }}>
+                    <div className="h-10 mb-2" style={{ borderBottom: `2px dashed ${template.colors.border}` }} />
+                    <span className="uppercase tracking-[0.15em]" style={{ fontSize: "10px", fontWeight: 500, color: template.colors.textFaint }}>
                       Printed Name
                     </span>
                   </div>
                   <div>
-                    <div className="h-10 mb-2" style={{ borderBottom: "2px dashed #E5E7EB" }} />
-                    <span className="uppercase tracking-[0.15em]" style={{ fontSize: "10px", fontWeight: 500, color: "#D1D5DB" }}>
+                    <div className="h-10 mb-2" style={{ borderBottom: `2px dashed ${template.colors.border}` }} />
+                    <span className="uppercase tracking-[0.15em]" style={{ fontSize: "10px", fontWeight: 500, color: template.colors.textFaint }}>
                       Date
                     </span>
                   </div>
