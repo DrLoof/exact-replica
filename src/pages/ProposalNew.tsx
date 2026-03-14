@@ -334,7 +334,7 @@ export default function ProposalNew() {
             serviceNames: realSelectedModules.map((m: any) => m.name),
             serviceContexts: realSelectedModules.map((m: any) => m.ai_context).filter(Boolean),
             clientChallenges: resolvedChallenges.length > 0 ? resolvedChallenges : null,
-            clientGoal: resolvedGoal || null,
+            goals: resolvedGoals.length > 0 ? resolvedGoals : null,
             clientContextNote: clientContextNote || null,
           },
         });
