@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
 import { EditableText } from "./EditableText";
-import { Sparkles } from "lucide-react";
+
 
 interface HeroCoverProps {
   proposalTitle: string;
