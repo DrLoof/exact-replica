@@ -720,7 +720,7 @@ export default function GuestProposalPreview() {
             <div className="mx-auto max-w-[900px] py-8 px-4 space-y-6">
 
               {/* Section 0: Cover */}
-              {!hiddenSections.has(0) && (
+              {!deletedSections.has(0) && (
                 <div id="guest-section-0" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg">
                   <HeroCover
                     proposalTitle={proposalTitle}
