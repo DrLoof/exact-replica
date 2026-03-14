@@ -761,6 +761,20 @@ export default function ProposalNew() {
           addonCount={addonCount}
         />
 
+        <ClientContextZone
+          visible={!!(selectedClient || newClientName.trim())}
+          clientChallenges={clientChallenges}
+          setClientChallenges={setClientChallenges}
+          clientChallengeOther={clientChallengeOther}
+          setClientChallengeOther={setClientChallengeOther}
+          selectedGoals={selectedGoals}
+          setSelectedGoals={setSelectedGoals}
+          goalOtherLabel={goalOtherLabel}
+          setGoalOtherLabel={setGoalOtherLabel}
+          clientContextNote={clientContextNote}
+          setClientContextNote={setClientContextNote}
+        />
+
         <TimelineZone
           showTimeline={showTimeline}
           setShowTimeline={setShowTimeline}
