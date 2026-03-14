@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { SignupGate, type SignupTrigger } from '@/components/onboarding/SignupGate';
 import { getDefaultModulesForGroup } from '@/lib/defaultModules';
+import { templates } from '@/lib/proposalTemplates';
 import {
   BrandProvider, HeroCover, SectionHeader, ServiceCard, PricingSummary,
   WhyUsCard, TestimonialCard, TermsSection, SignatureBlock,
