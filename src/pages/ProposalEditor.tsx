@@ -422,7 +422,7 @@ export default function ProposalEditor() {
     return <FileText size={22} />;
   };
 
-  const proposalDate = new Date(proposal.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const proposalDate = proposal.project_start_date || new Date(proposal.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
