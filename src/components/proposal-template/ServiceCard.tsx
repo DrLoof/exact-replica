@@ -89,6 +89,84 @@ export function ServiceCard({
     )
   );
 
+  if (isSoft) {
+    const border = template.colors.border;
+    const bg = template.colors.background;
+    const muted = template.colors.textBody;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay, duration: 0.5, ease: "easeOut" }}
+        className="group relative rounded-2xl p-7 transition-all duration-300"
+        style={{
+          background: "white", fontFamily: "'DM Sans', sans-serif",
+          border: `1px solid ${border}`,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = `${accent}4D`;
+          e.currentTarget.style.boxShadow = `0 10px 30px -5px ${accent}1A`;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = border;
+          e.currentTarget.style.boxShadow = "none";
+        }}
+      >
+        {isAddon && (
+          <span className="absolute top-4 right-4 px-3 py-1 rounded-full text-white uppercase tracking-wider"
+            style={{ background: accent, fontSize: "10px", fontWeight: 600 }}>
+            Add-on
+          </span>
+        )}
+        <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-105"
+          style={{ background: bg, color: accent }}>
+          {icon}
+        </div>
+        {onNameEdit ? (
+          <EditableText value={name} placeholder="Service name..." onSave={onNameEdit} as="h3"
+            className="mb-3" style={{ fontSize: "19px", fontWeight: 600, lineHeight: 1.2, color: dark }} />
+        ) : (
+          <h3 className="mb-3" style={{ fontSize: "19px", fontWeight: 600, lineHeight: 1.2, color: dark }}>{name}</h3>
+        )}
+        {onDescriptionEdit ? (
+          <EditableText value={description} placeholder="Click to add a description..." onSave={onDescriptionEdit} as="p"
+            className="mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: muted }} />
+        ) : (
+          <p className="mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: muted }}>{description}</p>
+        )}
+        <div className="pt-5" style={{ borderTop: `1px solid ${border}` }}>
+          <ul className="space-y-2">
+            {deliverables.map((item, idx) => (
+              <li key={idx} className="group/del flex items-start gap-2.5">
+                <svg className="w-4 h-4 mt-0.5 shrink-0" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8.5L6.5 12L13 4" stroke={accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                {editable ? (
+                  <EditableText value={item} placeholder="Deliverable..." onSave={(val) => handleItemEdit(idx, val)} as="span"
+                    className="flex-1" style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.5, color: muted }} />
+                ) : (
+                  <span style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.5, color: muted }}>{item}</span>
+                )}
+                {editable && (
+                  <button onClick={() => handleRemove(idx)}
+                    className="shrink-0 mt-0.5 opacity-0 group-hover/del:opacity-100 transition-opacity text-[#CCC] hover:text-red-400 print:hidden"
+                    title="Remove deliverable"><X className="h-3.5 w-3.5" /></button>
+                )}
+              </li>
+            ))}
+          </ul>
+          {renderDeliverablesEdit()}
+          <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${border}` }}>
+            <span style={{ fontSize: "13px", fontWeight: 500, color: template.colors.textMuted }}>
+              {price}{suffix && <span style={{ fontWeight: 400, opacity: 0.6 }}>{suffix}</span>}
+            </span>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   if (isElegant) {
     const accentTint = `${accent}0F`;
     const secondaryTint = `${secondary}26`;

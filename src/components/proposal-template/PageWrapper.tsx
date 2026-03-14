@@ -10,7 +10,27 @@ export function PageWrapper({ children, pageNumber }: PageWrapperProps) {
   const template = useTemplate();
   const isModern = template.id === 'modern';
   const isElegant = template.id === 'elegant';
+  const isSoft = template.id === 'soft';
   const accent = template.colors.primaryAccent;
+
+  if (isSoft) {
+    return (
+      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: template.colors.background }}>
+        <div className="relative z-10 px-10 py-14 lg:px-16 lg:py-20 max-w-5xl mx-auto">
+          {children}
+        </div>
+        {pageNumber && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3">
+            <div className="w-5 h-px" style={{ background: `${accent}4D` }} />
+            <span style={{ fontSize: "11px", fontWeight: 500, letterSpacing: "0.05em", color: template.colors.textMuted }}>
+              {pageNumber}
+            </span>
+            <div className="w-5 h-px" style={{ background: `${accent}4D` }} />
+          </div>
+        )}
+      </div>
+    );
+  }
 
   if (isElegant) {
     return (

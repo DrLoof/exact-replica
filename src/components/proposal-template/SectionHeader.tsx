@@ -21,9 +21,49 @@ export function SectionHeader({
   const template = useTemplate();
   const isModern = template.id === 'modern';
   const isElegant = template.id === 'elegant';
+  const isSoft = template.id === 'soft';
   const isCenter = align === "center";
   const accent = template.colors.primaryAccent;
   const dark = template.colors.primaryDark;
+
+  if (isSoft) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className={`mb-12 ${isCenter ? "text-center" : ""}`}
+        style={{ fontFamily: "'DM Sans', sans-serif" }}
+      >
+        <div className={`flex items-center gap-4 mb-6 ${isCenter ? "justify-center" : ""}`}>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+            style={{ background: `${accent}1A`, color: accent, fontSize: "13px", fontWeight: 700 }}>
+            {number}
+          </div>
+          <div className="w-10 h-px" style={{ background: `${accent}40` }} />
+        </div>
+        {onTitleEdit ? (
+          <EditableText value={title} placeholder="Section title..." onSave={onTitleEdit} as="h1"
+            style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 600, lineHeight: 1.1, color: dark }} />
+        ) : (
+          <h2 style={{ fontSize: "clamp(28px, 4vw, 44px)", fontWeight: 600, lineHeight: 1.1, color: dark }}>
+            {title}
+          </h2>
+        )}
+        {(subtitle || onSubtitleEdit) && (
+          onSubtitleEdit ? (
+            <EditableText value={subtitle || ''} placeholder="Click to add a subtitle..." onSave={onSubtitleEdit} as="p"
+              className="mt-3 max-w-xl"
+              style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.6, color: template.colors.textBody }} />
+          ) : (
+            <p className="mt-3 max-w-xl" style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.6, color: template.colors.textBody }}>
+              {subtitle}
+            </p>
+          )
+        )}
+      </motion.div>
+    );
+  }
 
   if (isElegant) {
     const accentTint = `${accent}0F`;

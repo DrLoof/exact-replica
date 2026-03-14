@@ -330,8 +330,105 @@ function ModernHeroCover({
   );
 }
 
+function SoftHeroCover({
+  proposalTitle, subtitle, clientName, date, proposalNumber,
+  onTitleEdit, onSubtitleEdit, onClientNameEdit, onDateEdit,
+}: HeroCoverProps) {
+  const brand = useBrand();
+  const template = useTemplate();
+  const accent = template.colors.primaryAccent;
+  const dark = template.colors.primaryDark;
+  const displayDate = date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+  return (
+    <div
+      className="relative min-h-screen w-full overflow-hidden flex flex-col"
+      style={{
+        background: `linear-gradient(to bottom right, ${accent}, ${accent}CC, ${accent}99)`,
+        fontFamily: "'DM Sans', sans-serif",
+      }}
+    >
+      {/* Top bar */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+        className="relative z-10 flex items-center justify-between px-10 pt-10 lg:px-16 lg:pt-14"
+      >
+        <div className="flex items-center gap-3">
+          {brand.logoUrl ? (
+            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain brightness-0 invert" />
+          ) : (
+            <span className="tracking-[0.2em] uppercase" style={{ fontSize: "14px", fontWeight: 600, color: "white" }}>
+              {brand.agencyName}
+            </span>
+          )}
+        </div>
+        {proposalNumber && (
+          <span style={{ fontSize: "12px", fontWeight: 500, color: "rgba(255,255,255,0.7)" }}>{proposalNumber}</span>
+        )}
+      </motion.div>
+
+      {/* Main Content */}
+      <div className="relative z-10 flex-1 flex flex-col justify-center px-10 lg:px-16 max-w-3xl">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.7, ease: "easeOut" }}
+        >
+          {onTitleEdit ? (
+            <EditableText value={proposalTitle} placeholder="Enter proposal title..." onSave={onTitleEdit} as="h1"
+              style={{
+                fontSize: "clamp(42px, 6vw, 72px)", fontWeight: 600, lineHeight: 1.08,
+                color: dark, letterSpacing: "-0.02em",
+              }} />
+          ) : (
+            <h1 style={{
+              fontSize: "clamp(42px, 6vw, 72px)", fontWeight: 600, lineHeight: 1.08,
+              color: dark, letterSpacing: "-0.02em",
+            }}>
+              {proposalTitle}
+            </h1>
+          )}
+          {(subtitle || onSubtitleEdit) && (
+            onSubtitleEdit ? (
+              <EditableText value={subtitle || ''} placeholder="Click to add a subtitle..." onSave={onSubtitleEdit} as="p"
+                className="max-w-lg mt-6"
+                style={{ fontSize: "17px", fontWeight: 400, lineHeight: 1.7, color: `${dark}CC` }} />
+            ) : (
+              <p className="max-w-lg mt-6" style={{ fontSize: "17px", fontWeight: 400, lineHeight: 1.7, color: `${dark}CC` }}>
+                {subtitle}
+              </p>
+            )
+          )}
+          <div className="mt-16" style={{ fontSize: "15px", color: `${dark}B3` }}>
+            <span style={{ fontStyle: "italic" }}>Prepared for:</span>{' '}
+            {onClientNameEdit ? (
+              <EditableText value={clientName} placeholder="Client name" onSave={onClientNameEdit} as="span"
+                style={{ fontWeight: 600, color: dark }} />
+            ) : (
+              <span style={{ fontWeight: 600, color: dark }}>{clientName}</span>
+            )}
+            <span className="mx-3">|</span>
+            {onDateEdit ? (
+              <EditableText value={displayDate} placeholder="Date" onSave={onDateEdit} as="span"
+                style={{ fontWeight: 600, color: dark }} />
+            ) : (
+              <span style={{ fontWeight: 600, color: dark }}>{displayDate}</span>
+            )}
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
 export function HeroCover(props: HeroCoverProps) {
   const template = useTemplate();
+
+  if (template.id === 'soft') {
+    return <SoftHeroCover {...props} />;
+  }
 
   if (template.id === 'elegant') {
     return <ElegantHeroCover {...props} />;
