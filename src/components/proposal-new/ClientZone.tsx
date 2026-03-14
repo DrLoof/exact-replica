@@ -85,26 +85,6 @@ export function ClientZone({
     ? clients.filter((c: any) => c.company_name.toLowerCase().includes(clientSearch.toLowerCase()))
     : [];
 
-  const toggleChallenge = (challenge: string) => {
-    setClientChallenges(
-      clientChallenges.includes(challenge)
-        ? clientChallenges.filter(c => c !== challenge)
-        : [...clientChallenges, challenge]
-    );
-  };
-
-  const toggleGoal = (goalOpt: GoalOption) => {
-    const existing = selectedGoals.find(g => g.id === goalOpt.id);
-    if (existing) {
-      setSelectedGoals(selectedGoals.filter(g => g.id !== goalOpt.id));
-    } else {
-      setSelectedGoals([...selectedGoals, { id: goalOpt.id, label: goalOpt.label, kpi: goalOpt.defaultKpi }]);
-    }
-  };
-
-  const updateGoalKpi = (goalId: string, kpi: string) => {
-    setSelectedGoals(selectedGoals.map(g => g.id === goalId ? { ...g, kpi } : g));
-  };
 
   const handleAutoFill = async () => {
     if (!newClientWebsite.trim()) return;
