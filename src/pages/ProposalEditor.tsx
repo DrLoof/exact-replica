@@ -879,7 +879,15 @@ export default function ProposalEditor() {
                         <Link to="/settings" className="mt-2 inline-block text-sm text-brand hover:text-brand-hover">Add in Settings →</Link>
                       </div>
                     ) : (
-                      <TermsSection clauses={termsClauses.map(c => ({ title: c.title, content: c.content }))} />
+                      <TermsSection
+                        clauses={termsClauses.map(c => ({ title: c.title, content: c.content }))}
+                        onClauseEdit={async (index, field, value) => {
+                          const clause = termsClauses[index];
+                          if (!clause) return;
+                          await supabase.from('terms_clauses').update({ [field]: value }).eq('id', clause.id);
+                          setTermsClauses(prev => prev.map((c, i) => i === index ? { ...c, [field]: value } : c));
+                        }}
+                      />
                     )}
                   </PageWrapper>
                 </div>
