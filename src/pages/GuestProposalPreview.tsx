@@ -704,7 +704,7 @@ export default function GuestProposalPreview() {
               </button>
             </div>
           )}
-          <TemplateProvider templateId={templateId} customColors={customColors}>
+          <TemplateProvider templateId={templateId} customColors={{ primaryAccent: activePrimary, secondaryAccent: activeSecondary, ...(customColors || {}) }}>
           <BrandProvider brand={{
             agencyName: agencyName.toUpperCase(),
             agencyFullName: agencyName,
