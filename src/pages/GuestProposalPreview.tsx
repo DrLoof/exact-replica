@@ -555,31 +555,65 @@ export default function GuestProposalPreview() {
             </div>
           </div>
 
-          {/* Color Customizer — locked for free users */}
+          {/* Color Customizer — preview allowed, saving gated */}
           <div className="mb-3 pb-3 border-b border-border">
             <div className="flex items-center gap-2 px-2 mb-2">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Colors</span>
-              <span className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground/60 bg-muted rounded px-1.5 py-0.5">Starter</span>
+              <span className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground/60 bg-muted rounded px-1.5 py-0.5">Preview</span>
             </div>
-            <div className="flex items-center gap-3 px-2 relative">
+            <div className="flex items-center gap-3 px-2 relative" ref={colorPickerRef}>
+              {/* Primary */}
               <div className="flex flex-col items-center gap-1">
                 <button
-                  onClick={() => toast('Upgrade to Starter to customize proposal colors.', { action: { label: 'See plans', onClick: () => navigate('/pricing') } })}
-                  className="w-6 h-6 rounded-full border-2 border-border opacity-50 cursor-not-allowed"
+                  onClick={() => setColorPickerOpen(colorPickerOpen === 'primaryAccent' ? null : 'primaryAccent')}
+                  className="w-6 h-6 rounded-full border-2 border-border hover:scale-110 transition-transform"
                   style={{ background: activePrimary }}
-                  title="Primary accent — upgrade to customize"
+                  title="Primary accent"
                 />
                 <span className="text-muted-foreground/50" style={{ fontSize: '9px' }}>Primary</span>
               </div>
+              {/* Secondary */}
               <div className="flex flex-col items-center gap-1">
                 <button
-                  onClick={() => toast('Upgrade to Starter to customize proposal colors.', { action: { label: 'See plans', onClick: () => navigate('/pricing') } })}
-                  className="w-6 h-6 rounded-full border-2 border-border opacity-50 cursor-not-allowed"
+                  onClick={() => setColorPickerOpen(colorPickerOpen === 'secondaryAccent' ? null : 'secondaryAccent')}
+                  className="w-6 h-6 rounded-full border-2 border-border hover:scale-110 transition-transform"
                   style={{ background: activeSecondary }}
-                  title="Secondary accent — upgrade to customize"
+                  title="Secondary accent"
                 />
                 <span className="text-muted-foreground/50" style={{ fontSize: '9px' }}>Secondary</span>
               </div>
+              {customColors && (
+                <button onClick={resetColors} className="text-muted-foreground hover:text-foreground ml-auto" title="Reset colors">
+                  <RefreshCw className="h-3 w-3" />
+                </button>
+              )}
+
+              {/* Color picker popover */}
+              {colorPickerOpen && (
+                <div className="absolute left-0 top-full mt-2 z-50 bg-popover border border-border rounded-lg shadow-lg p-3 w-48">
+                  <div className="grid grid-cols-5 gap-1.5 mb-2">
+                    {PRESET_COLORS.map(c => (
+                      <button
+                        key={c}
+                        onClick={() => { updateCustomColor(colorPickerOpen, c); setColorPickerOpen(null); }}
+                        className={cn('w-7 h-7 rounded-full border-2 hover:scale-110 transition-transform', (customColors?.[colorPickerOpen] || currentTemplate.colors[colorPickerOpen]) === c ? 'border-foreground' : 'border-transparent')}
+                        style={{ background: c }}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex gap-1.5 items-center">
+                    <span className="text-[10px] text-muted-foreground">#</span>
+                    <input
+                      value={hexInput}
+                      onChange={e => setHexInput(e.target.value.replace(/[^0-9a-fA-F]/g, '').slice(0, 6))}
+                      onKeyDown={e => { if (e.key === 'Enter' && hexInput.length >= 3) { updateCustomColor(colorPickerOpen, `#${hexInput}`); setColorPickerOpen(null); } }}
+                      placeholder="HEX"
+                      className="flex-1 text-xs bg-muted rounded px-2 py-1 border-none outline-none"
+                    />
+                  </div>
+                  <p className="text-[9px] text-muted-foreground/60 mt-2">Sign up to save colors</p>
+                </div>
+              )}
             </div>
           </div>
 
