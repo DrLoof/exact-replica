@@ -85,7 +85,7 @@ export default function ProposalNew() {
   const [newClientName, setNewClientName] = useState('');
   const [newContactName, setNewContactName] = useState('');
   const [newClientWebsite, setNewClientWebsite] = useState('');
-  const [clientChallenge, setClientChallenge] = useState('');
+  const [clientChallenges, setClientChallenges] = useState<string[]>([]);
   const [clientChallengeOther, setClientChallengeOther] = useState('');
   const [clientGoal, setClientGoal] = useState('');
   const [clientGoalOther, setClientGoalOther] = useState('');
