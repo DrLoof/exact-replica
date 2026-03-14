@@ -4,9 +4,11 @@ import {
   ArrowLeft, Eye, EyeOff, Share2, Download, Send, LinkIcon,
   ChevronDown, FileText, Check, DollarSign, Clock,
   RefreshCw, MoreHorizontal, Plus, X, Search, RotateCcw, Loader2,
+  Lock,
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { templates } from '@/lib/proposalTemplates';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -112,6 +114,7 @@ export default function ProposalEditor() {
   const [addServiceSearch, setAddServiceSearch] = useState('');
   const [availableModules, setAvailableModules] = useState<any[]>([]);
   const [regenerating, setRegenerating] = useState(false);
+  const [templateId, setTemplateId] = useState<string>('classic');
   const currencySymbol = agency?.currency_symbol || '$';
 
   // Warn user before leaving if an editable field is focused (unsaved inline edit)
@@ -147,7 +150,7 @@ export default function ProposalEditor() {
     }
 
     setProposal(propRes.data as ProposalData);
-
+    setTemplateId((propRes.data as any).template_id || 'classic');
     if (propRes.data.client_id) {
       const { data: cl } = await supabase.from('clients').select('*').eq('id', propRes.data.client_id).single();
       setClient(cl);
@@ -298,6 +301,19 @@ export default function ProposalEditor() {
       if (next.has(idx)) next.delete(idx); else next.add(idx);
       return next;
     });
+  };
+
+  const switchTemplate = async (newId: string) => {
+    const tmpl = templates[newId];
+    if (!tmpl) return;
+    if (tmpl.isPro) {
+      toast.error('This template is available on the Pro plan. Upgrade to unlock all templates.');
+      return;
+    }
+    setTemplateId(newId);
+    if (proposal) {
+      await supabase.from('proposals').update({ template_id: newId }).eq('id', proposal.id);
+    }
   };
 
   const getServicePrice = (s: ProposalService) => {
