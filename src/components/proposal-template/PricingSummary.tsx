@@ -458,7 +458,7 @@ export function PricingSummary({
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.5 }}
             className="mt-8 rounded-2xl p-8"
-            style={{ background: "white", border: "2px dashed #E5E7EB" }}
+            style={{ background: template.colors.cardBackground, border: `2px dashed ${template.colors.border}` }}
           >
             <h4 className="mb-4 uppercase tracking-[0.15em]"
               style={{ fontSize: "12px", fontWeight: 600, color: dark }}>
