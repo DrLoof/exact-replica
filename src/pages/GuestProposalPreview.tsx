@@ -770,7 +770,7 @@ export default function GuestProposalPreview() {
               )}
 
               {/* Section 2: Scope of Services */}
-              {!hiddenSections.has(2) && (
+              {!deletedSections.has(2) && (
                 <div id="guest-section-2" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="03">
                     <SectionHeader number="02" title="Scope of Services" subtitle="What we'll deliver for you" />
