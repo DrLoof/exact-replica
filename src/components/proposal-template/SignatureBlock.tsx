@@ -27,6 +27,9 @@ export function SignatureBlock({
   const brand = useBrand();
   const template = useTemplate();
   const isModern = template.id === 'modern';
+  const accent = template.colors.primaryAccent;
+  const secondary = template.colors.secondaryAccent;
+  const dark = template.colors.primaryDark;
 
   const agencyParty: SignatureParty = agency || {
     role: "Agency",
@@ -45,14 +48,14 @@ export function SignatureBlock({
         {/* Header */}
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
-            style={{ background: "#34D39915", color: "#34D399", fontSize: "13px", fontWeight: 600 }}>
+            style={{ background: `${secondary}15`, color: secondary, fontSize: "13px", fontWeight: 600 }}>
             <Pen size={13} />
             Ready to sign
           </div>
           <h2 style={{
             fontFamily: "'Fraunces', serif",
             fontSize: "clamp(28px, 3.5vw, 44px)",
-            fontWeight: 700, lineHeight: 1.1, color: "#1E1B4B",
+            fontWeight: 700, lineHeight: 1.1, color: dark,
           }}>
             {heading}
           </h2>
@@ -75,13 +78,13 @@ export function SignatureBlock({
             >
               {/* Role label */}
               <span className="inline-block px-3 py-1.5 rounded-full mb-6 uppercase tracking-wider"
-                style={{ fontSize: "11px", fontWeight: 600, background: "#2563EB12", color: "#2563EB" }}>
+                style={{ fontSize: "11px", fontWeight: 600, background: `${accent}12`, color: accent }}>
                 {party.role}
               </span>
 
               {/* Company & person */}
               <div className="mb-8">
-                <span className="block mb-1" style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, color: "#1E1B4B" }}>
+                <span className="block mb-1" style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, color: dark }}>
                   {party.companyName}
                 </span>
                 {party.personName && (
@@ -94,7 +97,7 @@ export function SignatureBlock({
               {/* Signature line */}
               <div className="space-y-6">
                 <div>
-                  <div className="h-16 mb-2 rounded-lg" style={{ background: "#2563EB06", borderBottom: "3px solid #2563EB" }} />
+                  <div className="h-16 mb-2 rounded-lg" style={{ background: `${accent}06`, borderBottom: `3px solid ${accent}` }} />
                   <span className="uppercase tracking-[0.15em]" style={{ fontSize: "10px", fontWeight: 500, color: "#D1D5DB" }}>
                     Signature
                   </span>
@@ -121,13 +124,17 @@ export function SignatureBlock({
         {/* Thank you / closing */}
         <div className="mt-20 text-center">
           <div className="inline-block">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4"
-              style={{ backgroundColor: "#1E1B4B" }}>
-              <span className="text-white" style={{ fontSize: "16px", fontWeight: 800 }}>
-                {brand.agencyName?.charAt(0) || 'A'}
-              </span>
-            </div>
-            <p className="mb-2" style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, color: "#1E1B4B" }}>
+            {brand.logoUrl ? (
+              <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain mx-auto mb-4" />
+            ) : (
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                style={{ backgroundColor: dark }}>
+                <span className="text-white" style={{ fontSize: "16px", fontWeight: 800 }}>
+                  {brand.agencyName?.charAt(0) || 'A'}
+                </span>
+              </div>
+            )}
+            <p className="mb-2" style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, color: dark }}>
               Thank you for considering {brand.agencyFullName}.
             </p>
             <p style={{ fontSize: "14px", fontWeight: 400, color: "#9CA3AF" }}>
@@ -135,17 +142,17 @@ export function SignatureBlock({
             </p>
             <div className="mt-6 flex items-center justify-center gap-3 flex-wrap">
               {brand.contactEmail && (
-                <span className="px-4 py-2 rounded-full" style={{ background: "#2563EB10", color: "#2563EB", fontSize: "13px", fontWeight: 500 }}>
+                <span className="px-4 py-2 rounded-full" style={{ background: `${accent}10`, color: accent, fontSize: "13px", fontWeight: 500 }}>
                   {brand.contactEmail}
                 </span>
               )}
               {brand.contactWebsite && (
-                <span className="px-4 py-2 rounded-full" style={{ background: "#2563EB10", color: "#2563EB", fontSize: "13px", fontWeight: 500 }}>
+                <span className="px-4 py-2 rounded-full" style={{ background: `${accent}10`, color: accent, fontSize: "13px", fontWeight: 500 }}>
                   {brand.contactWebsite}
                 </span>
               )}
               {brand.contactPhone && (
-                <span className="px-4 py-2 rounded-full" style={{ background: "#2563EB10", color: "#2563EB", fontSize: "13px", fontWeight: 500 }}>
+                <span className="px-4 py-2 rounded-full" style={{ background: `${accent}10`, color: accent, fontSize: "13px", fontWeight: 500 }}>
                   {brand.contactPhone}
                 </span>
               )}

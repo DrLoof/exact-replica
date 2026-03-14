@@ -24,6 +24,8 @@ export function WhyUsCard({
   const brand = useBrand();
   const template = useTemplate();
   const isModern = template.id === 'modern';
+  const accent = template.colors.primaryAccent;
+  const dark = template.colors.primaryDark;
 
   const IconComponent = icon && (LucideIcons as any)[icon]
     ? (LucideIcons as any)[icon]
@@ -45,7 +47,7 @@ export function WhyUsCard({
         {statValue && (
           <div className="absolute -top-4 -right-3 z-10">
             <div className="px-4 py-2 rounded-2xl text-center"
-              style={{ background: "#2563EB", color: "white", boxShadow: "3px 3px 0px #1E1B4B" }}>
+              style={{ background: accent, color: "white", boxShadow: `3px 3px 0px ${dark}` }}>
               <span className="block" style={{ fontSize: "20px", fontWeight: 800, lineHeight: 1, fontFamily: "'Fraunces', serif" }}>
                 {statValue}
               </span>
@@ -60,12 +62,12 @@ export function WhyUsCard({
 
         {/* Icon */}
         <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
-          style={{ background: "#2563EB10", color: "#2563EB" }}>
+          style={{ background: `${accent}10`, color: accent }}>
           <IconComponent size={22} />
         </div>
 
         {/* Title */}
-        <h3 className="mb-3" style={{ fontFamily: "'Fraunces', serif", fontSize: "18px", fontWeight: 700, lineHeight: 1.2, color: "#1E1B4B" }}>
+        <h3 className="mb-3" style={{ fontFamily: "'Fraunces', serif", fontSize: "18px", fontWeight: 700, lineHeight: 1.2, color: dark }}>
           {title}
         </h3>
 
@@ -77,7 +79,7 @@ export function WhyUsCard({
         {/* Bottom accent dots */}
         <div className="mt-6 pt-4 flex items-center gap-1.5" style={{ borderTop: "2px dashed #E5E7EB" }}>
           {[0.15, 0.25, 0.4, 0.55, 0.7].map((opacity, i) => (
-            <div key={i} className="w-2 h-2 rounded-full" style={{ background: "#2563EB", opacity }} />
+            <div key={i} className="w-2 h-2 rounded-full" style={{ background: accent, opacity }} />
           ))}
         </div>
       </motion.div>

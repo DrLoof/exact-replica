@@ -30,6 +30,9 @@ export function TestimonialCard({
   const brand = useBrand();
   const template = useTemplate();
   const isModern = template.id === 'modern';
+  const accent = template.colors.primaryAccent;
+  const secondary = template.colors.secondaryAccent;
+  const dark = template.colors.primaryDark;
 
   if (isModern && featured) {
     return (
@@ -40,11 +43,11 @@ export function TestimonialCard({
         className="rounded-3xl p-10"
         style={{
           fontFamily: "'Outfit', sans-serif",
-          backgroundColor: "#1E1B4B",
-          boxShadow: "0 12px 40px rgba(30,27,75,0.2)",
+          backgroundColor: dark,
+          boxShadow: `0 12px 40px ${dark}33`,
         }}
       >
-        <Quote size={28} style={{ color: "#93C5FD" }} className="mb-6" />
+        <Quote size={28} style={{ color: secondary }} className="mb-6" />
         <blockquote className="mb-8"
           style={{ fontSize: "18px", fontWeight: 400, lineHeight: 1.7, color: "rgba(255,255,255,0.85)", fontFamily: "'Fraunces', serif", fontStyle: "italic" }}>
           "{quote}"
@@ -52,12 +55,12 @@ export function TestimonialCard({
 
         {metricValue && (
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
-            style={{ background: "rgba(147,197,253,0.15)" }}>
-            <span style={{ fontSize: "18px", fontWeight: 800, color: "#93C5FD", fontFamily: "'Fraunces', serif" }}>
+            style={{ background: `${secondary}26` }}>
+            <span style={{ fontSize: "18px", fontWeight: 800, color: secondary, fontFamily: "'Fraunces', serif" }}>
               {metricValue}
             </span>
             {metricLabel && (
-              <span style={{ fontSize: "11px", fontWeight: 500, color: "#93C5FD", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <span style={{ fontSize: "11px", fontWeight: 500, color: secondary, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                 {metricLabel}
               </span>
             )}
@@ -70,7 +73,7 @@ export function TestimonialCard({
               <img src={avatarUrl} alt={clientName} className="w-12 h-12 rounded-full object-cover" />
             ) : (
               <div className="w-12 h-12 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: "#2563EB", boxShadow: "2px 2px 0px rgba(255,255,255,0.15)" }}>
+                style={{ backgroundColor: accent, boxShadow: "2px 2px 0px rgba(255,255,255,0.15)" }}>
                 <span className="text-white" style={{ fontSize: "16px", fontWeight: 700 }}>{clientName.charAt(0)}</span>
               </div>
             )}
@@ -101,7 +104,7 @@ export function TestimonialCard({
           boxShadow: "0 2px 12px rgba(30,27,75,0.04)",
         }}
       >
-        <Quote size={20} style={{ color: "#2563EB", opacity: 0.3 }} className="mb-4" />
+        <Quote size={20} style={{ color: accent, opacity: 0.3 }} className="mb-4" />
         <blockquote className="mb-6"
           style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.7, color: "#6B7280", fontFamily: "'Fraunces', serif", fontStyle: "italic" }}>
           "{quote}"
@@ -109,12 +112,12 @@ export function TestimonialCard({
 
         {metricValue && (
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5"
-            style={{ background: "#2563EB10" }}>
-            <span style={{ fontSize: "14px", fontWeight: 700, color: "#2563EB", fontFamily: "'Fraunces', serif" }}>
+            style={{ background: `${accent}10` }}>
+            <span style={{ fontSize: "14px", fontWeight: 700, color: accent, fontFamily: "'Fraunces', serif" }}>
               {metricValue}
             </span>
             {metricLabel && (
-              <span style={{ fontSize: "10px", fontWeight: 500, color: "#2563EB", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              <span style={{ fontSize: "10px", fontWeight: 500, color: accent, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                 {metricLabel}
               </span>
             )}
@@ -127,12 +130,12 @@ export function TestimonialCard({
               <img src={avatarUrl} alt={clientName} className="w-10 h-10 rounded-full object-cover" />
             ) : (
               <div className="w-10 h-10 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: "#1E1B4B", boxShadow: "2px 2px 0px #2563EB40" }}>
+                style={{ backgroundColor: dark, boxShadow: `2px 2px 0px ${accent}40` }}>
                 <span className="text-white" style={{ fontSize: "14px", fontWeight: 700 }}>{clientName.charAt(0)}</span>
               </div>
             )}
             <div>
-              <span className="block" style={{ fontSize: "14px", fontWeight: 600, color: "#1E1B4B" }}>{clientName}</span>
+              <span className="block" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>{clientName}</span>
               {(clientTitle || clientCompany) && (
                 <span className="block" style={{ fontSize: "12px", fontWeight: 400, color: "#D1D5DB" }}>
                   {clientTitle}{clientTitle && clientCompany ? " · " : ""}{clientCompany}
