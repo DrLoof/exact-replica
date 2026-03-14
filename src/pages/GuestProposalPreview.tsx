@@ -653,7 +653,7 @@ export default function GuestProposalPreview() {
           <BrandProvider brand={{
             agencyName: agencyName.toUpperCase(),
             agencyFullName: agencyName,
-            primaryColor: brandColor,
+            primaryColor: customColors?.primaryAccent || brandColor,
             darkColor: '#0A0A0A',
             logoUrl: identity.logo_url || null,
             logoInitial: (agencyName || 'A').charAt(0).toUpperCase(),
@@ -775,7 +775,7 @@ export default function GuestProposalPreview() {
                 <div id="guest-section-4" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="05">
                     <SectionHeader number="04" title="Investment" subtitle="Transparent pricing for every deliverable" />
-                    <PricingSummary items={pricingItems} total={totalStr} brandColor={brandColor} />
+                    <PricingSummary items={pricingItems} total={totalStr} brandColor={customColors?.primaryAccent || brandColor} />
                   </PageWrapper>
                   <PreviewWatermark />
                 </div>
