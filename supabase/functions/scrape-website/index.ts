@@ -425,7 +425,15 @@ Return this exact JSON structure:
         "source": "scraped"
       }
     ]
-  }
+  },
+  "team_members": [
+    {
+      "name": "Full Name",
+      "title": "Job Title",
+      "photo_url": "absolute URL to photo or null",
+      "bio": "One sentence bio or null"
+    }
+  ]
 }
 
 Rules:
