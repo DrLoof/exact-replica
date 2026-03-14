@@ -107,8 +107,9 @@ export default function ProposalEditor() {
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [termsClauses, setTermsClauses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hiddenSections, setHiddenSections] = useState<Set<number>>(new Set());
+  const [deletedSections, setDeletedSections] = useState<Set<number>>(new Set());
   const [activeSection, setActiveSection] = useState(0);
+  const [showAddPage, setShowAddPage] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showAddService, setShowAddService] = useState(false);
   const [addServiceSearch, setAddServiceSearch] = useState('');
