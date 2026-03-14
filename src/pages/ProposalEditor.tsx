@@ -673,7 +673,7 @@ export default function ProposalEditor() {
               </SectionWrapper>}
 
               {/* Section 1: Executive Summary */}
-              <SectionWrapper idx={1} hidden={hiddenSections.has(1)} onToggle={toggleSection} label="Executive Summary">
+              {!deletedSections.has(1) && <SectionWrapper idx={1} onDelete={deleteSection} label="Executive Summary">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="02">
                     <SectionHeader number="01" title="Executive Summary" subtitle="Our understanding and approach"
