@@ -482,7 +482,7 @@ export default function ProposalNew() {
         currencySymbol,
         executiveSummary,
         title: generatedTitle,
-        clientChallenge: resolvedChallenge || null,
+        clientChallenge: resolvedChallenges.length > 0 ? JSON.stringify(resolvedChallenges) : null,
         clientGoal: resolvedGoal || null,
         clientContextNote: clientContextNote || null,
       };
