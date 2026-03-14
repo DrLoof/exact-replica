@@ -28,6 +28,7 @@ export type Database = {
           dark_color: string | null
           default_notice_period: string | null
           default_revision_rounds: number | null
+          default_template: string | null
           default_validity_days: number | null
           email: string | null
           hourly_rate: number | null
@@ -63,6 +64,7 @@ export type Database = {
           dark_color?: string | null
           default_notice_period?: string | null
           default_revision_rounds?: number | null
+          default_template?: string | null
           default_validity_days?: number | null
           email?: string | null
           hourly_rate?: number | null
@@ -98,6 +100,7 @@ export type Database = {
           dark_color?: string | null
           default_notice_period?: string | null
           default_revision_rounds?: number | null
+          default_template?: string | null
           default_validity_days?: number | null
           email?: string | null
           hourly_rate?: number | null
@@ -626,6 +629,7 @@ export type Database = {
           sent_at: string | null
           status: string | null
           subtitle: string | null
+          template_id: string | null
           title: string | null
           total_estimated: number | null
           total_fixed: number | null
@@ -663,6 +667,7 @@ export type Database = {
           sent_at?: string | null
           status?: string | null
           subtitle?: string | null
+          template_id?: string | null
           title?: string | null
           total_estimated?: number | null
           total_fixed?: number | null
@@ -700,6 +705,7 @@ export type Database = {
           sent_at?: string | null
           status?: string | null
           subtitle?: string | null
+          template_id?: string | null
           title?: string | null
           total_estimated?: number | null
           total_fixed?: number | null
