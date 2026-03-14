@@ -390,6 +390,7 @@ export default function ProposalNew() {
         client_goal: resolvedGoal || null,
         client_context_note: clientContextNote || null,
         template_id: (agency as any).default_template || 'classic',
+        custom_colors: agency.brand_color ? { primaryAccent: agency.brand_color } : null,
       } as any).select('id').single();
       if (pError) throw pError;
 

@@ -3,8 +3,24 @@ import { ProposalTemplate, templates } from '@/lib/proposalTemplates';
 
 const TemplateContext = createContext<ProposalTemplate>(templates.classic);
 
-export function TemplateProvider({ templateId, children }: { templateId: string; children: React.ReactNode }) {
-  const template = templates[templateId] || templates.classic;
+export function TemplateProvider({ 
+  templateId, 
+  customColors,
+  children 
+}: { 
+  templateId: string; 
+  customColors?: Record<string, string> | null;
+  children: React.ReactNode;
+}) {
+  const baseTemplate = templates[templateId] || templates.classic;
+  
+  const template = customColors ? {
+    ...baseTemplate,
+    colors: {
+      ...baseTemplate.colors,
+      ...customColors,
+    },
+  } : baseTemplate;
 
   useEffect(() => {
     const link = document.createElement('link');

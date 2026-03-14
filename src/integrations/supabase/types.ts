@@ -611,6 +611,7 @@ export type Database = {
           client_id: string | null
           created_at: string
           created_by: string | null
+          custom_colors: Json | null
           custom_milestones: Json | null
           declined_at: string | null
           estimated_duration: string | null
@@ -649,6 +650,7 @@ export type Database = {
           client_id?: string | null
           created_at?: string
           created_by?: string | null
+          custom_colors?: Json | null
           custom_milestones?: Json | null
           declined_at?: string | null
           estimated_duration?: string | null
@@ -687,6 +689,7 @@ export type Database = {
           client_id?: string | null
           created_at?: string
           created_by?: string | null
+          custom_colors?: Json | null
           custom_milestones?: Json | null
           declined_at?: string | null
           estimated_duration?: string | null
