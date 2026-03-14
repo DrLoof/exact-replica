@@ -139,6 +139,7 @@ export function TestimonialCard({
   }
 
   // Elegant featured
+  if (isElegant && featured) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 24 }}
