@@ -442,7 +442,7 @@ export default function ProposalNew() {
       setSaving(true);
 
       let executiveSummary: string | null = null;
-      const resolvedChallenge = clientChallenge === 'Other' ? clientChallengeOther : clientChallenge;
+      const resolvedChallenges = clientChallenges.map(c => c === 'Other' ? clientChallengeOther : c).filter(Boolean);
       const resolvedGoal = clientGoal === 'Other' ? clientGoalOther : clientGoal;
       try {
         const { data: summaryData } = await supabase.functions.invoke('generate-executive-summary', {
@@ -451,7 +451,7 @@ export default function ProposalNew() {
             clientName: clientDisplayName,
             serviceNames: selectedMods.map((m: any) => m.name),
             serviceContexts: selectedMods.map((m: any) => m.ai_context).filter(Boolean),
-            clientChallenge: resolvedChallenge || null,
+            clientChallenges: resolvedChallenges.length > 0 ? resolvedChallenges : null,
             clientGoal: resolvedGoal || null,
             clientContextNote: clientContextNote || null,
           },
