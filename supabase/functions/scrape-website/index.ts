@@ -512,6 +512,7 @@ I have also pre-extracted quotes from HTML blockquotes and testimonial elements.
       if (aiResult.services_detected?.length > 0) result.detected_services = aiResult.services_detected;
       if (aiResult.testimonials?.length > 0) result.testimonials = aiResult.testimonials;
       if (aiResult.differentiators) result.differentiators = aiResult.differentiators;
+      if (aiResult.team_members?.length > 0) result.team_members = aiResult.team_members;
     }
 
     // Log testimonial results
