@@ -112,6 +112,7 @@ export default function ProposalNew() {
     d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7));
     return d.toISOString().split('T')[0];
   });
+  const [endDate, setEndDate] = useState('');
 
   const [saving, setSaving] = useState(false);
   const [showSignupGate, setShowSignupGate] = useState(false);
