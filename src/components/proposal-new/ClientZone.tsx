@@ -100,6 +100,7 @@ export function ClientZone({
           });
           if (summaryData?.summary) setClientContext(summaryData.summary);
           else setClientContext(rawParts.join('\n'));
+          if (summaryData?.industry && !clientIndustry) setClientIndustry(summaryData.industry);
         } catch {
           setClientContext(rawParts.join('\n'));
         }
