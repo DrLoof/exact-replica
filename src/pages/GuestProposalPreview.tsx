@@ -687,6 +687,7 @@ export default function GuestProposalPreview() {
               )}
             </div>
           </BrandProvider>
+          </TemplateProvider>
         </div>
       </div>
 

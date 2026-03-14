@@ -805,6 +805,7 @@ export default function ProposalEditor() {
 
             </div>
           </BrandProvider>
+          </TemplateProvider>
         </div>
       </div>
 
