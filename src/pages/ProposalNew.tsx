@@ -295,10 +295,15 @@ export default function ProposalNew() {
       const selectedModsList = Array.from(selectedModuleIds).map(id => modules.find((m: any) => m.id === id)).filter(Boolean);
 
       let totalDurationWeeks = 0;
-      selectedModsList.forEach((m: any) => {
-        const match = m.default_timeline?.match(/(\d+)/);
-        totalDurationWeeks += match ? parseInt(match[1]) : 2;
-      });
+      if (endDate && startDate) {
+        const diffMs = new Date(endDate).getTime() - new Date(startDate).getTime();
+        totalDurationWeeks = Math.max(1, Math.round(diffMs / (7 * 86400000)));
+      } else {
+        selectedModsList.forEach((m: any) => {
+          const match = m.default_timeline?.match(/(\d+)/);
+          totalDurationWeeks += match ? parseInt(match[1]) : 2;
+        });
+      }
       totalDurationWeeks = Math.max(totalDurationWeeks, 4);
       const durationStr = `${totalDurationWeeks} weeks`;
 
