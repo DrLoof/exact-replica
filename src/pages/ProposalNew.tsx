@@ -318,7 +318,10 @@ export default function ProposalNew() {
       // Generate executive summary
       let executiveSummary: string | null = null;
       const resolvedChallenges = clientChallenges.map(c => c === 'Other' ? clientChallengeOther : c).filter(Boolean);
-      const resolvedGoal = clientGoal === 'Other' ? clientGoalOther : clientGoal;
+      const resolvedGoals = selectedGoals.map(g => ({
+        ...g,
+        label: g.id === 'other' ? (goalOtherLabel || 'Other') : g.label,
+      }));
       try {
         const realSelectedModules = selectedModsList.map((m: any) => {
           const rm = realModules?.find((rm: any) => rm.name === m.name);
