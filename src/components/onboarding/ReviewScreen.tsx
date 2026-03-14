@@ -389,9 +389,14 @@ export function ReviewScreen({
                 <img src={agencyIdentity.logo_url} alt="" className="h-full w-full object-contain" />
               </div>
             ) : (
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl text-lg font-bold text-primary-foreground shrink-0" style={{ backgroundColor: agencyIdentity.brand_color || '#E8825C' }}>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex h-12 w-12 items-center justify-center rounded-xl text-lg font-bold text-primary-foreground shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                style={{ backgroundColor: agencyIdentity.brand_color || '#E8825C' }}
+                title="Click to upload logo"
+              >
                 {(agencyIdentity.name || 'A').charAt(0).toUpperCase()}
-              </div>
+              </button>
             )}
             <div className="min-w-0">
               <input
