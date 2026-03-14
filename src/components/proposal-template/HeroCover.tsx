@@ -289,13 +289,23 @@ function ModernHeroCover({
             style={{ background: "white", boxShadow: `0 2px 20px ${dark}0F` }}>
             <span className="block uppercase tracking-wider mb-1"
               style={{ fontSize: "10px", fontWeight: 600, color: accent }}>Prepared for</span>
-            <span style={{ fontSize: "16px", fontWeight: 700, color: dark }}>{clientName}</span>
+            {onClientNameEdit ? (
+              <EditableText value={clientName} placeholder="Client name" onSave={onClientNameEdit} as="span"
+                style={{ fontSize: "16px", fontWeight: 700, color: dark }} />
+            ) : (
+              <span style={{ fontSize: "16px", fontWeight: 700, color: dark }}>{clientName}</span>
+            )}
           </div>
           <div className="px-6 py-4 rounded-2xl"
             style={{ background: "white", boxShadow: `0 2px 20px ${dark}0F` }}>
             <span className="block uppercase tracking-wider mb-1"
               style={{ fontSize: "10px", fontWeight: 600, color: accent }}>Date</span>
-            <span style={{ fontSize: "16px", fontWeight: 700, color: dark }}>{displayDate}</span>
+            {onDateEdit ? (
+              <EditableText value={displayDate} placeholder="Date" onSave={onDateEdit} as="span"
+                style={{ fontSize: "16px", fontWeight: 700, color: dark }} />
+            ) : (
+              <span style={{ fontSize: "16px", fontWeight: 700, color: dark }}>{displayDate}</span>
+            )}
           </div>
         </motion.div>
       </div>
