@@ -80,7 +80,7 @@ Return ONLY valid JSON, nothing else.`,
       summary = rawContent || summary;
     }
 
-    return new Response(JSON.stringify({ summary }), {
+    return new Response(JSON.stringify({ summary, industry }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {

@@ -87,7 +87,6 @@ export function ClientZone({
         setClientSearch(data.name);
       }
       if (data?.email) setSuggestedContact(data.email);
-      if (data?.detected_services?.length > 0) setClientIndustry(data.detected_services[0] || '');
       
       const rawParts: string[] = [];
       if (data?.tagline) rawParts.push(data.tagline);
