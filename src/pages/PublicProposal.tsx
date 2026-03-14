@@ -19,6 +19,7 @@ import {
   SignatureBlock,
   PageWrapper,
 } from '@/components/proposal-template';
+import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 
 export default function PublicProposal() {
   const { shareId } = useParams<{ shareId: string }>();
