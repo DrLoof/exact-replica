@@ -150,7 +150,7 @@ export default function ProposalEditor() {
     }
 
     setProposal(propRes.data as ProposalData);
-
+    setTemplateId((propRes.data as any).template_id || 'classic');
     if (propRes.data.client_id) {
       const { data: cl } = await supabase.from('clients').select('*').eq('id', propRes.data.client_id).single();
       setClient(cl);
