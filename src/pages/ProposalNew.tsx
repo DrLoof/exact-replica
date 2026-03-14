@@ -489,8 +489,8 @@ export default function ProposalNew() {
         currencySymbol,
         executiveSummary,
         title: generatedTitle,
-        clientChallenge: resolvedChallenges.length > 0 ? JSON.stringify(resolvedChallenges) : null,
-        clientGoal: resolvedGoal || null,
+        clientChallenge: resolvedChallenges2.length > 0 ? JSON.stringify(resolvedChallenges2) : null,
+        goals: resolvedGoals2,
         clientContextNote: clientContextNote || null,
       };
       localStorage.setItem('propopad_guest_proposal', JSON.stringify(guestProposal));
