@@ -14,6 +14,8 @@ interface HeroCoverProps {
   confidential?: boolean;
   onTitleEdit?: (value: string) => void;
   onSubtitleEdit?: (value: string) => void;
+  onClientNameEdit?: (value: string) => void;
+  onDateEdit?: (value: string) => void;
 }
 
 function ElegantHeroCover({
