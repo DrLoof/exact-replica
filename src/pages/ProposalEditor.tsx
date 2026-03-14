@@ -1003,7 +1003,7 @@ export default function ProposalEditor() {
                     )}
                   </PageWrapper>
                 </div>
-              </SectionWrapper>
+              </SectionWrapper>}
 
               {/* Section 7: Testimonials */}
               <SectionWrapper idx={7} hidden={hiddenSections.has(7)} onToggle={toggleSection} label="Testimonials">
