@@ -1,0 +1,1 @@
+ALTER TABLE proposals ADD COLUMN custom_colors JSONB DEFAULT NULL;
