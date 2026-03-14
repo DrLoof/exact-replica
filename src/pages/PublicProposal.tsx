@@ -199,6 +199,7 @@ export default function PublicProposal() {
   ];
 
   return (
+    <TemplateProvider templateId={proposal?.template_id || 'classic'}>
     <BrandProvider brand={brandData}>
       <div className="min-h-screen bg-white">
         {/* Section 1: Cover */}
