@@ -1,4 +1,5 @@
 import React, { type ReactNode } from "react";
+import { useTemplate } from "./TemplateProvider";
 
 interface PageWrapperProps {
   children: ReactNode;
@@ -6,6 +7,34 @@ interface PageWrapperProps {
 }
 
 export function PageWrapper({ children, pageNumber }: PageWrapperProps) {
+  const template = useTemplate();
+  const isModern = template.id === 'modern';
+
+  if (isModern) {
+    return (
+      <div className="min-h-screen w-full relative overflow-hidden" style={{ background: "#FAFAF8" }}>
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute -top-20 -right-20 w-[300px] h-[300px] rounded-full"
+            style={{ background: "#2563EB", opacity: 0.03, filter: "blur(60px)" }} />
+          <div className="absolute bottom-[20%] -left-10 w-[200px] h-[200px] rounded-full"
+            style={{ background: "#2563EB", opacity: 0.025, filter: "blur(50px)" }} />
+        </div>
+        <div className="relative z-10 px-8 py-14 lg:px-16 lg:py-20 max-w-5xl mx-auto">
+          {children}
+        </div>
+        {pageNumber && (
+          <div className="absolute bottom-6 right-8 lg:right-16 flex items-center gap-2"
+            style={{ fontFamily: "'Outfit', sans-serif" }}>
+            <div className="w-8 h-8 rounded-full flex items-center justify-center"
+              style={{ background: "#2563EB12", color: "#2563EB", fontSize: "12px", fontWeight: 700 }}>
+              {pageNumber}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div
       className="relative min-h-screen w-full bg-white px-12 py-16 lg:px-16 lg:py-20"
