@@ -717,7 +717,7 @@ export default function ProposalEditor() {
                     </div>
                   </PageWrapper>
                 </div>
-              </SectionWrapper>
+              </SectionWrapper>}
 
               {/* Section 2: Scope of Services */}
               <SectionWrapper idx={2} hidden={hiddenSections.has(2)} onToggle={toggleSection} label="Scope of Services">
