@@ -392,7 +392,7 @@ export default function ProposalNew() {
         bundle_savings: bundleSavings,
         phases: generatedPhases,
         executive_summary: executiveSummary,
-        client_challenge: resolvedChallenge || null,
+        client_challenge: resolvedChallenges.length > 0 ? JSON.stringify(resolvedChallenges) : null,
         client_goal: resolvedGoal || null,
         client_context_note: clientContextNote || null,
         template_id: (agency as any).default_template || 'classic',
