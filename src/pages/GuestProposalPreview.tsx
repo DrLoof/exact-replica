@@ -13,6 +13,7 @@ import {
   WhyUsCard, TestimonialCard, TermsSection, SignatureBlock,
   TextContent, PageWrapper, HighlightPanel, EditableText, TimelineStep,
 } from '@/components/proposal-template';
+import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 
 
 function getDefaultAboutText(yearsExperience?: number | null): string {
@@ -488,6 +489,7 @@ export default function GuestProposalPreview() {
 
         {/* Proposal Content */}
         <div className="flex-1">
+          <TemplateProvider templateId="classic">
           <BrandProvider brand={{
             agencyName: agencyName.toUpperCase(),
             agencyFullName: agencyName,
@@ -685,6 +687,7 @@ export default function GuestProposalPreview() {
               )}
             </div>
           </BrandProvider>
+          </TemplateProvider>
         </div>
       </div>
 

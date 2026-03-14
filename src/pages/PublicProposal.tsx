@@ -19,6 +19,7 @@ import {
   SignatureBlock,
   PageWrapper,
 } from '@/components/proposal-template';
+import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 
 export default function PublicProposal() {
   const { shareId } = useParams<{ shareId: string }>();
@@ -198,6 +199,7 @@ export default function PublicProposal() {
   ];
 
   return (
+    <TemplateProvider templateId={proposal?.template_id || 'classic'}>
     <BrandProvider brand={brandData}>
       <div className="min-h-screen bg-white">
         {/* Section 1: Cover */}
@@ -462,6 +464,7 @@ export default function PublicProposal() {
         </div>
       </div>
     </BrandProvider>
+    </TemplateProvider>
   );
 }
 
