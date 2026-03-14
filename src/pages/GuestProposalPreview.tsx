@@ -800,7 +800,7 @@ export default function GuestProposalPreview() {
               )}
 
               {/* Section 3: Timeline */}
-              {!hiddenSections.has(3) && (
+              {!deletedSections.has(3) && (
                 <div id="guest-section-3" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="04">
                     <SectionHeader number="03" title="Project Timeline" subtitle="Key phases and milestones" />
