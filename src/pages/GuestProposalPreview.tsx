@@ -651,7 +651,7 @@ export default function GuestProposalPreview() {
               </button>
             </div>
           )}
-          <TemplateProvider templateId={templateId} customColors={isPreviewingPro ? null : customColors}>
+          <TemplateProvider templateId={templateId} customColors={customColors}>
           <BrandProvider brand={{
             agencyName: agencyName.toUpperCase(),
             agencyFullName: agencyName,
