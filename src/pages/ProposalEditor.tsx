@@ -1067,7 +1067,7 @@ export default function ProposalEditor() {
                     />
                   </PageWrapper>
                 </div>
-              </SectionWrapper>
+              </SectionWrapper>}
 
             </div>
           </BrandProvider>
