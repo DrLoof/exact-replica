@@ -9,7 +9,7 @@ import { SignupGate } from '@/components/onboarding/SignupGate';
 import { defaultModulesByGroup, type DefaultModule } from '@/lib/defaultModules';
 import { generateProposalTitle } from '@/lib/proposalTitleGenerator';
 import { GenerationScreen } from '@/components/proposal-new/GenerationScreen';
-import { ClientZone } from '@/components/proposal-new/ClientZone';
+import { ClientZone, type SelectedGoal, goalOptionsList } from '@/components/proposal-new/ClientZone';
 import { ServiceZone } from '@/components/proposal-new/ServiceZone';
 import { TimelineZone } from '@/components/proposal-new/TimelineZone';
 
