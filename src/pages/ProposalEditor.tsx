@@ -131,6 +131,17 @@ export default function ProposalEditor() {
     }, [])
   );
 
+  // Close color picker on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (colorPickerRef.current && !colorPickerRef.current.contains(e.target as Node)) {
+        setColorPickerOpen(null);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   useEffect(() => {
     if (id) loadProposal();
   }, [id]);
