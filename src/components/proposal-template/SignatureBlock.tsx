@@ -328,7 +328,7 @@ export function SignatureBlock({
                   {party.companyName}
                 </span>
                 {party.personName && (
-                  <span className="block" style={{ fontSize: "14px", fontWeight: 400, color: "#9CA3AF" }}>
+                <span className="block" style={{ fontSize: "14px", fontWeight: 400, color: template.colors.textMuted }}>
                     {party.personName}{party.title ? ` — ${party.title}` : ""}
                   </span>
                 )}
