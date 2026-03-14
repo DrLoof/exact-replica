@@ -458,8 +458,8 @@ export default function ProposalNew() {
             clientName: clientDisplayName,
             serviceNames: selectedMods.map((m: any) => m.name),
             serviceContexts: selectedMods.map((m: any) => m.ai_context).filter(Boolean),
-            clientChallenges: resolvedChallenges.length > 0 ? resolvedChallenges : null,
-            clientGoal: resolvedGoal || null,
+            clientChallenges: resolvedChallenges2.length > 0 ? resolvedChallenges2 : null,
+            goals: resolvedGoals2.length > 0 ? resolvedGoals2 : null,
             clientContextNote: clientContextNote || null,
           },
         });
