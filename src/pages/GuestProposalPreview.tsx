@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Share2, Download, FileText, EyeOff, Check, RefreshCw, Loader2, X, Lock, Palette } from 'lucide-react';
+import { ArrowLeft, Share2, Download, FileText, EyeOff, Check, RefreshCw, Loader2, X, Lock, Palette, Plus } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,7 +34,8 @@ export default function GuestProposalPreview() {
   const [signupTrigger, setSignupTrigger] = useState<SignupTrigger>('share');
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState(0);
-  const [hiddenSections, setHiddenSections] = useState<Set<number>>(new Set());
+  const [deletedSections, setDeletedSections] = useState<Set<number>>(new Set());
+  const [showAddPage, setShowAddPage] = useState(false);
   const [showAutoSaved, setShowAutoSaved] = useState(false);
   const [showNudge, setShowNudge] = useState(false);
   const [nudgeDismissed, setNudgeDismissed] = useState(() => !!localStorage.getItem('propopad_nudge_dismissed'));
@@ -203,10 +204,21 @@ export default function GuestProposalPreview() {
     return <FileText size={22} />;
   };
 
-  const toggleSection = (idx: number) => {
-    setHiddenSections(prev => {
+  const deleteSection = (idx: number) => {
+    setDeletedSections(prev => {
       const next = new Set(prev);
-      if (next.has(idx)) next.delete(idx); else next.add(idx);
+      next.add(idx);
+      return next;
+    });
+    toast.success(`${sectionNames[idx]} page removed`, {
+      action: { label: 'Undo', onClick: () => restoreSection(idx) },
+    });
+  };
+
+  const restoreSection = (idx: number) => {
+    setDeletedSections(prev => {
+      const next = new Set(prev);
+      next.delete(idx);
       return next;
     });
   };
@@ -620,22 +632,62 @@ export default function GuestProposalPreview() {
 
           {/* Section navigation */}
           {sectionNames.map((name, idx) => (
-            <button
-              key={idx}
-              onClick={() => {
-                setActiveSection(idx);
-                document.getElementById(`guest-section-${idx}`)?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className={cn(
-                'flex items-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors text-left',
-                activeSection === idx ? 'bg-accent font-medium text-accent-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
-                hiddenSections.has(idx) && 'opacity-40'
-              )}
-            >
-              {hiddenSections.has(idx) && <EyeOff className="h-3 w-3" />}
-              {name}
-            </button>
+            !deletedSections.has(idx) && (
+              <div
+                key={idx}
+                className="group/nav flex items-center gap-1"
+              >
+                <button
+                  onClick={() => {
+                    setActiveSection(idx);
+                    document.getElementById(`guest-section-${idx}`)?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className={cn(
+                    'flex-1 flex items-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors text-left',
+                    activeSection === idx ? 'bg-accent font-medium text-accent-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                  )}
+                >
+                  {name}
+                </button>
+                <button
+                  onClick={() => deleteSection(idx)}
+                  className="opacity-0 group-hover/nav:opacity-100 p-1 rounded text-muted-foreground hover:text-destructive transition-all"
+                  title={`Remove ${name}`}
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )
           ))}
+
+          {/* Add page button */}
+          {deletedSections.size > 0 && (
+            <div className="relative mt-2">
+              <button
+                onClick={() => setShowAddPage(!showAddPage)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 w-full text-left transition-colors"
+              >
+                <Plus className="h-3 w-3" />
+                Add page
+              </button>
+              {showAddPage && (
+                <div className="absolute left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-30 py-1">
+                  {sectionNames.map((name, idx) => (
+                    deletedSections.has(idx) && (
+                      <button
+                        key={idx}
+                        onClick={() => { restoreSection(idx); setShowAddPage(false); }}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-left text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                      >
+                        <Plus className="h-3 w-3" />
+                        {name}
+                      </button>
+                    )
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Proposal Content */}
@@ -668,7 +720,7 @@ export default function GuestProposalPreview() {
             <div className="mx-auto max-w-[900px] py-8 px-4 space-y-6">
 
               {/* Section 0: Cover */}
-              {!hiddenSections.has(0) && (
+              {!deletedSections.has(0) && (
                 <div id="guest-section-0" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg">
                   <HeroCover
                     proposalTitle={proposalTitle}
@@ -682,7 +734,7 @@ export default function GuestProposalPreview() {
               )}
 
               {/* Section 1: Executive Summary */}
-              {!hiddenSections.has(1) && (
+              {!deletedSections.has(1) && (
                 <div id="guest-section-1" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="02">
                     <div className="flex items-center justify-between mb-2">
@@ -718,7 +770,7 @@ export default function GuestProposalPreview() {
               )}
 
               {/* Section 2: Scope of Services */}
-              {!hiddenSections.has(2) && (
+              {!deletedSections.has(2) && (
                 <div id="guest-section-2" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="03">
                     <SectionHeader number="02" title="Scope of Services" subtitle="What we'll deliver for you" />
@@ -748,7 +800,7 @@ export default function GuestProposalPreview() {
               )}
 
               {/* Section 3: Timeline */}
-              {!hiddenSections.has(3) && (
+              {!deletedSections.has(3) && (
                 <div id="guest-section-3" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="04">
                     <SectionHeader number="03" title="Project Timeline" subtitle="Key phases and milestones" />
@@ -774,7 +826,7 @@ export default function GuestProposalPreview() {
               )}
 
               {/* Section 4: Investment */}
-              {!hiddenSections.has(4) && (
+              {!deletedSections.has(4) && (
                 <div id="guest-section-4" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="05">
                     <SectionHeader number="04" title="Investment" subtitle="Transparent pricing for every deliverable" />
@@ -785,7 +837,7 @@ export default function GuestProposalPreview() {
               )}
 
               {/* Section 5: Why Us */}
-              {!hiddenSections.has(5) && differentiators.length > 0 && (
+              {!deletedSections.has(5) && differentiators.length > 0 && (
                 <div id="guest-section-5" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="06">
                     <SectionHeader number="05" title="Why Us" subtitle="What sets us apart" />
@@ -811,7 +863,7 @@ export default function GuestProposalPreview() {
               )}
 
               {/* Section 6: Testimonials */}
-              {!hiddenSections.has(6) && testimonials.length > 0 && (
+              {!deletedSections.has(6) && testimonials.length > 0 && (
                 <div id="guest-section-6" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="07">
                     <SectionHeader number="06" title="What Our Clients Say" subtitle="Proof of impact" />
@@ -826,7 +878,7 @@ export default function GuestProposalPreview() {
               )}
 
               {/* Section 7: Terms */}
-              {!hiddenSections.has(7) && (
+              {!deletedSections.has(7) && (
                 <div id="guest-section-7" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="08">
                     <SectionHeader number="07" title="Terms & Conditions" />
@@ -837,7 +889,7 @@ export default function GuestProposalPreview() {
               )}
 
               {/* Section 8: Signature */}
-              {!hiddenSections.has(8) && (
+              {!deletedSections.has(8) && (
                 <div id="guest-section-8" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="09">
                     <SignatureBlock

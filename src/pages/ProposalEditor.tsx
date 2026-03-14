@@ -107,8 +107,9 @@ export default function ProposalEditor() {
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [termsClauses, setTermsClauses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hiddenSections, setHiddenSections] = useState<Set<number>>(new Set());
+  const [deletedSections, setDeletedSections] = useState<Set<number>>(new Set());
   const [activeSection, setActiveSection] = useState(0);
+  const [showAddPage, setShowAddPage] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showAddService, setShowAddService] = useState(false);
   const [addServiceSearch, setAddServiceSearch] = useState('');
@@ -311,10 +312,21 @@ export default function ProposalEditor() {
     setRegenerating(false);
   };
 
-  const toggleSection = (idx: number) => {
-    setHiddenSections(prev => {
+  const deleteSection = (idx: number) => {
+    setDeletedSections(prev => {
       const next = new Set(prev);
-      if (next.has(idx)) next.delete(idx); else next.add(idx);
+      next.add(idx);
+      return next;
+    });
+    toast.success(`${sectionNames[idx]} page removed`, {
+      action: { label: 'Undo', onClick: () => restoreSection(idx) },
+    });
+  };
+
+  const restoreSection = (idx: number) => {
+    setDeletedSections(prev => {
+      const next = new Set(prev);
+      next.delete(idx);
       return next;
     });
   };
@@ -569,22 +581,62 @@ export default function ProposalEditor() {
 
           {/* Section navigation */}
           {sectionNames.map((name, idx) => (
-            <button
-              key={idx}
-              onClick={() => {
-                setActiveSection(idx);
-                document.getElementById(`section-${idx}`)?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className={cn(
-                'flex items-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors text-left',
-                activeSection === idx ? 'bg-accent font-medium text-accent-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
-                hiddenSections.has(idx) && 'opacity-40'
-              )}
-            >
-              {hiddenSections.has(idx) && <EyeOff className="h-3 w-3" />}
-              {name}
-            </button>
+            !deletedSections.has(idx) && (
+              <div
+                key={idx}
+                className="group/nav flex items-center gap-1"
+              >
+                <button
+                  onClick={() => {
+                    setActiveSection(idx);
+                    document.getElementById(`section-${idx}`)?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className={cn(
+                    'flex-1 flex items-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors text-left',
+                    activeSection === idx ? 'bg-accent font-medium text-accent-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                  )}
+                >
+                  {name}
+                </button>
+                <button
+                  onClick={() => deleteSection(idx)}
+                  className="opacity-0 group-hover/nav:opacity-100 p-1 rounded text-muted-foreground hover:text-destructive transition-all"
+                  title={`Remove ${name}`}
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )
           ))}
+
+          {/* Add page button */}
+          {deletedSections.size > 0 && (
+            <div className="relative mt-2">
+              <button
+                onClick={() => setShowAddPage(!showAddPage)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 w-full text-left transition-colors"
+              >
+                <Plus className="h-3 w-3" />
+                Add page
+              </button>
+              {showAddPage && (
+                <div className="absolute left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-30 py-1">
+                  {sectionNames.map((name, idx) => (
+                    deletedSections.has(idx) && (
+                      <button
+                        key={idx}
+                        onClick={() => { restoreSection(idx); setShowAddPage(false); }}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-left text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                      >
+                        <Plus className="h-3 w-3" />
+                        {name}
+                      </button>
+                    )
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Proposal Content — rendered with template components */}
@@ -606,7 +658,7 @@ export default function ProposalEditor() {
               
 
               {/* Section 0: Cover */}
-              <SectionWrapper idx={0} hidden={hiddenSections.has(0)} onToggle={toggleSection} label="Cover">
+              {!deletedSections.has(0) && <SectionWrapper idx={0} onDelete={deleteSection} label="Cover">
                 <div className="rounded-2xl overflow-hidden shadow-lg">
                   <HeroCover
                     proposalTitle={proposal.title || 'Proposal Title'}
@@ -618,10 +670,10 @@ export default function ProposalEditor() {
                     onSubtitleEdit={(val) => updateField('subtitle', val)}
                   />
                 </div>
-              </SectionWrapper>
+              </SectionWrapper>}
 
               {/* Section 1: Executive Summary */}
-              <SectionWrapper idx={1} hidden={hiddenSections.has(1)} onToggle={toggleSection} label="Executive Summary">
+              {!deletedSections.has(1) && <SectionWrapper idx={1} onDelete={deleteSection} label="Executive Summary">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="02">
                     <SectionHeader number="01" title="Executive Summary" subtitle="Our understanding and approach"
@@ -665,10 +717,10 @@ export default function ProposalEditor() {
                     </div>
                   </PageWrapper>
                 </div>
-              </SectionWrapper>
+              </SectionWrapper>}
 
               {/* Section 2: Scope of Services */}
-              <SectionWrapper idx={2} hidden={hiddenSections.has(2)} onToggle={toggleSection} label="Scope of Services">
+              {!deletedSections.has(2) && <SectionWrapper idx={2} onDelete={deleteSection} label="Scope of Services">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="03">
                     <SectionHeader number="02" title="Scope of Services" subtitle="What we'll deliver for you"
@@ -732,10 +784,10 @@ export default function ProposalEditor() {
                     )}
                   </PageWrapper>
                 </div>
-              </SectionWrapper>
+              </SectionWrapper>}
 
               {/* Section 3: Timeline */}
-              <SectionWrapper idx={3} hidden={hiddenSections.has(3)} onToggle={toggleSection} label="Timeline">
+              {!deletedSections.has(3) && <SectionWrapper idx={3} onDelete={deleteSection} label="Timeline">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="04">
                     <SectionHeader number="03" title="Timeline" subtitle="How we'll get there"
@@ -829,10 +881,10 @@ export default function ProposalEditor() {
                     )}
                   </PageWrapper>
                 </div>
-              </SectionWrapper>
+              </SectionWrapper>}
 
               {/* Section 4: Investment */}
-              <SectionWrapper idx={4} hidden={hiddenSections.has(4)} onToggle={toggleSection} label="Investment">
+              {!deletedSections.has(4) && <SectionWrapper idx={4} onDelete={deleteSection} label="Investment">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="05">
                     <SectionHeader number="04" title="Investment" subtitle="Transparent pricing for every deliverable"
@@ -865,10 +917,10 @@ export default function ProposalEditor() {
                     />
                   </PageWrapper>
                 </div>
-              </SectionWrapper>
+              </SectionWrapper>}
 
               {/* Section 5: Terms */}
-              <SectionWrapper idx={5} hidden={hiddenSections.has(5)} onToggle={toggleSection} label="Terms & Conditions">
+              {!deletedSections.has(5) && <SectionWrapper idx={5} onDelete={deleteSection} label="Terms & Conditions">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="06">
                     <SectionHeader number="05" title="Terms & Conditions"
@@ -891,10 +943,10 @@ export default function ProposalEditor() {
                     )}
                   </PageWrapper>
                 </div>
-              </SectionWrapper>
+              </SectionWrapper>}
 
               {/* Section 6: Why Us */}
-              <SectionWrapper idx={6} hidden={hiddenSections.has(6)} onToggle={toggleSection} label="Why Us">
+              {!deletedSections.has(6) && <SectionWrapper idx={6} onDelete={deleteSection} label="Why Us">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="07">
                     <SectionHeader number="06" title="Why Us" subtitle="What sets us apart"
@@ -951,10 +1003,10 @@ export default function ProposalEditor() {
                     )}
                   </PageWrapper>
                 </div>
-              </SectionWrapper>
+              </SectionWrapper>}
 
               {/* Section 7: Testimonials */}
-              <SectionWrapper idx={7} hidden={hiddenSections.has(7)} onToggle={toggleSection} label="Testimonials">
+              {!deletedSections.has(7) && <SectionWrapper idx={7} onDelete={deleteSection} label="Testimonials">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="08">
                     <SectionHeader number="07" title="What Our Clients Say" subtitle="Proof of impact"
@@ -993,10 +1045,10 @@ export default function ProposalEditor() {
                     )}
                   </PageWrapper>
                 </div>
-              </SectionWrapper>
+              </SectionWrapper>}
 
               {/* Section 8: Signature */}
-              <SectionWrapper idx={8} hidden={hiddenSections.has(8)} onToggle={toggleSection} label="Signature">
+              {!deletedSections.has(8) && <SectionWrapper idx={8} onDelete={deleteSection} label="Signature">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="09">
                     <SignatureBlock
@@ -1015,7 +1067,7 @@ export default function ProposalEditor() {
                     />
                   </PageWrapper>
                 </div>
-              </SectionWrapper>
+              </SectionWrapper>}
 
             </div>
           </BrandProvider>
@@ -1278,29 +1330,16 @@ ${agencyName}`);
   );
 }
 
-function SectionWrapper({ idx, hidden, onToggle, label, children }: {
-  idx: number; hidden: boolean; onToggle: (idx: number) => void; label: string; children: React.ReactNode;
+function SectionWrapper({ idx, onDelete, label, children }: {
+  idx: number; onDelete: (idx: number) => void; label: string; children: React.ReactNode;
 }) {
-  if (hidden) {
-    return (
-      <div id={`section-${idx}`} className="rounded-xl border border-dashed border-border bg-muted/20 p-4 flex items-center justify-between print:hidden">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <EyeOff className="h-4 w-4" />
-          <span className="text-sm">{label}</span>
-          <span className="text-xs">(hidden from PDF)</span>
-        </div>
-        <button onClick={() => onToggle(idx)} className="text-xs text-brand hover:text-brand-hover">Show</button>
-      </div>
-    );
-  }
-
   return (
     <div id={`section-${idx}`} className="group relative">
       <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center gap-3 rounded-full bg-card border border-border px-4 py-1.5 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 z-20 print:hidden">
         <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{label}</span>
         <div className="w-px h-4 bg-border" />
-        <button onClick={() => onToggle(idx)} className="text-muted-foreground hover:text-foreground" title="Hide section">
-          <Eye className="h-3.5 w-3.5" />
+        <button onClick={() => onDelete(idx)} className="text-muted-foreground hover:text-destructive" title="Remove page">
+          <X className="h-3.5 w-3.5" />
         </button>
       </div>
       {children}
