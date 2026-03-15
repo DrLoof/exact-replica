@@ -1644,6 +1644,33 @@ export default function ProposalEditor() {
                 </div>
               </SectionWrapper>}
 
+              {/* Section 8: Terms */}
+              {!deletedSections.has(8) && <SectionWrapper idx={8} onDelete={deleteSection} label="Terms">
+                <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
+                  <PageWrapper pageNumber="09">
+                    <SectionHeader number="09" title="Terms & Conditions" subtitle="The fine print"
+                      onTitleEdit={(val) => updateField('title', val)}
+                      onSubtitleEdit={(val) => updateField('subtitle', val)} />
+                    {termsClauses.length === 0 ? (
+                      <div className="text-center py-16">
+                        <p className="text-muted-foreground" style={{ fontSize: '15px' }}>No terms clauses added yet.</p>
+                        <Link to="/settings" className="mt-2 inline-block text-sm text-brand hover:text-brand-hover">Add in Settings →</Link>
+                      </div>
+                    ) : (
+                      <TermsSection
+                        clauses={termsClauses.map(c => ({ title: c.title, content: c.content }))}
+                        onClauseEdit={async (index, field, value) => {
+                          const clause = termsClauses[index];
+                          if (!clause) return;
+                          await supabase.from('terms_clauses').update({ [field]: value }).eq('id', clause.id);
+                          setTermsClauses(prev => prev.map((c, i) => i === index ? { ...c, [field]: value } : c));
+                        }}
+                      />
+                    )}
+                  </PageWrapper>
+                </div>
+              </SectionWrapper>}
+
               {/* Section 9: Signature */}
               {!deletedSections.has(9) && <SectionWrapper idx={9} onDelete={deleteSection} label="Signature">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
