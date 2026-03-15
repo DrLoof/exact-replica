@@ -509,17 +509,14 @@ export const defaultModulesByGroup: Record<string, DefaultModule[]> = {
         'Publishing and scheduling',
       ],
       clientResponsibilities: [
-        'Film raw footage per agency guidance (or arrange filming)',
-        'Provide product/service access for content creation',
+        'Film raw footage per agency guidance',
         'Approve concepts and final edits before publishing',
         'Participate in on-camera content if required',
       ],
       outOfScope: [
         'Professional videography or on-site filming',
-        'Long-form video production (over 2 minutes)',
+        'Long-form video production',
         'Paid promotion of videos',
-        'YouTube channel management',
-        'Podcast production',
       ],
       defaultTimeline: 'Per video: 3-5 business days from footage receipt. Monthly packages: rolling delivery per content calendar.',
       suggestedKpis: [
