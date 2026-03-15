@@ -8,7 +8,6 @@ import { getDefaultModulesForGroup } from '@/lib/defaultModules';
 import { defaultBundles, findDefaultModule, calculateBundlePricing } from '@/lib/defaultBundles';
 import { ScanScreen } from './ScanScreen';
 import { ReviewScreen } from './ReviewScreen';
-import { PortfolioStep } from './PortfolioStep';
 import { SignupGate } from './SignupGate';
 
 /** Deduplicate testimonials by comparing normalized first 50 chars of quote text */
