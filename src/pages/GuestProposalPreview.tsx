@@ -986,7 +986,7 @@ export default function GuestProposalPreview() {
                     <SectionHeader number="06" title="What Our Clients Say" subtitle="Proof of impact" />
                     <div className="space-y-6">
                       {testimonials.slice(0, 4).map((t: any, i: number) => (
-                        <TestimonialCard key={i} clientName={t.client_name} clientTitle={t.client_title} clientCompany={t.client_company} quote={t.quote} metricValue={t.metric_value} metricLabel={t.metric_label} featured={i === 0} delay={i * 0.1} />
+                        <TestimonialCard key={i} clientName={t.client_name} clientTitle={t.client_title} clientCompany={t.client_company} quote={t.quote} metricValue={t.metric_value} metricLabel={t.metric_label} avatarUrl={t.avatar_url} featured={i === 0} delay={i * 0.1} />
                       ))}
                     </div>
                   </PageWrapper>
