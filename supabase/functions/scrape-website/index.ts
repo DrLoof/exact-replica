@@ -9,6 +9,19 @@ const corsHeaders = {
 
 const AI_GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
+// Decode common HTML entities
+function decodeHtmlEntities(s: string): string {
+  return s
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .replace(/&#x2F;/g, '/')
+    .replace(/&nbsp;/g, ' ');
+}
+
 // Extract quotes from HTML with rich patterns
 function extractQuotesFromHtml(html: string, pagePath: string): { quote: string; attribution: string; context: string }[] {
   const quotes: { quote: string; attribution: string; context: string }[] = [];
@@ -151,7 +164,7 @@ function extractLogo(html: string, baseUrl: string): string | null {
   const urlObj = new URL(baseUrl);
   const resolveUrl = (u: string) => {
     if (!u) return '';
-    u = u.replace(/&amp;/g, '&');
+    u = decodeHtmlEntities(u);
     if (u.startsWith('http')) return u;
     if (u.startsWith('//')) return 'https:' + u;
     if (u.startsWith('/')) return urlObj.origin + u;
@@ -192,16 +205,19 @@ function extractLogo(html: string, baseUrl: string): string | null {
     if (lower.match(/\.png(\?|$|&)/i)) score += 3;
     
     // Content/hero image penalties
-    if (lower.match(/\.webp(\?|$|&)/i)) score -= 3; // webp is rarely a logo
-    if (lower.match(/\.jpe?g(\?|$|&)/i)) score -= 3; // jpg is rarely a logo
-    if (lower.includes('wp-content/uploads/')) score -= 10; // WordPress content uploads are almost never logos
+    if (lower.match(/\.webp(\?|$|&)/i)) score -= 3;
+    if (lower.match(/\.jpe?g(\?|$|&)/i)) score -= 3;
+    if (lower.includes('wp-content/uploads/')) score -= 10;
     if (lower.includes('/uploads/')) score -= 5;
-    if (lower.match(/\d{3,4}x\d{3,4}/)) score -= 8; // dimensions in URL suggest content image
-    if (lower.match(/width=\d{4,}/)) score -= 8; // very wide = banner
-    if (lower.match(/height=\d{3,}/)) score -= 5; // tall = banner
+    if (lower.match(/\d{3,4}x\d{3,4}/)) score -= 8;
+    if (lower.match(/width=\d{4,}/)) score -= 8;
+    if (lower.match(/height=\d{3,}/)) score -= 5;
     if (lower.includes('hero') || lower.includes('banner') || lower.includes('slider') || lower.includes('slide')) score -= 15;
     if (lower.includes('featured') || lower.includes('cover') || lower.includes('background')) score -= 10;
     if (lower.includes('thumbnail') || lower.includes('thumb')) score -= 5;
+    if (lower.includes('login') || lower.includes('signin') || lower.includes('sign-in')) score -= 15;
+    if (lower.includes('avatar') || lower.includes('profile')) score -= 5;
+    if (lower.includes('gravatar')) score -= 10;
     
     // Context
     if (context === 'header') score += 3;
@@ -403,7 +419,7 @@ serve(async (req) => {
     const ogSiteNameMatch = homepageHtml.match(/<meta[^>]*property=["']og:site_name["'][^>]*content=["']([^"']+)["']/i)
       || homepageHtml.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:site_name["']/i);
     if (ogSiteNameMatch) {
-      result.name = ogSiteNameMatch[1].trim();
+      result.name = decodeHtmlEntities(ogSiteNameMatch[1].trim());
     } else {
       const titleMatch = homepageHtml.match(/<title[^>]*>([^<]+)<\/title>/i);
       if (titleMatch) {
@@ -420,14 +436,14 @@ serve(async (req) => {
             break;
           }
         }
-        result.name = title;
+        result.name = decodeHtmlEntities(title);
       }
     }
 
     // Meta description (tagline)
     const descMatch = homepageHtml.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i)
       || homepageHtml.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']description["']/i);
-    if (descMatch) result.tagline = descMatch[1].trim().slice(0, 200);
+    if (descMatch) result.tagline = decodeHtmlEntities(descMatch[1].trim().slice(0, 200));
 
     // Logo detection (improved)
     const detectedLogo = extractLogo(homepageHtml, targetUrl);
