@@ -52,7 +52,7 @@ function ElegantHeroCover({
         className="relative z-10 flex items-center justify-between px-10 pt-10 lg:px-16 lg:pt-14"
         style={{ fontFamily: "'DM Sans', sans-serif" }}
       >
-        <div className="flex items-center gap-3" onClick={props.onLogoClick} style={{ cursor: props.onLogoClick ? 'pointer' : undefined }} title={props.onLogoClick ? 'Click to replace logo' : undefined}>
+        <div className="flex items-center gap-3" onClick={onLogoClick} style={{ cursor: onLogoClick ? 'pointer' : undefined }} title={onLogoClick ? 'Click to replace logo' : undefined}>
           {brand.logoUrl ? (
             <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain hover:opacity-80 transition-opacity" />
           ) : (
