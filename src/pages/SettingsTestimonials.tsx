@@ -173,8 +173,12 @@ export default function SettingsTestimonials() {
             <div key={t.id} className="rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-sm">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4 flex-1 min-w-0">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-foreground">
-                    {t.client_name.charAt(0)}
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent overflow-hidden text-sm font-bold text-accent-foreground">
+                    {t.avatar_url ? (
+                      <img src={t.avatar_url} alt={t.client_name} className="w-full h-full object-cover" />
+                    ) : (
+                      t.client_name.charAt(0)
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
