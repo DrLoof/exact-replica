@@ -360,16 +360,12 @@ export const defaultModulesByGroup: Record<string, DefaultModule[]> = {
       clientResponsibilities: [
         'Provide email platform access or agree to copy delivery format',
         'Share subscriber list details and segmentation',
-        'Provide offers, promotions, or content to feature',
         'Approve email copy before scheduling',
-        'Manage email list and compliance (GDPR, CAN-SPAM)',
       ],
       outOfScope: [
         'Email template design',
         'Email platform setup or migration',
-        'List building or lead generation',
         'Marketing automation setup',
-        'Deliverability optimization',
       ],
       defaultTimeline: 'Per email: 3-5 business days. Sequences: 2-3 weeks. Includes 1 round of revisions per email.',
       suggestedKpis: [
