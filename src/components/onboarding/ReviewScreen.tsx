@@ -43,6 +43,7 @@ export function ReviewScreen({
   onDiffIntroChange,
   groupNameMap,
   onFinish,
+  onBack,
   saving,
   addedBundles = new Set(),
   onAddBundle,
