@@ -214,7 +214,7 @@ function ModernHeroCover({
       >
         <div className="flex items-center gap-3" onClick={onLogoClick} style={{ cursor: onLogoClick ? 'pointer' : undefined }} title={onLogoClick ? 'Click to replace logo' : undefined}>
           {brand.logoUrl ? (
-            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain hover:opacity-80 transition-opacity" />
+            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain brightness-0 hover:opacity-80 transition-opacity" />
           ) : (
             <>
               <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
