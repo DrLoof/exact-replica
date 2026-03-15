@@ -411,12 +411,12 @@ export function ClientContextZone({
             </div>
           )}
 
-          <div className="space-y-0.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
             {goalOptionsList.map(goalOpt => {
               const isSelected = selectedGoals.some(g => g.id === goalOpt.id);
               const selectedGoal = selectedGoals.find(g => g.id === goalOpt.id);
               return (
-                <div key={goalOpt.id}>
+                <div key={goalOpt.id} className={goalOpt.id === 'other' ? 'sm:col-span-2' : ''}>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
