@@ -1003,7 +1003,13 @@ export default function ProposalEditor() {
                       </div>
                     ) : (
                       <TermsSection
-                        clauses={termsClauses.map(c => ({ title: c.title, content: c.content }))}
+                        clauses={[
+                          ...termsClauses.map(c => ({ title: c.title, content: c.content })),
+                          ...(services.some(s => s.module?.client_responsibilities?.length || s.module?.out_of_scope?.length) ? [{
+                            title: 'Scope & Responsibilities',
+                            content: 'The client is responsible for providing timely feedback, required access credentials, and content/assets as outlined in each service\'s scope. Work beyond the deliverables listed for each service is considered out of scope and may require a separate agreement.'
+                          }] : []),
+                        ]}
                         onClauseEdit={async (index, field, value) => {
                           const clause = termsClauses[index];
                           if (!clause) return;

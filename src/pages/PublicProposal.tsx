@@ -354,7 +354,13 @@ export default function PublicProposal() {
               variant="dark"
             />
             <div className="mt-10">
-              <TermsSection clauses={termsClauses.map((c: any) => ({ title: c.title, content: c.content }))} />
+              <TermsSection clauses={[
+                ...termsClauses.map((c: any) => ({ title: c.title, content: c.content })),
+                ...(services.some((s: any) => s.module?.client_responsibilities?.length || s.module?.out_of_scope?.length) ? [{
+                  title: 'Scope & Responsibilities',
+                  content: 'The client is responsible for providing timely feedback, required access credentials, and content/assets as outlined in each service\'s scope. Work beyond the deliverables listed for each service is considered out of scope and may require a separate agreement.'
+                }] : []),
+              ]} />
             </div>
           </PageWrapper>
         )}

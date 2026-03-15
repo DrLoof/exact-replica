@@ -890,7 +890,13 @@ export default function GuestProposalPreview() {
                 <div id="guest-section-7" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="08">
                     <SectionHeader number="07" title="Terms & Conditions" />
-                    <TermsSection clauses={defaultTerms} />
+                    <TermsSection clauses={[
+                      ...defaultTerms,
+                      ...(localServices.some((s: any) => s.client_responsibilities?.length || s.out_of_scope?.length) ? [{
+                        title: 'Scope & Responsibilities',
+                        content: 'The client is responsible for providing timely feedback, required access credentials, and content/assets as outlined in each service\'s scope. Work beyond the deliverables listed for each service is considered out of scope and may require a separate agreement.'
+                      }] : []),
+                    ]} />
                   </PageWrapper>
                   <PreviewWatermark />
                 </div>
