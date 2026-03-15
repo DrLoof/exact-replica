@@ -1589,6 +1589,17 @@ export default function ProposalEditor() {
                               await supabase.from('testimonials').update({ metric_label: val }).eq('id', t.id);
                               setTestimonials(prev => prev.map(x => x.id === t.id ? { ...x, metric_label: val } : x));
                             }}
+                            onAvatarUpload={async (file) => {
+                              const ext = file.name.split('.').pop() || 'jpg';
+                              const path = `${agency.id}/testimonials/${t.id}.${ext}`;
+                              const { error } = await supabase.storage.from('agency-logos').upload(path, file, { upsert: true });
+                              if (error) { toast.error('Upload failed'); return; }
+                              const { data: urlData } = supabase.storage.from('agency-logos').getPublicUrl(path);
+                              const newAvatarUrl = urlData.publicUrl + '?t=' + Date.now();
+                              await supabase.from('testimonials').update({ avatar_url: newAvatarUrl }).eq('id', t.id);
+                              setTestimonials(prev => prev.map(x => x.id === t.id ? { ...x, avatar_url: newAvatarUrl } : x));
+                              toast.success('Photo uploaded');
+                            }}
                           />
                         ))}
                       </div>
