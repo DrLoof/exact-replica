@@ -1391,7 +1391,7 @@ export default function ProposalEditor() {
                       </p>
                       {proposalTeam.length > 0 && (
                         <div className={`grid gap-6 justify-center ${proposalTeam.length <= 2 ? 'grid-cols-2 max-w-md mx-auto' : proposalTeam.length === 3 ? 'grid-cols-3 max-w-lg mx-auto' : 'grid-cols-2 sm:grid-cols-4'}`}>
-                          {proposalTeam.slice(0, 4).map((member: any, i: number) => (
+                          {proposalTeam.map((member: any, i: number) => (
                             <TeamMemberCard
                               key={member.member_id}
                               name={member.name}
