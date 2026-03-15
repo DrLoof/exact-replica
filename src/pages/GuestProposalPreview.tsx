@@ -588,7 +588,7 @@ export default function GuestProposalPreview() {
         {/* Section Nav */}
         <div className="sticky top-[57px] hidden h-[calc(100vh-57px)] w-52 flex-col gap-1 overflow-y-auto border-r border-border bg-background p-3 lg:flex print:hidden">
           {/* Section navigation */}
-          <div className="mb-2 px-2">
+          <div className="mb-1 px-2">
             <span className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#B8B0A5' }}>Pages</span>
           </div>
           {sectionNames.map((name, idx) => {
@@ -691,8 +691,8 @@ export default function GuestProposalPreview() {
 
           {/* TEMPLATE zone */}
           <div className="mt-3 pt-3" style={{ borderTop: '1px solid #EEEAE3' }}>
-            <span className="block px-2 mb-2 text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#B8B0A5' }}>Template</span>
-            <div className="flex items-center justify-between px-1">
+            <span className="block px-2 mb-3 text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#B8B0A5' }}>Template</span>
+            <div className="flex items-center justify-between px-1 pb-1">
               {Object.values(templates).map((tmpl) => {
                 const isActive = templateId === tmpl.id;
                 const isLocked = tmpl.isPro;
