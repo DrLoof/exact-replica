@@ -409,13 +409,37 @@ Return format:
       });
     }
 
-    // Clean up and validate projects
-    const cleanProjects = projects.map((p: any, i: number) => ({
-      title: decodeHtmlEntities(String(p.title || `Project ${i + 1}`)).trim(),
-      description: p.description ? decodeHtmlEntities(String(p.description)).trim() : null,
-      category: String(p.category || "Other"),
-      image_urls: (p.image_urls || []).filter((u: string) => u && u.startsWith("http")).slice(0, 6),
-    }));
+    // Clean up and validate projects, ensuring hero images from subpages are included
+    const cleanProjects = projects.map((p: any, i: number) => {
+      const title = decodeHtmlEntities(String(p.title || `Project ${i + 1}`)).trim();
+      let imageUrls: string[] = (p.image_urls || []).filter((u: string) => u && u.startsWith("http"));
+      
+      // If we have a hero image from the subpage for this project, ensure it's first
+      const heroImg = subpageHeroImages[title];
+      if (heroImg) {
+        // Remove if already present, then prepend
+        imageUrls = imageUrls.filter((u: string) => u !== heroImg);
+        imageUrls.unshift(heroImg);
+      }
+
+      // If still no images, try fuzzy matching subpage hero images by title similarity
+      if (imageUrls.length === 0) {
+        for (const [spTitle, spImg] of Object.entries(subpageHeroImages)) {
+          if (spTitle.toLowerCase().includes(title.toLowerCase()) || 
+              title.toLowerCase().includes(spTitle.toLowerCase())) {
+            imageUrls.push(spImg);
+            break;
+          }
+        }
+      }
+
+      return {
+        title,
+        description: p.description ? decodeHtmlEntities(String(p.description)).trim() : null,
+        category: String(p.category || "Other"),
+        image_urls: imageUrls.slice(0, 6),
+      };
+    });
 
     // Log category distribution for debugging
     const catCounts: Record<string, number> = {};
