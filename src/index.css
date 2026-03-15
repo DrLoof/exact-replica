@@ -148,12 +148,85 @@
 
 /* Print styles for PDF export */
 @media print {
-  body { background: white !important; }
-  .print\\:hidden, nav, aside, header, .sticky { display: none !important; }
-  .group:hover > .absolute { display: none !important; }
+  /* Page setup — remove browser headers/footers */
+  @page {
+    margin: 0;
+    size: A4;
+  }
+
+  /* Force background colors & images to print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  body {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide all UI chrome */
+  .print\:hidden,
+  nav, aside, header,
+  .sticky,
+  [data-sonner-toaster],
+  iframe[src*="lovable"],
+  div[id*="lovable"],
+  a[href*="lovable.dev"],
+  div[class*="lovable"] {
+    display: none !important;
+  }
+
+  /* Hide hover-only controls */
+  .group:hover > .absolute,
+  .group-hover\:opacity-100 {
+    display: none !important;
+  }
+
+  /* Remove editor layout padding */
   .pl-60 { padding-left: 0 !important; }
   .mx-auto { max-width: 100% !important; }
+
+  /* Each proposal section = new page */
+  #section-0, #section-1, #section-2, #section-3,
+  #section-4, #section-5, #section-6, #section-7,
+  #section-8, #section-9 {
+    break-before: page;
+    break-inside: avoid;
+    page-break-before: always;
+  }
+  #section-0 {
+    break-before: auto;
+    page-break-before: auto;
+  }
+
+  /* Remove card shadows and rounded corners gap */
+  .rounded-2xl {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  /* Make each page fill the viewport */
+  .min-h-screen {
+    min-height: 100vh !important;
+  }
+
+  /* Keep content blocks together */
   details { break-inside: avoid; }
   details[open] summary ~ * { display: block !important; }
-  .rounded-xl, .rounded-2xl { break-inside: avoid; }
+  .rounded-xl { break-inside: avoid; }
+
+  /* Remove gaps between sections */
+  .space-y-8 > * + *, .space-y-6 > * + *, .gap-8, .gap-6 {
+    margin-top: 0 !important;
+  }
+
+  /* Disable animations */
+  *, *::before, *::after {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
 }
