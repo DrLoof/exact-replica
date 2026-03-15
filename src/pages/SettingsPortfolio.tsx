@@ -106,7 +106,7 @@ export default function SettingsPortfolio() {
       category: resolvedCategory,
       description: form.description.trim() || null,
       results: form.results.trim() || null,
-      images: form.images,
+      images: form.images as any,
       agency_id: agency!.id,
     };
 
@@ -116,7 +116,7 @@ export default function SettingsPortfolio() {
       toast.success('Portfolio item updated');
     } else {
       const maxOrder = items.length > 0 ? Math.max(...items.map(i => i.sort_order)) + 1 : 0;
-      const { error } = await supabase.from('portfolio_items').insert({ ...payload, sort_order: maxOrder });
+      const { error } = await supabase.from('portfolio_items').insert({ ...payload, sort_order: maxOrder } as any);
       if (error) { toast.error('Failed to create'); setSaving(false); return; }
       toast.success('Portfolio item added');
     }
