@@ -1,0 +1,3 @@
+
+ALTER TABLE public.agencies ADD COLUMN IF NOT EXISTS team_members JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.proposals ADD COLUMN IF NOT EXISTS team JSONB DEFAULT NULL;

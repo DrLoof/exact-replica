@@ -41,6 +41,8 @@ export function OnboardingWizard() {
   // Differentiators
   const [differentiators, setDifferentiators] = useState<any[]>([]);
   const [diffIntro, setDiffIntro] = useState('');
+  // Team members from scrape
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
   // Agency identity
   const [agencyIdentity, setAgencyIdentity] = useState<any>({});
   // Service group lookup
@@ -125,6 +127,18 @@ export function OnboardingWizard() {
     } else {
       setDifferentiators(defaultDiffs);
       setDiffIntro(data.about_text || '');
+    }
+
+    // Set team members from scrape (best-effort)
+    if (data.team_members?.length > 0) {
+      const members = data.team_members.slice(0, 6).map((m: any, i: number) => ({
+        id: `tm_${i + 1}`,
+        name: m.name || '',
+        title: m.title || '',
+        photo_url: m.photo_url || null,
+        bio: m.bio || null,
+      }));
+      setTeamMembers(members);
     }
 
     setScreen('review');
@@ -238,6 +252,7 @@ export function OnboardingWizard() {
         proposal_prefix: (agencyIdentity.name || targetAgency.name || 'AGY').replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase(),
         onboarding_complete: true,
         onboarding_step: 7,
+        team_members: teamMembers.length > 0 ? teamMembers : [],
       } as any).eq('id', targetAgency.id);
 
       // 2. Save selected service modules

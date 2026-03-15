@@ -14,3 +14,4 @@ export { WhyUsCard } from './WhyUsCard';
 export { TestimonialCard } from './TestimonialCard';
 export { PageWrapper } from './PageWrapper';
 export { EditableText } from './EditableText';
+export { TeamMemberCard } from './TeamMemberCard';

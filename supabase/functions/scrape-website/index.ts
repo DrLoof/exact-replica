@@ -425,7 +425,15 @@ Return this exact JSON structure:
         "source": "scraped"
       }
     ]
-  }
+  },
+  "team_members": [
+    {
+      "name": "Full Name",
+      "title": "Job Title",
+      "photo_url": "absolute URL to photo or null",
+      "bio": "One sentence bio or null"
+    }
+  ]
 }
 
 Rules:
@@ -453,6 +461,7 @@ The agency's name is "${agencyName}". Use this to distinguish client quotes from
 I have also pre-extracted quotes from HTML blockquotes and testimonial elements. These are listed in the "EXTRACTED QUOTES" section. Analyze each one carefully — only include those that are genuine client testimonials.
 
 - For differentiators, ONLY use real data found on the website (mark as "scraped"). Do NOT invent or generate fake stats, KPI numbers, or differentiators. If fewer than 3 are found, return only what you found. Translate all differentiator text to English.
+- For team_members, look for About/Team pages. Extract real people who work at the agency. Include their photo URLs (resolve to absolute URLs). If no team page is found, return an empty array. Do NOT fabricate team members. Translate names/titles to English if needed. Maximum 6 team members.
 - If data is not found, use null or empty string, don't invent testimonials or stats
 - Return ONLY the JSON object, no other text`
               },
@@ -503,6 +512,7 @@ I have also pre-extracted quotes from HTML blockquotes and testimonial elements.
       if (aiResult.services_detected?.length > 0) result.detected_services = aiResult.services_detected;
       if (aiResult.testimonials?.length > 0) result.testimonials = aiResult.testimonials;
       if (aiResult.differentiators) result.differentiators = aiResult.differentiators;
+      if (aiResult.team_members?.length > 0) result.team_members = aiResult.team_members;
     }
 
     // Log testimonial results

@@ -27,6 +27,7 @@ import {
   PageWrapper,
   HighlightPanel,
   EditableText,
+  TeamMemberCard,
 } from '@/components/proposal-template';
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 
@@ -106,6 +107,8 @@ export default function ProposalEditor() {
   const [differentiators, setDifferentiators] = useState<any[]>([]);
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [termsClauses, setTermsClauses] = useState<any[]>([]);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [proposalTeam, setProposalTeam] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletedSections, setDeletedSections] = useState<Set<number>>(new Set());
   const [activeSection, setActiveSection] = useState(0);
@@ -188,6 +191,27 @@ export default function ProposalEditor() {
       setDifferentiators(diffRes.data || []);
       setTestimonials(testRes.data || []);
       setTermsClauses(termsRes.data || []);
+
+      // Load team members from agency
+      const { data: agencyData } = await supabase.from('agencies').select('team_members').eq('id', propRes.data.agency_id).single();
+      const agencyTeam = Array.isArray((agencyData as any)?.team_members) ? (agencyData as any).team_members : [];
+      setTeamMembers(agencyTeam);
+
+      // Load proposal-specific team selection
+      const proposalTeamData = (propRes.data as any).team;
+      if (Array.isArray(proposalTeamData) && proposalTeamData.length > 0) {
+        setProposalTeam(proposalTeamData);
+      } else if (agencyTeam.length > 0) {
+        // Default: pre-select first 3 team members
+        const defaultTeam = agencyTeam.slice(0, 3).map((m: any) => ({
+          member_id: m.id,
+          name: m.name,
+          title: m.title,
+          photo_url: m.photo_url,
+          role_on_project: '',
+        }));
+        setProposalTeam(defaultTeam);
+      }
     }
 
     setLoading(false);
@@ -277,6 +301,41 @@ export default function ProposalEditor() {
     await supabase.from('proposals').update({ [field]: value }).eq('id', proposal.id);
     setProposal(prev => prev ? { ...prev, [field]: value } : prev);
   };
+
+  // Save team selection when it changes
+  const saveProposalTeam = useCallback(async (team: any[]) => {
+    if (!proposal) return;
+    await supabase.from('proposals').update({ team } as any).eq('id', proposal.id);
+  }, [proposal]);
+
+  const toggleTeamMember = (member: any) => {
+    setProposalTeam(prev => {
+      const exists = prev.find((m: any) => m.member_id === member.id);
+      let next: any[];
+      if (exists) {
+        next = prev.filter((m: any) => m.member_id !== member.id);
+      } else {
+        next = [...prev, {
+          member_id: member.id,
+          name: member.name,
+          title: member.title,
+          photo_url: member.photo_url,
+          role_on_project: '',
+        }];
+      }
+      saveProposalTeam(next);
+      return next;
+    });
+  };
+
+  const updateTeamRole = (memberId: string, role: string) => {
+    setProposalTeam(prev => {
+      const next = prev.map((m: any) => m.member_id === memberId ? { ...m, role_on_project: role } : m);
+      saveProposalTeam(next);
+      return next;
+    });
+  };
+
 
   const regenerateExecutiveSummary = async () => {
     if (!proposal || !agency) return;
@@ -1007,6 +1066,27 @@ export default function ProposalEditor() {
                             }}
                           />
                         ))}
+                      </div>
+                    )}
+
+                    {/* Your Team Block */}
+                    {proposalTeam.length > 0 && (
+                      <div className="mt-12">
+                        <p className="mb-6 text-center" style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#999' }}>
+                          The Team Behind Your Project
+                        </p>
+                        <div className={`grid gap-6 justify-center ${proposalTeam.length <= 2 ? 'grid-cols-2 max-w-md mx-auto' : proposalTeam.length === 3 ? 'grid-cols-3 max-w-lg mx-auto' : 'grid-cols-2 sm:grid-cols-4'}`}>
+                          {proposalTeam.slice(0, 4).map((member: any, i: number) => (
+                            <TeamMemberCard
+                              key={member.member_id}
+                              name={member.name}
+                              title={member.title}
+                              photoUrl={member.photo_url}
+                              roleOnProject={member.role_on_project}
+                              delay={i * 0.1}
+                            />
+                          ))}
+                        </div>
                       </div>
                     )}
                   </PageWrapper>

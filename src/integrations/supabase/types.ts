@@ -47,6 +47,7 @@ export type Database = {
           secondary_color: string | null
           state: string | null
           tagline: string | null
+          team_members: Json | null
           website: string | null
           years_experience: number | null
           zip: string | null
@@ -83,6 +84,7 @@ export type Database = {
           secondary_color?: string | null
           state?: string | null
           tagline?: string | null
+          team_members?: Json | null
           website?: string | null
           years_experience?: number | null
           zip?: string | null
@@ -119,6 +121,7 @@ export type Database = {
           secondary_color?: string | null
           state?: string | null
           tagline?: string | null
+          team_members?: Json | null
           website?: string | null
           years_experience?: number | null
           zip?: string | null
@@ -631,6 +634,7 @@ export type Database = {
           sent_at: string | null
           status: string | null
           subtitle: string | null
+          team: Json | null
           template_id: string | null
           title: string | null
           total_estimated: number | null
@@ -671,6 +675,7 @@ export type Database = {
           sent_at?: string | null
           status?: string | null
           subtitle?: string | null
+          team?: Json | null
           template_id?: string | null
           title?: string | null
           total_estimated?: number | null
@@ -711,6 +716,7 @@ export type Database = {
           sent_at?: string | null
           status?: string | null
           subtitle?: string | null
+          team?: Json | null
           template_id?: string | null
           title?: string | null
           total_estimated?: number | null

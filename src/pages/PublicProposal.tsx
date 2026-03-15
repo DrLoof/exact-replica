@@ -18,6 +18,7 @@ import {
   TestimonialCard,
   SignatureBlock,
   PageWrapper,
+  TeamMemberCard,
 } from '@/components/proposal-template';
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 
@@ -377,6 +378,24 @@ export default function PublicProposal() {
                 />
               ))}
             </div>
+
+            {/* Your Team */}
+            {(() => {
+              const proposalTeam = Array.isArray((proposal as any)?.team) ? (proposal as any).team : [];
+              if (proposalTeam.length === 0) return null;
+              return (
+                <div className="mt-12">
+                  <p className="mb-6 text-center" style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#999' }}>
+                    The Team Behind Your Project
+                  </p>
+                  <div className={`grid gap-6 justify-center ${proposalTeam.length <= 2 ? 'grid-cols-2 max-w-md mx-auto' : proposalTeam.length === 3 ? 'grid-cols-3 max-w-lg mx-auto' : 'grid-cols-2 sm:grid-cols-4'}`}>
+                    {proposalTeam.slice(0, 4).map((member: any, i: number) => (
+                      <TeamMemberCard key={member.member_id} name={member.name} title={member.title} photoUrl={member.photo_url} roleOnProject={member.role_on_project} delay={i * 0.1} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
           </PageWrapper>
         )}
 
