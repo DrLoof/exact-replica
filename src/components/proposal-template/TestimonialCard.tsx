@@ -439,12 +439,14 @@ export function TestimonialCard({
   // Classic non-featured
   return (
     <motion.div
+      {...wrapProps}
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5, ease: "easeOut" }}
-      className="bg-white border border-[#EBEBEB] rounded-2xl p-8"
+      className="bg-white border border-[#EBEBEB] rounded-2xl p-8 relative"
       style={{ fontFamily: "'Space Grotesk', sans-serif" }}
     >
+      {removeButton}
       <Quote size={20} style={{ color: `${brand.primaryColor}40` }} className="mb-4" />
       {onQuoteEdit ? (
         <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
