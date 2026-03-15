@@ -188,7 +188,7 @@ export default function GuestProposalPreview() {
   const identity = guestOnboarding?.agencyIdentity || {};
   const currencySymbol = guestProposal.currencySymbol || '$';
   const differentiators = localDifferentiators;
-  const testimonials = (guestOnboarding?.testimonials || []).filter((t: any) => t.approved);
+  const testimonials = localTestimonials;
   const clientName = guestProposal.clientName || 'Client';
   const agencyName = identity.name || 'Your Agency';
   const brandColor = identity.brand_color || '#E8825C';
