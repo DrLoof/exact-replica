@@ -878,7 +878,104 @@ export function ReviewScreen({
         </p>
       </section>
 
-      {/* CTA — inline */}
+      {/* Section: Our Team */}
+      {teamMembers.length > 0 && (
+        <section className="mt-4 rounded-2xl border border-border bg-card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="label-overline">Our Team</h2>
+            <button
+              onClick={() => setEditingSection(editingSection === 'team' ? null : 'team')}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              {editingSection === 'team' ? 'Done' : 'Edit'}
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {teamMembers.map((member, idx) => (
+              <div key={member.id || idx} className="rounded-xl border border-border bg-background p-4 flex flex-col items-center text-center relative group">
+                {editingSection === 'team' && (
+                  <button
+                    onClick={() => onTeamMembersChange(teamMembers.filter((_, i) => i !== idx))}
+                    className="absolute top-2 right-2 text-muted-foreground hover:text-destructive"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+
+                {/* Avatar */}
+                {member.photo_url ? (
+                  <img
+                    src={member.photo_url}
+                    alt={member.name}
+                    className="h-16 w-16 rounded-full object-cover border-2 border-border mb-3"
+                  />
+                ) : (
+                  <div className="h-16 w-16 rounded-full bg-brass/20 flex items-center justify-center mb-3 text-lg font-semibold text-brass">
+                    {(member.name || '?').split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+                  </div>
+                )}
+
+                {editingSection === 'team' ? (
+                  <div className="w-full space-y-2">
+                    <input
+                      value={member.name || ''}
+                      onChange={(e) => {
+                        const updated = [...teamMembers];
+                        updated[idx] = { ...updated[idx], name: e.target.value };
+                        onTeamMembersChange(updated);
+                      }}
+                      placeholder="Name"
+                      className="w-full text-center rounded border border-border bg-card px-2 py-1 text-sm font-medium text-foreground focus:border-ink focus:outline-none"
+                    />
+                    <input
+                      value={member.title || ''}
+                      onChange={(e) => {
+                        const updated = [...teamMembers];
+                        updated[idx] = { ...updated[idx], title: e.target.value };
+                        onTeamMembersChange(updated);
+                      }}
+                      placeholder="Title"
+                      className="w-full text-center rounded border border-border bg-card px-2 py-1 text-xs text-muted-foreground focus:border-ink focus:outline-none"
+                    />
+                    <textarea
+                      value={member.bio || ''}
+                      onChange={(e) => {
+                        const updated = [...teamMembers];
+                        updated[idx] = { ...updated[idx], bio: e.target.value };
+                        onTeamMembersChange(updated);
+                      }}
+                      placeholder="Short bio"
+                      rows={2}
+                      className="w-full text-center rounded border border-border bg-card px-2 py-1 text-xs text-muted-foreground focus:border-ink focus:outline-none resize-none"
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-sm font-semibold text-foreground">{member.name}</p>
+                    {member.title && <p className="text-xs text-muted-foreground mt-0.5">{member.title}</p>}
+                    {member.bio && <p className="text-[11px] text-muted-foreground/70 mt-1.5 line-clamp-2 leading-relaxed">{member.bio}</p>}
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {editingSection === 'team' && (
+            <button
+              onClick={() => onTeamMembersChange([...teamMembers, { id: `tm_${Date.now()}`, name: '', title: '', photo_url: null, bio: '' }])}
+              className="mt-3 flex items-center gap-2 text-xs text-brass hover:text-foreground font-medium"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add team member
+            </button>
+          )}
+
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            These team members will appear in the "Why Us" section of your proposals.
+          </p>
+        </section>
+      )}
+
       <div ref={inlineCtaRef} className="mt-10 text-center pb-6">
         <button
           onClick={handleFinishAttemptWrapped}
