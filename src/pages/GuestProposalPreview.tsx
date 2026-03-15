@@ -914,11 +914,11 @@ export default function GuestProposalPreview() {
                       ))}
                     </div>
                     {/* Team Members Block */}
-                    {guestTeamMembers.length > 0 && (
-                      <div className="mt-12">
-                        <p className="mb-6 text-center" style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#999' }}>
-                          The Team Behind Your Project
-                        </p>
+                    <div className="mt-12">
+                      <p className="mb-6 text-center" style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#999' }}>
+                        The Team Behind Your Project
+                      </p>
+                      {guestTeamMembers.length > 0 && (
                         <div className={`grid gap-6 justify-center ${guestTeamMembers.length <= 2 ? 'grid-cols-2 max-w-md mx-auto' : guestTeamMembers.length === 3 ? 'grid-cols-3 max-w-lg mx-auto' : 'grid-cols-2 sm:grid-cols-4'}`}>
                           {guestTeamMembers.slice(0, 4).map((member: any, i: number) => (
                             <TeamMemberCard
@@ -927,11 +927,44 @@ export default function GuestProposalPreview() {
                               title={member.title}
                               photoUrl={member.photo_url}
                               delay={i * 0.1}
+                              onRemove={() => {
+                                const next = guestTeamMembers.filter((_: any, idx: number) => idx !== i);
+                                setGuestTeamMembers(next);
+                                saveGuestTeam(next);
+                                toast.success(`${member.name} removed`);
+                              }}
+                              onNameEdit={(val) => {
+                                const next = guestTeamMembers.map((m: any, idx: number) => idx === i ? { ...m, name: val } : m);
+                                setGuestTeamMembers(next);
+                                saveGuestTeam(next);
+                              }}
+                              onTitleEdit={(val) => {
+                                const next = guestTeamMembers.map((m: any, idx: number) => idx === i ? { ...m, title: val } : m);
+                                setGuestTeamMembers(next);
+                                saveGuestTeam(next);
+                              }}
                             />
                           ))}
                         </div>
-                      </div>
-                    )}
+                      )}
+                      {guestTeamMembers.length < 4 && (
+                        <div className="flex justify-center mt-4 print:hidden">
+                          <button
+                            onClick={() => {
+                              const newMember = { id: crypto.randomUUID(), name: 'New Member', title: 'Role', photo_url: null };
+                              const next = [...guestTeamMembers, newMember];
+                              setGuestTeamMembers(next);
+                              saveGuestTeam(next);
+                              toast.success('Team member added');
+                            }}
+                            className="flex items-center gap-2 rounded-lg border border-dashed border-muted-foreground/30 px-4 py-2.5 text-sm text-muted-foreground hover:border-muted-foreground/60 hover:text-foreground transition-colors"
+                          >
+                            <UserPlus className="h-4 w-4" />
+                            Add team member
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </PageWrapper>
                   <PreviewWatermark />
                 </div>
