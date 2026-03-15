@@ -29,6 +29,7 @@ export function TestimonialCard({
   metricValue, metricLabel, avatarUrl,
   featured = false, delay = 0, onQuoteEdit, onNameEdit,
   onTitleEdit, onCompanyEdit, onMetricValueEdit, onMetricLabelEdit,
+  onAvatarUpload,
 }: TestimonialCardProps) {
   const brand = useBrand();
   const template = useTemplate();
@@ -38,6 +39,43 @@ export function TestimonialCard({
   const accent = template.colors.primaryAccent;
   const secondary = template.colors.secondaryAccent;
   const dark = template.colors.primaryDark;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarClick = () => {
+    if (onAvatarUpload) fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onAvatarUpload) {
+      onAvatarUpload(file);
+      e.target.value = '';
+    }
+  };
+
+  const renderAvatar = (size: string, rounded: string, bgStyle: React.CSSProperties, textStyle: React.CSSProperties) => {
+    const sizeClass = size === 'lg' ? 'w-12 h-12' : 'w-10 h-10';
+    const canUpload = !!onAvatarUpload;
+    return (
+      <div className={`relative ${canUpload ? 'cursor-pointer group/avatar' : ''}`} onClick={handleAvatarClick}>
+        {canUpload && (
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+        )}
+        {avatarUrl ? (
+          <img src={avatarUrl} alt={clientName} className={`${sizeClass} ${rounded} object-cover`} />
+        ) : (
+          <div className={`${sizeClass} ${rounded} flex items-center justify-center`} style={bgStyle}>
+            <span style={textStyle}>{clientName.charAt(0)}</span>
+          </div>
+        )}
+        {canUpload && (
+          <div className={`absolute inset-0 ${rounded} bg-black/50 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity print:hidden`}>
+            <Camera className="h-4 w-4 text-white" />
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderName = () => onNameEdit ? (
     <EditableText value={clientName} placeholder="Client name..." onSave={onNameEdit} as="span" />
