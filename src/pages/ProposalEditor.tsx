@@ -387,7 +387,7 @@ export default function ProposalEditor() {
       next.add(idx);
       return next;
     });
-    toast.success(`${sectionNames[idx]} page removed`, {
+    toast.success(`${sectionNames[idx]} hidden`, {
       action: { label: 'Undo', onClick: () => restoreSection(idx) },
     });
   };
@@ -398,6 +398,7 @@ export default function ProposalEditor() {
       next.delete(idx);
       return next;
     });
+    toast.success(`${sectionNames[idx]} restored`);
   };
 
   const switchTemplate = async (newId: string) => {
