@@ -417,6 +417,22 @@ export function OnboardingWizard() {
         }
       }
 
+      // 9. Save portfolio items from onboarding
+      if (portfolioItemsOnboarding.length > 0) {
+        const portfolioToInsert = portfolioItemsOnboarding.map((item: any, i: number) => ({
+          agency_id: targetAgency.id,
+          title: item.title,
+          category: item.category,
+          description: item.description || null,
+          results: item.results || null,
+          images: item.images || [],
+          sort_order: i,
+          is_active: true,
+          source_url: null,
+        }));
+        await supabase.from('portfolio_items').insert(portfolioToInsert as any);
+      }
+
       toast.success('Your agency is set up! Create your first proposal.');
       navigate('/proposals/new');
       window.location.href = '/proposals/new';
