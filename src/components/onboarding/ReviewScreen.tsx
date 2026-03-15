@@ -393,9 +393,13 @@ export function ReviewScreen({
         ) : (
           <div className="flex items-center gap-4">
             {agencyIdentity.logo_url ? (
-              <div className="h-12 w-12 rounded-xl border border-border bg-muted/50 p-1.5 shrink-0">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="h-12 w-12 rounded-xl border border-border bg-muted/50 p-1.5 shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                title="Click to replace logo"
+              >
                 <img src={agencyIdentity.logo_url} alt="" className="h-full w-full object-contain" />
-              </div>
+              </button>
             ) : (
               <button
                 onClick={() => fileInputRef.current?.click()}
