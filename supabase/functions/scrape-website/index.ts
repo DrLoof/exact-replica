@@ -500,14 +500,68 @@ serve(async (req) => {
       || homepageHtml.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']theme-color["']/i);
     if (themeColorMatch) result.brand_color = themeColorMatch[1].trim();
     
+    // Extract colors from inline styles and HTML
     const colorMatches = homepageHtml.match(/#[0-9a-fA-F]{6}/g) || [];
+    const genericColors = new Set(["#000000", "#ffffff", "#FFFFFF", "#333333", "#666666", "#999999", "#cccccc", "#CCCCCC", "#111111", "#222222", "#444444", "#555555", "#777777", "#888888", "#aaaaaa", "#AAAAAA", "#bbbbbb", "#BBBBBB", "#dddddd", "#DDDDDD", "#eeeeee", "#EEEEEE", "#f0f0f0", "#F0F0F0", "#fafafa", "#FAFAFA", "#f5f5f5", "#F5F5F5", "#e0e0e0", "#E0E0E0"]);
     const uniqueColors = [...new Set(colorMatches)]
-      .filter(c => !["#000000", "#ffffff", "#FFFFFF", "#333333", "#666666", "#999999", "#cccccc", "#CCCCCC"].includes(c))
-      .slice(0, 5);
+      .filter(c => !genericColors.has(c))
+      .slice(0, 10);
+
+    // Also try to extract colors from linked CSS stylesheets
+    if (!result.brand_color || uniqueColors.length < 2) {
+      const cssLinks = [...homepageHtml.matchAll(/<link[^>]*rel=["']stylesheet["'][^>]*href=["']([^"']+)["']/gi)];
+      const mainCssUrls = cssLinks
+        .map(m => resolveUrl(m[1]))
+        .filter(u => !u.includes('fonts.googleapis') && !u.includes('wp-includes'))
+        .slice(0, 3); // Limit to 3 stylesheets
+      
+      for (const cssUrl of mainCssUrls) {
+        try {
+          const cssResp = await fetch(cssUrl, {
+            headers: fetchHeaders,
+            signal: AbortSignal.timeout(4000),
+          });
+          if (cssResp.ok) {
+            const cssText = await cssResp.text();
+            
+            // Extract CSS custom properties that look like brand colors
+            const varMatches = cssText.match(/--(?:primary|brand|main|accent|theme|color-primary|site-color|brand-color)[^:]*:\s*(#[0-9a-fA-F]{3,8})/gi) || [];
+            for (const vm of varMatches) {
+              const hexMatch = vm.match(/#[0-9a-fA-F]{6}/);
+              if (hexMatch && !genericColors.has(hexMatch[0])) {
+                if (!result.brand_color) {
+                  result.brand_color = hexMatch[0];
+                  console.log(`Brand color from CSS variable: ${hexMatch[0]} (from ${cssUrl.slice(-50)})`);
+                }
+                if (!uniqueColors.includes(hexMatch[0])) uniqueColors.push(hexMatch[0]);
+              }
+            }
+            
+            // Extract prominent colors from CSS body/header/nav rules
+            const bodyColorMatch = cssText.match(/(?:body|\.site|\.wrapper|header|\.header|nav|\.nav|\.navbar)\s*\{[^}]*?(?:background(?:-color)?|color)\s*:\s*(#[0-9a-fA-F]{3,8})/gi);
+            if (bodyColorMatch) {
+              for (const bcm of bodyColorMatch) {
+                const hexMatch = bcm.match(/#[0-9a-fA-F]{6}/);
+                if (hexMatch && !genericColors.has(hexMatch[0]) && !uniqueColors.includes(hexMatch[0])) {
+                  uniqueColors.push(hexMatch[0]);
+                  if (!result.brand_color) {
+                    result.brand_color = hexMatch[0];
+                    console.log(`Brand color from CSS rule: ${hexMatch[0]}`);
+                  }
+                }
+              }
+            }
+          }
+        } catch (_) {}
+      }
+    }
+
     if (uniqueColors.length > 0) {
-      result.detected_colors = uniqueColors;
+      result.detected_colors = uniqueColors.slice(0, 5);
       if (!result.brand_color) result.brand_color = uniqueColors[0];
     }
+    
+    console.log(`Brand color: ${result.brand_color || 'none'}. Detected colors: ${uniqueColors.join(', ') || 'none'}`);
 
     // Email & Phone
     const emailMatch = homepageHtml.match(/mailto:([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})/i)
