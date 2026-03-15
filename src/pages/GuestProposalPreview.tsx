@@ -24,7 +24,7 @@ function getDefaultAboutText(yearsExperience?: number | null): string {
 
 const sectionNames = [
   'Cover', 'Executive Summary', 'Scope of Services', 'Timeline',
-  'Investment', 'Why Us', 'Testimonials', 'Terms', 'Signature',
+  'Investment', 'Why Us', 'Portfolio', 'Testimonials', 'Terms', 'Signature',
 ];
 
 export default function GuestProposalPreview() {
