@@ -1,4 +1,4 @@
-// Scrape website edge function v3 — Smart multi-page testimonial discovery
+// Scrape website edge function v4 — Improved logo, team, and testimonial extraction
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -20,7 +20,6 @@ function extractQuotesFromHtml(html: string, pagePath: string): { quote: string;
     const quoteText = match[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
     if (quoteText.length < 15 || quoteText.length > 1000) continue;
     
-    // Look for attribution nearby (next 500 chars after the blockquote)
     const afterQuote = html.slice(match.index + match[0].length, match.index + match[0].length + 500);
     const attrMatch = afterQuote.match(/<(?:figcaption|cite|p|span|div)[^>]*(?:class=["'][^"']*(?:author|attribution|cite|name|credit|source)[^"']*["'])?[^>]*>([\s\S]*?)<\/(?:figcaption|cite|p|span|div)>/i);
     const attribution = attrMatch ? attrMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
@@ -35,16 +34,12 @@ function extractQuotesFromHtml(html: string, pagePath: string): { quote: string;
   for (const pattern of classPatterns) {
     while ((match = pattern.exec(html)) !== null) {
       const block = match[1];
-      // Extract quote text (look for p, blockquote, or quoted text)
       const quoteMatch = block.match(/<(?:p|blockquote|q|span)[^>]*>([\s\S]*?)<\/(?:p|blockquote|q|span)>/i);
       if (!quoteMatch) continue;
       const quoteText = quoteMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
       if (quoteText.length < 15 || quoteText.length > 1000) continue;
-      
-      // Check we haven't already captured this quote via blockquote
       if (quotes.some(q => q.quote === quoteText)) continue;
       
-      // Look for attribution within the same block
       const attrMatch = block.match(/<(?:cite|figcaption|span|p|div)[^>]*(?:class=["'][^"']*(?:author|name|credit|source|attribution)[^"']*["'])?[^>]*>([\s\S]*?)<\/(?:cite|figcaption|span|p|div)>/i);
       const attribution = attrMatch ? attrMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
       
@@ -53,6 +48,216 @@ function extractQuotesFromHtml(html: string, pagePath: string): { quote: string;
   }
 
   return quotes;
+}
+
+// Extract team members directly from HTML structure
+function extractTeamFromHtml(html: string, baseUrl: string): { name: string; title: string; photo_url: string | null; bio: string | null }[] {
+  const members: { name: string; title: string; photo_url: string | null; bio: string | null }[] = [];
+  const seenNames = new Set<string>();
+  
+  const resolveUrl = (u: string) => {
+    if (!u) return null;
+    if (u.startsWith('data:')) return null;
+    if (u.startsWith('http')) return u;
+    if (u.startsWith('//')) return 'https:' + u;
+    if (u.startsWith('/')) return new URL(u, baseUrl).href;
+    return new URL(u, baseUrl).href;
+  };
+
+  // Pattern 1: Elements with staff/team/member class containing structured data
+  const teamBlockPatterns = [
+    /<(?:div|article|li)[^>]*class=["'][^"']*(?:team[-_\s]?member|staff|employee|person|member[-_\s]?card|people)[^"']*["'][^>]*>([\s\S]*?)<\/(?:div|article|li)>/gi,
+    /<(?:div|article|li)[^>]*class=["'][^"']*(?:child\s+staff|team-card|member-item|team-item)[^"']*["'][^>]*>([\s\S]*?)<\/(?:div|article|li)>/gi,
+  ];
+
+  for (const pattern of teamBlockPatterns) {
+    let match;
+    while ((match = pattern.exec(html)) !== null) {
+      const block = match[0]; // Use full match to include wrapper attributes
+      
+      // Extract name from h2, h3, h4 or .name/.team-member__name
+      const nameMatch = block.match(/<h[2-4][^>]*(?:class=["'][^"']*(?:name|title)[^"']*["'])?[^>]*>([^<]+)<\/h[2-4]>/i)
+        || block.match(/<(?:span|p|div)[^>]*class=["'][^"']*(?:name|member-name|team-member__name)[^"']*["'][^>]*>([^<]+)<\/(?:span|p|div)>/i);
+      if (!nameMatch) continue;
+      const name = nameMatch[1].trim();
+      if (!name || name.length < 2 || name.length > 60 || seenNames.has(name.toLowerCase())) continue;
+      
+      // Extract role/title from .role, .position, h4, or separate element
+      const roleMatch = block.match(/<(?:p|span|div|h4)[^>]*class=["'][^"']*(?:role|position|job[-_]?title|team-member__position|designation|subtitle)[^"']*["'][^>]*>([^<]+)<\/(?:p|span|div|h4)>/i)
+        || block.match(/<h4[^>]*>([^<]+)<\/h4>/i);
+      const title = roleMatch ? roleMatch[1].trim() : '';
+      
+      // Extract photo URL from img src or data-src (for lazy loading)
+      const imgMatch = block.match(/<img[^>]*(?:src|data-src)=["']([^"']+)["'][^>]*/i);
+      let photoUrl: string | null = null;
+      if (imgMatch) {
+        // Prefer data-src (lazy loaded actual image) over src (placeholder)
+        const dataSrcMatch = block.match(/<img[^>]*data-src=["']([^"']+)["']/i);
+        const srcMatch = block.match(/<img[^>]*src=["']([^"']+)["']/i);
+        const rawUrl = dataSrcMatch ? dataSrcMatch[1] : (srcMatch ? srcMatch[1] : null);
+        if (rawUrl && !rawUrl.startsWith('data:')) {
+          photoUrl = resolveUrl(rawUrl);
+        }
+      }
+      
+      // Extract bio
+      const bioMatch = block.match(/<(?:p|div)[^>]*class=["'][^"']*(?:bio|description|about|excerpt|team-member__bio)[^"']*["'][^>]*>([\s\S]*?)<\/(?:p|div)>/i);
+      let bio: string | null = null;
+      if (bioMatch) {
+        bio = bioMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        if (bio.length > 300) bio = bio.slice(0, 297) + '...';
+        if (bio.length < 5) bio = null;
+      }
+      
+      seenNames.add(name.toLowerCase());
+      members.push({ name, title, photo_url: photoUrl, bio });
+    }
+  }
+
+  // Pattern 2: Look for repeated grid patterns with headings + images (common team layout)
+  // Matches sections that have both an image and a heading nearby
+  if (members.length === 0) {
+    // Try matching fl-post-grid-post (Beaver Builder) and similar patterns
+    const gridPostPattern = /<(?:div|article)[^>]*class=["'][^"']*(?:fl-post-grid-post|wp-block-group|elementor-widget|card)[^"']*["'][^>]*>([\s\S]*?)<\/(?:div|article)>\s*(?:<\/div>)?\s*(?:<\/div>)?/gi;
+    let match;
+    while ((match = gridPostPattern.exec(html)) !== null) {
+      const block = match[0];
+      // Check if this looks like a team member block
+      if (!block.match(/(?:team|staff|member|employee|person)/i)) continue;
+      
+      const nameMatch = block.match(/<h[2-4][^>]*>([^<]+)<\/h[2-4]>/i);
+      if (!nameMatch) continue;
+      const name = nameMatch[1].trim();
+      if (!name || name.length < 2 || seenNames.has(name.toLowerCase())) continue;
+      
+      const roleMatch = block.match(/<h[3-5][^>]*(?:class=["'][^"']*(?:position|role|title)[^"']*["'])?[^>]*>([^<]+)<\/h[3-5]>/i);
+      const title = roleMatch && roleMatch[1].trim() !== name ? roleMatch[1].trim() : '';
+      
+      const dataSrcMatch = block.match(/<img[^>]*data-src=["']([^"']+)["']/i);
+      const srcMatch = block.match(/<img[^>]*src=["']([^"']+)["']/i);
+      const rawUrl = dataSrcMatch ? dataSrcMatch[1] : (srcMatch ? srcMatch[1] : null);
+      const photoUrl = rawUrl && !rawUrl.startsWith('data:') ? resolveUrl(rawUrl) : null;
+      
+      seenNames.add(name.toLowerCase());
+      members.push({ name, title, photo_url: photoUrl, bio: null });
+    }
+  }
+
+  return members.slice(0, 12);
+}
+
+// Extract logo from HTML with multiple strategies
+function extractLogo(html: string, baseUrl: string): string | null {
+  const urlObj = new URL(baseUrl);
+  const resolveUrl = (u: string) => {
+    if (!u) return '';
+    u = u.replace(/&amp;/g, '&');
+    if (u.startsWith('http')) return u;
+    if (u.startsWith('//')) return 'https:' + u;
+    if (u.startsWith('/')) return urlObj.origin + u;
+    return urlObj.origin + '/' + u;
+  };
+
+  let bestLogo: string | null = null;
+  let bestScore = 0;
+
+  const scoreLogo = (url: string, context: string): number => {
+    let score = 1;
+    const lower = url.toLowerCase();
+    if (lower.includes('logo')) score += 10;
+    if (lower.includes('brand')) score += 5;
+    if (lower.match(/\.svg(\?|$|&)/i)) score += 8;
+    if (lower.match(/\.png(\?|$|&)/i)) score += 3;
+    if (context === 'header') score += 5;
+    if (context === 'og:image') score += 2;
+    if (lower.includes('icon') && !lower.includes('logo')) score -= 3;
+    if (lower.includes('favicon')) score -= 5;
+    if (lower.includes('client') || lower.includes('partner') || lower.includes('sponsor')) score -= 10;
+    return score;
+  };
+
+  // Strategy 1: Header area images with logo indicators
+  const headerMatch = html.match(/<header[\s\S]*?<\/header>/i);
+  const navMatch = html.match(/<nav[\s\S]*?<\/nav>/i);
+  const headerHtml = headerMatch ? headerMatch[0] : (navMatch ? navMatch[0] : html.slice(0, 8000));
+
+  // Check all imgs in header area
+  const headerImgs = [...headerHtml.matchAll(/<img[^>]*(?:src|data-src)=["']([^"']+)["'][^>]*/gi)];
+  for (const m of headerImgs) {
+    // Also check for data-src
+    const dataSrc = m[0].match(/data-src=["']([^"']+)["']/i);
+    const src = m[0].match(/\bsrc=["']([^"']+)["']/i);
+    const url = dataSrc?.[1] || src?.[1];
+    if (!url || url.startsWith('data:')) continue;
+    const resolved = resolveUrl(url);
+    const score = scoreLogo(resolved, 'header');
+    if (score > bestScore) { bestScore = score; bestLogo = resolved; }
+  }
+
+  // Strategy 2: Elements with logo class/id containing images
+  const logoContainerPatterns = [
+    /<(?:a|div|span|figure)[^>]*(?:class|id)=["'][^"']*\blogo\b[^"']*["'][^>]*>[\s\S]*?<img[^>]*(?:src|data-src)=["']([^"']+)["'][^>]*>/gi,
+    /<(?:a|div|span|figure)[^>]*(?:class|id)=["'][^"']*\bbrand\b[^"']*["'][^>]*>[\s\S]*?<img[^>]*(?:src|data-src)=["']([^"']+)["'][^>]*>/gi,
+  ];
+  for (const pattern of logoContainerPatterns) {
+    const matches = [...html.matchAll(pattern)];
+    for (const m of matches) {
+      const url = m[1];
+      if (!url || url.startsWith('data:')) continue;
+      const resolved = resolveUrl(url);
+      const score = scoreLogo(resolved, 'header') + 3; // bonus for being in a logo container
+      if (score > bestScore) { bestScore = score; bestLogo = resolved; }
+    }
+  }
+
+  // Strategy 3: Inline SVG in logo containers
+  const inlineSvgPattern = /<(?:a|div|span)[^>]*(?:class|id)=["'][^"']*\blogo\b[^"']*["'][^>]*>[\s\S]*?<svg[\s\S]*?<\/svg>/gi;
+  // We can't extract an inline SVG as a URL, but we can note it exists
+
+  // Strategy 4: og:image as fallback (often the agency logo or branded image)
+  const ogImageMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)
+    || html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+  if (ogImageMatch) {
+    const resolved = resolveUrl(ogImageMatch[1]);
+    const score = scoreLogo(resolved, 'og:image');
+    if (score > bestScore) { bestScore = score; bestLogo = resolved; }
+  }
+
+  // Strategy 5: Favicon/apple-touch-icon as last resort
+  if (!bestLogo || bestScore < 5) {
+    const iconLinks = [...html.matchAll(/<link[^>]*rel=["'](?:icon|apple-touch-icon|shortcut icon)["'][^>]*href=["']([^"']+)["'][^>]*/gi)];
+    for (const m of iconLinks) {
+      const href = resolveUrl(m[1]);
+      if (href.match(/\.svg(\?|$|&)/i)) {
+        const score = scoreLogo(href, 'favicon');
+        if (score > bestScore) { bestScore = score; bestLogo = href; }
+      } else if (href.match(/\.png(\?|$|&)/i)) {
+        const sizeMatch = m[0].match(/sizes=["'](\d+)/i);
+        if (sizeMatch && parseInt(sizeMatch[1]) >= 128) {
+          const score = scoreLogo(href, 'favicon');
+          if (score > bestScore) { bestScore = score; bestLogo = href; }
+        }
+      }
+    }
+  }
+
+  // Strategy 6: First image in the page that contains 'logo' in URL or alt
+  if (!bestLogo) {
+    const allImgs = [...html.matchAll(/<img[^>]*(?:src|data-src)=["']([^"']+)["'][^>]*/gi)];
+    for (const m of allImgs) {
+      const url = m[1];
+      if (!url || url.startsWith('data:')) continue;
+      const resolved = resolveUrl(url);
+      if (resolved.toLowerCase().includes('logo')) {
+        const altMatch = m[0].match(/alt=["']([^"']*logo[^"']*)['"]/i);
+        const score = scoreLogo(resolved, 'body') + (altMatch ? 3 : 0);
+        if (score > bestScore) { bestScore = score; bestLogo = resolved; }
+        break; // take the first logo-ish image
+      }
+    }
+  }
+
+  return bestLogo;
 }
 
 // Clean HTML to text with quote/attribution markers for AI fallback
@@ -75,6 +280,27 @@ function cleanHtmlToText(html: string, maxLen = 5000): string {
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, maxLen);
+}
+
+// Preserve team-relevant HTML structure for AI parsing
+function cleanHtmlPreserveTeam(html: string, maxLen = 6000): string {
+  // Remove scripts, styles, nav, but keep structural elements for team parsing
+  let cleaned = html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<nav[\s\S]*?<\/nav>/gi, '');
+  
+  // Preserve img src/data-src, h2-h4 text, and class names that hint at team structure
+  cleaned = cleaned
+    .replace(/<img[^>]*(?:data-src|src)=["']([^"']+)["'][^>]*alt=["']([^"']*)["'][^>]*\/?>/gi, '[IMG: $1 alt="$2"]')
+    .replace(/<img[^>]*(?:data-src|src)=["']([^"']+)["'][^>]*\/?>/gi, '[IMG: $1]')
+    .replace(/<h([2-4])[^>]*>([^<]*)<\/h\1>/gi, '[H$1: $2]')
+    .replace(/<(?:p|span|div)[^>]*class=["'][^"']*(?:role|position|title|bio|description)[^"']*["'][^>]*>([^<]*)<\/(?:p|span|div)>/gi, '[ROLE: $1]')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  return cleaned.slice(0, maxLen);
 }
 
 serve(async (req) => {
@@ -124,7 +350,7 @@ serve(async (req) => {
       );
     }
 
-    // Step 2: Extract basic meta data from homepage (fast, no AI needed)
+    // Step 2: Extract basic meta data from homepage
     const result: Record<string, any> = {};
 
     // Agency name
@@ -157,40 +383,9 @@ serve(async (req) => {
       || homepageHtml.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']description["']/i);
     if (descMatch) result.tagline = descMatch[1].trim().slice(0, 200);
 
-    // Logo detection
-    const headerMatch = homepageHtml.match(/<header[\s\S]*?<\/header>/i);
-    const headerHtml = headerMatch ? headerMatch[0] : homepageHtml.slice(0, 5000);
-    const logoImgPatterns = [
-      /<img[^>]*src=["']([^"']*logo[^"']*)["']/gi,
-      /<(?:a|div|span)[^>]*(?:class|id)=["'][^"']*\blogo\b[^"']*["'][^>]*>\s*<img[^>]*src=["']([^"']+)["']/gi,
-    ];
-    let bestLogo: string | null = null;
-    for (const pattern of logoImgPatterns) {
-      const matches = [...headerHtml.matchAll(pattern)];
-      for (const m of matches) {
-        const src = m[1] || m[2];
-        if (!src) continue;
-        const resolved = resolveUrl(src);
-        if (resolved.match(/\.svg(\?|$|&)/i)) { bestLogo = resolved; break; }
-        if (!bestLogo && resolved.match(/\.png(\?|$|&)/i)) {
-          const urlLower = resolved.toLowerCase();
-          if (urlLower.includes('logo') || urlLower.includes('brand') || urlLower.includes('icon')) bestLogo = resolved;
-        }
-      }
-      if (bestLogo?.match(/\.svg(\?|$|&)/i)) break;
-    }
-    if (!bestLogo) {
-      const iconLinks = [...homepageHtml.matchAll(/<link[^>]*rel=["'](?:icon|apple-touch-icon|shortcut icon)["'][^>]*href=["']([^"']+)["'][^>]*/gi)];
-      for (const m of iconLinks) {
-        const href = resolveUrl(m[1]);
-        if (href.match(/\.svg(\?|$|&)/i)) { bestLogo = href; break; }
-        if (!bestLogo && href.match(/\.png(\?|$|&)/i)) {
-          const sizeMatch = m[0].match(/sizes=["'](\d+)/i);
-          if (sizeMatch && parseInt(sizeMatch[1]) >= 128) bestLogo = href;
-        }
-      }
-    }
-    if (bestLogo) result.logo_url = bestLogo.replace(/&amp;/g, '&');
+    // Logo detection (improved)
+    const detectedLogo = extractLogo(homepageHtml, targetUrl);
+    if (detectedLogo) result.logo_url = detectedLogo;
 
     // Theme color & detected colors
     const themeColorMatch = homepageHtml.match(/<meta[^>]*name=["']theme-color["'][^>]*content=["']([^"']+)["']/i)
@@ -239,50 +434,65 @@ serve(async (req) => {
       }
     }
 
-    // Step 3: Discover & fetch internal pages
+    // Step 3: Discover & fetch internal pages (expanded team paths)
     const pagesToFetch = [
       '/about', '/about-us', '/who-we-are', '/om-oss', '/om',
+      '/team', '/team/', '/our-team', '/our-team/', '/people', '/staff', '/meet-the-team',
+      '/kontakta/oss', '/kontakta/oss/', '/kontakta-oss',
       '/services', '/what-we-do', '/tjanster', '/tjanster/',
       '/testimonials', '/reviews', '/clients', '/kunder', '/referenser',
       '/work', '/case-studies', '/cases', '/kundcase', '/kundcase/', '/portfolio',
-      '/contact', '/kontakt', '/kontakta-oss',
+      '/contact', '/kontakt',
       '/references', '/referenties', '/projekte', '/projets',
     ];
     const navLinks = [...homepageHtml.matchAll(/<a[^>]*href=["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi)]
-      .map(m => m[1])
-      .filter(href => {
+      .map(m => ({ href: m[1], text: m[2].replace(/<[^>]+>/g, '').trim().toLowerCase() }))
+      .filter(({ href }) => {
         try {
           const hrefUrl = new URL(href, targetUrl);
           return hrefUrl.origin === urlObj.origin && hrefUrl.pathname !== '/';
         } catch { return false; }
       })
-      .map(href => {
-        try { return new URL(href, targetUrl).pathname; } catch { return null; }
+      .map(({ href, text }) => {
+        try { return { path: new URL(href, targetUrl).pathname, text }; } catch { return null; }
       })
-      .filter(Boolean) as string[];
+      .filter(Boolean) as { path: string; text: string }[];
 
-    const allPaths = [...new Set([...navLinks.slice(0, 20), ...pagesToFetch])];
-    console.log(`Will try ${Math.min(allPaths.length, 15)} paths. Nav links: ${navLinks.length}. First 15:`, allPaths.slice(0, 15));
+    // Prioritize team-related nav links
+    const teamKeywords = ['team', 'staff', 'people', 'about', 'om oss', 'kontakt', 'meet', 'our team', 'medarbetare', 'anställda'];
+    const teamNavLinks = navLinks.filter(({ text }) => teamKeywords.some(kw => text.includes(kw)));
+    const otherNavLinks = navLinks.filter(({ text }) => !teamKeywords.some(kw => text.includes(kw)));
+    
+    const allPaths = [...new Set([
+      ...teamNavLinks.map(l => l.path),
+      ...otherNavLinks.slice(0, 15).map(l => l.path),
+      ...pagesToFetch
+    ])];
+    console.log(`Will try ${Math.min(allPaths.length, 20)} paths. Team nav links: ${teamNavLinks.map(l => l.path).join(', ')}. Nav links: ${navLinks.length}`);
     
     const additionalContent: string[] = [];
+    const teamContent: { path: string; html: string }[] = [];
     const caseStudyLinks: string[] = [];
     const allExtractedQuotes: { quote: string; attribution: string; context: string }[] = [];
-    // Store raw HTML of case-study-bearing pages for quote extraction
-    const rawPageHtml: Map<string, string> = new Map();
+    const allExtractedTeam: { name: string; title: string; photo_url: string | null; bio: string | null }[] = [];
     
-    const fetchPromises = allPaths.slice(0, 15).map(async (path) => {
+    const fetchPromises = allPaths.slice(0, 20).map(async (path) => {
       try {
         const pageUrl = urlObj.origin + path;
         const resp = await fetch(pageUrl, {
           headers: fetchHeaders,
-          signal: AbortSignal.timeout(6000),
+          signal: AbortSignal.timeout(8000),
         });
         if (resp.ok) {
           const text = await resp.text();
           console.log(`Fetched ${path} — ${text.length} chars, status ${resp.status}`);
           
           const normalizedPath = path.replace(/\/$/, '');
-          const isCasePage = /\/(kundcase|case-studies|cases|work|portfolio|testimonials|reviews|referenser|references|kunder)\/?$/i.test(path);
+          const isCasePage = /\/(kundcase|case-studies|cases|work|portfolio|testimonials|reviews|referencer|references|kunder)\/?$/i.test(path);
+          const isTeamPage = /\/(team|our-team|people|staff|meet-the-team|kontakta|medarbetare)\/?/i.test(path)
+            || text.toLowerCase().includes('meet the team') || text.toLowerCase().includes('our team')
+            || text.toLowerCase().includes('meet our');
+          
           if (isCasePage) {
             const subLinks = [...text.matchAll(/<a[^>]*href=["']([^"'#]+)["'][^>]*>/gi)]
               .map(m => {
@@ -294,7 +504,25 @@ serve(async (req) => {
                 return norm.startsWith(normalizedPath) && norm !== normalizedPath && norm.length > normalizedPath.length + 1;
               }) as string[];
             caseStudyLinks.push(...subLinks);
-            console.log(`Case listing ${path} found ${subLinks.length} sublinks:`, subLinks.slice(0, 5));
+            console.log(`Case listing ${path} found ${subLinks.length} sublinks`);
+          }
+          
+          // Extract team members from HTML directly
+          if (isTeamPage) {
+            console.log(`Team page detected: ${path}`);
+            const teamMembers = extractTeamFromHtml(text, urlObj.origin);
+            if (teamMembers.length > 0) {
+              allExtractedTeam.push(...teamMembers);
+              console.log(`Extracted ${teamMembers.length} team members from ${path}:`, teamMembers.map(m => m.name));
+            }
+            // Also store for AI parsing
+            teamContent.push({ path, html: text });
+          }
+          
+          // Try logo from subpages if not found yet
+          if (!result.logo_url) {
+            const subLogo = extractLogo(text, urlObj.origin);
+            if (subLogo) result.logo_url = subLogo;
           }
           
           // Extract quotes from raw HTML
@@ -332,7 +560,6 @@ serve(async (req) => {
             const text = await resp.text();
             console.log(`Fetched case study ${path} — ${text.length} chars`);
             
-            // Extract quotes from raw HTML
             const pageQuotes = extractQuotesFromHtml(text, path);
             if (pageQuotes.length > 0) {
               allExtractedQuotes.push(...pageQuotes);
@@ -351,22 +578,47 @@ serve(async (req) => {
       await Promise.all(casePromises);
     }
 
-    // Also extract quotes from homepage
+    // Also extract quotes and team from homepage
     const homepageQuotes = extractQuotesFromHtml(homepageHtml, '/');
     if (homepageQuotes.length > 0) {
       allExtractedQuotes.push(...homepageQuotes);
       console.log(`Extracted ${homepageQuotes.length} quotes from homepage`);
     }
+    
+    // Try team extraction from homepage too
+    const homepageTeam = extractTeamFromHtml(homepageHtml, urlObj.origin);
+    if (homepageTeam.length > 0 && allExtractedTeam.length === 0) {
+      allExtractedTeam.push(...homepageTeam);
+      console.log(`Extracted ${homepageTeam.length} team members from homepage`);
+    }
 
     console.log(`Total extracted quotes: ${allExtractedQuotes.length}`);
+    console.log(`Total extracted team members: ${allExtractedTeam.length}`);
 
     // Clean homepage text
     const homepageText = cleanHtmlToText(homepageHtml, 4000);
 
     // Step 4: Send everything to AI for structured parsing
     const allContent = `[Homepage]\n${homepageText}\n\n${additionalContent.join('\n\n')}`;
+    
+    // Add team page content with preserved structure for AI
+    let teamSection = '';
+    if (teamContent.length > 0) {
+      const preservedTeam = teamContent.map(({ path, html }) => 
+        `[Team page: ${path}]\n${cleanHtmlPreserveTeam(html, 4000)}`
+      ).join('\n\n');
+      teamSection = `\n\n--- TEAM PAGE CONTENT (with preserved structure) ---\n${preservedTeam}`;
+    }
+    
+    // Add pre-extracted team for AI validation
+    let extractedTeamSection = '';
+    if (allExtractedTeam.length > 0) {
+      extractedTeamSection = `\n\n--- PRE-EXTRACTED TEAM MEMBERS ---\n${allExtractedTeam.map((m, i) => 
+        `${i + 1}. Name: "${m.name}", Title: "${m.title}", Photo: ${m.photo_url || 'none'}, Bio: ${m.bio || 'none'}`
+      ).join('\n')}`;
+    }
+
     console.log(`Scraped ${additionalContent.length} additional pages. Total content length: ${allContent.length} chars`);
-    console.log(`Pages scraped: ${additionalContent.map(c => c.split('\n')[0]).join(', ')}`);
 
     const agencyName = result.name || 'Unknown Agency';
 
@@ -389,7 +641,7 @@ serve(async (req) => {
             "Authorization": `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
-            model: "google/gemini-3-flash-preview",
+            model: "google/gemini-2.5-flash",
             messages: [
               {
                 role: "system",
@@ -429,7 +681,7 @@ Return this exact JSON structure:
   "team_members": [
     {
       "name": "Full Name",
-      "title": "Job Title",
+      "title": "Job Title (translated to English)",
       "photo_url": "absolute URL to photo or null",
       "bio": "One sentence bio or null"
     }
@@ -447,27 +699,34 @@ The agency's name is "${agencyName}". Use this to distinguish client quotes from
 2. REJECT any quote where the speaker works at "${agencyName}" or any variation of the agency name. Check the attribution carefully:
    - If title/role contains "${agencyName}" or a recognizable variation → REJECT (it's a staff quote)
    - If the person is described as owner/CEO/founder/employee of "${agencyName}" → REJECT
-   - Examples of INTERNAL quotes to reject: "SEO-specialist på ${agencyName}", "VD ${agencyName}", "Grundare av ${agencyName}"
-3. ACCEPT quotes where the speaker is clearly from a DIFFERENT company (their title mentions a different company name).
+3. ACCEPT quotes where the speaker is clearly from a DIFFERENT company.
 4. DO NOT include press releases, blog excerpts, news announcements, or agency self-descriptions.
 5. DO NOT include generic company statements or mission descriptions.
-6. Only select quotes that explicitly praise or reference the agency's work, results, or collaboration. Skip generic statements or industry observations that don't mention the agency or the working relationship, even if spoken by a client.
+6. Only select quotes that explicitly praise or reference the agency's work, results, or collaboration.
 7. If a case study page mentions metrics/results near a client quote, include them as metric_value and metric_label.
-8. For metric_value: ONLY include if there is a specific number or percentage. Examples: "+265%", "15,000", "3x". Do NOT include vague descriptions like "increased traffic" or "improved performance". If no specific metric exists, set metric_value to null.
-9. If multiple people are attributed the exact same quote text, only include it once — use the attribution with the most complete information (name + title + company).
+8. For metric_value: ONLY include if there is a specific number or percentage.
+9. If multiple people are attributed the exact same quote text, only include it once.
 10. If NO valid client testimonials are found, return an EMPTY testimonials array []. Do NOT fabricate testimonials.
 11. Translate all quotes to English while preserving meaning and tone.
 
 I have also pre-extracted quotes from HTML blockquotes and testimonial elements. These are listed in the "EXTRACTED QUOTES" section. Analyze each one carefully — only include those that are genuine client testimonials.
 
-- For differentiators, ONLY use real data found on the website (mark as "scraped"). Do NOT invent or generate fake stats, KPI numbers, or differentiators. If fewer than 3 are found, return only what you found. Translate all differentiator text to English.
-- For team_members, look for About/Team pages. Extract real people who work at the agency. Include their photo URLs (resolve to absolute URLs). If no team page is found, return an empty array. Do NOT fabricate team members. Translate names/titles to English if needed. Maximum 6 team members.
+TEAM MEMBER EXTRACTION — CRITICAL RULES:
+1. I have pre-extracted team members from HTML structure. They are listed in the "PRE-EXTRACTED TEAM MEMBERS" section. Use these as your primary source — validate and clean them up.
+2. If pre-extracted team members have photo_url values, KEEP THEM EXACTLY as provided (they are already absolute URLs).
+3. Also check the "TEAM PAGE CONTENT" section for any additional team members the HTML parser may have missed.
+4. Look for people with [IMG:...] markers near their names in the team page content — these are photo URLs.
+5. Translate job titles to English (e.g. "VD" → "CEO", "Art director" stays "Art Director", "Projektledare" → "Project Manager").
+6. Maximum 6 team members. Prioritize leadership and senior roles.
+7. If no team data found anywhere, return an empty array. Do NOT fabricate team members.
+
+- For differentiators, ONLY use real data found on the website (mark as "scraped"). Do NOT invent or generate fake stats.
 - If data is not found, use null or empty string, don't invent testimonials or stats
 - Return ONLY the JSON object, no other text`
               },
               {
                 role: "user",
-                content: `Parse this agency website content. Agency name: "${agencyName}".\n\n${allContent.slice(0, 22000)}${quotesSection}`
+                content: `Parse this agency website content. Agency name: "${agencyName}".\n\n${allContent.slice(0, 18000)}${teamSection}${extractedTeamSection}${quotesSection}`
               }
             ],
             temperature: 0.2,
@@ -512,14 +771,31 @@ I have also pre-extracted quotes from HTML blockquotes and testimonial elements.
       if (aiResult.services_detected?.length > 0) result.detected_services = aiResult.services_detected;
       if (aiResult.testimonials?.length > 0) result.testimonials = aiResult.testimonials;
       if (aiResult.differentiators) result.differentiators = aiResult.differentiators;
-      if (aiResult.team_members?.length > 0) result.team_members = aiResult.team_members;
+      
+      // For team: prefer AI-refined results if available, fall back to HTML-extracted
+      if (aiResult.team_members?.length > 0) {
+        result.team_members = aiResult.team_members;
+      } else if (allExtractedTeam.length > 0) {
+        // Use HTML-extracted team directly if AI didn't return any
+        result.team_members = allExtractedTeam.slice(0, 6);
+      }
+    } else if (allExtractedTeam.length > 0) {
+      // No AI result at all, use HTML-extracted team
+      result.team_members = allExtractedTeam.slice(0, 6);
     }
 
-    // Log testimonial results
+    // Log results
+    console.log(`Logo found: ${result.logo_url || 'none'}`);
     console.log(`Testimonials found: ${result.testimonials?.length || 0}`);
     if (result.testimonials?.length > 0) {
       result.testimonials.forEach((t: any, i: number) => {
         console.log(`  ${i + 1}. "${t.quote?.slice(0, 60)}..." — ${t.client_name}, ${t.client_company || 'unknown'}`);
+      });
+    }
+    console.log(`Team members found: ${result.team_members?.length || 0}`);
+    if (result.team_members?.length > 0) {
+      result.team_members.forEach((m: any, i: number) => {
+        console.log(`  ${i + 1}. ${m.name} — ${m.title} — photo: ${m.photo_url ? 'yes' : 'no'}`);
       });
     }
 
