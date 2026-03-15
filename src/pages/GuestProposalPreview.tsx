@@ -1076,13 +1076,13 @@ export default function GuestProposalPreview() {
                     <div className="space-y-6">
                       {testimonials.slice(0, 4).map((t: any, i: number) => (
                         <TestimonialCard key={i} clientName={t.client_name} clientTitle={t.client_title} clientCompany={t.client_company} quote={t.quote} metricValue={t.metric_value} metricLabel={t.metric_label} avatarUrl={t.avatar_url} featured={i === 0} delay={i * 0.1}
-                          onQuoteEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, quote: val } : x))}
-                          onNameEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, client_name: val } : x))}
-                          onTitleEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, client_title: val } : x))}
-                          onCompanyEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, client_company: val } : x))}
-                          onMetricValueEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, metric_value: val } : x))}
-                          onMetricLabelEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, metric_label: val } : x))}
-                          onRemove={() => setLocalTestimonials(prev => prev.filter((_, j) => j !== i))}
+                          onQuoteEdit={(val) => setLocalTestimonials(prev => { const u = prev.map((x, j) => j === i ? { ...x, quote: val } : x); saveGuestTestimonials(u); return u; })}
+                          onNameEdit={(val) => setLocalTestimonials(prev => { const u = prev.map((x, j) => j === i ? { ...x, client_name: val } : x); saveGuestTestimonials(u); return u; })}
+                          onTitleEdit={(val) => setLocalTestimonials(prev => { const u = prev.map((x, j) => j === i ? { ...x, client_title: val } : x); saveGuestTestimonials(u); return u; })}
+                          onCompanyEdit={(val) => setLocalTestimonials(prev => { const u = prev.map((x, j) => j === i ? { ...x, client_company: val } : x); saveGuestTestimonials(u); return u; })}
+                          onMetricValueEdit={(val) => setLocalTestimonials(prev => { const u = prev.map((x, j) => j === i ? { ...x, metric_value: val } : x); saveGuestTestimonials(u); return u; })}
+                          onMetricLabelEdit={(val) => setLocalTestimonials(prev => { const u = prev.map((x, j) => j === i ? { ...x, metric_label: val } : x); saveGuestTestimonials(u); return u; })}
+                          onRemove={() => setLocalTestimonials(prev => { const u = prev.filter((_, j) => j !== i); saveGuestTestimonials(u); return u; })}
                         />
                       ))}
                     </div>
