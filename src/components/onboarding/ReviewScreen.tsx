@@ -448,8 +448,8 @@ export function ReviewScreen({
                   value={agencyIdentity.email || ''}
                   onChange={e => onAgencyChange({ ...agencyIdentity, email: e.target.value })}
                   placeholder="Add email"
-                  size={agencyIdentity.email ? Math.max(agencyIdentity.email.length, 8) : 8}
-                  className="bg-transparent outline-none text-xs text-muted-foreground placeholder:italic placeholder:text-brass hover:text-foreground focus:text-foreground transition-colors w-auto"
+                  size={agencyIdentity.email ? Math.max(agencyIdentity.email.length + 2, 8) : 8}
+                  className="bg-transparent outline-none text-xs text-muted-foreground placeholder:italic placeholder:text-brass hover:text-foreground focus:text-foreground transition-colors w-auto max-w-none"
                 />
                 <span>·</span>
                 <input
@@ -457,8 +457,8 @@ export function ReviewScreen({
                   value={agencyIdentity.phone || ''}
                   onChange={e => onAgencyChange({ ...agencyIdentity, phone: e.target.value })}
                   placeholder="Add phone"
-                  size={agencyIdentity.phone ? Math.max(agencyIdentity.phone.length, 8) : 8}
-                  className="bg-transparent outline-none text-xs text-muted-foreground placeholder:italic placeholder:text-brass hover:text-foreground focus:text-foreground transition-colors w-auto"
+                  size={agencyIdentity.phone ? Math.max(agencyIdentity.phone.length + 2, 10) : 10}
+                  className="bg-transparent outline-none text-xs text-muted-foreground placeholder:italic placeholder:text-brass hover:text-foreground focus:text-foreground transition-colors w-auto max-w-none"
                 />
               </div>
             </div>
