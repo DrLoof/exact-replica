@@ -700,24 +700,18 @@ export default function ProposalNew() {
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back
         </button>
-        <h1 className="font-display text-base font-semibold text-foreground">New Proposal</h1>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleSaveDraft}
-            disabled={saving || !hasClient}
-            className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-50"
-          >
-            {saving ? 'Saving...' : 'Save as Draft'}
-          </button>
-          <button
-            onClick={handleBuild}
-            disabled={!canBuild || saving}
-            className="flex items-center gap-2 rounded-[10px] bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-40"
-          >
-            <Sparkles className="h-4 w-4" />
-            {saving ? 'Building...' : 'Build Proposal'}
-          </button>
+        <div className="absolute left-1/2 -translate-x-1/2">
+          <div className="rounded-lg bg-brand px-5 py-1.5">
+            <h1 className="font-display text-sm font-semibold text-white">New Proposal</h1>
+          </div>
         </div>
+        <button
+          onClick={handleSaveDraft}
+          disabled={saving || !hasClient}
+          className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted disabled:opacity-50"
+        >
+          {saving ? 'Saving...' : 'Save as Draft'}
+        </button>
       </div>
 
       <div className="mx-auto max-w-[720px] px-6 py-8 space-y-8">
