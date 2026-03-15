@@ -659,17 +659,26 @@ serve(async (req) => {
       })
       .filter(Boolean) as { path: string; text: string }[];
 
-    // Prioritize team-related nav links
+    // Prioritize team- and portfolio-related nav links
     const teamKeywords = ['team', 'staff', 'people', 'about', 'om oss', 'kontakt', 'meet', 'our team', 'medarbetare', 'anställda'];
+    const portfolioKeywords = ['portfolio', 'work', 'our work', 'case study', 'case studies', 'client success', 'success stories', 'projects', 'references'];
+    const portfolioPathRegex = /\/(portfolio|work|our-work|case-study|case-studies|cases|client-success|success-stories|projects|references?)\/?$/i;
+
     const teamNavLinks = navLinks.filter(({ text }) => teamKeywords.some(kw => text.includes(kw)));
-    const otherNavLinks = navLinks.filter(({ text }) => !teamKeywords.some(kw => text.includes(kw)));
+    const portfolioNavLinks = navLinks.filter(({ text, path }) =>
+      portfolioKeywords.some(kw => text.includes(kw)) || portfolioPathRegex.test(path)
+    );
+    const otherNavLinks = navLinks.filter(({ text, path }) =>
+      !teamKeywords.some(kw => text.includes(kw)) && !portfolioPathRegex.test(path)
+    );
     
     const allPaths = [...new Set([
       ...teamNavLinks.map(l => l.path),
-      ...otherNavLinks.slice(0, 15).map(l => l.path),
+      ...portfolioNavLinks.map(l => l.path),
+      ...otherNavLinks.slice(0, 12).map(l => l.path),
       ...pagesToFetch
     ])];
-    console.log(`Will try ${Math.min(allPaths.length, 20)} paths. Team nav links: ${teamNavLinks.map(l => l.path).join(', ')}. Nav links: ${navLinks.length}`);
+    console.log(`Will try ${Math.min(allPaths.length, 30)} paths. Team nav links: ${teamNavLinks.map(l => l.path).join(', ')}. Portfolio nav links: ${portfolioNavLinks.map(l => l.path).join(', ')}. Nav links: ${navLinks.length}`);
     
     const additionalContent: string[] = [];
     const teamContent: { path: string; html: string }[] = [];
