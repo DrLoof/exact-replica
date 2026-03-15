@@ -887,7 +887,6 @@ export default function ProposalEditor() {
                                   setServices(prev => prev.map(s => s.id === svc.id ? { ...s, out_of_scope: items } : s));
                                 }}
                               />
-                              />
                             </div>
                           ))}
                         </div>
