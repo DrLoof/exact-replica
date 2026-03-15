@@ -198,14 +198,25 @@ export default function ProposalEditor() {
     setServices(mapped);
 
     if (propRes.data.agency_id) {
-      const [diffRes, testRes, termsRes] = await Promise.all([
+      const [diffRes, testRes, termsRes, portfolioRes] = await Promise.all([
         supabase.from('differentiators').select('*').eq('agency_id', propRes.data.agency_id).order('display_order'),
         supabase.from('testimonials').select('*').eq('agency_id', propRes.data.agency_id).order('created_at', { ascending: false }),
         supabase.from('terms_clauses').select('*').eq('agency_id', propRes.data.agency_id).order('display_order'),
+        supabase.from('portfolio_items').select('*').eq('agency_id', propRes.data.agency_id).eq('is_active', true).order('sort_order'),
       ]);
       setDifferentiators(diffRes.data || []);
       setTestimonials(testRes.data || []);
       setTermsClauses(termsRes.data || []);
+
+      // Portfolio items
+      const allPi = (portfolioRes.data || []).map((d: any) => ({ ...d, images: d.images || [] }));
+      setAllPortfolioItems(allPi);
+      const selectedIds: string[] = (propRes.data as any).selected_portfolio_ids || [];
+      if (selectedIds.length > 0) {
+        setPortfolioItems(allPi.filter((p: any) => selectedIds.includes(p.id)));
+      } else {
+        setPortfolioItems([]);
+      }
 
       // Load team members from agency
       const { data: agencyData } = await supabase.from('agencies').select('team_members').eq('id', propRes.data.agency_id).single();
@@ -217,7 +228,6 @@ export default function ProposalEditor() {
       if (Array.isArray(proposalTeamData) && proposalTeamData.length > 0) {
         setProposalTeam(proposalTeamData);
       } else if (agencyTeam.length > 0) {
-        // Default: pre-select first 3 team members
         const defaultTeam = agencyTeam.slice(0, 3).map((m: any) => ({
           member_id: m.id,
           name: m.name,
