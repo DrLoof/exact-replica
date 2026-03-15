@@ -1363,11 +1363,8 @@ export default function ProposalEditor() {
                 </div>
               </SectionWrapper>}
 
-              {/* Section 5: Why Us (was 6) */}
+              {/* Section 5: Why Us */}
               {!deletedSections.has(5) && <SectionWrapper idx={5} onDelete={deleteSection} label="Why Us">
-
-              {/* Section 6: Why Us */}
-              {!deletedSections.has(6) && <SectionWrapper idx={6} onDelete={deleteSection} label="Why Us">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="07">
                     <SectionHeader number="06" title="Why Us" subtitle="What sets us apart"
