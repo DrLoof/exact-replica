@@ -367,7 +367,44 @@ export default function ProposalEditor() {
     return () => document.removeEventListener('keydown', handler);
   }, [proposal]);
 
-  // Save team selection when it changes
+  // Scroll tracking for active section highlight
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const handler = () => {
+      const containerTop = container.getBoundingClientRect().top;
+      let closest = sectionOrder[0];
+      let closestDist = Infinity;
+      for (const idx of sectionOrder) {
+        if (deletedSections.has(idx)) continue;
+        const el = document.getElementById(`section-${idx}`);
+        if (!el) continue;
+        const dist = Math.abs(el.getBoundingClientRect().top - containerTop - 100);
+        if (dist < closestDist) { closestDist = dist; closest = idx; }
+      }
+      setActiveSection(closest);
+    };
+    container.addEventListener('scroll', handler, { passive: true });
+    return () => container.removeEventListener('scroll', handler);
+  }, [sectionOrder, deletedSections]);
+
+  // Drag-and-drop section reorder handlers
+  const handleDragStart = (orderIdx: number) => setDragIdx(orderIdx);
+  const handleDragOver = (e: React.DragEvent, overIdx: number) => {
+    e.preventDefault();
+    if (dragIdx === null || dragIdx === overIdx) return;
+    setSectionOrder(prev => {
+      const next = [...prev];
+      const [moved] = next.splice(dragIdx, 1);
+      next.splice(overIdx, 0, moved);
+      return next;
+    });
+    setDragIdx(overIdx);
+  };
+  const handleDragEnd = () => setDragIdx(null);
+  const isReordered = JSON.stringify(sectionOrder) !== JSON.stringify(DEFAULT_SECTION_ORDER);
+  const resetOrder = () => setSectionOrder([...DEFAULT_SECTION_ORDER]);
+
   const saveProposalTeam = useCallback(async (team: any[]) => {
     if (!proposal) return;
     await supabase.from('proposals').update({ team } as any).eq('id', proposal.id);
