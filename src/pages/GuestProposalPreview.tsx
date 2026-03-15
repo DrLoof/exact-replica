@@ -943,6 +943,17 @@ export default function GuestProposalPreview() {
                                 setGuestTeamMembers(next);
                                 saveGuestTeam(next);
                               }}
+                              onPhotoUpload={(file) => {
+                                const reader = new FileReader();
+                                reader.onload = (e) => {
+                                  const dataUrl = e.target?.result as string;
+                                  const next = guestTeamMembers.map((m: any, idx2: number) => idx2 === i ? { ...m, photo_url: dataUrl } : m);
+                                  setGuestTeamMembers(next);
+                                  saveGuestTeam(next);
+                                  toast.success('Photo updated');
+                                };
+                                reader.readAsDataURL(file);
+                              }}
                             />
                           ))}
                         </div>

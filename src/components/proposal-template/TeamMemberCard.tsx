@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { motion } from "motion/react";
-import { X } from "lucide-react";
+import { X, Camera } from "lucide-react";
 import { useTemplate } from "./TemplateProvider";
 
 interface TeamMemberCardProps {
@@ -13,6 +13,7 @@ interface TeamMemberCardProps {
   onRemove?: () => void;
   onNameEdit?: (value: string) => void;
   onTitleEdit?: (value: string) => void;
+  onPhotoUpload?: (file: File) => void;
 }
 
 function getInitials(name: string) {
@@ -50,7 +51,7 @@ function InlineEditable({ value, onSave, style, className }: { value: string; on
   );
 }
 
-export function TeamMemberCard({ name, title, photoUrl, bio, roleOnProject, delay = 0, onRemove, onNameEdit, onTitleEdit }: TeamMemberCardProps) {
+export function TeamMemberCard({ name, title, photoUrl, bio, roleOnProject, delay = 0, onRemove, onNameEdit, onTitleEdit, onPhotoUpload }: TeamMemberCardProps) {
   const template = useTemplate();
   const accent = template.colors.primaryAccent;
   const dark = template.colors.primaryDark;
@@ -58,11 +59,21 @@ export function TeamMemberCard({ name, title, photoUrl, bio, roleOnProject, dela
   const isElegant = template.id === 'elegant';
   const isSoft = template.id === 'soft';
   const [hovered, setHovered] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const initials = getInitials(name);
 
-  const Avatar = () => (
-    photoUrl ? (
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onPhotoUpload) {
+      onPhotoUpload(file);
+    }
+    e.target.value = '';
+  };
+
+  const Avatar = () => {
+    const isClickable = !!onPhotoUpload;
+    const content = photoUrl ? (
       <img src={photoUrl} alt={name} className="h-16 w-16 rounded-full object-cover" />
     ) : (
       <div className="h-16 w-16 rounded-full flex items-center justify-center text-white font-semibold"
@@ -72,8 +83,23 @@ export function TeamMemberCard({ name, title, photoUrl, bio, roleOnProject, dela
         }}>
         {initials}
       </div>
-    )
-  );
+    );
+
+    if (!isClickable) return content;
+
+    return (
+      <div
+        className="relative cursor-pointer group"
+        onClick={() => fileInputRef.current?.click()}
+        title="Click to upload photo"
+      >
+        {content}
+        <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <Camera className="h-5 w-5 text-white" />
+        </div>
+      </div>
+    );
+  };
 
   const RemoveButton = () => onRemove ? (
     <button
@@ -84,8 +110,9 @@ export function TeamMemberCard({ name, title, photoUrl, bio, roleOnProject, dela
     </button>
   ) : null;
 
-  const nameStyle = (base: React.CSSProperties) => base;
-  const titleStyle = (base: React.CSSProperties) => base;
+  const HiddenInput = () => onPhotoUpload ? (
+    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+  ) : null;
 
   if (isSoft) {
     return (
@@ -98,6 +125,7 @@ export function TeamMemberCard({ name, title, photoUrl, bio, roleOnProject, dela
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
+        <HiddenInput />
         <RemoveButton />
         <Avatar />
         <InlineEditable value={name} onSave={onNameEdit} style={{ fontSize: '14px', fontWeight: 600, color: dark, marginTop: '12px', display: 'block' }} />
@@ -123,6 +151,7 @@ export function TeamMemberCard({ name, title, photoUrl, bio, roleOnProject, dela
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
+        <HiddenInput />
         <RemoveButton />
         <Avatar />
         <InlineEditable value={name} onSave={onNameEdit} style={{ fontFamily: "'Fraunces', serif", fontSize: '14px', fontWeight: 500, color: dark, marginTop: '12px', display: 'block' }} />
@@ -153,6 +182,7 @@ export function TeamMemberCard({ name, title, photoUrl, bio, roleOnProject, dela
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
+        <HiddenInput />
         <RemoveButton />
         <Avatar />
         <InlineEditable value={name} onSave={onNameEdit} style={{ fontFamily: "'Fraunces', serif", fontSize: '14px', fontWeight: 700, color: dark, marginTop: '12px', display: 'block' }} />
@@ -178,6 +208,7 @@ export function TeamMemberCard({ name, title, photoUrl, bio, roleOnProject, dela
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
+      <HiddenInput />
       <RemoveButton />
       <Avatar />
       <InlineEditable value={name} onSave={onNameEdit} style={{ fontSize: '14px', fontWeight: 700, color: dark, marginTop: '12px', display: 'block' }} />

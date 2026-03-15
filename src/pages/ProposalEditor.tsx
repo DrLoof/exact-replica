@@ -1427,6 +1427,24 @@ export default function ProposalEditor() {
                                   await supabase.from('agencies').update({ team_members: updatedAgencyTeam as any }).eq('id', agency.id);
                                 }
                               }}
+                              onPhotoUpload={async (file) => {
+                                if (!agency?.id) return;
+                                const ext = file.name.split('.').pop() || 'jpg';
+                                const path = `${agency.id}/team/${member.member_id}.${ext}`;
+                                const { error } = await supabase.storage.from('agency-logos').upload(path, file, { upsert: true });
+                                if (error) { toast.error('Upload failed'); return; }
+                                const { data: urlData } = supabase.storage.from('agency-logos').getPublicUrl(path);
+                                const photoUrl = urlData.publicUrl + '?t=' + Date.now();
+                                // Update proposal team
+                                const next = proposalTeam.map((m: any) => m.member_id === member.member_id ? { ...m, photo_url: photoUrl } : m);
+                                setProposalTeam(next);
+                                saveProposalTeam(next);
+                                // Sync to agency team
+                                const updatedAgencyTeam = teamMembers.map((m: any) => m.id === member.member_id ? { ...m, photo_url: photoUrl } : m);
+                                setTeamMembers(updatedAgencyTeam);
+                                await supabase.from('agencies').update({ team_members: updatedAgencyTeam as any }).eq('id', agency.id);
+                                toast.success('Photo updated');
+                              }}
                             />
                           ))}
                         </div>
