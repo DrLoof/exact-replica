@@ -673,6 +673,11 @@ serve(async (req) => {
             || text.toLowerCase().includes('meet our');
           
           if (isCasePage) {
+            // Track the first successfully fetched portfolio/work page
+            if (!detectedPortfolioUrl) {
+              detectedPortfolioUrl = urlObj.origin + path;
+              console.log(`Portfolio page detected: ${detectedPortfolioUrl}`);
+            }
             const subLinks = [...text.matchAll(/<a[^>]*href=["']([^"'#]+)["'][^>]*>/gi)]
               .map(m => {
                 try { return new URL(m[1], urlObj.origin).pathname; } catch { return null; }
