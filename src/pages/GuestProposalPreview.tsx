@@ -955,7 +955,10 @@ export default function GuestProposalPreview() {
                     </div>
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                       {differentiators.map((d: any, i: number) => (
-                        <WhyUsCard key={i} title={d.title} description={d.description || ''} statValue={d.stat_value} statLabel={d.stat_label} icon={d.icon} delay={i * 0.1} />
+                        <WhyUsCard key={i} title={d.title} description={d.description || ''} statValue={d.stat_value} statLabel={d.stat_label} icon={d.icon} delay={i * 0.1}
+                          onTitleEdit={(val) => setLocalDifferentiators(prev => prev.map((x, j) => j === i ? { ...x, title: val } : x))}
+                          onDescriptionEdit={(val) => setLocalDifferentiators(prev => prev.map((x, j) => j === i ? { ...x, description: val } : x))}
+                        />
                       ))}
                     </div>
                     {/* Team Members Block */}
