@@ -769,6 +769,13 @@ export function ReviewScreen({
           <Plus className="h-3.5 w-3.5" /> Add testimonial
         </button>
       </section>
+      {/* Section: Portfolio (collapsible) */}
+      <PortfolioSection
+        portfolioItems={portfolioItems}
+        onPortfolioItemsChange={onPortfolioItemsChange}
+        detectedPortfolioUrl={detectedPortfolioUrl}
+        serviceGroups={serviceGroups}
+      />
 
       {/* Section: Why Choose You */}
       <section className="mt-4 rounded-2xl border border-border bg-card p-6">
