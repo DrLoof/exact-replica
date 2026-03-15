@@ -255,7 +255,7 @@ export default function ProposalEditor() {
             price_override: removedService.price_override,
             custom_deliverables: removedService.custom_deliverables,
             bundle_id: removedService.bundle_id,
-          }).select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, icon)').single();
+          }).select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, client_responsibilities, out_of_scope, icon)').single();
           if (restored) {
             const mapped = { ...restored, module: restored.service_modules };
             setServices(prev => [...prev, mapped].sort((a, b) => (a.display_order || 0) - (b.display_order || 0)));
