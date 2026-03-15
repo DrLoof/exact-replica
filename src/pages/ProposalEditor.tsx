@@ -280,7 +280,7 @@ export default function ProposalEditor() {
       module_id: mod.id,
       display_order: services.length,
       is_addon: mod.service_type === 'addon',
-    }).select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, icon)').single();
+    }).select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, client_responsibilities, out_of_scope, icon)').single();
     if (error) { toast.error('Failed to add service'); return; }
     const mapped = { ...newSvc, module: newSvc.service_modules };
     const updated = [...services, mapped];

@@ -67,7 +67,7 @@ export default function PublicProposal() {
     const [agencyRes, clientRes, svcRes, diffRes, testRes, termsRes, phasesRes, ptRes] = await Promise.all([
       prop.agency_id ? supabase.from('agencies').select('*').eq('id', prop.agency_id).single() : { data: null },
       prop.client_id ? supabase.from('clients').select('*').eq('id', prop.client_id).single() : { data: null },
-      supabase.from('proposal_services').select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, icon, service_type)').eq('proposal_id', prop.id).order('display_order'),
+      supabase.from('proposal_services').select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, client_responsibilities, out_of_scope, icon, service_type)').eq('proposal_id', prop.id).order('display_order'),
       prop.agency_id ? supabase.from('differentiators').select('*').eq('agency_id', prop.agency_id).order('display_order') : { data: [] },
       prop.agency_id ? supabase.from('testimonials').select('*').eq('agency_id', prop.agency_id).order('created_at', { ascending: false }) : { data: [] },
       prop.agency_id ? supabase.from('terms_clauses').select('*').eq('agency_id', prop.agency_id).order('display_order') : { data: [] },
