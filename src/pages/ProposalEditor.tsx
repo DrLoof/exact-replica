@@ -1245,6 +1245,22 @@ export default function ProposalEditor() {
                               await supabase.from('testimonials').update({ client_name: val }).eq('id', t.id);
                               setTestimonials(prev => prev.map(x => x.id === t.id ? { ...x, client_name: val } : x));
                             }}
+                            onTitleEdit={async (val) => {
+                              await supabase.from('testimonials').update({ client_title: val }).eq('id', t.id);
+                              setTestimonials(prev => prev.map(x => x.id === t.id ? { ...x, client_title: val } : x));
+                            }}
+                            onCompanyEdit={async (val) => {
+                              await supabase.from('testimonials').update({ client_company: val }).eq('id', t.id);
+                              setTestimonials(prev => prev.map(x => x.id === t.id ? { ...x, client_company: val } : x));
+                            }}
+                            onMetricValueEdit={async (val) => {
+                              await supabase.from('testimonials').update({ metric_value: val }).eq('id', t.id);
+                              setTestimonials(prev => prev.map(x => x.id === t.id ? { ...x, metric_value: val } : x));
+                            }}
+                            onMetricLabelEdit={async (val) => {
+                              await supabase.from('testimonials').update({ metric_label: val }).eq('id', t.id);
+                              setTestimonials(prev => prev.map(x => x.id === t.id ? { ...x, metric_label: val } : x));
+                            }}
                           />
                         ))}
                       </div>
