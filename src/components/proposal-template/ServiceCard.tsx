@@ -139,6 +139,44 @@ export function ServiceCard({
     )
   );
 
+  const renderListAddButton = (
+    isAdding: boolean,
+    setIsAdding: (v: boolean) => void,
+    inputValue: string,
+    setInputValue: (v: string) => void,
+    onAdd: (items: string[]) => void,
+    currentItems: string[],
+    label: string,
+  ) => (
+    <div className="mt-2 print:hidden">
+      {isAdding ? (
+        <div className="flex items-center gap-2">
+          <input
+            type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && inputValue.trim()) { onAdd([...currentItems, inputValue.trim()]); setInputValue(""); setIsAdding(false); }
+              if (e.key === 'Escape') { setIsAdding(false); setInputValue(''); }
+            }}
+            placeholder={`Add ${label.toLowerCase()}...`} autoFocus
+            className="flex-1 border border-[#E0E0E0] rounded-lg px-3 py-1.5 text-[#555] outline-none focus:border-[#BBB]"
+            style={{ fontSize: "12px" }}
+          />
+          <button onClick={() => { if (inputValue.trim()) { onAdd([...currentItems, inputValue.trim()]); setInputValue(""); setIsAdding(false); } }} className="text-[#888] hover:text-[#555] text-xs font-medium">Add</button>
+          <button onClick={() => { setIsAdding(false); setInputValue(''); }} className="text-[#CCC] hover:text-[#888]">
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ) : (
+        <button onClick={() => setIsAdding(true)} className="flex items-center gap-1.5 text-[#CCC] hover:text-[#888] transition-colors" style={{ fontSize: "11px" }}>
+          <Plus className="h-3 w-3" /> Add {label.toLowerCase()}
+        </button>
+      )}
+    </div>
+  );
+
+  const renderResponsibilitiesEdit = () => editableResp && renderListAddButton(addingResp, setAddingResp, newResp, setNewResp, onClientResponsibilitiesEdit!, clientResponsibilities || [], "responsibility");
+  const renderOutOfScopeEdit = () => editableOos && renderListAddButton(addingOos, setAddingOos, newOos, setNewOos, onOutOfScopeEdit!, outOfScope || [], "out of scope item");
+
   // ── Soft template ──
   if (isSoft) {
     const border = template.colors.border;
