@@ -168,6 +168,7 @@ export default function GuestProposalPreview() {
   const currencySymbol = guestProposal.currencySymbol || '$';
   const differentiators = guestOnboarding?.differentiators || [];
   const testimonials = (guestOnboarding?.testimonials || []).filter((t: any) => t.approved);
+  const guestTeamMembers = (guestOnboarding?.teamMembers || []).filter((m: any) => m.name);
   const clientName = guestProposal.clientName || 'Client';
   const agencyName = identity.name || 'Your Agency';
   const brandColor = identity.brand_color || '#E8825C';
@@ -898,6 +899,25 @@ export default function GuestProposalPreview() {
                         <WhyUsCard key={i} title={d.title} description={d.description || ''} statValue={d.stat_value} statLabel={d.stat_label} icon={d.icon} delay={i * 0.1} />
                       ))}
                     </div>
+                    {/* Team Members Block */}
+                    {guestTeamMembers.length > 0 && (
+                      <div className="mt-12">
+                        <p className="mb-6 text-center" style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#999' }}>
+                          The Team Behind Your Project
+                        </p>
+                        <div className={`grid gap-6 justify-center ${guestTeamMembers.length <= 2 ? 'grid-cols-2 max-w-md mx-auto' : guestTeamMembers.length === 3 ? 'grid-cols-3 max-w-lg mx-auto' : 'grid-cols-2 sm:grid-cols-4'}`}>
+                          {guestTeamMembers.slice(0, 4).map((member: any, i: number) => (
+                            <TeamMemberCard
+                              key={member.id || i}
+                              name={member.name}
+                              title={member.title}
+                              photoUrl={member.photo_url}
+                              delay={i * 0.1}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </PageWrapper>
                   <PreviewWatermark />
                 </div>
