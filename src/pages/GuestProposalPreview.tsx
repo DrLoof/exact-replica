@@ -696,7 +696,7 @@ export default function GuestProposalPreview() {
                   }}
                   className={cn(
                     'flex-1 flex items-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors text-left',
-                    activeSection === idx ? 'bg-accent font-medium text-accent-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                    activeSection === idx ? 'bg-ink font-medium text-white' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
                   )}
                 >
                   {name}
