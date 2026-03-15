@@ -701,8 +701,8 @@ export default function GuestProposalPreview() {
                     isActive && !isHidden ? '' : 'hover:bg-[#F4F0EA]',
                   )}
                   style={isActive && !isHidden ? {
-                    backgroundColor: '#FAF5EF',
-                    borderLeft: '3px solid #E8825C',
+                    backgroundColor: 'hsl(24 28% 13% / 0.08)',
+                    borderLeft: '3px solid hsl(24 28% 13%)',
                     paddingLeft: '9px',
                   } : {
                     borderLeft: '3px solid transparent',
