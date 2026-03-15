@@ -53,6 +53,10 @@ export function ReviewScreen({
   onAddBundle,
   teamMembers,
   onTeamMembersChange,
+  portfolioItems,
+  onPortfolioItemsChange,
+  detectedPortfolioUrl,
+  serviceGroups,
 }: ReviewScreenProps) {
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [showAllServices, setShowAllServices] = useState(false);
