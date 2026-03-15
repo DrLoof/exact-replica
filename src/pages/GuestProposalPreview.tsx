@@ -885,8 +885,8 @@ export default function GuestProposalPreview() {
                             pricingModel={(svc.pricing_model || 'fixed') as any}
                             description={svc.description || svc.short_description || ''}
                             deliverables={svc.deliverables || []}
-                            clientResponsibilities={svc.client_responsibilities || []}
-                            outOfScope={svc.out_of_scope || []}
+                            clientResponsibilities={showClientResponsibilities ? (svc.client_responsibilities || []) : []}
+                            outOfScope={showOutOfScope ? (svc.out_of_scope || []) : []}
                             isAddon={svc.service_type === 'addon'}
                             delay={i * 0.1}
                             onDeliverablesEdit={(dels) => handleServiceEdit(i, 'deliverables', dels)}
