@@ -70,6 +70,7 @@ export function ServiceCard({
   clientResponsibilities, outOfScope,
   isAddon = false, delay = 0,
   onNameEdit, onDescriptionEdit, onDeliverablesEdit,
+  onClientResponsibilitiesEdit, onOutOfScopeEdit,
 }: ServiceCardProps) {
   const brand = useBrand();
   const template = useTemplate();
@@ -82,7 +83,13 @@ export function ServiceCard({
   const suffix = pricingModel ? MODEL_LABELS[pricingModel] || "" : "";
   const [newItem, setNewItem] = useState("");
   const [adding, setAdding] = useState(false);
+  const [addingResp, setAddingResp] = useState(false);
+  const [newResp, setNewResp] = useState("");
+  const [addingOos, setAddingOos] = useState(false);
+  const [newOos, setNewOos] = useState("");
   const editable = !!onDeliverablesEdit;
+  const editableResp = !!onClientResponsibilitiesEdit;
+  const editableOos = !!onOutOfScopeEdit;
 
   const hasResponsibilities = clientResponsibilities && clientResponsibilities.length > 0;
   const hasOutOfScope = outOfScope && outOfScope.length > 0;
