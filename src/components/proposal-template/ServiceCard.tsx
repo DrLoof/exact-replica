@@ -86,6 +86,7 @@ function CollapsibleList({
 export function ServiceCard({
   icon, name, price, pricingModel, description, deliverables,
   clientResponsibilities, outOfScope,
+  moduleDefaultResponsibilities, moduleDefaultOutOfScope,
   isAddon = false, delay = 0,
   onNameEdit, onDescriptionEdit, onDeliverablesEdit,
   onClientResponsibilitiesEdit, onOutOfScopeEdit,
