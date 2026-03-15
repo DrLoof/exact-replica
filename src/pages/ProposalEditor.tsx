@@ -126,12 +126,14 @@ export default function ProposalEditor() {
   const [addServiceSearch, setAddServiceSearch] = useState('');
   const [availableModules, setAvailableModules] = useState<any[]>([]);
   const [regenerating, setRegenerating] = useState(false);
+  const [regeneratingTimeline, setRegeneratingTimeline] = useState(false);
   const [templateId, setTemplateId] = useState<string>('classic');
   const [customColors, setCustomColors] = useState<Record<string, string> | null>(null);
   const [colorPickerOpen, setColorPickerOpen] = useState<string | null>(null);
   const [hexInput, setHexInput] = useState('');
   const colorPickerRef = useRef<HTMLDivElement>(null);
   const currencySymbol = agency?.currency_symbol || '$';
+  const undoRef = useRef<{ field: string; value: any } | null>(null);
 
   // Warn user before leaving if an editable field is focused (unsaved inline edit)
   useBeforeUnload(
@@ -308,9 +310,30 @@ export default function ProposalEditor() {
 
   const updateField = async (field: string, value: any) => {
     if (!proposal) return;
+    // Store undo state
+    undoRef.current = { field, value: (proposal as any)[field] };
     await supabase.from('proposals').update({ [field]: value }).eq('id', proposal.id);
     setProposal(prev => prev ? { ...prev, [field]: value } : prev);
   };
+
+  // Undo last change with Ctrl+Z / Cmd+Z
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
+        const active = document.activeElement;
+        if (active && active.getAttribute('contenteditable') === 'true') return; // let browser handle it
+        if (undoRef.current && proposal) {
+          e.preventDefault();
+          const { field, value } = undoRef.current;
+          undoRef.current = null;
+          updateField(field, value);
+          toast.success('Change undone');
+        }
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [proposal]);
 
   // Save team selection when it changes
   const saveProposalTeam = useCallback(async (team: any[]) => {
@@ -387,7 +410,7 @@ export default function ProposalEditor() {
       next.add(idx);
       return next;
     });
-    toast.success(`${sectionNames[idx]} page removed`, {
+    toast.success(`${sectionNames[idx]} hidden`, {
       action: { label: 'Undo', onClick: () => restoreSection(idx) },
     });
   };
@@ -398,6 +421,7 @@ export default function ProposalEditor() {
       next.delete(idx);
       return next;
     });
+    toast.success(`${sectionNames[idx]} restored`);
   };
 
   const switchTemplate = async (newId: string) => {
@@ -649,34 +673,50 @@ export default function ProposalEditor() {
           </div>
 
           {/* Section navigation */}
-          {sectionNames.map((name, idx) => (
-            !deletedSections.has(idx) && (
+          {sectionNames.map((name, idx) => {
+            const isLocked = idx === 0 || idx === 2 || idx === 4; // Cover, Scope, Investment
+            const isHidden = deletedSections.has(idx);
+            return (
               <div
                 key={idx}
                 className="group/nav flex items-center gap-1"
               >
                 <button
                   onClick={() => {
-                    setActiveSection(idx);
-                    document.getElementById(`section-${idx}`)?.scrollIntoView({ behavior: 'smooth' });
+                    if (!isHidden) {
+                      setActiveSection(idx);
+                      document.getElementById(`section-${idx}`)?.scrollIntoView({ behavior: 'smooth' });
+                    }
                   }}
                   className={cn(
                     'flex-1 flex items-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors text-left',
+                    isHidden ? 'text-muted-foreground/40' :
                     activeSection === idx ? 'bg-accent font-medium text-accent-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
                   )}
                 >
                   {name}
                 </button>
-                <button
-                  onClick={() => deleteSection(idx)}
-                  className="opacity-0 group-hover/nav:opacity-100 p-1 rounded text-muted-foreground hover:text-destructive transition-all"
-                  title={`Remove ${name}`}
-                >
-                  <X className="h-3 w-3" />
-                </button>
+                {isLocked ? (
+                  <span className="p-1 text-muted-foreground/30" title="Required section">
+                    <Lock className="h-3 w-3" />
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => isHidden ? restoreSection(idx) : deleteSection(idx)}
+                    className={cn(
+                      'p-1 rounded transition-all',
+                      isHidden
+                        ? 'text-muted-foreground/40 hover:text-foreground'
+                        : 'opacity-0 group-hover/nav:opacity-100 text-muted-foreground hover:text-foreground'
+                    )}
+                    title={isHidden ? `Show ${name}` : `Hide ${name}`}
+                  >
+                    {isHidden ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                  </button>
+                )}
               </div>
-            )
-          ))}
+            );
+          })}
 
           {/* Scope display toggles */}
           <div className="mt-3 pt-3 border-t border-border">
@@ -701,34 +741,7 @@ export default function ProposalEditor() {
             </label>
           </div>
 
-          {/* Add page button */}
-          {deletedSections.size > 0 && (
-            <div className="relative mt-2">
-              <button
-                onClick={() => setShowAddPage(!showAddPage)}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 w-full text-left transition-colors"
-              >
-                <Plus className="h-3 w-3" />
-                Add page
-              </button>
-              {showAddPage && (
-                <div className="absolute left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-30 py-1">
-                  {sectionNames.map((name, idx) => (
-                    deletedSections.has(idx) && (
-                      <button
-                        key={idx}
-                        onClick={() => { restoreSection(idx); setShowAddPage(false); }}
-                        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-left text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-                      >
-                        <Plus className="h-3 w-3" />
-                        {name}
-                      </button>
-                    )
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          {/* Add page button removed — eye toggles handle show/hide inline */}
         </div>
 
         {/* Proposal Content — rendered with template components */}
@@ -963,6 +976,54 @@ export default function ProposalEditor() {
                             }}
                           />
                         ))}
+                        {/* Add/Remove phase controls */}
+                        <div className="flex items-center gap-3 mt-4 print:hidden">
+                          <button
+                            onClick={() => {
+                              const phases = [...(proposal.phases as any[]), { name: `Phase ${(proposal.phases as any[]).length + 1}`, duration: '2 weeks', description: '' }];
+                              updateField('phases', phases);
+                            }}
+                            className="flex items-center gap-1.5 rounded-lg border border-dashed border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+                          >
+                            <Plus className="h-3 w-3" /> Add Phase
+                          </button>
+                          {(proposal.phases as any[]).length > 1 && (
+                            <button
+                              onClick={() => {
+                                const phases = [...(proposal.phases as any[])];
+                                phases.pop();
+                                updateField('phases', phases);
+                              }}
+                              className="flex items-center gap-1.5 rounded-lg border border-dashed border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-colors"
+                            >
+                              <X className="h-3 w-3" /> Remove Last
+                            </button>
+                          )}
+                          <button
+                            onClick={async () => {
+                              if (!confirm('Regenerate timeline? Your current edits will be replaced with a new AI-generated version.')) return;
+                              setRegeneratingTimeline(true);
+                              try {
+                                const serviceNames = services.map(s => ({ name: s.module?.name || 'Service' }));
+                                const durationMatch = (proposal.estimated_duration || '16 weeks').match(/(\d+)/);
+                                const totalWeeks = durationMatch ? parseInt(durationMatch[1]) : 16;
+                                const { data } = await supabase.functions.invoke('generate-timeline', {
+                                  body: { services: serviceNames, clientName: client?.company_name || 'Client', totalWeeks },
+                                });
+                                if (data?.phases) {
+                                  await updateField('phases', data.phases);
+                                  toast.success('Timeline regenerated!');
+                                }
+                              } catch { toast.error('Failed to regenerate timeline'); }
+                              setRegeneratingTimeline(false);
+                            }}
+                            disabled={regeneratingTimeline}
+                            className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors disabled:opacity-50 ml-auto"
+                          >
+                            {regeneratingTimeline ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCcw className="h-3 w-3" />}
+                            {regeneratingTimeline ? 'Regenerating...' : 'Regenerate'}
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       <div className="mt-10 text-center py-12">
@@ -1183,6 +1244,22 @@ export default function ProposalEditor() {
                             onNameEdit={async (val) => {
                               await supabase.from('testimonials').update({ client_name: val }).eq('id', t.id);
                               setTestimonials(prev => prev.map(x => x.id === t.id ? { ...x, client_name: val } : x));
+                            }}
+                            onTitleEdit={async (val) => {
+                              await supabase.from('testimonials').update({ client_title: val }).eq('id', t.id);
+                              setTestimonials(prev => prev.map(x => x.id === t.id ? { ...x, client_title: val } : x));
+                            }}
+                            onCompanyEdit={async (val) => {
+                              await supabase.from('testimonials').update({ client_company: val }).eq('id', t.id);
+                              setTestimonials(prev => prev.map(x => x.id === t.id ? { ...x, client_company: val } : x));
+                            }}
+                            onMetricValueEdit={async (val) => {
+                              await supabase.from('testimonials').update({ metric_value: val }).eq('id', t.id);
+                              setTestimonials(prev => prev.map(x => x.id === t.id ? { ...x, metric_value: val } : x));
+                            }}
+                            onMetricLabelEdit={async (val) => {
+                              await supabase.from('testimonials').update({ metric_label: val }).eq('id', t.id);
+                              setTestimonials(prev => prev.map(x => x.id === t.id ? { ...x, metric_label: val } : x));
                             }}
                           />
                         ))}
