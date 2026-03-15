@@ -720,7 +720,7 @@ export default function GuestProposalPreview() {
 
                   {/* Lock or eye toggle */}
                   {isLocked ? (
-                    <span style={{ color: '#D5CFC7' }}><Lock className="h-3 w-3" /></span>
+                    <span style={{ color: isActive && !isHidden ? '#FFFFFF80' : '#D5CFC7' }}><Lock className="h-3 w-3" /></span>
                   ) : (
                     <button
                       onClick={(e) => {
