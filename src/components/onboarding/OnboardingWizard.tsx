@@ -8,6 +8,7 @@ import { getDefaultModulesForGroup } from '@/lib/defaultModules';
 import { defaultBundles, findDefaultModule, calculateBundlePricing } from '@/lib/defaultBundles';
 import { ScanScreen } from './ScanScreen';
 import { ReviewScreen } from './ReviewScreen';
+import { PortfolioStep } from './PortfolioStep';
 import { SignupGate } from './SignupGate';
 
 /** Deduplicate testimonials by comparing normalized first 50 chars of quote text */
@@ -29,7 +30,7 @@ function deduplicateTestimonials(testimonials: any[]): any[] {
 export function OnboardingWizard() {
   const navigate = useNavigate();
   const { agency, userProfile, user } = useAuth();
-  const [screen, setScreen] = useState<'scan' | 'review'>('scan');
+  const [screen, setScreen] = useState<'scan' | 'review' | 'portfolio'>('scan');
   const [saving, setSaving] = useState(false);
   const [scrapeData, setScrapeData] = useState<any>(null);
   const [showSignupGate, setShowSignupGate] = useState(false);
@@ -49,6 +50,8 @@ export function OnboardingWizard() {
   const [groupNameMap, setGroupNameMap] = useState<Record<string, string>>({});
   // Selected bundles
   const [addedBundles, setAddedBundles] = useState<Set<string>>(new Set());
+  // Portfolio items from onboarding step
+  const [portfolioItemsOnboarding, setPortfolioItemsOnboarding] = useState<any[]>([]);
 
   // Load service groups
   useEffect(() => {
@@ -163,9 +166,23 @@ export function OnboardingWizard() {
     setScreen('review');
   };
 
-  const handleFinishAttempt = () => {
+  const handleReviewComplete = () => {
+    // Move to portfolio step instead of finishing
+    setScreen('portfolio');
+  };
+
+  const handlePortfolioContinue = (items: any[]) => {
+    setPortfolioItemsOnboarding(items);
+    handleFinalFinish();
+  };
+
+  const handlePortfolioSkip = () => {
+    setPortfolioItemsOnboarding([]);
+    handleFinalFinish();
+  };
+
+  const handleFinalFinish = () => {
     if (!user) {
-      // Guest: save all onboarding data to localStorage so ProposalNew can use it
       const guestData = {
         agencyIdentity,
         selectedModuleKeys: [...selectedModuleKeys],
@@ -400,6 +417,22 @@ export function OnboardingWizard() {
         }
       }
 
+      // 9. Save portfolio items from onboarding
+      if (portfolioItemsOnboarding.length > 0) {
+        const portfolioToInsert = portfolioItemsOnboarding.map((item: any, i: number) => ({
+          agency_id: targetAgency.id,
+          title: item.title,
+          category: item.category,
+          description: item.description || null,
+          results: item.results || null,
+          images: item.images || [],
+          sort_order: i,
+          is_active: true,
+          source_url: null,
+        }));
+        await supabase.from('portfolio_items').insert(portfolioToInsert as any);
+      }
+
       toast.success('Your agency is set up! Create your first proposal.');
       navigate('/proposals/new');
       window.location.href = '/proposals/new';
@@ -459,13 +492,22 @@ export function OnboardingWizard() {
             diffIntro={diffIntro}
             onDiffIntroChange={setDiffIntro}
             groupNameMap={groupNameMap}
-            onFinish={handleFinishAttempt}
+            onFinish={handleReviewComplete}
             onBack={() => setScreen('scan')}
             saving={saving}
             addedBundles={addedBundles}
             onAddBundle={(name) => setAddedBundles(prev => new Set([...prev, name]))}
             teamMembers={teamMembers}
             onTeamMembersChange={setTeamMembers}
+          />
+        )}
+        {screen === 'portfolio' && (
+          <PortfolioStep
+            onContinue={handlePortfolioContinue}
+            onSkip={handlePortfolioSkip}
+            serviceGroups={Object.values(groupNameMap)}
+            detectedPortfolioUrl={scrapeData?.portfolio_url || null}
+            saving={saving}
           />
         )}
       </div>
