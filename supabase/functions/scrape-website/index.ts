@@ -433,6 +433,68 @@ serve(async (req) => {
     const detectedLogo = extractLogo(homepageHtml, targetUrl);
     if (detectedLogo) result.logo_url = detectedLogo;
 
+    // Logo fallback: probe common logo URLs directly if none found
+    if (!result.logo_url) {
+      const logoProbeUrls = [
+        '/favicon.svg',
+        '/logo.svg',
+        '/images/logo.svg',
+        '/img/logo.svg',
+        '/assets/logo.svg',
+        '/images/logo.png',
+        '/img/logo.png',
+        '/assets/logo.png',
+      ];
+      for (const probePath of logoProbeUrls) {
+        try {
+          const probeUrl = urlObj.origin + probePath;
+          const probeResp = await fetch(probeUrl, {
+            method: 'HEAD',
+            headers: fetchHeaders,
+            signal: AbortSignal.timeout(3000),
+          });
+          if (probeResp.ok) {
+            const ct = probeResp.headers.get('content-type') || '';
+            if (ct.includes('svg') || ct.includes('image')) {
+              result.logo_url = probeUrl;
+              console.log(`Logo found via URL probe: ${probeUrl}`);
+              break;
+            }
+          }
+        } catch (_) {}
+      }
+    }
+
+    // Logo fallback: extract from <link> icon/apple-touch-icon tags
+    if (!result.logo_url) {
+      const iconLinks = [...homepageHtml.matchAll(/<link[^>]*rel=["'](?:icon|apple-touch-icon|shortcut\s+icon)["'][^>]*href=["']([^"']+)["'][^>]*/gi)];
+      let bestIcon: string | null = null;
+      let bestIconSize = 0;
+      for (const m of iconLinks) {
+        const href = resolveUrl(m[1]);
+        if (href.match(/\.svg(\?|$)/i)) {
+          bestIcon = href;
+          break; // SVG favicon is great
+        }
+        const sizeMatch = m[0].match(/sizes=["'](\d+)/i);
+        const size = sizeMatch ? parseInt(sizeMatch[1]) : 0;
+        if (size > bestIconSize || (!bestIcon && href)) {
+          bestIcon = href;
+          bestIconSize = size;
+        }
+      }
+      if (bestIcon) {
+        result.logo_url = bestIcon;
+        console.log(`Logo found via link icon: ${bestIcon}`);
+      }
+    }
+
+    // Logo last resort: Google favicon service (returns high-quality site icons)
+    if (!result.logo_url) {
+      result.logo_url = `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=128`;
+      console.log(`Logo fallback to Google favicon API for ${urlObj.hostname}`);
+    }
+
     // Theme color & detected colors
     const themeColorMatch = homepageHtml.match(/<meta[^>]*name=["']theme-color["'][^>]*content=["']([^"']+)["']/i)
       || homepageHtml.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']theme-color["']/i);
