@@ -249,9 +249,11 @@ export default function ProposalEditor() {
       }
     }
 
-    // Sync portfolio visibility with deletedSections
+    // Sync portfolio visibility with deletedSections (Portfolio = index 6)
     if (!(propRes.data as any).portfolio_section_visible) {
-      setDeletedSections(prev => new Set([...prev, 7]));
+      setDeletedSections(prev => new Set([...prev, 6]));
+    } else {
+      setDeletedSections(prev => { const next = new Set(prev); next.delete(6); return next; });
     }
 
     setLoading(false);
