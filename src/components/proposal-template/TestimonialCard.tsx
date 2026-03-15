@@ -396,17 +396,13 @@ export function TestimonialCard({
           )}
           <div>
             <span className="block text-white" style={{ fontSize: "15px", fontWeight: 600 }}>{onNameEdit ? renderName() : clientName}</span>
-            {(clientTitle || clientCompany) && (
-              <span className="block text-white/50" style={{ fontSize: "13px", fontWeight: 400 }}>
-                {clientTitle}{clientTitle && clientCompany ? " · " : ""}{clientCompany}
-              </span>
-            )}
+            {renderTitleCompany({ fontSize: "13px", fontWeight: 400, color: "rgba(255,255,255,0.5)" })}
           </div>
-          {metricValue && (
-            <div className="ml-auto text-right">
-              <span className="block text-white" style={{ fontSize: "24px", fontWeight: 700 }}>{metricValue}</span>
-              {metricLabel && <span className="block text-white/50 uppercase tracking-[0.1em]" style={{ fontSize: "10px", fontWeight: 500 }}>{metricLabel}</span>}
-            </div>
+          {renderMetric(
+            { fontSize: "24px", fontWeight: 700, color: "white" },
+            { fontSize: "10px", fontWeight: 500, color: "rgba(255,255,255,0.5)", textTransform: "uppercase" as const, letterSpacing: "0.1em" },
+            {},
+            "ml-auto text-right"
           )}
         </div>
       </motion.div>
