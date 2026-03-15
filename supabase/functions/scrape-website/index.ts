@@ -225,28 +225,28 @@ function extractLogo(html: string, baseUrl: string): string | null {
   // Check all imgs in header area
   const headerImgs = [...headerHtml.matchAll(/<img[^>]*(?:src|data-src)=["']([^"']+)["'][^>]*/gi)];
   for (const m of headerImgs) {
-    // Also check for data-src
     const dataSrc = m[0].match(/data-src=["']([^"']+)["']/i);
     const src = m[0].match(/\bsrc=["']([^"']+)["']/i);
     const url = dataSrc?.[1] || src?.[1];
     if (!url || url.startsWith('data:')) continue;
     const resolved = resolveUrl(url);
-    const score = scoreLogo(resolved, 'header');
+    const score = scoreLogo(resolved, 'header', m[0]);
     if (score > bestScore) { bestScore = score; bestLogo = resolved; }
   }
 
   // Strategy 2: Elements with logo class/id containing images
   const logoContainerPatterns = [
-    /<(?:a|div|span|figure)[^>]*(?:class|id)=["'][^"']*\blogo\b[^"']*["'][^>]*>[\s\S]*?<img[^>]*(?:src|data-src)=["']([^"']+)["'][^>]*>/gi,
-    /<(?:a|div|span|figure)[^>]*(?:class|id)=["'][^"']*\bbrand\b[^"']*["'][^>]*>[\s\S]*?<img[^>]*(?:src|data-src)=["']([^"']+)["'][^>]*>/gi,
+    /<(?:a|div|span|figure)[^>]*(?:class|id)=["'][^"']*\blogo\b[^"']*["'][^>]*>[\s\S]*?(<img[^>]*(?:src|data-src)=["']([^"']+)["'][^>]*>)/gi,
+    /<(?:a|div|span|figure)[^>]*(?:class|id)=["'][^"']*\bbrand\b[^"']*["'][^>]*>[\s\S]*?(<img[^>]*(?:src|data-src)=["']([^"']+)["'][^>]*>)/gi,
   ];
   for (const pattern of logoContainerPatterns) {
     const matches = [...html.matchAll(pattern)];
     for (const m of matches) {
-      const url = m[1];
+      const imgTag = m[1];
+      const url = m[2];
       if (!url || url.startsWith('data:')) continue;
       const resolved = resolveUrl(url);
-      const score = scoreLogo(resolved, 'header') + 3; // bonus for being in a logo container
+      const score = scoreLogo(resolved, 'logo-container', imgTag);
       if (score > bestScore) { bestScore = score; bestLogo = resolved; }
     }
   }
