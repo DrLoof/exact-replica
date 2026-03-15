@@ -640,348 +640,370 @@ export default function ProposalEditor() {
       </div>
 
       <div className="flex">
-        {/* Section Nav */}
-        <div className="sticky top-[57px] hidden h-[calc(100vh-57px)] w-52 flex-col gap-1 overflow-y-auto border-r border-border bg-background p-3 lg:flex print:hidden">
-          {/* Template Picker */}
-          <div className="mb-3">
-            <span className="block px-2 mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Template</span>
-            <div className="flex gap-2">
-              {Object.values(templates).map((tmpl) => {
-                const isActive = templateId === tmpl.id;
-                const isLocked = tmpl.isPro;
-                return (
+        {/* Sidebar */}
+        <div className="sticky top-[57px] hidden h-[calc(100vh-57px)] w-[260px] flex-col border-r lg:flex print:hidden" style={{ backgroundColor: '#FAFAF7', fontFamily: "'DM Sans', sans-serif" }}>
+          {/* Scrollable area */}
+          <div className="flex-1 overflow-y-auto p-3">
+            {/* Back link */}
+            <button onClick={() => navigate('/proposals')} className="flex items-center gap-2 mb-4 px-2 text-[12px] text-muted-foreground hover:text-foreground transition-colors">
+              <ArrowLeft className="h-3.5 w-3.5" /> Back to proposals
+            </button>
+
+            {/* TEMPLATE zone */}
+            <div className="mb-3">
+              <span className="block px-2 mb-2 text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#B8B0A5' }}>Template</span>
+              <div className="flex gap-2">
+                {Object.values(templates).map((tmpl) => {
+                  const isActive = templateId === tmpl.id;
+                  const isLocked = tmpl.isPro;
+                  return (
+                    <button
+                      key={tmpl.id}
+                      onClick={() => switchTemplate(tmpl.id)}
+                      className={cn(
+                        'flex-1 rounded-lg overflow-hidden border-2 transition-all',
+                        isActive ? 'border-[#2A2118] ring-1 ring-[#2A2118]/20' : 'border-[#EEEAE3] hover:border-[#D5CFC7]'
+                      )}
+                    >
+                      <div className="h-10 relative" style={{ background: tmpl.colors.background }}>
+                        <div className="absolute bottom-0 left-0 right-0 h-1.5" style={{ background: tmpl.colors.primaryAccent }} />
+                        {isLocked && (
+                          <div className="absolute top-1 right-1 flex items-center gap-0.5 bg-foreground/80 text-background rounded px-1 py-0.5">
+                            <Lock className="h-2.5 w-2.5" />
+                            <span style={{ fontSize: '8px', fontWeight: 700 }}>PRO</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="px-2 py-1.5" style={{ backgroundColor: '#FAFAF7' }}>
+                        <span className={cn('block text-center', isActive ? 'font-semibold' : '')} style={{ fontSize: '11px', color: isActive ? '#2A2118' : '#B8B0A5' }}>
+                          {tmpl.name}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* COLORS zone */}
+            <div className="mb-3 pb-3" style={{ borderBottom: '1px solid #EEEAE3' }}>
+              <span className="block px-2 mb-2 text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#B8B0A5' }}>Colors</span>
+              <div className="flex items-center gap-3 px-2 relative" ref={colorPickerRef}>
+                <div className="flex flex-col items-center gap-1">
                   <button
-                    key={tmpl.id}
-                    onClick={() => switchTemplate(tmpl.id)}
-                    className={cn(
-                      'flex-1 rounded-lg overflow-hidden border-2 transition-all',
-                      isActive ? 'border-brand ring-1 ring-brand/30' : 'border-border hover:border-muted-foreground/30'
-                    )}
-                  >
-                    <div className="h-8 relative" style={{ background: tmpl.colors.background }}>
-                      <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: tmpl.colors.primaryAccent }} />
-                      {isLocked && (
-                        <div className="absolute top-1 right-1 flex items-center gap-0.5 bg-foreground/80 text-background rounded px-1 py-0.5">
-                          <Lock className="h-2.5 w-2.5" />
-                          <span style={{ fontSize: '8px', fontWeight: 700 }}>PRO</span>
+                    onClick={() => { setColorPickerOpen(colorPickerOpen === 'primaryAccent' ? null : 'primaryAccent'); setHexInput(activePrimary); }}
+                    className="w-6 h-6 rounded-full border-2 hover:scale-110 transition-transform" style={{ background: activePrimary, borderColor: '#EEEAE3' }}
+                  />
+                  <span style={{ fontSize: '9px', color: '#B8B0A5' }}>Primary</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <button
+                    onClick={() => { setColorPickerOpen(colorPickerOpen === 'secondaryAccent' ? null : 'secondaryAccent'); setHexInput(activeSecondary); }}
+                    className="w-6 h-6 rounded-full border-2 hover:scale-110 transition-transform" style={{ background: activeSecondary, borderColor: '#EEEAE3' }}
+                  />
+                  <span style={{ fontSize: '9px', color: '#B8B0A5' }}>Secondary</span>
+                </div>
+                {customColors && (
+                  <button onClick={resetColors} className="ml-auto hover:text-foreground" style={{ fontSize: '10px', color: '#B8B0A5' }}>Reset</button>
+                )}
+                {colorPickerOpen && (
+                  <div className="absolute left-0 top-full mt-2 z-50 bg-popover border border-border rounded-xl p-3 shadow-lg" style={{ width: '200px' }}>
+                    <div className="grid grid-cols-5 gap-2 mb-3">
+                      {PRESET_COLORS.map((color) => (
+                        <button
+                          key={color}
+                          onClick={() => { updateCustomColor(colorPickerOpen, color); setColorPickerOpen(null); }}
+                          className={cn(
+                            'w-7 h-7 rounded-full border-2 transition-transform hover:scale-110',
+                            (colorPickerOpen === 'primaryAccent' ? activePrimary : activeSecondary) === color ? 'border-foreground scale-110' : 'border-transparent'
+                          )}
+                          style={{ background: color }}
+                        />
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input type="text" value={hexInput} onChange={(e) => setHexInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' && /^#[0-9A-Fa-f]{6}$/.test(hexInput)) { updateCustomColor(colorPickerOpen, hexInput); setColorPickerOpen(null); } }}
+                        placeholder="#000000"
+                        className="flex-1 border border-border rounded-md px-2 py-1 text-xs bg-background text-foreground outline-none focus:border-brand"
+                        style={{ fontSize: '11px' }} />
+                      <button onClick={() => { if (/^#[0-9A-Fa-f]{6}$/.test(hexInput)) { updateCustomColor(colorPickerOpen, hexInput); setColorPickerOpen(null); } }}
+                        className="text-xs text-brand hover:text-brand-hover font-medium">OK</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* SECTIONS zone */}
+            <div>
+              <div className="flex items-center justify-between px-2 mb-2">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#B8B0A5' }}>Sections</span>
+                {isReordered && (
+                  <button onClick={resetOrder} className="text-[11px] hover:text-foreground transition-colors" style={{ color: '#B8B0A5' }}>Reset order</button>
+                )}
+              </div>
+
+              <div className="space-y-0.5">
+                {sectionOrder.map((sectionIdx, orderIdx) => {
+                  const name = sectionNames[sectionIdx];
+                  const isLocked = LOCKED_SECTIONS.has(sectionIdx);
+                  const isHidden = deletedSections.has(sectionIdx);
+                  const isActive = activeSection === sectionIdx;
+                  const isExpanded = expandedSection === sectionIdx;
+
+                  // Section-specific controls config
+                  const hasControls = [1, 5, 6, 7].includes(sectionIdx); // Exec Summary, Why Us, Portfolio, Testimonials
+
+                  return (
+                    <div key={sectionIdx}>
+                      <div
+                        draggable={!isLocked}
+                        onDragStart={() => handleDragStart(orderIdx)}
+                        onDragOver={(e) => handleDragOver(e, orderIdx)}
+                        onDragEnd={handleDragEnd}
+                        className={cn(
+                          'flex items-center gap-1.5 rounded-lg px-3 py-2.5 transition-all duration-200 cursor-pointer',
+                          isHidden ? 'opacity-40' : '',
+                          isActive && !isHidden ? '' : 'hover:bg-[#F4F0EA]',
+                        )}
+                        style={isActive && !isHidden ? {
+                          backgroundColor: '#FAF5EF',
+                          borderLeft: '3px solid #E8825C',
+                          paddingLeft: '9px',
+                        } : {
+                          borderLeft: '3px solid transparent',
+                          paddingLeft: '9px',
+                        }}
+                        onClick={() => {
+                          if (!isHidden) {
+                            setActiveSection(sectionIdx);
+                            setExpandedSection(isExpanded ? null : (hasControls ? sectionIdx : null));
+                            document.getElementById(`section-${sectionIdx}`)?.scrollIntoView({ behavior: 'smooth' });
+                          }
+                        }}
+                      >
+                        {/* Drag handle */}
+                        <span className={cn('transition-opacity', isLocked ? 'opacity-0' : 'opacity-0 group-hover:opacity-100')}
+                          style={{ color: '#C8C3BB', cursor: isLocked ? 'default' : 'grab' }}>
+                          <GripVertical className="h-3.5 w-3.5" />
+                        </span>
+
+                        {/* Section name */}
+                        <span className={cn(
+                          'flex-1 text-[13px] font-medium transition-colors',
+                          isHidden ? 'line-through' : '',
+                        )} style={{ color: isActive && !isHidden ? '#2A2118' : isHidden ? '#C8C3BB' : '#7A7265' }}>
+                          {name}
+                        </span>
+
+                        {/* Lock or eye toggle */}
+                        {isLocked ? (
+                          <span style={{ color: '#D5CFC7' }}><Lock className="h-3 w-3" /></span>
+                        ) : (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (isHidden) {
+                                restoreSection(sectionIdx);
+                                // If it's portfolio, also update the field
+                                if (sectionIdx === 6) updateField('portfolio_section_visible', true);
+                              } else {
+                                deleteSection(sectionIdx);
+                                if (sectionIdx === 6) updateField('portfolio_section_visible', false);
+                              }
+                            }}
+                            className="p-0.5 rounded transition-all"
+                            style={{ color: isHidden ? '#C8C3BB' : '#B8B0A5' }}
+                          >
+                            {isHidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Expandable section-specific controls */}
+                      {isExpanded && !isHidden && (
+                        <div className="ml-7 mr-2 mb-2 mt-1 transition-all duration-200">
+                          {/* Executive Summary controls */}
+                          {sectionIdx === 1 && (
+                            <div className="space-y-2 p-2 rounded-lg" style={{ backgroundColor: '#F4F0EA' }}>
+                              <span className="text-[10px] font-medium" style={{ color: '#7A7265' }}>Tone</span>
+                              <div className="flex flex-wrap gap-1.5">
+                                {['professional', 'friendly', 'bold', 'concise'].map(tone => (
+                                  <button key={tone} onClick={() => updateField('executive_summary_tone', tone)}
+                                    className={cn(
+                                      'rounded-full px-2.5 py-1 text-[11px] font-medium capitalize transition-colors',
+                                      (proposal as any)?.executive_summary_tone === tone
+                                        ? 'bg-[#2A2118] text-white'
+                                        : 'bg-white text-[#7A7265] hover:bg-[#EEEAE3]'
+                                    )}>
+                                    {tone}
+                                  </button>
+                                ))}
+                              </div>
+                              <button
+                                onClick={() => {
+                                  if (!confirm('Regenerate this section? Your current edits will be replaced.')) return;
+                                  regenerateExecutiveSummary();
+                                }}
+                                disabled={regenerating}
+                                className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[11px] font-medium transition-colors hover:bg-white disabled:opacity-50"
+                                style={{ borderColor: '#EEEAE3', color: '#7A7265' }}>
+                                {regenerating ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCcw className="h-3 w-3" />}
+                                {regenerating ? 'Regenerating...' : 'Regenerate'}
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Why Us controls */}
+                          {sectionIdx === 5 && (
+                            <div className="space-y-1.5 p-2 rounded-lg" style={{ backgroundColor: '#F4F0EA' }}>
+                              <div className="flex items-center justify-between">
+                                <span className="text-[11px]" style={{ color: '#7A7265' }}>{differentiators.length} differentiators</span>
+                              </div>
+                              <Link to="/settings/differentiators" className="flex items-center gap-1 text-[11px] text-brand hover:text-brand-hover">
+                                Edit differentiators <ExternalLink className="h-3 w-3" />
+                              </Link>
+                            </div>
+                          )}
+
+                          {/* Portfolio controls */}
+                          {sectionIdx === 6 && (
+                            <div className="space-y-2 p-2 rounded-lg" style={{ backgroundColor: '#F4F0EA' }}>
+                              <div className="flex items-center justify-between">
+                                <span className="text-[11px]" style={{ color: '#7A7265' }}>
+                                  {portfolioItems.length} of {allPortfolioItems.length} selected
+                                </span>
+                                {portfolioItems.length >= 6 && (
+                                  <span className="text-[10px] text-amber-600 font-medium">Max 6</span>
+                                )}
+                              </div>
+                              {allPortfolioItems.length > 0 ? (
+                                <div className="max-h-[200px] overflow-y-auto space-y-1">
+                                  {allPortfolioItems.map(item => {
+                                    const isSelected = portfolioItems.some(p => p.id === item.id);
+                                    const heroImg = item.images?.[0]?.url;
+                                    return (
+                                      <button key={item.id}
+                                        onClick={() => {
+                                          if (isSelected) {
+                                            const updated = portfolioItems.filter(p => p.id !== item.id);
+                                            setPortfolioItems(updated);
+                                            updateField('selected_portfolio_ids', updated.map((p: any) => p.id));
+                                          } else if (portfolioItems.length < 6) {
+                                            const updated = [...portfolioItems, item];
+                                            setPortfolioItems(updated);
+                                            updateField('selected_portfolio_ids', updated.map((p: any) => p.id));
+                                          }
+                                        }}
+                                        disabled={!isSelected && portfolioItems.length >= 6}
+                                        className={cn(
+                                          'w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-left transition-all text-[11px]',
+                                          isSelected ? 'bg-brand/10 border border-brand/30' : 'bg-white border border-transparent hover:bg-white/80 disabled:opacity-40'
+                                        )}>
+                                        <div className="h-8 w-8 flex-shrink-0 rounded overflow-hidden bg-muted">
+                                          {heroImg ? <img src={heroImg} alt="" className="h-full w-full object-cover" /> : <Image className="h-3 w-3 m-auto mt-2.5 text-muted-foreground/50" />}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="font-medium truncate" style={{ color: '#2A2118' }}>{item.title}</p>
+                                          <p className="truncate" style={{ color: '#B8B0A5', fontSize: '10px' }}>{item.category}</p>
+                                        </div>
+                                        {isSelected && <Check className="h-3.5 w-3.5 flex-shrink-0 text-brand" />}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              ) : (
+                                <p className="text-[11px] text-center py-2" style={{ color: '#B8B0A5' }}>No portfolio items yet.</p>
+                              )}
+                              <div className="pt-1">
+                                <label className="text-[10px] font-medium" style={{ color: '#7A7265' }}>Section title</label>
+                                <input type="text" value={(proposal as any)?.portfolio_section_title || 'Our Work'}
+                                  onChange={(e) => updateField('portfolio_section_title', e.target.value)}
+                                  className="mt-0.5 w-full rounded-md border px-2 py-1 text-xs bg-white outline-none focus:border-brand"
+                                  style={{ borderColor: '#EEEAE3', color: '#2A2118' }} />
+                              </div>
+                              <Link to="/settings/portfolio" target="_blank" className="flex items-center gap-1 text-[11px] text-brand hover:text-brand-hover">
+                                Manage portfolio <ExternalLink className="h-3 w-3" />
+                              </Link>
+                            </div>
+                          )}
+
+                          {/* Testimonials controls */}
+                          {sectionIdx === 7 && (
+                            <div className="space-y-1.5 p-2 rounded-lg" style={{ backgroundColor: '#F4F0EA' }}>
+                              <div className="flex items-center justify-between">
+                                <span className="text-[11px]" style={{ color: '#7A7265' }}>
+                                  {testimonials.length} testimonial{testimonials.length !== 1 ? 's' : ''}
+                                </span>
+                              </div>
+                              {testimonials.length > 0 && (
+                                <div className="max-h-[150px] overflow-y-auto space-y-1">
+                                  {testimonials.map(t => (
+                                    <div key={t.id} className="flex items-center gap-2 px-2 py-1 rounded bg-white text-[11px]">
+                                      <div className="flex-1 min-w-0">
+                                        <p className="font-medium truncate" style={{ color: '#2A2118' }}>{t.client_name}</p>
+                                        <p className="truncate" style={{ color: '#B8B0A5', fontSize: '10px' }}>
+                                          {t.client_company || t.quote?.slice(0, 30) + '...'}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              <Link to="/settings/testimonials" target="_blank" className="flex items-center gap-1 text-[11px] text-brand hover:text-brand-hover">
+                                Manage testimonials <ExternalLink className="h-3 w-3" />
+                              </Link>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
-                    <div className="px-2 py-1.5 bg-background">
-                      <span className={cn('block text-center', isActive ? 'text-foreground font-semibold' : 'text-muted-foreground')} style={{ fontSize: '11px' }}>
-                        {tmpl.name}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
+                  );
+                })}
+              </div>
+
+              {/* Scope Display toggles */}
+              <div className="mt-3 pt-3" style={{ borderTop: '1px solid #EEEAE3' }}>
+                <span className="block px-2 mb-2 text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#B8B0A5' }}>Scope Display</span>
+                <label className="flex items-center gap-2 px-2 py-1.5 cursor-pointer group">
+                  <input type="checkbox" checked={proposal.show_client_responsibilities ?? true}
+                    onChange={(e) => updateField('show_client_responsibilities', e.target.checked)}
+                    className="rounded border-border text-brand focus:ring-brand h-3.5 w-3.5" />
+                  <span className="text-xs group-hover:text-foreground transition-colors" style={{ color: '#7A7265' }}>Client Responsibilities</span>
+                </label>
+                <label className="flex items-center gap-2 px-2 py-1.5 cursor-pointer group">
+                  <input type="checkbox" checked={proposal.show_out_of_scope ?? true}
+                    onChange={(e) => updateField('show_out_of_scope', e.target.checked)}
+                    className="rounded border-border text-brand focus:ring-brand h-3.5 w-3.5" />
+                  <span className="text-xs group-hover:text-foreground transition-colors" style={{ color: '#7A7265' }}>Out of Scope</span>
+                </label>
+              </div>
             </div>
           </div>
 
-          {/* Color Customizer */}
-          <div className="mb-3 pb-3 border-b border-border">
-            <span className="block px-2 mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Colors</span>
-            <div className="flex items-center gap-3 px-2 relative" ref={colorPickerRef}>
-              {/* Primary swatch */}
-              <div className="flex flex-col items-center gap-1">
-                <button
-                  onClick={() => { setColorPickerOpen(colorPickerOpen === 'primaryAccent' ? null : 'primaryAccent'); setHexInput(activePrimary); }}
-                  className="w-6 h-6 rounded-full border-2 border-border hover:scale-110 transition-transform"
-                  style={{ background: activePrimary }}
-                  title="Primary accent"
-                />
-                <span className="text-muted-foreground" style={{ fontSize: '9px' }}>Primary</span>
+          {/* Bottom Action Bar — sticky */}
+          <div className="p-3 space-y-2" style={{ borderTop: '1px solid #EEEAE3' }}>
+            <button
+              onClick={() => setShowShareModal(true)}
+              className="flex items-center justify-center gap-2 w-full rounded-lg py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90"
+              style={{ backgroundColor: '#2A2118' }}>
+              <Share2 className="h-4 w-4" /> Share Proposal
+            </button>
+            <div className="flex items-center justify-between px-1">
+              <button onClick={() => window.print()} className="flex items-center gap-1.5 text-[12px] transition-colors hover:text-foreground" style={{ color: '#B8B0A5' }}>
+                <Download className="h-3.5 w-3.5" /> Download PDF
+              </button>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-green-500" />
+                <span className="text-[11px]" style={{ color: '#B8B0A5' }}>Saved</span>
               </div>
-              {/* Secondary swatch */}
-              <div className="flex flex-col items-center gap-1">
-                <button
-                  onClick={() => { setColorPickerOpen(colorPickerOpen === 'secondaryAccent' ? null : 'secondaryAccent'); setHexInput(activeSecondary); }}
-                  className="w-6 h-6 rounded-full border-2 border-border hover:scale-110 transition-transform"
-                  style={{ background: activeSecondary }}
-                  title="Secondary accent"
-                />
-                <span className="text-muted-foreground" style={{ fontSize: '9px' }}>Secondary</span>
-              </div>
-              {/* Reset */}
-              {customColors && (
-                <button onClick={resetColors} className="text-muted-foreground hover:text-foreground ml-auto" style={{ fontSize: '10px' }}>
-                  Reset
-                </button>
-              )}
-
-              {/* Color picker popover */}
-              {colorPickerOpen && (
-                <div className="absolute left-0 top-full mt-2 z-50 bg-popover border border-border rounded-xl p-3 shadow-lg" style={{ width: '200px' }}>
-                  <div className="grid grid-cols-5 gap-2 mb-3">
-                    {PRESET_COLORS.map((color) => (
-                      <button
-                        key={color}
-                        onClick={() => { updateCustomColor(colorPickerOpen, color); setColorPickerOpen(null); }}
-                        className={cn(
-                          'w-7 h-7 rounded-full border-2 transition-transform hover:scale-110',
-                          (colorPickerOpen === 'primaryAccent' ? activePrimary : activeSecondary) === color ? 'border-foreground scale-110' : 'border-transparent'
-                        )}
-                        style={{ background: color }}
-                      />
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={hexInput}
-                      onChange={(e) => setHexInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && /^#[0-9A-Fa-f]{6}$/.test(hexInput)) {
-                          updateCustomColor(colorPickerOpen, hexInput);
-                          setColorPickerOpen(null);
-                        }
-                      }}
-                      placeholder="#000000"
-                      className="flex-1 border border-border rounded-md px-2 py-1 text-xs bg-background text-foreground outline-none focus:border-brand"
-                      style={{ fontSize: '11px' }}
-                    />
-                    <button
-                      onClick={() => {
-                        if (/^#[0-9A-Fa-f]{6}$/.test(hexInput)) {
-                          updateCustomColor(colorPickerOpen, hexInput);
-                          setColorPickerOpen(null);
-                        }
-                      }}
-                      className="text-xs text-brand hover:text-brand-hover font-medium"
-                    >
-                      OK
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
-
-          {/* Section navigation */}
-          {sectionNames.map((name, idx) => {
-            const isLocked = idx === 0 || idx === 2 || idx === 4; // Cover, Scope, Investment
-            const isHidden = deletedSections.has(idx);
-            return (
-              <div
-                key={idx}
-                className="group/nav flex items-center gap-1"
-              >
-                <button
-                  onClick={() => {
-                    if (!isHidden) {
-                      setActiveSection(idx);
-                      document.getElementById(`section-${idx}`)?.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}
-                  className={cn(
-                    'flex-1 flex items-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors text-left',
-                    isHidden ? 'text-muted-foreground/40' :
-                    activeSection === idx ? 'bg-ink font-medium text-white' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
-                  )}
-                >
-                  {name}
-                </button>
-                {isLocked ? (
-                  <span className="p-1 text-muted-foreground/30" title="Required section">
-                    <Lock className="h-3 w-3" />
-                  </span>
-                ) : (
-                  <button
-                    onClick={() => isHidden ? restoreSection(idx) : deleteSection(idx)}
-                    className={cn(
-                      'p-1 rounded transition-all',
-                      isHidden
-                        ? 'text-muted-foreground/40 hover:text-foreground'
-                        : 'opacity-0 group-hover/nav:opacity-100 text-muted-foreground hover:text-foreground'
-                    )}
-                    title={isHidden ? `Show ${name}` : `Hide ${name}`}
-                  >
-                    {isHidden ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                  </button>
-                )}
-              </div>
-            );
-          })}
-
-          {/* Scope display toggles */}
-          <div className="mt-3 pt-3 border-t border-border">
-            <span className="block px-2 mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Scope Display</span>
-            <label className="flex items-center gap-2 px-2 py-1.5 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={proposal.show_client_responsibilities ?? true}
-                onChange={(e) => updateField('show_client_responsibilities', e.target.checked)}
-                className="rounded border-border text-brand focus:ring-brand h-3.5 w-3.5"
-              />
-              <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">Client Responsibilities</span>
-            </label>
-            <label className="flex items-center gap-2 px-2 py-1.5 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={proposal.show_out_of_scope ?? true}
-                onChange={(e) => updateField('show_out_of_scope', e.target.checked)}
-                className="rounded border-border text-brand focus:ring-brand h-3.5 w-3.5"
-              />
-              <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">Out of Scope</span>
-            </label>
-          </div>
-
-          {/* Portfolio Controls */}
-          <div className="mt-3 pt-3 border-t border-border">
-            <div className="flex items-center justify-between px-2 mb-2">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Portfolio</span>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={(proposal as any)?.portfolio_section_visible ?? false}
-                  onChange={(e) => {
-                    updateField('portfolio_section_visible', e.target.checked);
-                    if (e.target.checked && deletedSections.has(7)) {
-                      restoreSection(7);
-                    }
-                    if (!e.target.checked && !deletedSections.has(7)) {
-                      deleteSection(7);
-                    }
-                  }}
-                  className="sr-only peer"
-                />
-                <div className="w-7 h-4 bg-muted rounded-full peer peer-checked:bg-brand transition-colors after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full" />
-              </label>
-            </div>
-
-            {(proposal as any)?.portfolio_section_visible && (
-              <div className="space-y-2 px-1">
-                {/* Selected count */}
-                <div className="flex items-center justify-between px-1">
-                  <span className="text-[11px] text-muted-foreground">
-                    {portfolioItems.length} of {allPortfolioItems.length} selected
-                  </span>
-                  {portfolioItems.length >= 6 && (
-                    <span className="text-[10px] text-amber-600 font-medium">Maximum 6</span>
-                  )}
-                </div>
-
-                {/* Portfolio item list */}
-                <div className="max-h-[280px] overflow-y-auto space-y-1 pr-1">
-                  {(() => {
-                    // Smart suggestions: get service group names from proposal services
-                    const proposalGroupNames = new Set<string>();
-                    services.forEach((svc: any) => {
-                      const groupName = svc.module?.service_groups?.name || '';
-                      if (groupName) proposalGroupNames.add(groupName.toLowerCase());
-                    });
-
-                    const isMatch = (item: any) => {
-                      if (proposalGroupNames.size === 0) return false;
-                      const cat = (item.category || '').toLowerCase();
-                      return Array.from(proposalGroupNames).some(g =>
-                        cat.includes(g) || g.includes(cat) ||
-                        cat.split(/[&,]/).some((c: string) => g.includes(c.trim())) ||
-                        g.split(/[&,]/).some((c: string) => cat.includes(c.trim()))
-                      );
-                    };
-
-                    const suggested = allPortfolioItems.filter(isMatch);
-                    const others = allPortfolioItems.filter(p => !isMatch(p));
-                    const hasSuggestions = suggested.length > 0 && others.length > 0;
-
-                    const renderItem = (item: any) => {
-                      const isSelected = portfolioItems.some(p => p.id === item.id);
-                      const heroImg = item.images?.[0]?.url;
-                      return (
-                        <button
-                          key={item.id}
-                          onClick={() => {
-                            if (isSelected) {
-                              const updated = portfolioItems.filter(p => p.id !== item.id);
-                              setPortfolioItems(updated);
-                              updateField('selected_portfolio_ids', updated.map((p: any) => p.id));
-                            } else if (portfolioItems.length < 6) {
-                              const updated = [...portfolioItems, item];
-                              setPortfolioItems(updated);
-                              updateField('selected_portfolio_ids', updated.map((p: any) => p.id));
-                            }
-                          }}
-                          disabled={!isSelected && portfolioItems.length >= 6}
-                          className={cn(
-                            'w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-all text-xs',
-                            isSelected
-                              ? 'bg-brand/10 border border-brand/40'
-                              : 'border border-transparent hover:bg-muted/50 disabled:opacity-40'
-                          )}
-                        >
-                          {/* Thumbnail */}
-                          <div className="h-9 w-9 flex-shrink-0 rounded-md overflow-hidden bg-muted">
-                            {heroImg ? (
-                              <img src={heroImg} alt="" className="h-full w-full object-cover" />
-                            ) : (
-                              <div className="h-full w-full flex items-center justify-center">
-                                <Image className="h-3.5 w-3.5 text-muted-foreground/50" />
-                              </div>
-                            )}
-                          </div>
-                          {/* Info */}
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate text-foreground" style={{ fontSize: '11px' }}>{item.title}</p>
-                            <p className="truncate text-muted-foreground" style={{ fontSize: '10px' }}>{item.category}</p>
-                          </div>
-                          {/* Check */}
-                          {isSelected && (
-                            <Check className="h-3.5 w-3.5 flex-shrink-0 text-brand" />
-                          )}
-                        </button>
-                      );
-                    };
-
-                    return (
-                      <>
-                        {hasSuggestions && (
-                          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider px-1 pt-1">Suggested</p>
-                        )}
-                        {(hasSuggestions ? suggested : allPortfolioItems).map(renderItem)}
-                        {hasSuggestions && (
-                          <>
-                            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider px-1 pt-2">Other projects</p>
-                            {others.map(renderItem)}
-                          </>
-                        )}
-                        {allPortfolioItems.length === 0 && (
-                          <p className="text-[11px] text-muted-foreground text-center py-3">No portfolio items yet.</p>
-                        )}
-                      </>
-                    );
-                  })()}
-                </div>
-
-                {/* Section title */}
-                <div className="px-1 pt-1">
-                  <label className="text-[10px] font-medium text-muted-foreground">Section title</label>
-                  <input
-                    type="text"
-                    value={(proposal as any)?.portfolio_section_title || 'Our Work'}
-                    onChange={(e) => updateField('portfolio_section_title', e.target.value)}
-                    className="mt-0.5 w-full rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground outline-none focus:border-brand"
-                  />
-                </div>
-
-                {/* Manage link */}
-                <a
-                  href="/settings/portfolio"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 px-1 pt-1 text-[11px] text-brand hover:text-brand-hover transition-colors"
-                >
-                  Manage portfolio <ExternalLink className="h-3 w-3" />
-                </a>
-              </div>
-            )}
-          </div>
-
-          {/* Add page button removed — eye toggles handle show/hide inline */}
         </div>
 
         {/* Proposal Content — rendered with template components */}
-         <div className="flex-1 overflow-y-auto">
+         <div ref={scrollContainerRef} className="flex-1 overflow-y-auto h-[calc(100vh-57px)]">
           <TemplateProvider templateId={templateId} customColors={{ primaryAccent: activePrimary, secondaryAccent: activeSecondary, ...(customColors || {}) }}>
           <BrandProvider brand={{
             agencyName: (agency?.name || 'Agency').toUpperCase(),
