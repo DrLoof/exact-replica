@@ -1,9 +1,25 @@
-import React, { type ReactNode, useState } from "react";
+import React, { type ReactNode, useState, useRef, useEffect } from "react";
 import { motion } from "motion/react";
 import { Plus, X, ChevronDown } from "lucide-react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
 import { EditableText } from "./EditableText";
+
+const GENERIC_RESPONSIBILITIES = [
+  'Provide timely feedback within agreed review windows',
+  'Designate a single point of contact for approvals',
+  'Provide brand assets and guidelines',
+  'Provide platform/tool access credentials',
+  'Share relevant business data and insights',
+];
+
+const GENERIC_OUT_OF_SCOPE = [
+  'Services not explicitly listed in the deliverables',
+  'Third-party tool subscription or licensing costs',
+  'Content creation beyond what is specified',
+  'Translation or localization',
+  'Training beyond what is included in deliverables',
+];
 
 interface ServiceCardProps {
   icon: ReactNode;
@@ -14,6 +30,8 @@ interface ServiceCardProps {
   deliverables: string[];
   clientResponsibilities?: string[];
   outOfScope?: string[];
+  moduleDefaultResponsibilities?: string[];
+  moduleDefaultOutOfScope?: string[];
   isAddon?: boolean;
   delay?: number;
   onNameEdit?: (value: string) => void;
@@ -65,9 +83,77 @@ function CollapsibleList({
   );
 }
 
+function ListAddButton({
+  isAdding, setIsAdding, inputValue, setInputValue,
+  onAdd, currentItems, label, suggestions,
+}: {
+  isAdding: boolean; setIsAdding: (v: boolean) => void;
+  inputValue: string; setInputValue: (v: string) => void;
+  onAdd: (items: string[]) => void; currentItems: string[];
+  label: string; suggestions: string[];
+}) {
+  const availableSuggestions = suggestions.filter(s => !currentItems.includes(s));
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const sugRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (sugRef.current && !sugRef.current.contains(e.target as Node)) setShowSuggestions(false);
+    };
+    if (showSuggestions) document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showSuggestions]);
+
+  return (
+    <div className="mt-2 print:hidden relative" ref={sugRef}>
+      {isAdding ? (
+        <div>
+          <div className="flex items-center gap-2">
+            <input
+              type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && inputValue.trim()) { onAdd([...currentItems, inputValue.trim()]); setInputValue(""); setIsAdding(false); setShowSuggestions(false); }
+                if (e.key === 'Escape') { setIsAdding(false); setInputValue(''); setShowSuggestions(false); }
+              }}
+              onFocus={() => { if (availableSuggestions.length > 0) setShowSuggestions(true); }}
+              placeholder={`Add ${label.toLowerCase()}...`} autoFocus
+              className="flex-1 border border-[#E0E0E0] rounded-lg px-3 py-1.5 text-[#555] outline-none focus:border-[#BBB]"
+              style={{ fontSize: "12px" }}
+            />
+            <button onClick={() => { if (inputValue.trim()) { onAdd([...currentItems, inputValue.trim()]); setInputValue(""); setIsAdding(false); setShowSuggestions(false); } }} className="text-[#888] hover:text-[#555] text-xs font-medium">Add</button>
+            <button onClick={() => { setIsAdding(false); setInputValue(''); setShowSuggestions(false); }} className="text-[#CCC] hover:text-[#888]">
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          {showSuggestions && availableSuggestions.length > 0 && (
+            <div className="absolute left-0 right-0 mt-1 z-20 bg-white border border-[#E0E0E0] rounded-lg shadow-lg max-h-40 overflow-y-auto">
+              <div className="px-3 py-1.5 text-[10px] font-semibold text-[#AAA] uppercase tracking-wider">Suggestions</div>
+              {availableSuggestions.slice(0, 8).map((sug, i) => (
+                <button
+                  key={i}
+                  onClick={() => { onAdd([...currentItems, sug]); setShowSuggestions(false); }}
+                  className="w-full text-left px-3 py-1.5 text-[#666] hover:bg-[#F5F5F5] transition-colors"
+                  style={{ fontSize: "12px" }}
+                >
+                  {sug}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <button onClick={() => setIsAdding(true)} className="flex items-center gap-1.5 text-[#CCC] hover:text-[#888] transition-colors" style={{ fontSize: "11px" }}>
+          <Plus className="h-3 w-3" /> Add {label.toLowerCase()}
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function ServiceCard({
   icon, name, price, pricingModel, description, deliverables,
   clientResponsibilities, outOfScope,
+  moduleDefaultResponsibilities, moduleDefaultOutOfScope,
   isAddon = false, delay = 0,
   onNameEdit, onDescriptionEdit, onDeliverablesEdit,
   onClientResponsibilitiesEdit, onOutOfScopeEdit,
@@ -139,43 +225,17 @@ export function ServiceCard({
     )
   );
 
-  const renderListAddButton = (
-    isAdding: boolean,
-    setIsAdding: (v: boolean) => void,
-    inputValue: string,
-    setInputValue: (v: string) => void,
-    onAdd: (items: string[]) => void,
-    currentItems: string[],
-    label: string,
-  ) => (
-    <div className="mt-2 print:hidden">
-      {isAdding ? (
-        <div className="flex items-center gap-2">
-          <input
-            type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && inputValue.trim()) { onAdd([...currentItems, inputValue.trim()]); setInputValue(""); setIsAdding(false); }
-              if (e.key === 'Escape') { setIsAdding(false); setInputValue(''); }
-            }}
-            placeholder={`Add ${label.toLowerCase()}...`} autoFocus
-            className="flex-1 border border-[#E0E0E0] rounded-lg px-3 py-1.5 text-[#555] outline-none focus:border-[#BBB]"
-            style={{ fontSize: "12px" }}
-          />
-          <button onClick={() => { if (inputValue.trim()) { onAdd([...currentItems, inputValue.trim()]); setInputValue(""); setIsAdding(false); } }} className="text-[#888] hover:text-[#555] text-xs font-medium">Add</button>
-          <button onClick={() => { setIsAdding(false); setInputValue(''); }} className="text-[#CCC] hover:text-[#888]">
-            <X className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      ) : (
-        <button onClick={() => setIsAdding(true)} className="flex items-center gap-1.5 text-[#CCC] hover:text-[#888] transition-colors" style={{ fontSize: "11px" }}>
-          <Plus className="h-3 w-3" /> Add {label.toLowerCase()}
-        </button>
-      )}
-    </div>
-  );
+  const respSuggestions = [...(moduleDefaultResponsibilities || []), ...GENERIC_RESPONSIBILITIES];
+  const oosSuggestions = [...(moduleDefaultOutOfScope || []), ...GENERIC_OUT_OF_SCOPE];
 
-  const renderResponsibilitiesEdit = () => editableResp && renderListAddButton(addingResp, setAddingResp, newResp, setNewResp, onClientResponsibilitiesEdit!, clientResponsibilities || [], "responsibility");
-  const renderOutOfScopeEdit = () => editableOos && renderListAddButton(addingOos, setAddingOos, newOos, setNewOos, onOutOfScopeEdit!, outOfScope || [], "out of scope item");
+  const renderResponsibilitiesEdit = () => editableResp && (
+    <ListAddButton isAdding={addingResp} setIsAdding={setAddingResp} inputValue={newResp} setInputValue={setNewResp}
+      onAdd={onClientResponsibilitiesEdit!} currentItems={clientResponsibilities || []} label="responsibility" suggestions={respSuggestions} />
+  );
+  const renderOutOfScopeEdit = () => editableOos && (
+    <ListAddButton isAdding={addingOos} setIsAdding={setAddingOos} inputValue={newOos} setInputValue={setNewOos}
+      onAdd={onOutOfScopeEdit!} currentItems={outOfScope || []} label="out of scope item" suggestions={oosSuggestions} />
+  );
 
   // ── Soft template ──
   if (isSoft) {

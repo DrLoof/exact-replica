@@ -895,6 +895,8 @@ export default function ProposalEditor() {
                                     ? (svc.out_of_scope || svc.module?.out_of_scope || [])
                                     : []
                                 }
+                                moduleDefaultResponsibilities={svc.module?.client_responsibilities || []}
+                                moduleDefaultOutOfScope={svc.module?.out_of_scope || []}
                                 isAddon={svc.is_addon || false}
                                 delay={i * 0.1}
                                 onNameEdit={async (val) => {

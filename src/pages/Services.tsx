@@ -25,12 +25,15 @@ interface ModuleForm {
   default_timeline: string;
   deliverables: string;
   service_type: string;
+  client_responsibilities: string;
+  out_of_scope: string;
 }
 
 const emptyForm: ModuleForm = {
   name: '', short_description: '', description: '', group_id: '',
   pricing_model: 'fixed', price_fixed: '', price_monthly: '', price_hourly: '',
   estimated_hours: '', default_timeline: '', deliverables: '', service_type: 'core',
+  client_responsibilities: '', out_of_scope: '',
 };
 
 export default function Services() {
@@ -78,6 +81,8 @@ export default function Services() {
       default_timeline: mod.default_timeline || '',
       deliverables: (mod.deliverables || []).join('\n'),
       service_type: mod.service_type || 'core',
+      client_responsibilities: (mod.client_responsibilities || []).join('\n'),
+      out_of_scope: (mod.out_of_scope || []).join('\n'),
     });
     setShowModal(true);
   };
@@ -99,6 +104,8 @@ export default function Services() {
       estimated_hours: form.estimated_hours ? parseInt(form.estimated_hours) : null,
       default_timeline: form.default_timeline || null,
       deliverables: form.deliverables ? form.deliverables.split('\n').filter(Boolean) : null,
+      client_responsibilities: form.client_responsibilities ? form.client_responsibilities.split('\n').filter(Boolean) : null,
+      out_of_scope: form.out_of_scope ? form.out_of_scope.split('\n').filter(Boolean) : null,
       service_type: form.service_type,
       is_active: true,
     };
@@ -264,7 +271,13 @@ export default function Services() {
               </div>
 
               <F label="Deliverables (one per line)">
-                <textarea value={form.deliverables} onChange={e => setForm(p => ({ ...p, deliverables: e.target.value }))} rows={4} placeholder="Logo design&#10;Brand guidelines&#10;Color palette" className={inputCls} />
+                <textarea value={form.deliverables} onChange={e => setForm(p => ({ ...p, deliverables: e.target.value }))} rows={3} placeholder="Logo design&#10;Brand guidelines&#10;Color palette" className={inputCls} />
+              </F>
+              <F label="Client Responsibilities (one per line)">
+                <textarea value={form.client_responsibilities} onChange={e => setForm(p => ({ ...p, client_responsibilities: e.target.value }))} rows={3} placeholder="Provide brand guidelines&#10;Designate decision-maker&#10;Provide timely feedback" className={inputCls} />
+              </F>
+              <F label="Out of Scope (one per line)">
+                <textarea value={form.out_of_scope} onChange={e => setForm(p => ({ ...p, out_of_scope: e.target.value }))} rows={3} placeholder="Copywriting&#10;Photography&#10;Ongoing maintenance" className={inputCls} />
               </F>
             </div>
 
