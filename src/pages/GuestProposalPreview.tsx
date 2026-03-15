@@ -16,6 +16,19 @@ import {
 } from '@/components/proposal-template';
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 
+  // Sync testimonial edits back to localStorage so they persist on proposal creation
+  const saveGuestTestimonials = useCallback((testimonials: any[]) => {
+    try {
+      const raw = localStorage.getItem('propopad_guest_onboarding');
+      const onboarding = raw ? JSON.parse(raw) : {};
+      // Merge edits back: update approved testimonials, keep unapproved ones
+      const allTestimonials = onboarding.testimonials || [];
+      const approvedEdited = testimonials;
+      const unapproved = allTestimonials.filter((t: any) => !t.approved);
+      onboarding.testimonials = [...approvedEdited, ...unapproved];
+      localStorage.setItem('propopad_guest_onboarding', JSON.stringify(onboarding));
+    } catch {}
+  }, []);
 
 function getDefaultAboutText(yearsExperience?: number | null): string {
   const yearsPart = yearsExperience ? `Over the past ${yearsExperience} years` : 'Over the past years';
