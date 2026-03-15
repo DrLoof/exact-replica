@@ -460,6 +460,56 @@ export type Database = {
           },
         ]
       }
+      portfolio_items: {
+        Row: {
+          agency_id: string | null
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          images: Json | null
+          is_active: boolean | null
+          results: string | null
+          sort_order: number | null
+          source_url: string | null
+          title: string
+        }
+        Insert: {
+          agency_id?: string | null
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          images?: Json | null
+          is_active?: boolean | null
+          results?: string | null
+          sort_order?: number | null
+          source_url?: string | null
+          title: string
+        }
+        Update: {
+          agency_id?: string | null
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          images?: Json | null
+          is_active?: boolean | null
+          results?: string | null
+          sort_order?: number | null
+          source_url?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_items_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proposal_analytics: {
         Row: {
           created_at: string
@@ -494,6 +544,42 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "proposal_analytics_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_portfolio: {
+        Row: {
+          id: string
+          portfolio_item_id: string | null
+          proposal_id: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          id?: string
+          portfolio_item_id?: string | null
+          proposal_id?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          id?: string
+          portfolio_item_id?: string | null
+          proposal_id?: string | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_portfolio_portfolio_item_id_fkey"
+            columns: ["portfolio_item_id"]
+            isOneToOne: false
+            referencedRelation: "portfolio_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_portfolio_proposal_id_fkey"
             columns: ["proposal_id"]
             isOneToOne: false
             referencedRelation: "proposals"
