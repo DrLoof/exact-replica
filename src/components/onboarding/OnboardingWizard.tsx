@@ -476,7 +476,7 @@ export function OnboardingWizard() {
             diffIntro={diffIntro}
             onDiffIntroChange={setDiffIntro}
             groupNameMap={groupNameMap}
-            onFinish={handleFinishAttempt}
+            onFinish={handleReviewComplete}
             onBack={() => setScreen('scan')}
             saving={saving}
             addedBundles={addedBundles}
