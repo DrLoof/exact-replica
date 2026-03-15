@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AppShell } from '@/components/layout/AppShell';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Trash2, Pencil, X, Save, Star, Quote } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Pencil, X, Save, Star, Quote, Camera, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface Testimonial {
