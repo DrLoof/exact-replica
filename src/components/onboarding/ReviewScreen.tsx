@@ -415,7 +415,7 @@ export function ReviewScreen({
               />
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 {/* Inline color picker */}
-                <label className="relative inline-flex items-center gap-1.5 cursor-pointer group">
+                <label className="relative inline-flex items-center gap-1.5 cursor-pointer group shrink-0">
                   <span
                     className="inline-block h-4 w-4 rounded-full border border-border group-hover:ring-2 group-hover:ring-brass/30 transition-shadow"
                     style={{ backgroundColor: agencyIdentity.brand_color || '#E8825C' }}
@@ -429,22 +429,22 @@ export function ReviewScreen({
                   />
                 </label>
                 <span>·</span>
-                {/* Inline email */}
                 <input
                   type="email"
                   value={agencyIdentity.email || ''}
                   onChange={e => onAgencyChange({ ...agencyIdentity, email: e.target.value })}
                   placeholder="Add email"
-                  className="bg-transparent border-b border-transparent focus:border-brass outline-none text-xs text-muted-foreground placeholder:italic placeholder:text-brass hover:text-foreground focus:text-foreground transition-colors max-w-[180px]"
+                  size={agencyIdentity.email ? Math.max(agencyIdentity.email.length, 8) : 8}
+                  className="bg-transparent outline-none text-xs text-muted-foreground placeholder:italic placeholder:text-brass hover:text-foreground focus:text-foreground transition-colors w-auto"
                 />
                 <span>·</span>
-                {/* Inline phone */}
                 <input
                   type="tel"
                   value={agencyIdentity.phone || ''}
                   onChange={e => onAgencyChange({ ...agencyIdentity, phone: e.target.value })}
                   placeholder="Add phone"
-                  className="bg-transparent border-b border-transparent focus:border-brass outline-none text-xs text-muted-foreground placeholder:italic placeholder:text-brass hover:text-foreground focus:text-foreground transition-colors max-w-[140px]"
+                  size={agencyIdentity.phone ? Math.max(agencyIdentity.phone.length, 8) : 8}
+                  className="bg-transparent outline-none text-xs text-muted-foreground placeholder:italic placeholder:text-brass hover:text-foreground focus:text-foreground transition-colors w-auto"
                 />
               </div>
             </div>
