@@ -606,7 +606,7 @@ export default function GuestProposalPreview() {
                     isActive && !isHidden ? '' : 'hover:bg-[#F4F0EA]',
                   )}
                   style={isActive && !isHidden ? {
-                    backgroundColor: 'hsl(24 28% 13%)',
+                    backgroundColor: 'hsl(24 28% 13% / 0.85)',
                   } : {}}
                   onClick={() => {
                     if (!isHidden) {
@@ -623,7 +623,7 @@ export default function GuestProposalPreview() {
                     {name}
                   </span>
 
-                  {/* Lock or eye toggle */}
+                  {/* Lock or eye toggle — eye only on hover unless hidden */}
                   {isLocked ? (
                     <span style={{ color: isActive && !isHidden ? '#FFFFFF80' : '#D5CFC7' }}><Lock className="h-3 w-3" /></span>
                   ) : (
@@ -638,7 +638,10 @@ export default function GuestProposalPreview() {
                           deleteSection(idx);
                         }
                       }}
-                      className="p-0.5 rounded transition-all"
+                      className={cn(
+                        'p-0.5 rounded transition-all',
+                        isHidden ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                      )}
                       style={{ color: isHidden ? '#C8C3BB' : isActive ? '#FFFFFF80' : '#B8B0A5' }}
                     >
                       {isHidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
