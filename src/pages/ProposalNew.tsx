@@ -473,6 +473,8 @@ export default function ProposalNew() {
           pricing_model_override: null,
           is_addon: (realMod?.service_type || mod.service_type) === 'addon',
           bundle_id: bundleModuleIdSet.has(mod.id) ? selectedBundleId : null,
+          client_responsibilities: mod.client_responsibilities || [],
+          out_of_scope: mod.out_of_scope || [],
         };
       }).filter((s: any) => s.module_id);
 
