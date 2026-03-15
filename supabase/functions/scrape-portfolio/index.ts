@@ -343,7 +343,10 @@ For each project found, extract:
   - If it's about data analysis, reporting, dashboards → Analytics & Data
   - If it's a general marketing engagement or strategic consulting → Marketing Strategy
   - ONLY use "Other" as an absolute last resort when there is truly no signal
-- image_urls: Array of image URLs associated with this project from the provided image list. Match by proximity in HTML, alt text relevance, or URL containing the project/client name.
+- image_urls: Array of image URLs associated with this project. IMAGE PRIORITY:
+  1. If a "Hero image" URL is listed in the subpage content section below, USE IT FIRST — it's the best representation
+  2. Then look for images from the listing page that match by alt text or URL containing the project/client name
+  3. Include up to 3 images per project, hero image first
 
 Rules:
 - Only extract REAL projects shown on the page, do NOT invent projects
