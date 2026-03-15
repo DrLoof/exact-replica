@@ -12,7 +12,7 @@ import { templates } from '@/lib/proposalTemplates';
 import {
   BrandProvider, HeroCover, SectionHeader, ServiceCard, PricingSummary,
   WhyUsCard, TestimonialCard, TermsSection, SignatureBlock,
-  TextContent, PageWrapper, HighlightPanel, EditableText, TimelineStep,
+  TextContent, PageWrapper, HighlightPanel, EditableText, TimelineStep, TeamMemberCard,
 } from '@/components/proposal-template';
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 
