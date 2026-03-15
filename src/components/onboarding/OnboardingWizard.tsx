@@ -487,15 +487,10 @@ export function OnboardingWizard() {
             onAddBundle={(name) => setAddedBundles(prev => new Set([...prev, name]))}
             teamMembers={teamMembers}
             onTeamMembersChange={setTeamMembers}
-          />
-        )}
-        {screen === 'portfolio' && (
-          <PortfolioStep
-            onContinue={handlePortfolioContinue}
-            onSkip={handlePortfolioSkip}
-            serviceGroups={Object.values(groupNameMap)}
+            portfolioItems={portfolioItemsOnboarding}
+            onPortfolioItemsChange={setPortfolioItemsOnboarding}
             detectedPortfolioUrl={scrapeData?.portfolio_url || null}
-            saving={saving}
+            serviceGroups={Object.values(groupNameMap)}
           />
         )}
       </div>
