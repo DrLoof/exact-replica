@@ -168,6 +168,7 @@ export default function GuestProposalPreview() {
   const currencySymbol = guestProposal.currencySymbol || '$';
   const differentiators = guestOnboarding?.differentiators || [];
   const testimonials = (guestOnboarding?.testimonials || []).filter((t: any) => t.approved);
+  const guestTeamMembers = (guestOnboarding?.teamMembers || []).filter((m: any) => m.name);
   const clientName = guestProposal.clientName || 'Client';
   const agencyName = identity.name || 'Your Agency';
   const brandColor = identity.brand_color || '#E8825C';
