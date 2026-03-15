@@ -763,8 +763,8 @@ export default function ProposalEditor() {
                         onDragOver={(e) => handleDragOver(e, orderIdx)}
                         onDragEnd={handleDragEnd}
                         className={cn(
-                          'flex items-center gap-1.5 rounded-lg px-3 py-2.5 transition-all duration-200 cursor-pointer',
-                          isHidden ? 'opacity-40' : '',
+                          'group flex items-center gap-1.5 rounded-lg px-3 py-2.5 transition-all duration-200 cursor-pointer',
+                          isHidden ? 'opacity-50' : '',
                           isActive && !isHidden ? '' : 'hover:bg-[#F4F0EA]',
                         )}
                         style={isActive && !isHidden ? {
