@@ -504,39 +504,51 @@ export type Database = {
       proposal_services: {
         Row: {
           bundle_id: string | null
+          client_responsibilities: string[] | null
           custom_deliverables: string[] | null
           custom_description: string | null
           display_order: number | null
           id: string
           is_addon: boolean | null
           module_id: string | null
+          out_of_scope: string[] | null
           price_override: number | null
           pricing_model_override: string | null
           proposal_id: string | null
+          show_out_of_scope: boolean | null
+          show_responsibilities: boolean | null
         }
         Insert: {
           bundle_id?: string | null
+          client_responsibilities?: string[] | null
           custom_deliverables?: string[] | null
           custom_description?: string | null
           display_order?: number | null
           id?: string
           is_addon?: boolean | null
           module_id?: string | null
+          out_of_scope?: string[] | null
           price_override?: number | null
           pricing_model_override?: string | null
           proposal_id?: string | null
+          show_out_of_scope?: boolean | null
+          show_responsibilities?: boolean | null
         }
         Update: {
           bundle_id?: string | null
+          client_responsibilities?: string[] | null
           custom_deliverables?: string[] | null
           custom_description?: string | null
           display_order?: number | null
           id?: string
           is_addon?: boolean | null
           module_id?: string | null
+          out_of_scope?: string[] | null
           price_override?: number | null
           pricing_model_override?: string | null
           proposal_id?: string | null
+          show_out_of_scope?: boolean | null
+          show_responsibilities?: boolean | null
         }
         Relationships: [
           {
@@ -632,6 +644,8 @@ export type Database = {
           selected_differentiator_ids: string[] | null
           selected_testimonial_ids: string[] | null
           sent_at: string | null
+          show_client_responsibilities: boolean | null
+          show_out_of_scope: boolean | null
           status: string | null
           subtitle: string | null
           team: Json | null
@@ -673,6 +687,8 @@ export type Database = {
           selected_differentiator_ids?: string[] | null
           selected_testimonial_ids?: string[] | null
           sent_at?: string | null
+          show_client_responsibilities?: boolean | null
+          show_out_of_scope?: boolean | null
           status?: string | null
           subtitle?: string | null
           team?: Json | null
@@ -714,6 +730,8 @@ export type Database = {
           selected_differentiator_ids?: string[] | null
           selected_testimonial_ids?: string[] | null
           sent_at?: string | null
+          show_client_responsibilities?: boolean | null
+          show_out_of_scope?: boolean | null
           status?: string | null
           subtitle?: string | null
           team?: Json | null

@@ -55,6 +55,8 @@ interface ProposalData {
   client_challenge: string | null;
   client_goal: string | null;
   client_context_note: string | null;
+  show_client_responsibilities: boolean;
+  show_out_of_scope: boolean;
 }
 
 interface ProposalService {
@@ -65,6 +67,10 @@ interface ProposalService {
   display_order: number | null;
   is_addon: boolean | null;
   custom_deliverables: string[] | null;
+  client_responsibilities: string[] | null;
+  out_of_scope: string[] | null;
+  show_responsibilities: boolean | null;
+  show_out_of_scope: boolean | null;
   module?: {
     name: string;
     description: string | null;
@@ -282,7 +288,9 @@ export default function ProposalEditor() {
       module_id: mod.id,
       display_order: services.length,
       is_addon: mod.service_type === 'addon',
-    }).select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, client_responsibilities, out_of_scope, icon)').single();
+      client_responsibilities: mod.client_responsibilities || [],
+      out_of_scope: mod.out_of_scope || [],
+    } as any).select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, client_responsibilities, out_of_scope, icon)').single();
     if (error) { toast.error('Failed to add service'); return; }
     const mapped = { ...newSvc, module: newSvc.service_modules };
     const updated = [...services, mapped];
@@ -670,6 +678,29 @@ export default function ProposalEditor() {
             )
           ))}
 
+          {/* Scope display toggles */}
+          <div className="mt-3 pt-3 border-t border-border">
+            <span className="block px-2 mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Scope Display</span>
+            <label className="flex items-center gap-2 px-2 py-1.5 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={proposal.show_client_responsibilities ?? true}
+                onChange={(e) => updateField('show_client_responsibilities', e.target.checked)}
+                className="rounded border-border text-brand focus:ring-brand h-3.5 w-3.5"
+              />
+              <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">Client Responsibilities</span>
+            </label>
+            <label className="flex items-center gap-2 px-2 py-1.5 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={proposal.show_out_of_scope ?? false}
+                onChange={(e) => updateField('show_out_of_scope', e.target.checked)}
+                className="rounded border-border text-brand focus:ring-brand h-3.5 w-3.5"
+              />
+              <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">Out of Scope</span>
+            </label>
+          </div>
+
           {/* Add page button */}
           {deletedSections.size > 0 && (
             <div className="relative mt-2">
@@ -821,8 +852,16 @@ export default function ProposalEditor() {
                                 pricingModel={(svc.module?.pricing_model || 'fixed') as any}
                                 description={svc.module?.description || svc.module?.short_description || ''}
                                 deliverables={svc.custom_deliverables || svc.module?.deliverables || []}
-                                clientResponsibilities={svc.module?.client_responsibilities || []}
-                                outOfScope={svc.module?.out_of_scope || []}
+                                clientResponsibilities={
+                                  (proposal.show_client_responsibilities ?? true) && (svc.show_responsibilities !== false)
+                                    ? (svc.client_responsibilities || svc.module?.client_responsibilities || [])
+                                    : []
+                                }
+                                outOfScope={
+                                  (proposal.show_out_of_scope ?? false) && (svc.show_out_of_scope !== false)
+                                    ? (svc.out_of_scope || svc.module?.out_of_scope || [])
+                                    : []
+                                }
                                 isAddon={svc.is_addon || false}
                                 delay={i * 0.1}
                                 onNameEdit={async (val) => {
@@ -838,6 +877,14 @@ export default function ProposalEditor() {
                                 onDeliverablesEdit={async (dels) => {
                                   await supabase.from('proposal_services').update({ custom_deliverables: dels }).eq('id', svc.id);
                                   setServices(prev => prev.map(s => s.id === svc.id ? { ...s, custom_deliverables: dels } : s));
+                                }}
+                                onClientResponsibilitiesEdit={async (items) => {
+                                  await supabase.from('proposal_services').update({ client_responsibilities: items } as any).eq('id', svc.id);
+                                  setServices(prev => prev.map(s => s.id === svc.id ? { ...s, client_responsibilities: items } : s));
+                                }}
+                                onOutOfScopeEdit={async (items) => {
+                                  await supabase.from('proposal_services').update({ out_of_scope: items } as any).eq('id', svc.id);
+                                  setServices(prev => prev.map(s => s.id === svc.id ? { ...s, out_of_scope: items } : s));
                                 }}
                               />
                             </div>

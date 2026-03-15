@@ -263,8 +263,16 @@ export default function PublicProposal() {
                   pricingModel={svc.module?.pricing_model || 'fixed'}
                   description={svc.module?.description || svc.module?.short_description || ''}
                   deliverables={svc.module?.deliverables || []}
-                  clientResponsibilities={svc.module?.client_responsibilities || []}
-                  outOfScope={svc.module?.out_of_scope || []}
+                  clientResponsibilities={
+                    (proposal.show_client_responsibilities ?? true) && (svc.show_responsibilities !== false)
+                      ? (svc.client_responsibilities || svc.module?.client_responsibilities || [])
+                      : []
+                  }
+                  outOfScope={
+                    (proposal.show_out_of_scope ?? false) && (svc.show_out_of_scope !== false)
+                      ? (svc.out_of_scope || svc.module?.out_of_scope || [])
+                      : []
+                  }
                   isAddon={svc.is_addon || svc.module?.service_type === 'addon'}
                   delay={idx * 0.08}
                 />
