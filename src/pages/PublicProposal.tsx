@@ -342,39 +342,11 @@ export default function PublicProposal() {
           </PageWrapper>
         )}
 
-        {/* Section 6: Terms & Conditions */}
-        {termsClauses.length > 0 && (
+        {/* Section 6: Why Us */}
+        {differentiators.length > 0 && (
           <PageWrapper pageNumber="06">
             <SectionHeader
               number="05"
-              title="Terms & Conditions"
-              subtitle="The legal framework governing our engagement."
-            />
-            <HighlightPanel
-              items={[
-                { label: 'Validity', value: `${proposal.validity_days || 30} days` },
-                { label: 'Revisions', value: `${proposal.revision_rounds ?? 2} rounds` },
-                { label: 'Notice Period', value: proposal.notice_period || '30 days' },
-              ]}
-              variant="dark"
-            />
-            <div className="mt-10">
-              <TermsSection clauses={[
-                ...termsClauses.map((c: any) => ({ title: c.title, content: c.content })),
-                ...(services.some((s: any) => s.module?.client_responsibilities?.length || s.module?.out_of_scope?.length) ? [{
-                  title: 'Scope & Responsibilities',
-                  content: 'The client is responsible for providing timely feedback, required access credentials, and content/assets as outlined in each service\'s scope. Work beyond the deliverables listed for each service is considered out of scope and may require a separate agreement.'
-                }] : []),
-              ]} />
-            </div>
-          </PageWrapper>
-        )}
-
-        {/* Section 7: Why Us */}
-        {differentiators.length > 0 && (
-          <PageWrapper pageNumber="07">
-            <SectionHeader
-              number="06"
               title={`Why ${agency?.name || 'Us'}`}
               subtitle="What sets us apart and drives results for our clients."
             />
@@ -412,11 +384,11 @@ export default function PublicProposal() {
           </PageWrapper>
         )}
 
-        {/* Section 7b: Portfolio */}
+        {/* Section 7: Portfolio */}
         {portfolioItems.length > 0 && (proposal as any).portfolio_section_visible && (
-          <PageWrapper pageNumber="08">
+          <PageWrapper pageNumber="07">
             <SectionHeader
-              number="07"
+              number="06"
               title={(proposal as any).portfolio_section_title || 'Our Work'}
               subtitle="Selected projects from our portfolio"
             />
@@ -439,9 +411,9 @@ export default function PublicProposal() {
 
         {/* Section 8: Testimonials */}
         {testimonials.length > 0 && (
-          <PageWrapper pageNumber="09">
+          <PageWrapper pageNumber="08">
             <SectionHeader
-              number="08"
+              number="07"
               title="What Our Clients Say"
               subtitle="Real results from real partnerships."
             />
@@ -479,7 +451,35 @@ export default function PublicProposal() {
           </PageWrapper>
         )}
 
-        {/* Section 9: Signature + Accept/Decline */}
+        {/* Section 9: Terms & Conditions */}
+        {termsClauses.length > 0 && (
+          <PageWrapper pageNumber="09">
+            <SectionHeader
+              number="08"
+              title="Terms & Conditions"
+              subtitle="The legal framework governing our engagement."
+            />
+            <HighlightPanel
+              items={[
+                { label: 'Validity', value: `${proposal.validity_days || 30} days` },
+                { label: 'Revisions', value: `${proposal.revision_rounds ?? 2} rounds` },
+                { label: 'Notice Period', value: proposal.notice_period || '30 days' },
+              ]}
+              variant="dark"
+            />
+            <div className="mt-10">
+              <TermsSection clauses={[
+                ...termsClauses.map((c: any) => ({ title: c.title, content: c.content })),
+                ...(services.some((s: any) => s.module?.client_responsibilities?.length || s.module?.out_of_scope?.length) ? [{
+                  title: 'Scope & Responsibilities',
+                  content: 'The client is responsible for providing timely feedback, required access credentials, and content/assets as outlined in each service\'s scope. Work beyond the deliverables listed for each service is considered out of scope and may require a separate agreement.'
+                }] : []),
+              ]} />
+            </div>
+          </PageWrapper>
+        )}
+
+        {/* Section 10: Signature + Accept/Decline */}
         <PageWrapper pageNumber="10">
           <SignatureBlock
             client={{
