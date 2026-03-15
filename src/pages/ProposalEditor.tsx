@@ -900,21 +900,21 @@ export default function ProposalEditor() {
                       <button
                         key={tmpl.id}
                         onClick={() => switchTemplate(tmpl.id)}
-                        className="flex flex-col items-center gap-1.5 group"
+                        className="flex flex-col items-center gap-1 group relative"
                       >
+                        {isLocked && (
+                          <span className="rounded-full text-white px-1.5 py-px mb-0.5" style={{ backgroundColor: '#2A2118', fontSize: '7px', fontWeight: 700, letterSpacing: '0.05em', lineHeight: '1.4' }}>
+                            PRO
+                          </span>
+                        )}
+                        {!isLocked && <span className="mb-0.5" style={{ height: '13px' }} />}
                         <div className={cn(
-                          'relative w-10 h-10 rounded-full border-2 transition-all flex items-center justify-center overflow-hidden',
+                          'w-10 h-10 rounded-full border-2 transition-all flex items-center justify-center',
                           isActive ? 'border-[#2A2118] ring-2 ring-[#2A2118]/20 scale-110' : 'border-[#EEEAE3] hover:border-[#D5CFC7] hover:scale-105'
                         )} style={{ background: tmpl.colors.background }}>
-                          <div className="absolute inset-0 rounded-full" style={{ background: `linear-gradient(135deg, ${tmpl.colors.primaryAccent}40, transparent 60%)` }} />
                           <div className="w-5 h-0.5 rounded-full" style={{ background: tmpl.colors.primaryAccent }} />
-                          {isLocked && (
-                            <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 flex items-center justify-center rounded-full text-white px-1.5 py-0.5" style={{ backgroundColor: '#2A2118', fontSize: '7px', fontWeight: 700, letterSpacing: '0.05em' }}>
-                              PRO
-                            </div>
-                          )}
                         </div>
-                        <span className={cn('text-[10px] transition-colors', isActive ? 'font-medium' : '')} style={{ color: isActive ? '#2A2118' : '#B8B0A5' }}>
+                        <span className={cn('text-[10px] transition-colors mt-0.5', isActive ? 'font-medium' : '')} style={{ color: isActive ? '#2A2118' : '#B8B0A5' }}>
                           {tmpl.name}
                         </span>
                       </button>
