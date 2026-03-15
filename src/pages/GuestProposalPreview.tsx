@@ -160,6 +160,8 @@ export default function GuestProposalPreview() {
     (guestOnboarding?.teamMembers || []).filter((m: any) => m.name)
   );
 
+  const [localDifferentiators, setLocalDifferentiators] = useState<any[]>(guestOnboarding?.differentiators || []);
+
   const saveGuestTeam = useCallback((team: any[]) => {
     try {
       const raw = localStorage.getItem('propopad_guest_onboarding');
@@ -182,7 +184,7 @@ export default function GuestProposalPreview() {
 
   const identity = guestOnboarding?.agencyIdentity || {};
   const currencySymbol = guestProposal.currencySymbol || '$';
-  const differentiators = guestOnboarding?.differentiators || [];
+  const differentiators = localDifferentiators;
   const testimonials = (guestOnboarding?.testimonials || []).filter((t: any) => t.approved);
   const clientName = guestProposal.clientName || 'Client';
   const agencyName = identity.name || 'Your Agency';
@@ -886,6 +888,8 @@ export default function GuestProposalPreview() {
                             outOfScope={showOutOfScope ? (svc.out_of_scope || []) : []}
                             isAddon={svc.service_type === 'addon'}
                             delay={i * 0.1}
+                            onNameEdit={(val) => handleServiceEdit(i, 'name', val)}
+                            onDescriptionEdit={(val) => handleServiceEdit(i, 'description', val)}
                             onDeliverablesEdit={(dels) => handleServiceEdit(i, 'deliverables', dels)}
                           />
                         );
@@ -951,7 +955,10 @@ export default function GuestProposalPreview() {
                     </div>
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                       {differentiators.map((d: any, i: number) => (
-                        <WhyUsCard key={i} title={d.title} description={d.description || ''} statValue={d.stat_value} statLabel={d.stat_label} icon={d.icon} delay={i * 0.1} />
+                        <WhyUsCard key={i} title={d.title} description={d.description || ''} statValue={d.stat_value} statLabel={d.stat_label} icon={d.icon} delay={i * 0.1}
+                          onTitleEdit={(val) => setLocalDifferentiators(prev => prev.map((x, j) => j === i ? { ...x, title: val } : x))}
+                          onDescriptionEdit={(val) => setLocalDifferentiators(prev => prev.map((x, j) => j === i ? { ...x, description: val } : x))}
+                        />
                       ))}
                     </div>
                     {/* Team Members Block */}
