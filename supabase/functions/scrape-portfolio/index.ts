@@ -99,25 +99,103 @@ function extractImages(html: string, baseUrl: string): { url: string; alt: strin
   return images;
 }
 
-/** Fetch a case study subpage and extract text content */
-async function fetchSubpageContent(subpageUrl: string): Promise<string> {
+/** Extract the best hero/feature image from a detail page HTML */
+function extractHeroImage(html: string, baseUrl: string): string | null {
+  // 1. Check og:image meta tag (highest priority — curated by site owner)
+  const ogMatch = html.match(/<meta\s[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i)
+    || html.match(/<meta\s[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+  if (ogMatch?.[1]) {
+    const resolved = resolveUrl(ogMatch[1], baseUrl);
+    if (resolved && !resolved.includes(".svg")) return resolved;
+  }
+
+  // 2. Check twitter:image
+  const twitterMatch = html.match(/<meta\s[^>]*(?:name|property)=["']twitter:image["'][^>]*content=["']([^"']+)["']/i)
+    || html.match(/<meta\s[^>]*content=["']([^"']+)["'][^>]*(?:name|property)=["']twitter:image["']/i);
+  if (twitterMatch?.[1]) {
+    const resolved = resolveUrl(twitterMatch[1], baseUrl);
+    if (resolved && !resolved.includes(".svg")) return resolved;
+  }
+
+  // 3. Look for the first large image in the main content area
+  // Strip nav/header/footer first to focus on content
+  const contentHtml = html
+    .replace(/<nav[\s\S]*?<\/nav>/gi, "")
+    .replace(/<footer[\s\S]*?<\/footer>/gi, "")
+    .replace(/<header[\s\S]*?<\/header>/gi, "");
+
+  const imgTagRegex = /<img\s[^>]*>/gi;
+  let tagMatch;
+  while ((tagMatch = imgTagRegex.exec(contentHtml)) !== null) {
+    const tag = tagMatch[0];
+
+    // Check if it has a meaningful width (skip tiny images)
+    const widthMatch = tag.match(/width=["']?(\d+)/i);
+    if (widthMatch && parseInt(widthMatch[1]) < 200) continue;
+
+    // Skip known non-content images
+    if (tag.includes("avatar") || tag.includes("icon") || tag.includes("logo") || 
+        tag.includes("gravatar") || tag.includes("emoji") || tag.includes("badge")) continue;
+
+    // Extract best src (data-src > src, skip data: URIs)
+    const dataSrcMatch = tag.match(/data-src=["']([^"']+)["']/i);
+    const srcMatch = tag.match(/\ssrc=["']([^"']+)["']/i);
+    const dataSrcsetMatch = tag.match(/data-srcset=["']([^"']+)["']/i);
+
+    let bestSrc = "";
+    if (dataSrcMatch?.[1]) bestSrc = dataSrcMatch[1];
+    else if (srcMatch?.[1] && !srcMatch[1].startsWith("data:")) bestSrc = srcMatch[1];
+    else if (dataSrcsetMatch?.[1]) {
+      bestSrc = dataSrcsetMatch[1].split(",")[0].trim().split(/\s+/)[0];
+    }
+
+    const resolved = resolveUrl(bestSrc, baseUrl);
+    if (resolved && !resolved.includes(".svg") && !resolved.includes("favicon") && !resolved.includes("pixel")) {
+      return resolved;
+    }
+  }
+
+  // 4. Check for hero background images in inline styles
+  const bgMatch = contentHtml.match(/class=["'][^"']*hero[^"']*["'][^>]*style=["'][^"']*background(?:-image)?:\s*url\(["']?([^"')]+)["']?\)/i)
+    || contentHtml.match(/style=["'][^"']*background(?:-image)?:\s*url\(["']?([^"')]+)["']?\)[^"']*["'][^>]*class=["'][^"']*hero/i);
+  if (bgMatch?.[1]) {
+    const resolved = resolveUrl(bgMatch[1], baseUrl);
+    if (resolved) return resolved;
+  }
+
+  return null;
+}
+
+interface SubpageData {
+  text: string;
+  heroImage: string | null;
+}
+
+/** Fetch a case study subpage and extract text content + hero image */
+async function fetchSubpageData(subpageUrl: string, baseUrl: string): Promise<SubpageData> {
   try {
     const resp = await fetch(subpageUrl, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; Propopad/1.0)" },
       redirect: "follow",
     });
-    if (!resp.ok) return "";
+    if (!resp.ok) return { text: "", heroImage: null };
     const html = await resp.text();
-    // Strip scripts/styles/nav/footer/header
+
+    // Extract hero image before stripping HTML
+    const heroImage = extractHeroImage(html, baseUrl);
+
+    // Strip scripts/styles/nav/footer/header for text
     const clean = html
       .replace(/<script[\s\S]*?<\/script>/gi, "")
       .replace(/<style[\s\S]*?<\/style>/gi, "")
       .replace(/<nav[\s\S]*?<\/nav>/gi, "")
       .replace(/<footer[\s\S]*?<\/footer>/gi, "")
       .replace(/<header[\s\S]*?<\/header>/gi, "");
-    return clean.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 2000);
+    const text = clean.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 2000);
+
+    return { text, heroImage };
   } catch {
-    return "";
+    return { text: "", heroImage: null };
   }
 }
 
@@ -125,7 +203,6 @@ async function fetchSubpageContent(subpageUrl: string): Promise<string> {
 function extractCaseStudyLinks(html: string, baseUrl: string): Map<string, string> {
   const links = new Map<string, string>(); // title -> url
   
-  // Look for links inside case study containers or portfolio items
   const linkRegex = /<a\s[^>]*href=["']([^"']+)["'][^>]*(?:title=["']([^"']+)["'])?[^>]*>/gi;
   let match;
   while ((match = linkRegex.exec(html)) !== null) {
@@ -133,15 +210,10 @@ function extractCaseStudyLinks(html: string, baseUrl: string): Map<string, strin
     const title = match[2] ? decodeHtmlEntities(match[2]) : "";
     if (!href || href === "#" || href.includes("javascript:")) continue;
     
-    // Only include links that look like case study detail pages (not external)
     const resolved = resolveUrl(href, baseUrl);
-    if (!resolved) continue;
-    
-    // Must be same domain and look like a detail page
-    if (!resolved.startsWith(baseUrl)) continue;
+    if (!resolved || !resolved.startsWith(baseUrl)) continue;
     if (resolved === baseUrl || resolved === baseUrl + "/") continue;
     
-    // Check if it looks like a case study / portfolio detail URL
     const path = new URL(resolved).pathname;
     if (path.split("/").filter(Boolean).length >= 2 && title) {
       links.set(title, resolved);
@@ -187,24 +259,32 @@ serve(async (req) => {
 
     const baseUrl = new URL(formattedUrl).origin;
 
-    // Extract images with lazy-loading support
+    // Extract images with lazy-loading support from listing page
     const pageImages = extractImages(html, baseUrl);
-    console.log(`Extracted ${pageImages.length} images (with lazy-load support)`);
+    console.log(`Extracted ${pageImages.length} images from listing page`);
 
     // Extract case study subpage links
     const caseStudyLinks = extractCaseStudyLinks(html, baseUrl);
     console.log(`Found ${caseStudyLinks.size} case study subpage links`);
 
-    // Fetch up to 12 subpages in parallel for descriptions
+    // Fetch up to 12 subpages in parallel for descriptions AND hero images
     const subpageEntries = Array.from(caseStudyLinks.entries()).slice(0, 12);
-    const subpageContents = new Map<string, string>();
+    const subpageResults = new Map<string, SubpageData>();
     if (subpageEntries.length > 0) {
       const fetches = subpageEntries.map(async ([title, spUrl]) => {
-        const content = await fetchSubpageContent(spUrl);
-        if (content) subpageContents.set(title, content);
+        const data = await fetchSubpageData(spUrl, baseUrl);
+        if (data.text || data.heroImage) subpageResults.set(title, data);
       });
       await Promise.all(fetches);
-      console.log(`Fetched ${subpageContents.size} subpage contents for descriptions`);
+      
+      const heroCount = Array.from(subpageResults.values()).filter(d => d.heroImage).length;
+      console.log(`Fetched ${subpageResults.size} subpages (${heroCount} with hero images)`);
+    }
+
+    // Build a map of title -> hero images from subpages (for AI to use)
+    const subpageHeroImages: Record<string, string> = {};
+    for (const [title, data] of subpageResults) {
+      if (data.heroImage) subpageHeroImages[title] = data.heroImage;
     }
 
     // Strip scripts/styles for cleaner text extraction
