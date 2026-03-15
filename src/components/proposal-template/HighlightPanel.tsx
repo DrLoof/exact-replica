@@ -212,7 +212,7 @@ export function HighlightPanel({
   const styles = {
     default: { bg: "#FAFAFA", text: brand.darkColor, label: "#999", border: "#EBEBEB" },
     accent: { bg: brand.primaryColor, text: "#FFFFFF", label: "rgba(255,255,255,0.6)", border: "rgba(255,255,255,0.15)" },
-    dark: { bg: brand.darkColor, text: "#FFFFFF", label: "rgba(255,255,255,0.6)", border: "rgba(255,255,255,0.1)" },
+    dark: { bg: "#0A0A0A", text: "#FFFFFF", label: "rgba(255,255,255,0.6)", border: "rgba(255,255,255,0.1)" },
   };
   const s = styles[variant];
 
