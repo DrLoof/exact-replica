@@ -1,11 +1,12 @@
 import { AppShell } from '@/components/layout/AppShell';
-import { Building2, Palette, Receipt, UserPlus, ChevronRight, Quote, Award } from 'lucide-react';
+import { Building2, Palette, Receipt, UserPlus, ChevronRight, Quote, Award, Image } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const settingsSections = [
   { label: 'Agency Profile', desc: 'Company name, contact info, and address', icon: Building2, path: '/settings/agency' },
   { label: 'Branding', desc: 'Logo, colors, and visual identity', icon: Palette, path: '/settings/branding' },
   { label: 'Pricing & Terms', desc: 'Currency, rates, payment templates, and legal clauses', icon: Receipt, path: '/settings/pricing' },
+  { label: 'Portfolio', desc: 'Showcase previous work and case studies in proposals', icon: Image, path: '/settings/portfolio' },
   { label: 'Testimonials', desc: 'Client quotes and success metrics for proposals', icon: Quote, path: '/settings/testimonials' },
   { label: 'Why Us — Differentiators', desc: 'Stats and reasons that set you apart', icon: Award, path: '/settings/differentiators' },
   { label: 'Team', desc: 'Invite and manage team members', icon: UserPlus, path: '/settings/team' },

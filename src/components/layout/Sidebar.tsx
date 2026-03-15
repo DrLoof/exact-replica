@@ -1,7 +1,7 @@
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, Users, Layers, Package,
-  Building2, Palette, Receipt, UserPlus, LogOut, Zap, X,
+  Building2, Palette, Receipt, UserPlus, LogOut, Zap, X, Image,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import logoOrange from '@/assets/logo_propopad_small.svg';
@@ -20,6 +20,7 @@ const settingsNav = [
   { label: 'Agency Profile', icon: Building2, path: '/settings/agency' },
   { label: 'Branding', icon: Palette, path: '/settings/branding' },
   { label: 'Pricing & Terms', icon: Receipt, path: '/settings/pricing' },
+  { label: 'Portfolio', icon: Image, path: '/settings/portfolio' },
   { label: 'Team', icon: UserPlus, path: '/settings/team' },
 ];
 
