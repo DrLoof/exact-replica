@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useRef } from "react";
 import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
 import { EditableText } from "./EditableText";
-import { Quote } from "lucide-react";
+import { Quote, Camera } from "lucide-react";
 
 interface TestimonialCardProps {
   clientName: string;
@@ -21,6 +21,7 @@ interface TestimonialCardProps {
   onCompanyEdit?: (value: string) => void;
   onMetricValueEdit?: (value: string) => void;
   onMetricLabelEdit?: (value: string) => void;
+  onAvatarUpload?: (file: File) => void;
 }
 
 export function TestimonialCard({
@@ -28,6 +29,7 @@ export function TestimonialCard({
   metricValue, metricLabel, avatarUrl,
   featured = false, delay = 0, onQuoteEdit, onNameEdit,
   onTitleEdit, onCompanyEdit, onMetricValueEdit, onMetricLabelEdit,
+  onAvatarUpload,
 }: TestimonialCardProps) {
   const brand = useBrand();
   const template = useTemplate();
@@ -37,6 +39,43 @@ export function TestimonialCard({
   const accent = template.colors.primaryAccent;
   const secondary = template.colors.secondaryAccent;
   const dark = template.colors.primaryDark;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarClick = () => {
+    if (onAvatarUpload) fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onAvatarUpload) {
+      onAvatarUpload(file);
+      e.target.value = '';
+    }
+  };
+
+  const renderAvatar = (size: string, rounded: string, bgStyle: React.CSSProperties, textStyle: React.CSSProperties) => {
+    const sizeClass = size === 'lg' ? 'w-12 h-12' : 'w-10 h-10';
+    const canUpload = !!onAvatarUpload;
+    return (
+      <div className={`relative ${canUpload ? 'cursor-pointer group/avatar' : ''}`} onClick={handleAvatarClick}>
+        {canUpload && (
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+        )}
+        {avatarUrl ? (
+          <img src={avatarUrl} alt={clientName} className={`${sizeClass} ${rounded} object-cover`} />
+        ) : (
+          <div className={`${sizeClass} ${rounded} flex items-center justify-center`} style={bgStyle}>
+            <span style={textStyle}>{clientName.charAt(0)}</span>
+          </div>
+        )}
+        {canUpload && (
+          <div className={`absolute inset-0 ${rounded} bg-black/50 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity print:hidden`}>
+            <Camera className="h-4 w-4 text-white" />
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderName = () => onNameEdit ? (
     <EditableText value={clientName} placeholder="Client name..." onSave={onNameEdit} as="span" />
@@ -112,13 +151,7 @@ export function TestimonialCard({
         )}
         <div className="pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}>
           <div className="flex items-center gap-4">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt={clientName} className="w-12 h-12 rounded-xl object-cover" />
-            ) : (
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>
-                <span className="text-white" style={{ fontSize: "16px", fontWeight: 600 }}>{clientName.charAt(0)}</span>
-              </div>
-            )}
+            {renderAvatar('lg', 'rounded-xl', { backgroundColor: "rgba(255,255,255,0.2)" }, { fontSize: "16px", fontWeight: 600, color: "white" })}
             <div>
               <span className="block text-white" style={{ fontSize: "15px", fontWeight: 600 }}>{onNameEdit ? renderName() : clientName}</span>
               {renderTitleCompany({ fontSize: "13px", fontWeight: 400, color: "rgba(255,255,255,0.5)" })}
@@ -160,13 +193,7 @@ export function TestimonialCard({
         )}
         <div className="pt-5" style={{ borderTop: `1px solid ${border}` }}>
           <div className="flex items-center gap-3">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt={clientName} className="w-10 h-10 rounded-xl object-cover" />
-            ) : (
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: bg, color: accent }}>
-                <span style={{ fontSize: "14px", fontWeight: 600 }}>{clientName.charAt(0)}</span>
-              </div>
-            )}
+            {renderAvatar('sm', 'rounded-xl', { backgroundColor: bg, color: accent }, { fontSize: "14px", fontWeight: 600 })}
             <div>
               <span className="block" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>{onNameEdit ? renderName() : clientName}</span>
               {renderTitleCompany({ fontSize: "12px", fontWeight: 400, color: template.colors.textFaint })}
@@ -206,13 +233,7 @@ export function TestimonialCard({
         )}
         <div className="pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}>
           <div className="flex items-center gap-4">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt={clientName} className="w-12 h-12 rounded-2xl object-cover" />
-            ) : (
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>
-                <span className="text-white" style={{ fontSize: "16px", fontWeight: 600 }}>{clientName.charAt(0)}</span>
-              </div>
-            )}
+            {renderAvatar('lg', 'rounded-2xl', { backgroundColor: "rgba(255,255,255,0.2)" }, { fontSize: "16px", fontWeight: 600, color: "white" })}
             <div>
               <span className="block text-white" style={{ fontSize: "15px", fontWeight: 600 }}>{onNameEdit ? renderName() : clientName}</span>
               {renderTitleCompany({ fontSize: "13px", fontWeight: 400, color: "rgba(255,255,255,0.5)" })}
@@ -256,14 +277,7 @@ export function TestimonialCard({
         )}
         <div className="pt-5" style={{ borderTop: `1px solid ${border}` }}>
           <div className="flex items-center gap-3">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt={clientName} className="w-10 h-10 rounded-2xl object-cover" />
-            ) : (
-              <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
-                style={{ backgroundColor: `${accent}15`, color: accent }}>
-                <span style={{ fontSize: "14px", fontWeight: 600 }}>{clientName.charAt(0)}</span>
-              </div>
-            )}
+            {renderAvatar('sm', 'rounded-2xl', { backgroundColor: `${accent}15`, color: accent }, { fontSize: "14px", fontWeight: 600 })}
             <div>
               <span className="block" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>{onNameEdit ? renderName() : clientName}</span>
               {renderTitleCompany({ fontSize: "12px", fontWeight: 400, color: template.colors.textFaint })}
@@ -303,14 +317,7 @@ export function TestimonialCard({
         )}
         <div className="pt-6 mb-0" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}>
           <div className="flex items-center gap-4">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt={clientName} className="w-12 h-12 rounded-full object-cover" />
-            ) : (
-              <div className="w-12 h-12 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: accent, boxShadow: "2px 2px 0px rgba(255,255,255,0.15)" }}>
-                <span className="text-white" style={{ fontSize: "16px", fontWeight: 700 }}>{clientName.charAt(0)}</span>
-              </div>
-            )}
+            {renderAvatar('lg', 'rounded-full', { backgroundColor: accent, boxShadow: "2px 2px 0px rgba(255,255,255,0.15)" }, { fontSize: "16px", fontWeight: 700, color: "white" })}
             <div>
               <span className="block text-white" style={{ fontSize: "15px", fontWeight: 600 }}>{onNameEdit ? renderName() : clientName}</span>
               {renderTitleCompany({ fontSize: "13px", fontWeight: 400, color: "rgba(255,255,255,0.45)" })}
@@ -350,14 +357,7 @@ export function TestimonialCard({
         )}
         <div className="pt-5" style={{ borderTop: `2px dashed ${template.colors.border}` }}>
           <div className="flex items-center gap-3">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt={clientName} className="w-10 h-10 rounded-full object-cover" />
-            ) : (
-              <div className="w-10 h-10 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: dark, boxShadow: `2px 2px 0px ${accent}40` }}>
-                <span className="text-white" style={{ fontSize: "14px", fontWeight: 700 }}>{clientName.charAt(0)}</span>
-              </div>
-            )}
+            {renderAvatar('sm', 'rounded-full', { backgroundColor: dark, boxShadow: `2px 2px 0px ${accent}40` }, { fontSize: "14px", fontWeight: 700, color: "white" })}
             <div>
               <span className="block" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>{onNameEdit ? renderName() : clientName}</span>
               {renderTitleCompany({ fontSize: "12px", fontWeight: 400, color: template.colors.textFaint })}
@@ -387,13 +387,7 @@ export function TestimonialCard({
           <blockquote className="text-white mb-8" style={{ fontSize: "20px", fontWeight: 400, lineHeight: 1.6 }}>"{quote}"</blockquote>
         )}
         <div className="flex items-center gap-4">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt={clientName} className="w-12 h-12 rounded-full object-cover" />
-          ) : (
-            <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: brand.primaryColor }}>
-              <span className="text-white" style={{ fontSize: "16px", fontWeight: 700 }}>{clientName.charAt(0)}</span>
-            </div>
-          )}
+          {renderAvatar('lg', 'rounded-full', { backgroundColor: brand.primaryColor }, { fontSize: "16px", fontWeight: 700, color: "white" })}
           <div>
             <span className="block text-white" style={{ fontSize: "15px", fontWeight: 600 }}>{onNameEdit ? renderName() : clientName}</span>
             {renderTitleCompany({ fontSize: "13px", fontWeight: 400, color: "rgba(255,255,255,0.5)" })}
@@ -427,14 +421,7 @@ export function TestimonialCard({
         <blockquote className="text-[#555] mb-6" style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.6, fontFamily: "'Inter', sans-serif" }}>"{quote}"</blockquote>
       )}
       <div className="flex items-center gap-3">
-        {avatarUrl ? (
-          <img src={avatarUrl} alt={clientName} className="w-10 h-10 rounded-full object-cover" />
-        ) : (
-          <div className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: `${brand.primaryColor}15`, color: brand.primaryColor }}>
-            <span style={{ fontSize: "14px", fontWeight: 700 }}>{clientName.charAt(0)}</span>
-          </div>
-        )}
+        {renderAvatar('sm', 'rounded-full', { backgroundColor: `${brand.primaryColor}15`, color: brand.primaryColor }, { fontSize: "14px", fontWeight: 700 })}
         <div>
           <span className="block" style={{ fontSize: "14px", fontWeight: 600, color: brand.darkColor }}>{onNameEdit ? renderName() : clientName}</span>
           {renderTitleCompany({ fontSize: "12px", fontWeight: 400, color: "#999" })}

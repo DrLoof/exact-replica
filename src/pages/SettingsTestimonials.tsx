@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AppShell } from '@/components/layout/AppShell';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Trash2, Pencil, X, Save, Star, Quote } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Pencil, X, Save, Star, Quote, Camera, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface Testimonial {
@@ -31,6 +31,9 @@ export default function SettingsTestimonials() {
   const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { if (agency) load(); }, [agency]);
 
@@ -41,7 +44,7 @@ export default function SettingsTestimonials() {
     setLoading(false);
   };
 
-  const openCreate = () => { setForm(emptyForm); setEditId(null); setShowModal(true); };
+  const openCreate = () => { setForm(emptyForm); setEditId(null); setAvatarFile(null); setAvatarPreview(null); setShowModal(true); };
   const openEdit = (t: Testimonial) => {
     setForm({
       client_name: t.client_name, client_title: t.client_title || '', client_company: t.client_company || '',
@@ -49,12 +52,61 @@ export default function SettingsTestimonials() {
       avatar_url: t.avatar_url || '', is_featured: t.is_featured || false,
     });
     setEditId(t.id);
+    setAvatarFile(null);
+    setAvatarPreview(t.avatar_url || null);
     setShowModal(true);
+  };
+
+  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setAvatarPreview(reader.result as string);
+    reader.readAsDataURL(file);
   };
 
   const handleSave = async () => {
     if (!agency || !form.client_name.trim() || !form.quote.trim()) return;
     setSaving(true);
+
+    let avatarUrl = form.avatar_url || null;
+
+    // If we're editing, use existing id; for new, we need to insert first to get the id
+    if (avatarFile) {
+      const ext = avatarFile.name.split('.').pop() || 'jpg';
+      // For new testimonials, insert first to get id, then upload
+      if (!editId) {
+        const { data: inserted, error: insertErr } = await supabase.from('testimonials').insert({
+          agency_id: agency.id,
+          client_name: form.client_name.trim(),
+          client_title: form.client_title || null,
+          client_company: form.client_company || null,
+          quote: form.quote.trim(),
+          metric_value: form.metric_value || null,
+          metric_label: form.metric_label || null,
+          avatar_url: null,
+          is_featured: form.is_featured,
+        }).select('id').single();
+        if (insertErr || !inserted) { toast.error('Failed to create'); setSaving(false); return; }
+        const path = `${agency.id}/testimonials/${inserted.id}.${ext}`;
+        await supabase.storage.from('agency-logos').upload(path, avatarFile, { upsert: true });
+        const { data: urlData } = supabase.storage.from('agency-logos').getPublicUrl(path);
+        avatarUrl = urlData.publicUrl + '?t=' + Date.now();
+        await supabase.from('testimonials').update({ avatar_url: avatarUrl }).eq('id', inserted.id);
+        toast.success('Testimonial added');
+        setShowModal(false);
+        setSaving(false);
+        load();
+        return;
+      } else {
+        const path = `${agency.id}/testimonials/${editId}.${ext}`;
+        await supabase.storage.from('agency-logos').upload(path, avatarFile, { upsert: true });
+        const { data: urlData } = supabase.storage.from('agency-logos').getPublicUrl(path);
+        avatarUrl = urlData.publicUrl + '?t=' + Date.now();
+      }
+    }
+
     const payload = {
       agency_id: agency.id,
       client_name: form.client_name.trim(),
@@ -63,7 +115,7 @@ export default function SettingsTestimonials() {
       quote: form.quote.trim(),
       metric_value: form.metric_value || null,
       metric_label: form.metric_label || null,
-      avatar_url: form.avatar_url || null,
+      avatar_url: avatarUrl,
       is_featured: form.is_featured,
     };
 
@@ -121,8 +173,12 @@ export default function SettingsTestimonials() {
             <div key={t.id} className="rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-sm">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4 flex-1 min-w-0">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-foreground">
-                    {t.client_name.charAt(0)}
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent overflow-hidden text-sm font-bold text-accent-foreground">
+                    {t.avatar_url ? (
+                      <img src={t.avatar_url} alt={t.client_name} className="w-full h-full object-cover" />
+                    ) : (
+                      t.client_name.charAt(0)
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -197,8 +253,24 @@ export default function SettingsTestimonials() {
                 </div>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Avatar URL</label>
-                <input value={form.avatar_url} onChange={e => setForm(p => ({ ...p, avatar_url: e.target.value }))} placeholder="https://..." className={inputCls} />
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Photo</label>
+                <div className="flex items-center gap-4">
+                  <div
+                    className="relative w-14 h-14 rounded-full overflow-hidden cursor-pointer group border-2 border-dashed border-border hover:border-brand transition-colors flex items-center justify-center bg-muted"
+                    onClick={() => avatarInputRef.current?.click()}
+                  >
+                    <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarSelect} />
+                    {avatarPreview ? (
+                      <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <Camera className="h-5 w-5 text-muted-foreground" />
+                    )}
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Upload className="h-4 w-4 text-white" />
+                    </div>
+                  </div>
+                  <span className="text-xs text-muted-foreground">Click to upload a photo</span>
+                </div>
               </div>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={form.is_featured} onChange={e => setForm(p => ({ ...p, is_featured: e.target.checked }))}
