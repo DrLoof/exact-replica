@@ -485,6 +485,15 @@ export function OnboardingWizard() {
             onTeamMembersChange={setTeamMembers}
           />
         )}
+        {screen === 'portfolio' && (
+          <PortfolioStep
+            onContinue={handlePortfolioContinue}
+            onSkip={handlePortfolioSkip}
+            serviceGroups={Object.values(groupNameMap)}
+            detectedPortfolioUrl={scrapeData?.portfolio_url || null}
+            saving={saving}
+          />
+        )}
       </div>
 
       {/* Signup Gate Modal */}
