@@ -45,6 +45,8 @@ export function ReviewScreen({
   saving,
   addedBundles = new Set(),
   onAddBundle,
+  teamMembers,
+  onTeamMembersChange,
 }: ReviewScreenProps) {
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [showAllServices, setShowAllServices] = useState(false);
