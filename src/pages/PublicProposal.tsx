@@ -72,6 +72,14 @@ export default function PublicProposal() {
     setTermsClauses(termsRes.data || []);
     setTimelinePhases(phasesRes.data || []);
     setPaymentTemplates(ptRes.data || []);
+
+    // Load portfolio items if selected
+    const selectedPortfolioIds: string[] = prop.selected_portfolio_ids || [];
+    if (selectedPortfolioIds.length > 0 && prop.portfolio_section_visible && prop.agency_id) {
+      const { data: piData } = await supabase.from('portfolio_items').select('*').eq('agency_id', prop.agency_id).eq('is_active', true).in('id', selectedPortfolioIds);
+      setPortfolioItems((piData || []).map((d: any) => ({ ...d, images: d.images || [] })));
+    }
+
     setLoading(false);
   };
 
