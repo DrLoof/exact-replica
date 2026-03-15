@@ -160,6 +160,8 @@ export default function GuestProposalPreview() {
     (guestOnboarding?.teamMembers || []).filter((m: any) => m.name)
   );
 
+  const [localDifferentiators, setLocalDifferentiators] = useState<any[]>(guestOnboarding?.differentiators || []);
+
   const saveGuestTeam = useCallback((team: any[]) => {
     try {
       const raw = localStorage.getItem('propopad_guest_onboarding');
@@ -182,7 +184,6 @@ export default function GuestProposalPreview() {
 
   const identity = guestOnboarding?.agencyIdentity || {};
   const currencySymbol = guestProposal.currencySymbol || '$';
-  const [localDifferentiators, setLocalDifferentiators] = useState<any[]>(guestOnboarding?.differentiators || []);
   const differentiators = localDifferentiators;
   const testimonials = (guestOnboarding?.testimonials || []).filter((t: any) => t.approved);
   const clientName = guestProposal.clientName || 'Client';
