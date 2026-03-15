@@ -400,15 +400,12 @@ export const defaultModulesByGroup: Record<string, DefaultModule[]> = {
         'Provide Google Analytics and Search Console access',
         'Provide CMS access for on-page changes',
         'Implement technical fixes or provide developer access',
-        'Approve content recommendations before production',
         'Share business priorities and seasonal patterns',
       ],
       outOfScope: [
-        'Content writing',
-        'Link building outreach',
-        'Paid search/PPC',
+        'Content writing (available as separate service)',
+        'Paid search/PPC management',
         'Website design or major development changes',
-        'Social media optimization',
       ],
       defaultTimeline: 'Audit: 2-3 weeks. Ongoing: minimum 6-month engagement for meaningful results. Monthly implementation cycles with quarterly strategy reviews.',
       suggestedKpis: [
