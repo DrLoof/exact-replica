@@ -3,8 +3,16 @@ import { AppShell } from '@/components/layout/AppShell';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, GripVertical, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
+interface TeamMember {
+  id: string;
+  name: string;
+  title: string;
+  photo_url: string | null;
+  bio: string | null;
+}
 
 export default function SettingsAgency() {
   const { agency } = useAuth();
@@ -13,6 +21,7 @@ export default function SettingsAgency() {
     tagline: '', about_text: '', years_experience: '' as string,
     address_line1: '', address_line2: '', city: '', state: '', zip: '', country: '',
   });
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -32,6 +41,8 @@ export default function SettingsAgency() {
         zip: agency.zip || '',
         country: agency.country || '',
       });
+      const raw = (agency as any).team_members;
+      if (Array.isArray(raw)) setTeamMembers(raw);
     }
   }, [agency]);
 
@@ -39,11 +50,33 @@ export default function SettingsAgency() {
     if (!agency) return;
     setSaving(true);
     const { years_experience, ...rest } = form;
-    const payload = { ...rest, years_experience: years_experience ? parseInt(years_experience, 10) : null };
-    const { error } = await supabase.from('agencies').update(payload).eq('id', agency.id);
+    const payload = {
+      ...rest,
+      years_experience: years_experience ? parseInt(years_experience, 10) : null,
+      team_members: teamMembers,
+    };
+    const { error } = await supabase.from('agencies').update(payload as any).eq('id', agency.id);
     if (error) toast.error('Failed to save');
     else toast.success('Agency profile updated');
     setSaving(false);
+  };
+
+  const addTeamMember = () => {
+    setTeamMembers(prev => [...prev, {
+      id: `tm_${Date.now()}`,
+      name: '',
+      title: '',
+      photo_url: null,
+      bio: null,
+    }]);
+  };
+
+  const updateMember = (id: string, field: keyof TeamMember, value: string) => {
+    setTeamMembers(prev => prev.map(m => m.id === id ? { ...m, [field]: value || null } : m));
+  };
+
+  const removeMember = (id: string) => {
+    setTeamMembers(prev => prev.filter(m => m.id !== id));
   };
 
   const Field = ({ label, name, type = 'text', span = 1 }: { label: string; name: keyof typeof form; type?: string; span?: number }) => (
@@ -104,6 +137,76 @@ export default function SettingsAgency() {
             <Field label="ZIP / Postal Code" name="zip" />
             <Field label="Country" name="country" />
           </div>
+        </div>
+
+        {/* Team Members Section */}
+        <div className="rounded-xl border border-border bg-card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-sm font-semibold text-foreground">Team Members</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Add team members to feature in proposals</p>
+            </div>
+            <button
+              onClick={addTeamMember}
+              className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add Member
+            </button>
+          </div>
+
+          {teamMembers.length === 0 ? (
+            <div className="text-center py-10 border border-dashed border-border rounded-lg">
+              <User className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">No team members yet</p>
+              <p className="text-xs text-muted-foreground/60 mt-1">Team members will appear in the "Why Us" section of your proposals</p>
+              <button onClick={addTeamMember} className="mt-3 text-xs font-medium text-brand hover:text-brand-hover">
+                + Add your first team member
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {teamMembers.map((member) => (
+                <div key={member.id} className="flex items-start gap-3 rounded-lg border border-border p-4 group">
+                  <div className="flex items-center gap-2 pt-1">
+                    <GripVertical className="h-4 w-4 text-muted-foreground/30 cursor-grab" />
+                    {member.photo_url ? (
+                      <img src={member.photo_url} alt={member.name} className="h-10 w-10 rounded-full object-cover" />
+                    ) : (
+                      <div className="h-10 w-10 rounded-full bg-brand/10 flex items-center justify-center text-brand text-xs font-bold">
+                        {member.name ? member.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?'}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input
+                      placeholder="Full name"
+                      value={member.name}
+                      onChange={e => updateMember(member.id, 'name', e.target.value)}
+                      className="rounded-md border border-border bg-background px-2.5 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none"
+                    />
+                    <input
+                      placeholder="Job title"
+                      value={member.title}
+                      onChange={e => updateMember(member.id, 'title', e.target.value)}
+                      className="rounded-md border border-border bg-background px-2.5 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none"
+                    />
+                    <input
+                      placeholder="Short bio (optional)"
+                      value={member.bio || ''}
+                      onChange={e => updateMember(member.id, 'bio', e.target.value)}
+                      className="sm:col-span-2 rounded-md border border-border bg-background px-2.5 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none"
+                    />
+                  </div>
+                  <button
+                    onClick={() => removeMember(member.id)}
+                    className="p-1.5 rounded-md text-muted-foreground/40 hover:text-destructive hover:bg-destructive/5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </AppShell>
