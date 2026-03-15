@@ -770,7 +770,7 @@ export default function ProposalEditor() {
             agencyFullName: agency?.name || 'Agency',
             primaryColor: customColors?.primaryAccent || agency?.brand_color || '#fc956e',
             darkColor: agency?.dark_color || '#0A0A0A',
-            logoUrl: agency?.logo_url || null,
+            logoUrl: localLogoUrl || agency?.logo_url || null,
             logoInitial: (agency?.name || 'A').charAt(0).toUpperCase(),
             contactEmail: agency?.email || '',
             contactWebsite: agency?.website || '',
