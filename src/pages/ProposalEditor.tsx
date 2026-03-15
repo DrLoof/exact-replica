@@ -780,7 +780,7 @@ export default function ProposalEditor() {
                       >
                         {/* Drag handle */}
                         <span className={cn('transition-opacity', isLocked ? 'opacity-0' : 'opacity-0 group-hover:opacity-100')}
-                          style={{ color: '#C8C3BB', cursor: isLocked ? 'default' : 'grab' }}>
+                          style={{ color: isActive && !isHidden ? '#FFFFFF60' : '#C8C3BB', cursor: isLocked ? 'default' : 'grab' }}>
                           <GripVertical className="h-3.5 w-3.5" />
                         </span>
 
