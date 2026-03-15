@@ -16,6 +16,7 @@ interface HeroCoverProps {
   onSubtitleEdit?: (value: string) => void;
   onClientNameEdit?: (value: string) => void;
   onDateEdit?: (value: string) => void;
+  onLogoClick?: () => void;
 }
 
 function ElegantHeroCover({
