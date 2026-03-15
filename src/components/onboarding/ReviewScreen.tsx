@@ -359,6 +359,9 @@ export function ReviewScreen({
           </button>
         </div>
 
+        {/* Hidden file input — always rendered so logo click works in both modes */}
+        <input ref={fileInputRef} type="file" accept=".png,.svg,.webp" onChange={handleLogoUpload} className="hidden" />
+
         {editingSection === 'agency' ? (
           <div className="space-y-4">
             <input
