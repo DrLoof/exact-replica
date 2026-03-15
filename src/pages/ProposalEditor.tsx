@@ -1362,10 +1362,10 @@ export default function ProposalEditor() {
                 </div>
               </SectionWrapper>}
 
-              {/* Section 8: Signature */}
-              {!deletedSections.has(8) && <SectionWrapper idx={8} onDelete={deleteSection} label="Signature">
+              {/* Section 9: Signature */}
+              {!deletedSections.has(9) && <SectionWrapper idx={9} onDelete={deleteSection} label="Signature">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
-                  <PageWrapper pageNumber="09">
+                  <PageWrapper pageNumber="10">
                     <SignatureBlock
                       client={{
                         role: 'Client',
