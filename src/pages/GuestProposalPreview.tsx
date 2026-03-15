@@ -1070,6 +1070,8 @@ export default function GuestProposalPreview() {
                           onNameEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, client_name: val } : x))}
                           onTitleEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, client_title: val } : x))}
                           onCompanyEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, client_company: val } : x))}
+                          onMetricValueEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, metric_value: val } : x))}
+                          onMetricLabelEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, metric_label: val } : x))}
                           onRemove={() => setLocalTestimonials(prev => prev.filter((_, j) => j !== i))}
                         />
                       ))}
