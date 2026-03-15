@@ -266,7 +266,7 @@ export default function PublicProposal() {
                       : []
                   }
                   outOfScope={
-                    (proposal.show_out_of_scope ?? false) && (svc.show_out_of_scope !== false)
+                    (proposal.show_out_of_scope ?? true) && (svc.show_out_of_scope !== false)
                       ? (svc.out_of_scope || svc.module?.out_of_scope || [])
                       : []
                   }
