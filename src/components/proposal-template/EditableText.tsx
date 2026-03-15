@@ -5,14 +5,16 @@ interface EditableTextProps {
   value: string;
   placeholder?: string;
   onSave: (value: string) => void;
-  as?: "h1" | "h3" | "p" | "span";
+  as?: "h1" | "h3" | "p" | "span" | "div";
   className?: string;
   style?: React.CSSProperties;
+  multiline?: boolean;
 }
 
 /**
  * Inline-editable text that clears placeholder on focus,
  * shows a subtle editing indicator, and restores default if left empty.
+ * Supports multiline editing (Enter creates new lines) when multiline=true or as="p"/"div".
  */
 export function EditableText({
   value,
@@ -21,21 +23,23 @@ export function EditableText({
   as: Tag = "p",
   className = "",
   style,
+  multiline,
 }: EditableTextProps) {
   const brand = useBrand();
   const ref = useRef<HTMLElement>(null);
   const [editing, setEditing] = useState(false);
   const isPlaceholder = !value || value === placeholder;
 
+  // Default multiline for block elements
+  const isMultiline = multiline ?? (Tag === "p" || Tag === "div");
+
   const handleFocus = useCallback(() => {
     setEditing(true);
     const el = ref.current;
     if (!el) return;
-    // If showing placeholder/default text, clear it for a fresh start
     if (isPlaceholder) {
-      el.textContent = "";
+      el.innerHTML = "";
     }
-    // Select all existing text so user can type over it easily
     const range = document.createRange();
     const sel = window.getSelection();
     if (sel && el.childNodes.length > 0) {
@@ -45,18 +49,62 @@ export function EditableText({
     }
   }, [isPlaceholder]);
 
+  const getTextFromHtml = (el: HTMLElement): string => {
+    // Convert <br> and block elements to newlines, then get text
+    const clone = el.cloneNode(true) as HTMLElement;
+    // Replace <br> with newline markers
+    clone.querySelectorAll('br').forEach(br => br.replaceWith('\n'));
+    // Replace block-level divs/p with newline + text
+    clone.querySelectorAll('div, p').forEach(block => {
+      block.prepend(document.createTextNode('\n'));
+    });
+    return (clone.textContent || "").trim();
+  };
+
   const handleBlur = useCallback(() => {
     setEditing(false);
     const el = ref.current;
     if (!el) return;
-    const newText = (el.textContent || "").trim();
+    const newText = getTextFromHtml(el);
     if (newText && newText !== value) {
       onSave(newText);
     } else if (!newText) {
-      // Restore placeholder display
       el.textContent = placeholder || value;
     }
   }, [value, placeholder, onSave]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      if (isMultiline) {
+        // Allow default behavior (inserts <br> or <div>)
+        return;
+      }
+      // Single-line: save on Enter
+      e.preventDefault();
+      ref.current?.blur();
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      const el = ref.current;
+      if (el) {
+        el.textContent = value || placeholder || "";
+      }
+      setEditing(false);
+      ref.current?.blur();
+    }
+  }, [isMultiline, value, placeholder]);
+
+  // Render value with newlines as <br> elements
+  const renderContent = () => {
+    const text = value || placeholder || "";
+    if (!text.includes('\n')) return text;
+    return text.split('\n').map((line, i, arr) => (
+      <React.Fragment key={i}>
+        {line}
+        {i < arr.length - 1 && <br />}
+      </React.Fragment>
+    ));
+  };
 
   return (
     <Tag
@@ -68,6 +116,7 @@ export function EditableText({
       } ${isPlaceholder && !editing ? "opacity-40 italic" : ""} ${className}`}
       style={{
         ...style,
+        whiteSpace: isMultiline ? 'pre-wrap' : undefined,
         ...(editing
           ? { ["--tw-ring-color" as any]: `${brand.primaryColor}55`, ["--tw-ring-offset-color" as any]: "white" }
           : { ["--tw-ring-color" as any]: `${brand.primaryColor}30`, ["--tw-ring-offset-color" as any]: "white" }),
@@ -76,8 +125,9 @@ export function EditableText({
       suppressContentEditableWarning
       onFocus={handleFocus}
       onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
     >
-      {value || placeholder}
+      {renderContent()}
     </Tag>
   );
 }
