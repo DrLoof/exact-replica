@@ -218,15 +218,12 @@ export const defaultModulesByGroup: Record<string, DefaultModule[]> = {
       clientResponsibilities: [
         'Provide CMS and hosting credentials',
         'Submit change requests through agreed channel',
-        'Approve significant changes before deployment',
         'Maintain hosting account and domain renewal',
       ],
       outOfScope: [
-        'Major redesigns or new section development',
+        'Major redesigns or new feature development',
         'Content creation or copywriting',
         'SEO strategy',
-        'Server infrastructure management (if self-hosted)',
-        'Third-party platform troubleshooting',
       ],
       defaultTimeline: 'Ongoing monthly engagement. Onboarding: 1 week. Request turnaround: 1-3 business days for minor updates, 5-10 business days for development tasks.',
       suggestedKpis: [
