@@ -123,7 +123,11 @@ export function PortfolioStep({ onContinue, onSkip, serviceGroups, detectedPortf
     toast.success('Project added');
   };
 
-  const allCategories = [...new Set([...serviceGroups, 'Other', ...items.map(i => i.category)])];
+  const allCategories = [...new Set([...serviceGroups, 'Other', ...items.map(i => i.category), ...scrapedProjects.map(p => p.category)])];
+
+  const updateScrapedCategory = (idx: number, category: string) => {
+    setScrapedProjects(prev => prev.map((p, i) => i === idx ? { ...p, category } : p));
+  };
 
   return (
     <div className="mx-auto max-w-[720px] px-6 py-12">
@@ -185,33 +189,45 @@ export function PortfolioStep({ onContinue, onSkip, serviceGroups, detectedPortf
 
           <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
             {scrapedProjects.map((project, idx) => (
-              <button
+              <div
                 key={idx}
-                onClick={() => toggleProject(idx)}
-                className={`w-full flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all ${
+                className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 transition-all ${
                   project.selected ? 'border-brand/40 bg-brand/5' : 'border-border hover:bg-muted/30'
                 }`}
               >
                 {/* Thumbnail */}
-                <div className="h-10 w-10 flex-shrink-0 rounded-md overflow-hidden bg-muted">
+                <button onClick={() => toggleProject(idx)} className="h-10 w-10 flex-shrink-0 rounded-md overflow-hidden bg-muted">
                   {project.image_urls[0] ? (
                     <img src={project.image_urls[0]} alt="" className="h-full w-full object-cover" />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center"><Image className="h-4 w-4 text-muted-foreground/50" /></div>
                   )}
-                </div>
+                </button>
                 {/* Info */}
-                <div className="flex-1 min-w-0">
+                <button onClick={() => toggleProject(idx)} className="flex-1 min-w-0 text-left">
                   <p className="text-sm font-medium text-foreground truncate">{project.title}</p>
-                  <p className="text-xs text-muted-foreground truncate">{project.category}</p>
-                </div>
+                  {project.description && (
+                    <p className="text-xs text-muted-foreground truncate">{project.description}</p>
+                  )}
+                </button>
+                {/* Editable category dropdown */}
+                <select
+                  value={project.category}
+                  onChange={(e) => { e.stopPropagation(); updateScrapedCategory(idx, e.target.value); }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-[11px] bg-brand/10 text-brand border-none rounded-full px-2 py-0.5 outline-none cursor-pointer hover:bg-brand/20 transition-colors max-w-[140px]"
+                >
+                  {allCategories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
                 {/* Check */}
-                <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                <button onClick={() => toggleProject(idx)} className={`h-5 w-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
                   project.selected ? 'border-brand bg-brand' : 'border-border'
                 }`}>
                   {project.selected && <Check className="h-3 w-3 text-primary-foreground" />}
-                </div>
-              </button>
+                </button>
+              </div>
             ))}
           </div>
 
