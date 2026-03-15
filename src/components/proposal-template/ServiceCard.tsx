@@ -19,6 +19,8 @@ interface ServiceCardProps {
   onNameEdit?: (value: string) => void;
   onDescriptionEdit?: (value: string) => void;
   onDeliverablesEdit?: (deliverables: string[]) => void;
+  onClientResponsibilitiesEdit?: (items: string[]) => void;
+  onOutOfScopeEdit?: (items: string[]) => void;
 }
 
 const MODEL_LABELS: Record<string, string> = {
