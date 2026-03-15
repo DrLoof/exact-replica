@@ -199,11 +199,12 @@ export default function ProposalEditor() {
     setServices(mapped);
 
     if (propRes.data.agency_id) {
-      const [diffRes, testRes, termsRes, portfolioRes] = await Promise.all([
+      const [diffRes, testRes, termsRes, portfolioRes, sgRes] = await Promise.all([
         supabase.from('differentiators').select('*').eq('agency_id', propRes.data.agency_id).order('display_order'),
         supabase.from('testimonials').select('*').eq('agency_id', propRes.data.agency_id).order('created_at', { ascending: false }),
         supabase.from('terms_clauses').select('*').eq('agency_id', propRes.data.agency_id).order('display_order'),
         supabase.from('portfolio_items').select('*').eq('agency_id', propRes.data.agency_id).eq('is_active', true).order('sort_order'),
+        supabase.from('service_groups').select('*').order('display_order'),
       ]);
       setDifferentiators(diffRes.data || []);
       setTestimonials(testRes.data || []);
