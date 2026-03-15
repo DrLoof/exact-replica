@@ -55,6 +55,8 @@ interface ProposalData {
   client_challenge: string | null;
   client_goal: string | null;
   client_context_note: string | null;
+  show_client_responsibilities: boolean;
+  show_out_of_scope: boolean;
 }
 
 interface ProposalService {
