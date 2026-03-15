@@ -50,6 +50,8 @@ export function OnboardingWizard() {
   const [groupNameMap, setGroupNameMap] = useState<Record<string, string>>({});
   // Selected bundles
   const [addedBundles, setAddedBundles] = useState<Set<string>>(new Set());
+  // Portfolio items from onboarding step
+  const [portfolioItemsOnboarding, setPortfolioItemsOnboarding] = useState<any[]>([]);
 
   // Load service groups
   useEffect(() => {
