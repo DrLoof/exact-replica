@@ -171,6 +171,51 @@ export default function ProposalNew() {
     }
   };
 
+  // Load portfolio items for suggestion
+  useEffect(() => {
+    if (!agency || isGuestMode) return;
+    supabase.from('portfolio_items').select('*, service_groups:category')
+      .eq('agency_id', agency.id).eq('is_active', true).order('sort_order')
+      .then(({ data }) => setAllPortfolioItems((data || []).map((d: any) => ({ ...d, images: d.images || [] }))));
+  }, [agency?.id]);
+
+  // Match portfolio items to selected services
+  useEffect(() => {
+    if (allPortfolioItems.length === 0 || selectedModuleIds.size === 0) {
+      setMatchedPortfolioIds([]);
+      return;
+    }
+    // Get group names of selected services
+    const selectedGroupNames = new Set<string>();
+    selectedModuleIds.forEach(id => {
+      const mod = modules.find((m: any) => m.id === id);
+      if (mod?.group_id) {
+        const group = groups.find((g: any) => g.id === mod.group_id);
+        if (group?.name) selectedGroupNames.add(group.name.toLowerCase());
+      }
+    });
+
+    if (selectedGroupNames.size === 0) { setMatchedPortfolioIds([]); return; }
+
+    // Score portfolio items by match quality
+    const scored = allPortfolioItems.map(item => {
+      const cat = (item.category || '').toLowerCase();
+      let score = 0;
+      for (const gName of selectedGroupNames) {
+        if (cat === gName) { score = 3; break; }
+        if (cat.includes(gName) || gName.includes(cat)) { score = Math.max(score, 2); continue; }
+        const catParts = cat.split(/[&,]/).map((s: string) => s.trim());
+        const gParts = gName.split(/[&,]/).map((s: string) => s.trim());
+        if (catParts.some((c: string) => gParts.some((g: string) => c.includes(g) || g.includes(c)))) {
+          score = Math.max(score, 1);
+        }
+      }
+      return { id: item.id, score };
+    }).filter(s => s.score > 0).sort((a, b) => b.score - a.score);
+
+    setMatchedPortfolioIds(scored.slice(0, 4).map(s => s.id));
+  }, [allPortfolioItems, selectedModuleIds, modules, groups]);
+
   // Service helpers
   const toggleModule = (id: string) => {
     setSelectedModuleIds(prev => {
