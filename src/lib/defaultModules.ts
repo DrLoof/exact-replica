@@ -101,18 +101,15 @@ export const defaultModulesByGroup: Record<string, DefaultModule[]> = {
         'Source files delivered in required formats',
       ],
       clientResponsibilities: [
+        'Submit design briefs with clear requirements and copy',
         'Provide brand guidelines and asset library',
-        'Submit design briefs with clear requirements',
-        'Provide copy and content for each design piece',
-        'Give feedback within 2 business days per revision round',
+        'Give feedback within 2 business days per revision',
         'Manage print production and vendor relationships',
       ],
       outOfScope: [
         'Copywriting or content creation',
         'Brand identity changes or logo redesigns',
-        'Website design or development',
         'Video production or motion graphics',
-        'Photo retouching or photography',
       ],
       defaultTimeline: 'Ongoing monthly engagement. Initial setup: 1 week. Typical turnaround per request: 2-5 business days depending on complexity. Includes 1 round of revisions per piece.',
       suggestedKpis: [
