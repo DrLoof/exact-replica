@@ -448,7 +448,7 @@ export function ReviewScreen({
                   value={agencyIdentity.email || ''}
                   onChange={e => onAgencyChange({ ...agencyIdentity, email: e.target.value })}
                   placeholder="Add email"
-                  size={agencyIdentity.email ? Math.max(agencyIdentity.email.length + 2, 8) : 8}
+                  size={agencyIdentity.email ? Math.max(agencyIdentity.email.length, 8) : 8}
                   className="bg-transparent outline-none text-xs text-muted-foreground placeholder:italic placeholder:text-brass hover:text-foreground focus:text-foreground transition-colors w-auto max-w-none"
                 />
                 <span>·</span>
