@@ -600,14 +600,7 @@ export default function GuestProposalPreview() {
             return (
               <div key={idx}>
                 <div
-                  className={cn(
-                    'group flex items-center gap-1.5 rounded-lg px-3 py-2.5 transition-all duration-200 cursor-pointer',
-                    isHidden ? 'opacity-50' : '',
-                    isActive && !isHidden ? '' : 'hover:bg-[#F4F0EA]',
-                  )}
-                  style={isActive && !isHidden ? {
-                    backgroundColor: 'hsl(24 28% 13% / 0.85)',
-                  } : {}}
+                  className="group flex items-center gap-1.5 cursor-pointer"
                   onClick={() => {
                     if (!isHidden) {
                       setActiveSection(idx);
@@ -615,38 +608,46 @@ export default function GuestProposalPreview() {
                     }
                   }}
                 >
-                  {/* Section name */}
-                  <span className={cn(
-                    'flex-1 text-[13px] font-normal transition-colors',
-                    isHidden ? 'line-through' : '',
-                  )} style={{ color: isActive && !isHidden ? '#FFFFFF' : isHidden ? '#C8C3BB' : '#7A7265' }}>
-                    {name}
-                  </span>
+                  {/* Highlighted section name area */}
+                  <div className={cn(
+                    'flex-1 rounded-lg px-3 py-2.5 transition-all duration-200',
+                    isHidden ? 'opacity-50' : '',
+                    isActive && !isHidden ? '' : 'hover:bg-[#F4F0EA]',
+                  )} style={isActive && !isHidden ? { backgroundColor: 'hsl(24 28% 13% / 0.85)' } : {}}>
+                    <span className={cn(
+                      'text-[13px] font-normal transition-colors',
+                      isHidden ? 'line-through' : '',
+                    )} style={{ color: isActive && !isHidden ? '#FFFFFF' : isHidden ? '#C8C3BB' : '#7A7265' }}>
+                      {name}
+                    </span>
+                  </div>
 
-                  {/* Lock or eye toggle — eye only on hover unless hidden */}
-                  {isLocked ? (
-                    <span style={{ color: isActive && !isHidden ? '#FFFFFF80' : '#D5CFC7' }}><Lock className="h-3 w-3" /></span>
-                  ) : (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (idx === 6) {
-                          setPortfolioVisible(!portfolioVisible);
-                        } else if (isHidden) {
-                          restoreSection(idx);
-                        } else {
-                          deleteSection(idx);
-                        }
-                      }}
-                      className={cn(
-                        'p-0.5 rounded transition-all',
-                        isHidden ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                      )}
-                      style={{ color: isHidden ? '#C8C3BB' : isActive ? '#FFFFFF80' : '#B8B0A5' }}
-                    >
-                      {isHidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                    </button>
-                  )}
+                  {/* Lock or eye toggle — outside the highlight */}
+                  <div className="w-6 flex items-center justify-center shrink-0">
+                    {isLocked ? (
+                      <span style={{ color: '#D5CFC7' }}><Lock className="h-3 w-3" /></span>
+                    ) : (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (idx === 6) {
+                            setPortfolioVisible(!portfolioVisible);
+                          } else if (isHidden) {
+                            restoreSection(idx);
+                          } else {
+                            deleteSection(idx);
+                          }
+                        }}
+                        className={cn(
+                          'p-0.5 rounded transition-all',
+                          isHidden ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                        )}
+                        style={{ color: isHidden ? '#C8C3BB' : '#B8B0A5' }}
+                      >
+                        {isHidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             );
