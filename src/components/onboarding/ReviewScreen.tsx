@@ -54,6 +54,8 @@ export function ReviewScreen({
   const [editingPrice, setEditingPrice] = useState<string | null>(null);
   const [priceOverrides, setPriceOverrides] = useState<Record<string, number>>({});
   const [showStickyCta, setShowStickyCta] = useState(false);
+  const [uploadingTeamPhoto, setUploadingTeamPhoto] = useState<number | null>(null);
+  const teamPhotoInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
   const [expandedServices, setExpandedServices] = useState<Set<string>>(new Set());
   const [editingDeliverable, setEditingDeliverable] = useState<{ key: string; index: number } | null>(null);
   const [deliverableDraft, setDeliverableDraft] = useState('');
@@ -922,18 +924,58 @@ export function ReviewScreen({
                       </button>
                     )}
 
-                    {/* Avatar */}
-                    {member.photo_url ? (
-                      <img
-                        src={member.photo_url}
-                        alt={member.name}
-                        className="h-16 w-16 rounded-full object-cover border-2 border-border mb-3"
-                      />
-                    ) : (
-                      <div className="h-16 w-16 rounded-full bg-brass/20 flex items-center justify-center mb-3 text-lg font-semibold text-brass">
-                        {(member.name || '?').split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
-                      </div>
-                    )}
+                    {/* Avatar — clickable to upload photo */}
+                    <input
+                      ref={(el) => { teamPhotoInputRefs.current[idx] = el; }}
+                      type="file"
+                      accept=".png,.jpg,.jpeg,.webp"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setUploadingTeamPhoto(idx);
+                        const ext = file.name.split('.').pop();
+                        const path = `team/${Date.now()}-${idx}.${ext}`;
+                        const { error } = await supabase.storage.from('agency-logos').upload(path, file, { upsert: true });
+                        if (error) { toast.error('Upload failed'); setUploadingTeamPhoto(null); return; }
+                        const { data: urlData } = supabase.storage.from('agency-logos').getPublicUrl(path);
+                        const updated = [...teamMembers];
+                        updated[idx] = { ...updated[idx], photo_url: urlData.publicUrl };
+                        onTeamMembersChange(updated);
+                        setUploadingTeamPhoto(null);
+                      }}
+                    />
+                    <button
+                      onClick={() => teamPhotoInputRefs.current[idx]?.click()}
+                      className="relative group/avatar mb-3"
+                      title="Upload photo"
+                    >
+                      {uploadingTeamPhoto === idx ? (
+                        <div className="h-16 w-16 rounded-full bg-brass/20 flex items-center justify-center">
+                          <Loader2 className="h-5 w-5 text-brass animate-spin" />
+                        </div>
+                      ) : member.photo_url ? (
+                        <div className="relative">
+                          <img
+                            src={member.photo_url}
+                            alt={member.name}
+                            className="h-16 w-16 rounded-full object-cover border-2 border-border"
+                          />
+                          <div className="absolute inset-0 rounded-full bg-black/0 group-hover/avatar:bg-black/30 flex items-center justify-center transition-colors">
+                            <Upload className="h-4 w-4 text-white opacity-0 group-hover/avatar:opacity-100 transition-opacity" />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="relative">
+                          <div className="h-16 w-16 rounded-full bg-brass/20 flex items-center justify-center text-lg font-semibold text-brass">
+                            {(member.name || '?').split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+                          </div>
+                          <div className="absolute inset-0 rounded-full bg-black/0 group-hover/avatar:bg-black/20 flex items-center justify-center transition-colors">
+                            <Upload className="h-4 w-4 text-brass opacity-0 group-hover/avatar:opacity-100 transition-opacity" />
+                          </div>
+                        </div>
+                      )}
+                    </button>
 
                     {editingSection === 'team' ? (
                       <div className="w-full space-y-2">
