@@ -382,7 +382,6 @@ export function ReviewScreen({
             </div>
             <div>
               <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground">
-              <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground">
                 {agencyIdentity.logo_url && (
                   <div className="h-6 w-6 rounded border border-border bg-background p-0.5 shrink-0">
                     <img src={agencyIdentity.logo_url} alt="" className="h-full w-full object-contain" />
