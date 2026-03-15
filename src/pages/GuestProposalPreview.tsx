@@ -483,10 +483,14 @@ export default function GuestProposalPreview() {
   };
 
   const defaultTerms = [
-    { title: 'Payment Terms', content: 'All fees are due according to the payment schedule outlined in the Investment section of this proposal.' },
-    { title: 'Revision Policy', content: 'This proposal includes the number of revision rounds specified per deliverable.' },
-    { title: 'Intellectual Property', content: 'Upon receipt of full payment, the client receives full ownership of all final deliverables.' },
-    { title: 'Termination', content: 'Either party may terminate this agreement with written notice as specified in the notice period.' },
+    { title: 'Payment Terms', content: 'All fees are due according to the payment schedule outlined in the Investment section of this proposal. Invoices will be issued at each milestone and are payable within 14 days of receipt.' },
+    { title: 'Project Timeline & Milestones', content: 'The project timeline outlined in this proposal is an estimate based on the defined scope of work. Actual timelines may vary depending on the timely provision of client feedback, content, assets, and approvals.' },
+    { title: 'Revision Policy', content: 'This proposal includes the number of revision rounds specified per deliverable. Additional revision rounds beyond the included allowance will be billed at our standard hourly rate.' },
+    { title: 'Intellectual Property', content: 'Upon receipt of full and final payment, the client will receive full ownership of all final deliverables created specifically for this project.' },
+    { title: 'Confidentiality', content: 'Both parties agree to keep confidential any proprietary or sensitive information shared during the course of this engagement.' },
+    { title: 'Termination', content: 'Either party may terminate this agreement with written notice as specified in the notice period above.' },
+    { title: 'Liability', content: "The agency's total liability under this agreement shall not exceed the total fees paid by the client for the services." },
+    { title: 'Governing Law', content: 'This agreement shall be governed by and construed in accordance with the laws of the jurisdiction where the agency is registered.' },
   ];
 
   const defaultPhases = [
