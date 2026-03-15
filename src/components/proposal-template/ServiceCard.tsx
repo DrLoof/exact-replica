@@ -1,9 +1,25 @@
-import React, { type ReactNode, useState } from "react";
+import React, { type ReactNode, useState, useRef, useEffect } from "react";
 import { motion } from "motion/react";
 import { Plus, X, ChevronDown } from "lucide-react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
 import { EditableText } from "./EditableText";
+
+const GENERIC_RESPONSIBILITIES = [
+  'Provide timely feedback within agreed review windows',
+  'Designate a single point of contact for approvals',
+  'Provide brand assets and guidelines',
+  'Provide platform/tool access credentials',
+  'Share relevant business data and insights',
+];
+
+const GENERIC_OUT_OF_SCOPE = [
+  'Services not explicitly listed in the deliverables',
+  'Third-party tool subscription or licensing costs',
+  'Content creation beyond what is specified',
+  'Translation or localization',
+  'Training beyond what is included in deliverables',
+];
 
 interface ServiceCardProps {
   icon: ReactNode;
@@ -14,6 +30,8 @@ interface ServiceCardProps {
   deliverables: string[];
   clientResponsibilities?: string[];
   outOfScope?: string[];
+  moduleDefaultResponsibilities?: string[];
+  moduleDefaultOutOfScope?: string[];
   isAddon?: boolean;
   delay?: number;
   onNameEdit?: (value: string) => void;
