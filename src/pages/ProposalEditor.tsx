@@ -98,8 +98,11 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 
 const sectionNames = [
   'Cover', 'Executive Summary', 'Scope of Services', 'Timeline',
-  'Investment', 'Terms', 'Why Us', 'Portfolio', 'Testimonials', 'Signature',
+  'Investment', 'Why Us', 'Portfolio', 'Testimonials', 'Terms', 'Signature',
 ];
+
+const DEFAULT_SECTION_ORDER = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+const LOCKED_SECTIONS = new Set([0, 2, 4]); // Cover, Scope, Investment
 
 function getDefaultAboutText(yearsExperience?: number | null): string {
   const yearsPart = yearsExperience ? `Over the past ${yearsExperience} years` : 'Over the past years';
