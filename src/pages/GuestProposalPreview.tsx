@@ -610,7 +610,7 @@ export default function GuestProposalPreview() {
                 >
                   {/* Highlighted section name area */}
                   <div className={cn(
-                    'flex-1 rounded-lg px-3 py-2.5 transition-all duration-200',
+                    'flex-1 rounded-lg px-3 py-1.5 transition-all duration-200',
                     isHidden ? 'opacity-50' : '',
                     isActive && !isHidden ? '' : 'hover:bg-[#F4F0EA]',
                   )} style={isActive && !isHidden ? { backgroundColor: 'hsl(24 28% 13% / 0.85)' } : {}}>
