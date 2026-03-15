@@ -631,18 +631,13 @@ export const defaultModulesByGroup: Record<string, DefaultModule[]> = {
       clientResponsibilities: [
         'Provide email platform access',
         'Share subscriber lists and consent documentation',
-        'Provide promotional offers and company news',
         'Approve email campaigns before sending',
-        'Maintain compliance with email regulations',
-        'Share product imagery and brand assets',
+        'Maintain compliance with email regulations (GDPR, CAN-SPAM)',
       ],
       outOfScope: [
         'Email platform subscription costs',
         'List building or lead generation',
-        'Transactional email development (order confirmations, etc.)',
         'SMS/text message marketing',
-        'Custom email platform development or migration',
-        'Direct mail campaigns',
       ],
       defaultTimeline: 'Setup and onboarding: 2-3 weeks. First campaign: Week 3-4. Ongoing monthly management. Minimum 3-month commitment recommended.',
       suggestedKpis: [
