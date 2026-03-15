@@ -5,6 +5,7 @@ import {
   ChevronDown, FileText, Check, DollarSign, Clock,
   RefreshCw, MoreHorizontal, Plus, X, Search, RotateCcw, Loader2,
   Lock, Palette, Image, ExternalLink, ChevronUp, UserPlus,
+  GripVertical,
 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { cn } from '@/lib/utils';
