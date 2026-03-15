@@ -54,6 +54,8 @@ export function ReviewScreen({
   const [editingPrice, setEditingPrice] = useState<string | null>(null);
   const [priceOverrides, setPriceOverrides] = useState<Record<string, number>>({});
   const [showStickyCta, setShowStickyCta] = useState(false);
+  const [uploadingTeamPhoto, setUploadingTeamPhoto] = useState<number | null>(null);
+  const teamPhotoInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
   const [expandedServices, setExpandedServices] = useState<Set<string>>(new Set());
   const [editingDeliverable, setEditingDeliverable] = useState<{ key: string; index: number } | null>(null);
   const [deliverableDraft, setDeliverableDraft] = useState('');
