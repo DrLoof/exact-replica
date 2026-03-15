@@ -687,7 +687,7 @@ serve(async (req) => {
     const allExtractedTeam: { name: string; title: string; photo_url: string | null; bio: string | null }[] = [];
     let detectedPortfolioUrl: string | null = null;
     
-    const fetchPromises = allPaths.slice(0, 20).map(async (path) => {
+    const fetchPromises = allPaths.slice(0, 30).map(async (path) => {
       try {
         const pageUrl = urlObj.origin + path;
         const resp = await fetch(pageUrl, {
