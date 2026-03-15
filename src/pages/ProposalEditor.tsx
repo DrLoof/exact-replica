@@ -1385,11 +1385,11 @@ export default function ProposalEditor() {
                     )}
 
                     {/* Your Team Block */}
-                    {proposalTeam.length > 0 && (
-                      <div className="mt-12">
-                        <p className="mb-6 text-center" style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#999' }}>
-                          The Team Behind Your Project
-                        </p>
+                    <div className="mt-12">
+                      <p className="mb-6 text-center" style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#999' }}>
+                        The Team Behind Your Project
+                      </p>
+                      {proposalTeam.length > 0 && (
                         <div className={`grid gap-6 justify-center ${proposalTeam.length <= 2 ? 'grid-cols-2 max-w-md mx-auto' : proposalTeam.length === 3 ? 'grid-cols-3 max-w-lg mx-auto' : 'grid-cols-2 sm:grid-cols-4'}`}>
                           {proposalTeam.slice(0, 4).map((member: any, i: number) => (
                             <TeamMemberCard
@@ -1399,11 +1399,59 @@ export default function ProposalEditor() {
                               photoUrl={member.photo_url}
                               roleOnProject={member.role_on_project}
                               delay={i * 0.1}
+                              onRemove={() => {
+                                const next = proposalTeam.filter((m: any) => m.member_id !== member.member_id);
+                                setProposalTeam(next);
+                                saveProposalTeam(next);
+                                toast.success(`${member.name} removed from team`);
+                              }}
+                              onNameEdit={(val) => {
+                                const next = proposalTeam.map((m: any) => m.member_id === member.member_id ? { ...m, name: val } : m);
+                                setProposalTeam(next);
+                                saveProposalTeam(next);
+                              }}
+                              onTitleEdit={(val) => {
+                                const next = proposalTeam.map((m: any) => m.member_id === member.member_id ? { ...m, title: val } : m);
+                                setProposalTeam(next);
+                                saveProposalTeam(next);
+                              }}
                             />
                           ))}
                         </div>
-                      </div>
-                    )}
+                      )}
+                      {proposalTeam.length < 4 && (
+                        <div className="flex justify-center mt-4 print:hidden">
+                          <button
+                            onClick={async () => {
+                              const newId = crypto.randomUUID();
+                              const newMember = {
+                                member_id: newId,
+                                name: 'New Member',
+                                title: 'Role',
+                                photo_url: null,
+                                role_on_project: '',
+                              };
+                              const nextTeam = [...proposalTeam, newMember];
+                              setProposalTeam(nextTeam);
+                              saveProposalTeam(nextTeam);
+
+                              // Also save to agency team_members so it persists in settings
+                              if (agency?.id) {
+                                const agencyMember = { id: newId, name: 'New Member', title: 'Role', photo_url: null, bio: null };
+                                const updatedAgencyTeam = [...teamMembers, agencyMember];
+                                setTeamMembers(updatedAgencyTeam);
+                                await supabase.from('agencies').update({ team_members: updatedAgencyTeam as any }).eq('id', agency.id);
+                              }
+                              toast.success('Team member added');
+                            }}
+                            className="flex items-center gap-2 rounded-lg border border-dashed border-muted-foreground/30 px-4 py-2.5 text-sm text-muted-foreground hover:border-muted-foreground/60 hover:text-foreground transition-colors"
+                          >
+                            <UserPlus className="h-4 w-4" />
+                            Add team member
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </PageWrapper>
                 </div>
               </SectionWrapper>}
