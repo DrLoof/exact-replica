@@ -1363,37 +1363,8 @@ export default function ProposalEditor() {
                 </div>
               </SectionWrapper>}
 
-              {/* Section 5: Terms */}
-              {!deletedSections.has(5) && <SectionWrapper idx={5} onDelete={deleteSection} label="Terms & Conditions">
-                <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
-                  <PageWrapper pageNumber="06">
-                    <SectionHeader number="05" title="Terms & Conditions"
-                      onTitleEdit={(val) => updateField('title', val)} />
-                    {termsClauses.length === 0 ? (
-                      <div className="text-center py-16">
-                        <p className="text-muted-foreground" style={{ fontSize: '15px' }}>No terms & conditions configured.</p>
-                        <Link to="/settings" className="mt-2 inline-block text-sm text-brand hover:text-brand-hover">Add in Settings →</Link>
-                      </div>
-                    ) : (
-                      <TermsSection
-                        clauses={[
-                          ...termsClauses.map(c => ({ title: c.title, content: c.content })),
-                          ...(services.some(s => s.module?.client_responsibilities?.length || s.module?.out_of_scope?.length) ? [{
-                            title: 'Scope & Responsibilities',
-                            content: 'The client is responsible for providing timely feedback, required access credentials, and content/assets as outlined in each service\'s scope. Work beyond the deliverables listed for each service is considered out of scope and may require a separate agreement.'
-                          }] : []),
-                        ]}
-                        onClauseEdit={async (index, field, value) => {
-                          const clause = termsClauses[index];
-                          if (!clause) return;
-                          await supabase.from('terms_clauses').update({ [field]: value }).eq('id', clause.id);
-                          setTermsClauses(prev => prev.map((c, i) => i === index ? { ...c, [field]: value } : c));
-                        }}
-                      />
-                    )}
-                  </PageWrapper>
-                </div>
-              </SectionWrapper>}
+              {/* Section 5: Why Us (was 6) */}
+              {!deletedSections.has(5) && <SectionWrapper idx={5} onDelete={deleteSection} label="Why Us">
 
               {/* Section 6: Why Us */}
               {!deletedSections.has(6) && <SectionWrapper idx={6} onDelete={deleteSection} label="Why Us">
