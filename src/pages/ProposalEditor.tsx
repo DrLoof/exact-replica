@@ -1223,7 +1223,7 @@ export default function ProposalEditor() {
                         </div>
                       </div>
                     ) : (
-                      <div className="mt-10 text-center py-12">
+                      <div className="mt-10 text-center py-12 print:hidden">
                         <Clock className="mx-auto h-8 w-8 text-muted-foreground mb-3" />
                         <p className="text-[#999]" style={{ fontSize: '15px' }}>No timeline generated yet</p>
                         <p className="text-xs text-muted-foreground mt-1 mb-4">Generate project phases based on your selected services.</p>
