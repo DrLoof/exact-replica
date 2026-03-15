@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { TrendingUp } from "lucide-react";
 import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
@@ -116,24 +117,59 @@ export function TestimonialCard({
     );
   };
 
+  const [showMetricInputs, setShowMetricInputs] = useState(false);
+
   const renderMetric = (valueStyle: React.CSSProperties, labelStyle: React.CSSProperties, containerStyle?: React.CSSProperties, containerClass?: string) => {
-    if (!metricValue && !onMetricValueEdit) return null;
-    return (
-      <div className={containerClass || "inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5"} style={containerStyle}>
-        {onMetricValueEdit ? (
-          <EditableText value={metricValue || ''} placeholder="Metric..." onSave={onMetricValueEdit} as="span" style={valueStyle} />
-        ) : (
-          <span style={valueStyle}>{metricValue}</span>
-        )}
-        {(metricLabel || onMetricLabelEdit) && (
-          onMetricLabelEdit ? (
-            <EditableText value={metricLabel || ''} placeholder="Label..." onSave={onMetricLabelEdit} as="span" style={labelStyle} />
+    // Has metric data — show it (editable or static)
+    if (metricValue) {
+      return (
+        <div className={containerClass || "inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5"} style={containerStyle}>
+          {onMetricValueEdit ? (
+            <EditableText value={metricValue} placeholder="Metric..." onSave={onMetricValueEdit} as="span" style={valueStyle} />
           ) : (
-            <span style={labelStyle}>{metricLabel}</span>
-          )
-        )}
-      </div>
-    );
+            <span style={valueStyle}>{metricValue}</span>
+          )}
+          {(metricLabel || onMetricLabelEdit) && (
+            onMetricLabelEdit ? (
+              <EditableText value={metricLabel || ''} placeholder="Label..." onSave={onMetricLabelEdit} as="span" style={labelStyle} />
+            ) : (
+              <span style={labelStyle}>{metricLabel}</span>
+            )
+          )}
+        </div>
+      );
+    }
+
+    // No metric but user activated the inline inputs
+    if (showMetricInputs && onMetricValueEdit) {
+      return (
+        <div className={containerClass || "inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5"} style={containerStyle}>
+          <EditableText value="" placeholder="e.g. +265%" onSave={(val) => { onMetricValueEdit(val); }} as="span" style={valueStyle} />
+          {onMetricLabelEdit && (
+            <EditableText value="" placeholder="e.g. ROAS" onSave={onMetricLabelEdit} as="span" style={labelStyle} />
+          )}
+        </div>
+      );
+    }
+
+    // No metric, callbacks available — show "Add KPI" button (hidden in print)
+    if (onMetricValueEdit && !metricValue) {
+      return (
+        <button
+          onClick={() => setShowMetricInputs(true)}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full mb-5 text-[12px] font-medium transition-all duration-200 opacity-60 hover:opacity-100 print:hidden"
+          style={{ 
+            backgroundColor: containerStyle?.background as string || 'rgba(110,154,122,0.1)', 
+            color: valueStyle.color as string || '#6E9A7A' 
+          }}
+        >
+          <TrendingUp className="h-3.5 w-3.5" />
+          + Add KPI
+        </button>
+      );
+    }
+
+    return null;
   };
 
   // Wrap helper for hover remove button

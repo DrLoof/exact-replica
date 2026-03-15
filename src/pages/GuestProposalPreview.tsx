@@ -16,7 +16,6 @@ import {
 } from '@/components/proposal-template';
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 
-
 function getDefaultAboutText(yearsExperience?: number | null): string {
   const yearsPart = yearsExperience ? `Over the past ${yearsExperience} years` : 'Over the past years';
   return `${yearsPart}, we've helped ambitious brands transform their market position through the intersection of strategy, design, and technology. We're not the biggest agency — and that's by design. Our deliberately lean structure means faster decisions, fewer layers, and more senior attention on every engagement.`;
@@ -164,6 +163,17 @@ export default function GuestProposalPreview() {
   const [localTestimonials, setLocalTestimonials] = useState<any[]>(
     (guestOnboarding?.testimonials || []).filter((t: any) => t.approved)
   );
+
+  // Sync testimonial edits back to localStorage
+  const saveGuestTestimonials = useCallback((updated: any[]) => {
+    try {
+      const raw = localStorage.getItem('propopad_guest_onboarding');
+      const onboarding = raw ? JSON.parse(raw) : {};
+      const unapproved = (onboarding.testimonials || []).filter((t: any) => !t.approved);
+      onboarding.testimonials = [...updated, ...unapproved];
+      localStorage.setItem('propopad_guest_onboarding', JSON.stringify(onboarding));
+    } catch {}
+  }, []);
 
   const saveGuestTeam = useCallback((team: any[]) => {
     try {
@@ -1066,11 +1076,13 @@ export default function GuestProposalPreview() {
                     <div className="space-y-6">
                       {testimonials.slice(0, 4).map((t: any, i: number) => (
                         <TestimonialCard key={i} clientName={t.client_name} clientTitle={t.client_title} clientCompany={t.client_company} quote={t.quote} metricValue={t.metric_value} metricLabel={t.metric_label} avatarUrl={t.avatar_url} featured={i === 0} delay={i * 0.1}
-                          onQuoteEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, quote: val } : x))}
-                          onNameEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, client_name: val } : x))}
-                          onTitleEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, client_title: val } : x))}
-                          onCompanyEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, client_company: val } : x))}
-                          onRemove={() => setLocalTestimonials(prev => prev.filter((_, j) => j !== i))}
+                          onQuoteEdit={(val) => setLocalTestimonials(prev => { const u = prev.map((x, j) => j === i ? { ...x, quote: val } : x); saveGuestTestimonials(u); return u; })}
+                          onNameEdit={(val) => setLocalTestimonials(prev => { const u = prev.map((x, j) => j === i ? { ...x, client_name: val } : x); saveGuestTestimonials(u); return u; })}
+                          onTitleEdit={(val) => setLocalTestimonials(prev => { const u = prev.map((x, j) => j === i ? { ...x, client_title: val } : x); saveGuestTestimonials(u); return u; })}
+                          onCompanyEdit={(val) => setLocalTestimonials(prev => { const u = prev.map((x, j) => j === i ? { ...x, client_company: val } : x); saveGuestTestimonials(u); return u; })}
+                          onMetricValueEdit={(val) => setLocalTestimonials(prev => { const u = prev.map((x, j) => j === i ? { ...x, metric_value: val } : x); saveGuestTestimonials(u); return u; })}
+                          onMetricLabelEdit={(val) => setLocalTestimonials(prev => { const u = prev.map((x, j) => j === i ? { ...x, metric_label: val } : x); saveGuestTestimonials(u); return u; })}
+                          onRemove={() => setLocalTestimonials(prev => { const u = prev.filter((_, j) => j !== i); saveGuestTestimonials(u); return u; })}
                         />
                       ))}
                     </div>
