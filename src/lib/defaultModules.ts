@@ -831,16 +831,13 @@ export const defaultModulesByGroup: Record<string, DefaultModule[]> = {
       clientResponsibilities: [
         'Provide newsworthy stories, launches, and milestones',
         'Designate spokesperson(s) available for media requests',
-        'Approve press releases and talking points before outreach',
+        'Approve press releases before outreach',
         'Respond to media interview requests promptly',
-        'Share company news and developments proactively',
       ],
       outOfScope: [
         'Paid media or sponsored content',
-        'Social media management',
         'Event planning and logistics',
-        'Investor relations',
-        'Government relations or lobbying',
+        'Social media management',
       ],
       defaultTimeline: 'Onboarding: 1-2 weeks. First outreach: Week 3. Ongoing monthly with media placements typically within 4-8 weeks. Minimum 3-month commitment.',
       suggestedKpis: [
