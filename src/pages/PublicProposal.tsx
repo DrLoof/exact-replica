@@ -4,21 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { AlertTriangle, Layers, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import {
-  BrandProvider,
-  HeroCover,
-  SectionHeader,
-  TextContent,
-  HighlightPanel,
-  BundleCard,
-  ServiceCard,
-  PricingSummary,
-  TimelineStep,
-  TermsSection,
-  WhyUsCard,
-  TestimonialCard,
-  SignatureBlock,
-  PageWrapper,
-  TeamMemberCard,
+  BrandProvider, HeroCover, SectionHeader, TextContent, HighlightPanel,
+  BundleCard, ServiceCard, PricingSummary, TimelineStep, TermsSection,
+  WhyUsCard, TestimonialCard, SignatureBlock, PageWrapper, TeamMemberCard, PortfolioCard,
 } from '@/components/proposal-template';
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 
@@ -30,6 +18,7 @@ export default function PublicProposal() {
   const [agency, setAgency] = useState<any>(null);
   const [client, setClient] = useState<any>(null);
   const [services, setServices] = useState<any[]>([]);
+  const [portfolioItems, setPortfolioItems] = useState<any[]>([]);
   const [differentiators, setDifferentiators] = useState<any[]>([]);
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [termsClauses, setTermsClauses] = useState<any[]>([]);
@@ -83,6 +72,14 @@ export default function PublicProposal() {
     setTermsClauses(termsRes.data || []);
     setTimelinePhases(phasesRes.data || []);
     setPaymentTemplates(ptRes.data || []);
+
+    // Load portfolio items if selected
+    const selectedPortfolioIds: string[] = prop.selected_portfolio_ids || [];
+    if (selectedPortfolioIds.length > 0 && prop.portfolio_section_visible && prop.agency_id) {
+      const { data: piData } = await supabase.from('portfolio_items').select('*').eq('agency_id', prop.agency_id).eq('is_active', true).in('id', selectedPortfolioIds);
+      setPortfolioItems((piData || []).map((d: any) => ({ ...d, images: d.images || [] })));
+    }
+
     setLoading(false);
   };
 

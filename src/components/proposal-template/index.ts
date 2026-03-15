@@ -15,3 +15,4 @@ export { TestimonialCard } from './TestimonialCard';
 export { PageWrapper } from './PageWrapper';
 export { EditableText } from './EditableText';
 export { TeamMemberCard } from './TeamMemberCard';
+export { PortfolioCard } from './PortfolioCard';

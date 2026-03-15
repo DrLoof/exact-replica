@@ -724,10 +724,13 @@ export type Database = {
           notice_period: string | null
           payment_template_id: string | null
           phases: Json | null
+          portfolio_section_title: string | null
+          portfolio_section_visible: boolean | null
           project_start_date: string | null
           reference_number: string
           revision_rounds: number | null
           selected_differentiator_ids: string[] | null
+          selected_portfolio_ids: string[] | null
           selected_testimonial_ids: string[] | null
           sent_at: string | null
           show_client_responsibilities: boolean | null
@@ -767,10 +770,13 @@ export type Database = {
           notice_period?: string | null
           payment_template_id?: string | null
           phases?: Json | null
+          portfolio_section_title?: string | null
+          portfolio_section_visible?: boolean | null
           project_start_date?: string | null
           reference_number: string
           revision_rounds?: number | null
           selected_differentiator_ids?: string[] | null
+          selected_portfolio_ids?: string[] | null
           selected_testimonial_ids?: string[] | null
           sent_at?: string | null
           show_client_responsibilities?: boolean | null
@@ -810,10 +816,13 @@ export type Database = {
           notice_period?: string | null
           payment_template_id?: string | null
           phases?: Json | null
+          portfolio_section_title?: string | null
+          portfolio_section_visible?: boolean | null
           project_start_date?: string | null
           reference_number?: string
           revision_rounds?: number | null
           selected_differentiator_ids?: string[] | null
+          selected_portfolio_ids?: string[] | null
           selected_testimonial_ids?: string[] | null
           sent_at?: string | null
           show_client_responsibilities?: boolean | null
