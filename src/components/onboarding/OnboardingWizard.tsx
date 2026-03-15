@@ -30,7 +30,7 @@ function deduplicateTestimonials(testimonials: any[]): any[] {
 export function OnboardingWizard() {
   const navigate = useNavigate();
   const { agency, userProfile, user } = useAuth();
-  const [screen, setScreen] = useState<'scan' | 'review'>('scan');
+  const [screen, setScreen] = useState<'scan' | 'review' | 'portfolio'>('scan');
   const [saving, setSaving] = useState(false);
   const [scrapeData, setScrapeData] = useState<any>(null);
   const [showSignupGate, setShowSignupGate] = useState(false);
