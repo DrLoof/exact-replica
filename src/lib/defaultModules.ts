@@ -324,18 +324,15 @@ export const defaultModulesByGroup: Record<string, DefaultModule[]> = {
         'Copy notes explaining strategic reasoning',
       ],
       clientResponsibilities: [
-        'Provide brand messaging framework (or engage Messaging module)',
-        'Share target audience and unique selling propositions',
+        'Provide brand messaging framework or participate in briefing session',
+        'Share target audience and key selling points',
         'Provide wireframes or page structures for copy placement',
-        'Designate one approver for copy sign-off',
         'Provide feedback within 5 business days',
       ],
       outOfScope: [
         'Blog writing or ongoing content',
         'UX/UI design or wireframing',
         'Website development',
-        'Legal page copy (privacy policy, terms of service)',
-        'Product descriptions for e-commerce',
       ],
       defaultTimeline: '2-4 weeks. Research & sitemap review (Week 1), First draft (Week 2), Revisions (Week 3), Final delivery (Week 4). Includes 2 rounds of revisions.',
       suggestedKpis: [
