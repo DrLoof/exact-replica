@@ -182,7 +182,8 @@ export default function GuestProposalPreview() {
 
   const identity = guestOnboarding?.agencyIdentity || {};
   const currencySymbol = guestProposal.currencySymbol || '$';
-  const differentiators = guestOnboarding?.differentiators || [];
+  const [localDifferentiators, setLocalDifferentiators] = useState<any[]>(guestOnboarding?.differentiators || []);
+  const differentiators = localDifferentiators;
   const testimonials = (guestOnboarding?.testimonials || []).filter((t: any) => t.approved);
   const clientName = guestProposal.clientName || 'Client';
   const agencyName = identity.name || 'Your Agency';
