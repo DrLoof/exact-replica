@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { TrendingUp } from "lucide-react";
 import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
