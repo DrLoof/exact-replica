@@ -337,6 +337,7 @@ export default function ProposalEditor() {
   };
 
 
+  const regenerateExecutiveSummary = async () => {
     if (!proposal || !agency) return;
     setRegenerating(true);
     try {
