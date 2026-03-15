@@ -879,7 +879,7 @@ export function ReviewScreen({
       </section>
 
       {/* Section: Our Team */}
-      {teamMembers.length > 0 && (
+      {(
         <section className="mt-4 rounded-2xl border border-border bg-card p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="label-overline">Our Team</h2>
