@@ -888,6 +888,8 @@ export default function GuestProposalPreview() {
                             outOfScope={showOutOfScope ? (svc.out_of_scope || []) : []}
                             isAddon={svc.service_type === 'addon'}
                             delay={i * 0.1}
+                            onNameEdit={(val) => handleServiceEdit(i, 'name', val)}
+                            onDescriptionEdit={(val) => handleServiceEdit(i, 'description', val)}
                             onDeliverablesEdit={(dels) => handleServiceEdit(i, 'deliverables', dels)}
                           />
                         );
