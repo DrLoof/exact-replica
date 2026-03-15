@@ -1363,11 +1363,8 @@ export default function ProposalEditor() {
                 </div>
               </SectionWrapper>}
 
-              {/* Section 5: Why Us (was 6) */}
+              {/* Section 5: Why Us */}
               {!deletedSections.has(5) && <SectionWrapper idx={5} onDelete={deleteSection} label="Why Us">
-
-              {/* Section 6: Why Us */}
-              {!deletedSections.has(6) && <SectionWrapper idx={6} onDelete={deleteSection} label="Why Us">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="07">
                     <SectionHeader number="06" title="Why Us" subtitle="What sets us apart"
@@ -1523,8 +1520,8 @@ export default function ProposalEditor() {
                 </div>
               </SectionWrapper>}
 
-              {/* Section 7: Portfolio */}
-              {!deletedSections.has(7) && <SectionWrapper idx={7} onDelete={deleteSection} label="Portfolio">
+              {/* Section 6: Portfolio */}
+              {!deletedSections.has(6) && <SectionWrapper idx={6} onDelete={deleteSection} label="Portfolio">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="08">
                     <SectionHeader number="08" title={(proposal as any).portfolio_section_title || 'Our Work'} subtitle="Selected projects from our portfolio"
@@ -1578,8 +1575,8 @@ export default function ProposalEditor() {
                 </div>
               </SectionWrapper>}
 
-              {/* Section 8: Testimonials */}
-              {!deletedSections.has(8) && <SectionWrapper idx={8} onDelete={deleteSection} label="Testimonials">
+              {/* Section 7: Testimonials */}
+              {!deletedSections.has(7) && <SectionWrapper idx={7} onDelete={deleteSection} label="Testimonials">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="09">
                     <SectionHeader number="09" title="What Our Clients Say" subtitle="Proof of impact"
@@ -1642,6 +1639,33 @@ export default function ProposalEditor() {
                           />
                         ))}
                       </div>
+                    )}
+                  </PageWrapper>
+                </div>
+              </SectionWrapper>}
+
+              {/* Section 8: Terms */}
+              {!deletedSections.has(8) && <SectionWrapper idx={8} onDelete={deleteSection} label="Terms">
+                <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
+                  <PageWrapper pageNumber="09">
+                    <SectionHeader number="09" title="Terms & Conditions" subtitle="The fine print"
+                      onTitleEdit={(val) => updateField('title', val)}
+                      onSubtitleEdit={(val) => updateField('subtitle', val)} />
+                    {termsClauses.length === 0 ? (
+                      <div className="text-center py-16">
+                        <p className="text-muted-foreground" style={{ fontSize: '15px' }}>No terms clauses added yet.</p>
+                        <Link to="/settings" className="mt-2 inline-block text-sm text-brand hover:text-brand-hover">Add in Settings →</Link>
+                      </div>
+                    ) : (
+                      <TermsSection
+                        clauses={termsClauses.map(c => ({ title: c.title, content: c.content }))}
+                        onClauseEdit={async (index, field, value) => {
+                          const clause = termsClauses[index];
+                          if (!clause) return;
+                          await supabase.from('terms_clauses').update({ [field]: value }).eq('id', clause.id);
+                          setTermsClauses(prev => prev.map((c, i) => i === index ? { ...c, [field]: value } : c));
+                        }}
+                      />
                     )}
                   </PageWrapper>
                 </div>
