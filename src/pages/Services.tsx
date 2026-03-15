@@ -104,6 +104,8 @@ export default function Services() {
       estimated_hours: form.estimated_hours ? parseInt(form.estimated_hours) : null,
       default_timeline: form.default_timeline || null,
       deliverables: form.deliverables ? form.deliverables.split('\n').filter(Boolean) : null,
+      client_responsibilities: form.client_responsibilities ? form.client_responsibilities.split('\n').filter(Boolean) : null,
+      out_of_scope: form.out_of_scope ? form.out_of_scope.split('\n').filter(Boolean) : null,
       service_type: form.service_type,
       is_active: true,
     };
