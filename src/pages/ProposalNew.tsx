@@ -120,6 +120,10 @@ export default function ProposalNew() {
   const [saving, setSaving] = useState(false);
   const [showSignupGate, setShowSignupGate] = useState(false);
   const [showGenerating, setShowGenerating] = useState(false);
+  const [portfolioSuggestionDismissed, setPortfolioSuggestionDismissed] = useState(false);
+  const [portfolioAccepted, setPortfolioAccepted] = useState(false);
+  const [allPortfolioItems, setAllPortfolioItems] = useState<any[]>([]);
+  const [matchedPortfolioIds, setMatchedPortfolioIds] = useState<string[]>([]);
 
   // Pre-fill from query params
   const prefilledClientId = searchParams.get('client');
@@ -166,6 +170,51 @@ export default function ProposalNew() {
       toast.success(`Pre-filled ${ids.size} services from last proposal`);
     }
   };
+
+  // Load portfolio items for suggestion
+  useEffect(() => {
+    if (!agency || isGuestMode) return;
+    supabase.from('portfolio_items').select('*, service_groups:category')
+      .eq('agency_id', agency.id).eq('is_active', true).order('sort_order')
+      .then(({ data }) => setAllPortfolioItems((data || []).map((d: any) => ({ ...d, images: d.images || [] }))));
+  }, [agency?.id]);
+
+  // Match portfolio items to selected services
+  useEffect(() => {
+    if (allPortfolioItems.length === 0 || selectedModuleIds.size === 0) {
+      setMatchedPortfolioIds([]);
+      return;
+    }
+    // Get group names of selected services
+    const selectedGroupNames = new Set<string>();
+    selectedModuleIds.forEach(id => {
+      const mod = modules.find((m: any) => m.id === id);
+      if (mod?.group_id) {
+        const group = groups.find((g: any) => g.id === mod.group_id);
+        if (group?.name) selectedGroupNames.add(group.name.toLowerCase());
+      }
+    });
+
+    if (selectedGroupNames.size === 0) { setMatchedPortfolioIds([]); return; }
+
+    // Score portfolio items by match quality
+    const scored = allPortfolioItems.map(item => {
+      const cat = (item.category || '').toLowerCase();
+      let score = 0;
+      for (const gName of selectedGroupNames) {
+        if (cat === gName) { score = 3; break; }
+        if (cat.includes(gName) || gName.includes(cat)) { score = Math.max(score, 2); continue; }
+        const catParts = cat.split(/[&,]/).map((s: string) => s.trim());
+        const gParts = gName.split(/[&,]/).map((s: string) => s.trim());
+        if (catParts.some((c: string) => gParts.some((g: string) => c.includes(g) || g.includes(c)))) {
+          score = Math.max(score, 1);
+        }
+      }
+      return { id: item.id, score };
+    }).filter(s => s.score > 0).sort((a, b) => b.score - a.score);
+
+    setMatchedPortfolioIds(scored.slice(0, 4).map(s => s.id));
+  }, [allPortfolioItems, selectedModuleIds, modules, groups]);
 
   // Service helpers
   const toggleModule = (id: string) => {
@@ -404,6 +453,9 @@ export default function ProposalNew() {
         client_context_note: clientContextNote || null,
         template_id: (agency as any).default_template || 'classic',
         custom_colors: agency.brand_color ? { primaryAccent: agency.brand_color } : null,
+        selected_portfolio_ids: portfolioAccepted && matchedPortfolioIds.length > 0 ? matchedPortfolioIds : null,
+        portfolio_section_visible: portfolioAccepted && matchedPortfolioIds.length > 0,
+        portfolio_section_title: 'Our Work',
       } as any).select('id').single();
       if (pError) throw pError;
 
@@ -785,6 +837,43 @@ export default function ProposalNew() {
           timelinePhases={timelinePhases}
         />
       </div>
+
+      {/* Portfolio suggestion */}
+      {!isGuestMode && !portfolioSuggestionDismissed && matchedPortfolioIds.length > 0 && hasServices && (
+        <div className="border-t border-brand/20 px-6 py-3" style={{ background: '#FAF8F5' }}>
+          <div className="mx-auto flex max-w-[720px] items-center justify-between gap-4">
+            <p className="text-[13px] text-foreground">
+              <span className="mr-1.5">💡</span>
+              You have {matchedPortfolioIds.length} portfolio item{matchedPortfolioIds.length > 1 ? 's' : ''} matching these services.
+              {!portfolioAccepted && ' Include them in this proposal?'}
+              {portfolioAccepted && <span className="ml-1.5 text-brand font-medium">Added ✓</span>}
+            </p>
+            {!portfolioAccepted ? (
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <button
+                  onClick={() => { setPortfolioAccepted(true); }}
+                  className="rounded-lg bg-foreground px-3.5 py-1.5 text-xs font-medium text-background hover:opacity-90 transition-opacity"
+                >
+                  Yes, add them
+                </button>
+                <button
+                  onClick={() => setPortfolioSuggestionDismissed(true)}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  No thanks
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => { setPortfolioAccepted(false); setPortfolioSuggestionDismissed(true); }}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+              >
+                Undo
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Sticky bottom action bar */}
       <div className="sticky bottom-0 border-t border-parchment bg-card/95 backdrop-blur px-6 py-4">
