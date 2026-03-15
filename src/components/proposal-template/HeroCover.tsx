@@ -212,9 +212,9 @@ function ModernHeroCover({
         transition={{ delay: 0.2, duration: 0.5 }}
         className="relative z-10 flex items-center justify-between px-8 pt-8 lg:px-14 lg:pt-12"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3" onClick={props.onLogoClick} style={{ cursor: props.onLogoClick ? 'pointer' : undefined }} title={props.onLogoClick ? 'Click to replace logo' : undefined}>
           {brand.logoUrl ? (
-            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain" />
+            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain hover:opacity-80 transition-opacity" />
           ) : (
             <>
               <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
