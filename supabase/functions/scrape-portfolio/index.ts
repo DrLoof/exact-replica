@@ -299,10 +299,12 @@ serve(async (req) => {
 
     // Build subpage context for AI
     let subpageContext = "";
-    if (subpageContents.size > 0) {
-      subpageContext = "\n\nCase study subpage content (use this for descriptions and category inference):\n";
-      for (const [title, content] of subpageContents) {
-        subpageContext += `\n--- ${title} ---\n${content.slice(0, 1500)}\n`;
+    if (subpageResults.size > 0) {
+      subpageContext = "\n\nCase study subpage content (use for descriptions, category inference, AND image matching):\n";
+      for (const [title, data] of subpageResults) {
+        subpageContext += `\n--- ${title} ---\n`;
+        if (data.heroImage) subpageContext += `Hero image: ${data.heroImage}\n`;
+        subpageContext += `${data.text.slice(0, 1500)}\n`;
       }
     }
 
