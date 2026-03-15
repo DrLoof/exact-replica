@@ -148,7 +148,7 @@ function ListAddButton({
       )}
     </div>
   );
-
+}
 
 export function ServiceCard({
   icon, name, price, pricingModel, description, deliverables,
