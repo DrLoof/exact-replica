@@ -158,9 +158,9 @@ export function HighlightPanel({
         accentColor: "white", shadow: `0 8px 30px ${accent}40`,
       },
       dark: {
-        bg: dark, border: "none",
+        bg: '#1A1A3E', border: `2px dashed rgba(255,255,255,0.1)`,
         textColor: "white", labelColor: "rgba(255,255,255,0.45)",
-        accentColor: secondary, shadow: `0 8px 30px ${dark}26`,
+        accentColor: accent, shadow: `0 8px 30px #1A1A3E26`,
       },
     };
 
