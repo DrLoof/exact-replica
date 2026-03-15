@@ -157,7 +157,7 @@ export default function ProposalEditor() {
     const [propRes, svcRes] = await Promise.all([
       supabase.from('proposals').select('*').eq('id', id).single(),
       supabase.from('proposal_services')
-        .select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, icon)')
+        .select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, client_responsibilities, out_of_scope, icon)')
         .eq('proposal_id', id)
         .order('display_order'),
     ]);
