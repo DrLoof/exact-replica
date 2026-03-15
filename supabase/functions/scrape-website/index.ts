@@ -642,7 +642,7 @@ serve(async (req) => {
       '/kontakta/oss', '/kontakta/oss/', '/kontakta-oss',
       '/services', '/what-we-do', '/tjanster', '/tjanster/',
       '/testimonials', '/reviews', '/clients', '/kunder', '/referenser',
-      '/work', '/case-studies', '/cases', '/kundcase', '/kundcase/', '/portfolio',
+      '/work', '/our-work', '/projects', '/case-study', '/case-studies', '/cases', '/kundcase', '/kundcase/', '/portfolio', '/client-success', '/success-stories',
       '/contact', '/kontakt',
       '/references', '/referenties', '/projekte', '/projets',
     ];
