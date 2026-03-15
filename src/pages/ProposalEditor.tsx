@@ -132,6 +132,8 @@ export default function ProposalEditor() {
   const [colorPickerOpen, setColorPickerOpen] = useState<string | null>(null);
   const [hexInput, setHexInput] = useState('');
   const colorPickerRef = useRef<HTMLDivElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const [localLogoUrl, setLocalLogoUrl] = useState<string | null>(null);
   const currencySymbol = agency?.currency_symbol || '$';
   const undoRef = useRef<{ field: string; value: any } | null>(null);
 
