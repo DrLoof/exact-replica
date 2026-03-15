@@ -1249,7 +1249,62 @@ export default function ProposalEditor() {
                 </div>
               </SectionWrapper>}
 
-              {/* Section 7: Testimonials */}
+              {/* Section 7: Portfolio */}
+              {!deletedSections.has(7) && <SectionWrapper idx={7} onDelete={deleteSection} label="Portfolio">
+                <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
+                  <PageWrapper pageNumber="08">
+                    <SectionHeader number="08" title={(proposal as any).portfolio_section_title || 'Our Work'} subtitle="Selected projects from our portfolio"
+                      onTitleEdit={(val) => updateField('portfolio_section_title', val)} />
+                    {portfolioItems.length === 0 ? (
+                      <div className="text-center py-16 print:hidden">
+                        <p className="text-muted-foreground" style={{ fontSize: '15px' }}>No portfolio items added yet.</p>
+                        <p className="text-xs text-muted-foreground mt-1 mb-4">Add your previous work to build credibility.</p>
+                        <div className="flex items-center justify-center gap-3">
+                          <button onClick={() => {
+                              const unselected = allPortfolioItems.filter(p => !portfolioItems.some(s => s.id === p.id));
+                              if (unselected.length > 0) {
+                                const toAdd = unselected.slice(0, 4);
+                                const updated = [...portfolioItems, ...toAdd];
+                                setPortfolioItems(updated);
+                                updateField('selected_portfolio_ids', updated.map((p: any) => p.id));
+                                updateField('portfolio_section_visible', true);
+                              }
+                            }}
+                            className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
+                            disabled={allPortfolioItems.length === 0}
+                          >
+                            {allPortfolioItems.length > 0 ? 'Add from library' : 'No items available'}
+                          </button>
+                          <Link to="/settings/portfolio" className="text-sm text-brand hover:text-brand-hover">Go to Settings →</Link>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                          {portfolioItems.map((item, i) => (
+                            <div key={item.id} className="group/portfolio relative">
+                              <button onClick={() => { const updated = portfolioItems.filter(p => p.id !== item.id); setPortfolioItems(updated); updateField('selected_portfolio_ids', updated.map((p: any) => p.id)); }}
+                                className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground opacity-0 shadow-md transition-opacity group-hover/portfolio:opacity-100 print:hidden"
+                                title="Remove from proposal"><X className="h-3 w-3" /></button>
+                              <PortfolioCard title={item.title} category={item.category} description={item.description} results={item.results} imageUrl={item.images?.[0]?.url} imageAlt={item.images?.[0]?.alt_text} delay={i * 0.1} />
+                            </div>
+                          ))}
+                        </div>
+                        {allPortfolioItems.filter(p => !portfolioItems.some(s => s.id === p.id)).length > 0 && (
+                          <div className="mt-6 text-center print:hidden">
+                            <button onClick={() => { const unselected = allPortfolioItems.filter(p => !portfolioItems.some(s => s.id === p.id)); if (unselected.length > 0) { const toAdd = unselected[0]; const updated = [...portfolioItems, toAdd]; setPortfolioItems(updated); updateField('selected_portfolio_ids', updated.map((p: any) => p.id)); } }}
+                              className="inline-flex items-center gap-2 rounded-lg border-2 border-dashed border-border px-5 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground">
+                              <Plus className="h-4 w-4" /> Add Project
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </PageWrapper>
+                </div>
+              </SectionWrapper>}
+
+              {/* Section 8: Testimonials */}
               {!deletedSections.has(7) && <SectionWrapper idx={7} onDelete={deleteSection} label="Testimonials">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="08">
