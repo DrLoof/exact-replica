@@ -248,18 +248,11 @@ export function TestimonialCard({
             "{quote}"
           </blockquote>
         )}
-        {metricValue && (
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5"
-            style={{ background: accentTint }}>
-            <span style={{ fontSize: "14px", fontWeight: 600, color: accent, fontFamily: "'Fraunces', serif" }}>
-              {metricValue}
-            </span>
-            {metricLabel && (
-              <span style={{ fontSize: "10px", fontWeight: 500, color: accent, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                {metricLabel}
-              </span>
-            )}
-          </div>
+        {renderMetric(
+          { fontSize: "14px", fontWeight: 600, color: accent, fontFamily: "'Fraunces', serif" },
+          { fontSize: "10px", fontWeight: 500, color: accent, textTransform: "uppercase" as const, letterSpacing: "0.05em" },
+          { background: accentTint },
+          "inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5"
         )}
         <div className="pt-5" style={{ borderTop: `1px solid ${border}` }}>
           <div className="flex items-center gap-3">
@@ -273,11 +266,7 @@ export function TestimonialCard({
             )}
             <div>
               <span className="block" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>{onNameEdit ? renderName() : clientName}</span>
-              {(clientTitle || clientCompany) && (
-                <span className="block" style={{ fontSize: "12px", fontWeight: 400, color: template.colors.textFaint }}>
-                  {clientTitle}{clientTitle && clientCompany ? " · " : ""}{clientCompany}
-                </span>
-              )}
+              {renderTitleCompany({ fontSize: "12px", fontWeight: 400, color: template.colors.textFaint })}
             </div>
           </div>
         </div>
