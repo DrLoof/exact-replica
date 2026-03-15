@@ -119,6 +119,7 @@ export default function ProposalEditor() {
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [portfolioItems, setPortfolioItems] = useState<any[]>([]);
   const [allPortfolioItems, setAllPortfolioItems] = useState<any[]>([]);
+  const [serviceGroups, setServiceGroups] = useState<any[]>([]);
   const [proposalTeam, setProposalTeam] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletedSections, setDeletedSections] = useState<Set<number>>(new Set());
