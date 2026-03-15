@@ -126,9 +126,12 @@ export default function ProposalEditor() {
   const [serviceGroups, setServiceGroups] = useState<any[]>([]);
   const [proposalTeam, setProposalTeam] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [deletedSections, setDeletedSections] = useState<Set<number>>(new Set());
+  const [deletedSections, setDeletedSections] = useState<Set<number>>(new Set([6])); // Portfolio hidden by default
   const [activeSection, setActiveSection] = useState(0);
-  const [showAddPage, setShowAddPage] = useState(false);
+  const [sectionOrder, setSectionOrder] = useState<number[]>([...DEFAULT_SECTION_ORDER]);
+  const [expandedSection, setExpandedSection] = useState<number | null>(null);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showAddService, setShowAddService] = useState(false);
   const [addServiceSearch, setAddServiceSearch] = useState('');
