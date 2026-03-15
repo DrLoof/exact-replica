@@ -166,17 +166,6 @@ export function OnboardingWizard() {
   };
 
   const handleReviewComplete = () => {
-    // Move to portfolio step instead of finishing
-    setScreen('portfolio');
-  };
-
-  const handlePortfolioContinue = (items: any[]) => {
-    setPortfolioItemsOnboarding(items);
-    handleFinalFinish();
-  };
-
-  const handlePortfolioSkip = () => {
-    setPortfolioItemsOnboarding([]);
     handleFinalFinish();
   };
 
