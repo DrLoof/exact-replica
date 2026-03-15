@@ -30,10 +30,22 @@ export function TestimonialCard({
   metricValue, metricLabel, avatarUrl,
   featured = false, delay = 0, onQuoteEdit, onNameEdit,
   onTitleEdit, onCompanyEdit, onMetricValueEdit, onMetricLabelEdit,
-  onAvatarUpload,
+  onAvatarUpload, onRemove,
 }: TestimonialCardProps) {
   const brand = useBrand();
   const template = useTemplate();
+  const [hovered, setHovered] = useState(false);
+
+  const removeButton = onRemove ? (
+    <button
+      onClick={(e) => { e.stopPropagation(); onRemove(); }}
+      className={`absolute top-3 right-3 z-10 p-1.5 rounded-full transition-opacity duration-200 print:hidden ${hovered ? 'opacity-100' : 'opacity-0'}`}
+      style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+      title="Remove testimonial"
+    >
+      <X className="h-3.5 w-3.5 text-white" />
+    </button>
+  ) : null;
   const isModern = template.id === 'modern';
   const isElegant = template.id === 'elegant';
   const isSoft = template.id === 'soft';
