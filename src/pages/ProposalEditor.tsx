@@ -10,6 +10,7 @@ import {
 import * as LucideIcons from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { templates } from '@/lib/proposalTemplates';
+import { calculateTimeline, getObjectivesStat, getKpiBarItems } from '@/lib/proposalStats';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';

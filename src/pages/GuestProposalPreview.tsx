@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { SignupGate, type SignupTrigger } from '@/components/onboarding/SignupGate';
 import { getDefaultModulesForGroup } from '@/lib/defaultModules';
 import { templates } from '@/lib/proposalTemplates';
+import { calculateTimeline, getObjectivesStat, getKpiBarItems } from '@/lib/proposalStats';
 import {
   BrandProvider, HeroCover, SectionHeader, ServiceCard, PricingSummary,
   WhyUsCard, TestimonialCard, TermsSection, SignatureBlock,
