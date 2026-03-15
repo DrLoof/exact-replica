@@ -67,18 +67,15 @@ export const defaultModulesByGroup: Record<string, DefaultModule[]> = {
         'Boilerplate copy (company description, team bios template)',
       ],
       clientResponsibilities: [
-        'Provide access to existing marketing materials and messaging',
-        'Share customer/audience research or personas if available',
         'Participate in brand workshop or stakeholder interviews',
-        'Identify key audience segments and their priorities',
+        'Share existing marketing materials and messaging',
+        'Identify key audience segments',
         'Provide feedback within agreed review windows',
       ],
       outOfScope: [
         'Visual identity or design work',
-        'Website copywriting',
         'Ongoing content creation',
-        'Customer research or persona development',
-        'Competitor analysis beyond messaging comparison',
+        'Website copywriting',
       ],
       defaultTimeline: '2-4 weeks. Stakeholder interviews (Week 1), Draft messaging framework (Week 2), Refinement and finalization (Weeks 3-4). Includes 2 rounds of revisions.',
       suggestedKpis: [
