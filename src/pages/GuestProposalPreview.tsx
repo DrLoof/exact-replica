@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Share2, Download, FileText, EyeOff, Check, RefreshCw, Loader2, X, Lock, Palette, Plus, UserPlus } from 'lucide-react';
+import { ArrowLeft, Share2, Download, FileText, Eye, EyeOff, Check, RefreshCw, Loader2, X, Lock, Palette, Plus, UserPlus } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
