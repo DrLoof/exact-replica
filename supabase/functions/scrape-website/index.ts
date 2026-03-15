@@ -161,18 +161,59 @@ function extractLogo(html: string, baseUrl: string): string | null {
   let bestLogo: string | null = null;
   let bestScore = 0;
 
-  const scoreLogo = (url: string, context: string): number => {
+  const scoreLogo = (url: string, context: string, imgTag?: string): number => {
     let score = 1;
     const lower = url.toLowerCase();
-    if (lower.includes('logo')) score += 10;
+    
+    // Strong positive signals
+    if (lower.includes('logo')) score += 15;
     if (lower.includes('brand')) score += 5;
-    if (lower.match(/\.svg(\?|$|&)/i)) score += 8;
+    
+    // Check alt text for logo keyword (very strong signal)
+    if (imgTag) {
+      const altMatch = imgTag.match(/alt=["']([^"']*)["']/i);
+      if (altMatch) {
+        const alt = altMatch[1].toLowerCase();
+        if (alt.includes('logo')) score += 12;
+        if (alt.includes('brand')) score += 5;
+      }
+      // Check class/id on the img itself
+      const classMatch = imgTag.match(/class=["']([^"']*)["']/i);
+      if (classMatch) {
+        const cls = classMatch[1].toLowerCase();
+        if (cls.includes('logo')) score += 12;
+        if (cls.includes('brand')) score += 5;
+        if (cls.includes('hero') || cls.includes('banner') || cls.includes('cover') || cls.includes('featured')) score -= 15;
+      }
+    }
+    
+    // Format signals — SVGs are almost always logos
+    if (lower.match(/\.svg(\?|$|&)/i)) score += 10;
     if (lower.match(/\.png(\?|$|&)/i)) score += 3;
-    if (context === 'header') score += 5;
-    if (context === 'og:image') score += 2;
+    
+    // Content/hero image penalties
+    if (lower.match(/\.webp(\?|$|&)/i)) score -= 3; // webp is rarely a logo
+    if (lower.match(/\.jpe?g(\?|$|&)/i)) score -= 3; // jpg is rarely a logo
+    if (lower.includes('wp-content/uploads/')) score -= 10; // WordPress content uploads are almost never logos
+    if (lower.includes('/uploads/')) score -= 5;
+    if (lower.match(/\d{3,4}x\d{3,4}/)) score -= 8; // dimensions in URL suggest content image
+    if (lower.match(/width=\d{4,}/)) score -= 8; // very wide = banner
+    if (lower.match(/height=\d{3,}/)) score -= 5; // tall = banner
+    if (lower.includes('hero') || lower.includes('banner') || lower.includes('slider') || lower.includes('slide')) score -= 15;
+    if (lower.includes('featured') || lower.includes('cover') || lower.includes('background')) score -= 10;
+    if (lower.includes('thumbnail') || lower.includes('thumb')) score -= 5;
+    
+    // Context
+    if (context === 'header') score += 3;
+    if (context === 'og:image') score += 1; // low — og:image is often a hero, not logo
+    if (context === 'logo-container') score += 8; // high — explicitly in a logo wrapper
+    
+    // Negative signals
     if (lower.includes('icon') && !lower.includes('logo')) score -= 3;
     if (lower.includes('favicon')) score -= 5;
     if (lower.includes('client') || lower.includes('partner') || lower.includes('sponsor')) score -= 10;
+    if (lower.includes('spinner') || lower.includes('loading') || lower.includes('placeholder')) score -= 20;
+    
     return score;
   };
 
@@ -184,28 +225,28 @@ function extractLogo(html: string, baseUrl: string): string | null {
   // Check all imgs in header area
   const headerImgs = [...headerHtml.matchAll(/<img[^>]*(?:src|data-src)=["']([^"']+)["'][^>]*/gi)];
   for (const m of headerImgs) {
-    // Also check for data-src
     const dataSrc = m[0].match(/data-src=["']([^"']+)["']/i);
     const src = m[0].match(/\bsrc=["']([^"']+)["']/i);
     const url = dataSrc?.[1] || src?.[1];
     if (!url || url.startsWith('data:')) continue;
     const resolved = resolveUrl(url);
-    const score = scoreLogo(resolved, 'header');
+    const score = scoreLogo(resolved, 'header', m[0]);
     if (score > bestScore) { bestScore = score; bestLogo = resolved; }
   }
 
   // Strategy 2: Elements with logo class/id containing images
   const logoContainerPatterns = [
-    /<(?:a|div|span|figure)[^>]*(?:class|id)=["'][^"']*\blogo\b[^"']*["'][^>]*>[\s\S]*?<img[^>]*(?:src|data-src)=["']([^"']+)["'][^>]*>/gi,
-    /<(?:a|div|span|figure)[^>]*(?:class|id)=["'][^"']*\bbrand\b[^"']*["'][^>]*>[\s\S]*?<img[^>]*(?:src|data-src)=["']([^"']+)["'][^>]*>/gi,
+    /<(?:a|div|span|figure)[^>]*(?:class|id)=["'][^"']*\blogo\b[^"']*["'][^>]*>[\s\S]*?(<img[^>]*(?:src|data-src)=["']([^"']+)["'][^>]*>)/gi,
+    /<(?:a|div|span|figure)[^>]*(?:class|id)=["'][^"']*\bbrand\b[^"']*["'][^>]*>[\s\S]*?(<img[^>]*(?:src|data-src)=["']([^"']+)["'][^>]*>)/gi,
   ];
   for (const pattern of logoContainerPatterns) {
     const matches = [...html.matchAll(pattern)];
     for (const m of matches) {
-      const url = m[1];
+      const imgTag = m[1];
+      const url = m[2];
       if (!url || url.startsWith('data:')) continue;
       const resolved = resolveUrl(url);
-      const score = scoreLogo(resolved, 'header') + 3; // bonus for being in a logo container
+      const score = scoreLogo(resolved, 'logo-container', imgTag);
       if (score > bestScore) { bestScore = score; bestLogo = resolved; }
     }
   }
@@ -257,6 +298,11 @@ function extractLogo(html: string, baseUrl: string): string | null {
     }
   }
 
+  console.log(`Logo detection result: score=${bestScore}, url=${bestLogo?.slice(0, 100)}`);
+  
+  // If best score is very low, it's likely not a real logo
+  if (bestScore < 3) return null;
+  
   return bestLogo;
 }
 
