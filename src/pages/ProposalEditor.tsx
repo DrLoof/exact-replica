@@ -1575,8 +1575,8 @@ export default function ProposalEditor() {
                 </div>
               </SectionWrapper>}
 
-              {/* Section 8: Testimonials */}
-              {!deletedSections.has(8) && <SectionWrapper idx={8} onDelete={deleteSection} label="Testimonials">
+              {/* Section 7: Testimonials */}
+              {!deletedSections.has(7) && <SectionWrapper idx={7} onDelete={deleteSection} label="Testimonials">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="09">
                     <SectionHeader number="09" title="What Our Clients Say" subtitle="Proof of impact"
