@@ -183,16 +183,12 @@ export const defaultModulesByGroup: Record<string, DefaultModule[]> = {
       clientResponsibilities: [
         'Provide campaign goals and target audience',
         'Provide or approve final landing page copy',
-        'Provide product/service images and assets',
-        'Provide CRM/email platform access for integration',
-        'Manage ad traffic driving to the page',
+        'Provide CRM/email platform access for form integration',
       ],
       outOfScope: [
         'Copywriting (unless bundled)',
         'Paid ad campaign management',
         'Ongoing optimization beyond initial A/B test',
-        'Full website design',
-        'Video production for landing page',
       ],
       defaultTimeline: '2-3 weeks. Strategy & wireframe (Week 1), Design & development (Week 2), Testing & launch (Week 3). Includes 1 round of design revisions.',
       suggestedKpis: [
