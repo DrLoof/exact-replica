@@ -42,6 +42,48 @@ export function TestimonialCard({
     <EditableText value={clientName} placeholder="Client name..." onSave={onNameEdit} as="span" />
   ) : clientName;
 
+  const renderTitleCompany = (style: React.CSSProperties) => {
+    if (!onTitleEdit && !onCompanyEdit) {
+      if (!clientTitle && !clientCompany) return null;
+      return (
+        <span className="block" style={style}>
+          {clientTitle}{clientTitle && clientCompany ? " · " : ""}{clientCompany}
+        </span>
+      );
+    }
+    return (
+      <span className="block" style={style}>
+        {onTitleEdit ? (
+          <EditableText value={clientTitle || ''} placeholder="Title..." onSave={onTitleEdit} as="span" />
+        ) : clientTitle}
+        {(clientTitle || onTitleEdit) && (clientCompany || onCompanyEdit) ? " · " : ""}
+        {onCompanyEdit ? (
+          <EditableText value={clientCompany || ''} placeholder="Company..." onSave={onCompanyEdit} as="span" />
+        ) : clientCompany}
+      </span>
+    );
+  };
+
+  const renderMetric = (valueStyle: React.CSSProperties, labelStyle: React.CSSProperties, containerStyle?: React.CSSProperties, containerClass?: string) => {
+    if (!metricValue && !onMetricValueEdit) return null;
+    return (
+      <div className={containerClass || "inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5"} style={containerStyle}>
+        {onMetricValueEdit ? (
+          <EditableText value={metricValue || ''} placeholder="Metric..." onSave={onMetricValueEdit} as="span" style={valueStyle} />
+        ) : (
+          <span style={valueStyle}>{metricValue}</span>
+        )}
+        {(metricLabel || onMetricLabelEdit) && (
+          onMetricLabelEdit ? (
+            <EditableText value={metricLabel || ''} placeholder="Label..." onSave={onMetricLabelEdit} as="span" style={labelStyle} />
+          ) : (
+            <span style={labelStyle}>{metricLabel}</span>
+          )
+        )}
+      </div>
+    );
+  };
+
   // Soft featured
   if (isSoft && featured) {
     return (
