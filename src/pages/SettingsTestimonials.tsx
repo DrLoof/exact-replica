@@ -44,7 +44,7 @@ export default function SettingsTestimonials() {
     setLoading(false);
   };
 
-  const openCreate = () => { setForm(emptyForm); setEditId(null); setShowModal(true); };
+  const openCreate = () => { setForm(emptyForm); setEditId(null); setAvatarFile(null); setAvatarPreview(null); setShowModal(true); };
   const openEdit = (t: Testimonial) => {
     setForm({
       client_name: t.client_name, client_title: t.client_title || '', client_company: t.client_company || '',
@@ -52,7 +52,18 @@ export default function SettingsTestimonials() {
       avatar_url: t.avatar_url || '', is_featured: t.is_featured || false,
     });
     setEditId(t.id);
+    setAvatarFile(null);
+    setAvatarPreview(t.avatar_url || null);
     setShowModal(true);
+  };
+
+  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setAvatarPreview(reader.result as string);
+    reader.readAsDataURL(file);
   };
 
   const handleSave = async () => {
