@@ -777,6 +777,7 @@ export default function ProposalEditor() {
             contactPhone: agency?.phone || '',
             currency: agency?.currency_symbol || '$',
           }}>
+            <input ref={logoInputRef} type="file" accept=".png,.jpg,.jpeg,.svg,.webp" onChange={handleLogoUpload} className="hidden" />
             <div className="mx-auto max-w-[900px] py-8 px-4 space-y-6 print:max-w-none print:p-0 print:space-y-0">
               
 
