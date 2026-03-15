@@ -263,6 +263,8 @@ export default function PublicProposal() {
                   pricingModel={svc.module?.pricing_model || 'fixed'}
                   description={svc.module?.description || svc.module?.short_description || ''}
                   deliverables={svc.module?.deliverables || []}
+                  clientResponsibilities={svc.module?.client_responsibilities || []}
+                  outOfScope={svc.module?.out_of_scope || []}
                   isAddon={svc.is_addon || svc.module?.service_type === 'addon'}
                   delay={idx * 0.08}
                 />

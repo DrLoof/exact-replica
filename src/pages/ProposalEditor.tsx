@@ -819,6 +819,8 @@ export default function ProposalEditor() {
                                 pricingModel={(svc.module?.pricing_model || 'fixed') as any}
                                 description={svc.module?.description || svc.module?.short_description || ''}
                                 deliverables={svc.custom_deliverables || svc.module?.deliverables || []}
+                                clientResponsibilities={svc.module?.client_responsibilities || []}
+                                outOfScope={svc.module?.out_of_scope || []}
                                 isAddon={svc.is_addon || false}
                                 delay={i * 0.1}
                                 onNameEdit={async (val) => {
