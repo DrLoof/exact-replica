@@ -127,6 +127,18 @@ export function OnboardingWizard() {
       setDiffIntro(data.about_text || '');
     }
 
+    // Set team members from scrape (best-effort)
+    if (data.team_members?.length > 0) {
+      const members = data.team_members.slice(0, 6).map((m: any, i: number) => ({
+        id: `tm_${i + 1}`,
+        name: m.name || '',
+        title: m.title || '',
+        photo_url: m.photo_url || null,
+        bio: m.bio || null,
+      }));
+      setTeamMembers(members);
+    }
+
     setScreen('review');
   };
 
