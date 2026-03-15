@@ -1449,8 +1449,7 @@ export default function ProposalEditor() {
                           ))}
                         </div>
                       )}
-                      {proposalTeam.length < 4 && (
-                        <div className="flex justify-center mt-4 print:hidden">
+                      <div className="flex justify-center mt-4 print:hidden">
                           <button
                             onClick={async () => {
                               const newId = crypto.randomUUID();

@@ -958,8 +958,7 @@ export default function GuestProposalPreview() {
                           ))}
                         </div>
                       )}
-                      {guestTeamMembers.length < 4 && (
-                        <div className="flex justify-center mt-4 print:hidden">
+                      <div className="flex justify-center mt-4 print:hidden">
                           <button
                             onClick={() => {
                               const newMember = { id: crypto.randomUUID(), name: 'New Member', title: 'Role', photo_url: null };
