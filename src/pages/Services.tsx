@@ -25,12 +25,15 @@ interface ModuleForm {
   default_timeline: string;
   deliverables: string;
   service_type: string;
+  client_responsibilities: string;
+  out_of_scope: string;
 }
 
 const emptyForm: ModuleForm = {
   name: '', short_description: '', description: '', group_id: '',
   pricing_model: 'fixed', price_fixed: '', price_monthly: '', price_hourly: '',
   estimated_hours: '', default_timeline: '', deliverables: '', service_type: 'core',
+  client_responsibilities: '', out_of_scope: '',
 };
 
 export default function Services() {
