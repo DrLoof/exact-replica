@@ -54,7 +54,7 @@ function ElegantHeroCover({
       >
         <div className="flex items-center gap-3" onClick={onLogoClick} style={{ cursor: onLogoClick ? 'pointer' : undefined }} title={onLogoClick ? 'Click to replace logo' : undefined}>
           {brand.logoUrl ? (
-            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain hover:opacity-80 transition-opacity" />
+            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain brightness-0 hover:opacity-80 transition-opacity" />
           ) : (
             <>
               <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: accent }}>
@@ -214,7 +214,7 @@ function ModernHeroCover({
       >
         <div className="flex items-center gap-3" onClick={onLogoClick} style={{ cursor: onLogoClick ? 'pointer' : undefined }} title={onLogoClick ? 'Click to replace logo' : undefined}>
           {brand.logoUrl ? (
-            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain hover:opacity-80 transition-opacity" />
+            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain brightness-0 hover:opacity-80 transition-opacity" />
           ) : (
             <>
               <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
@@ -512,7 +512,7 @@ export function HeroCover(props: HeroCoverProps) {
         >
           <div onClick={props.onLogoClick} style={{ cursor: props.onLogoClick ? 'pointer' : undefined }} title={props.onLogoClick ? 'Click to replace logo' : undefined}>
           {brand.logoUrl ? (
-            <img src={brand.logoUrl} alt={brand.agencyName} className="h-32 w-auto object-contain hover:opacity-80 transition-opacity" />
+            <img src={brand.logoUrl} alt={brand.agencyName} className="h-32 w-auto object-contain brightness-0 hover:opacity-80 transition-opacity" />
           ) : (
             <span className="tracking-[0.15em] uppercase"
               style={{ fontSize: "18px", fontWeight: 700, color: brand.darkColor, letterSpacing: "0.08em" }}>
