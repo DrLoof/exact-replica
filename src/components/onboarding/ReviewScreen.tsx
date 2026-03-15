@@ -359,6 +359,9 @@ export function ReviewScreen({
           </button>
         </div>
 
+        {/* Hidden file input — always rendered so logo click works in both modes */}
+        <input ref={fileInputRef} type="file" accept=".png,.svg,.webp" onChange={handleLogoUpload} className="hidden" />
+
         {editingSection === 'agency' ? (
           <div className="space-y-4">
             <input
@@ -378,7 +381,6 @@ export function ReviewScreen({
               <input type="color" value={agencyIdentity.brand_color || '#E8825C'} onChange={e => onAgencyChange({ ...agencyIdentity, brand_color: e.target.value })} className="h-8 w-8 cursor-pointer rounded border border-border" />
             </div>
             <div>
-              <input ref={fileInputRef} type="file" accept=".png,.svg,.webp" onChange={handleLogoUpload} className="hidden" />
               <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground">
                 {agencyIdentity.logo_url && (
                   <div className="h-6 w-6 rounded border border-border bg-background p-0.5 shrink-0">
