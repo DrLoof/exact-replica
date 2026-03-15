@@ -734,7 +734,7 @@ export default function GuestProposalPreview() {
                         }
                       }}
                       className="p-0.5 rounded transition-all"
-                      style={{ color: isHidden ? '#C8C3BB' : '#B8B0A5' }}
+                      style={{ color: isHidden ? '#C8C3BB' : isActive ? '#FFFFFF80' : '#B8B0A5' }}
                     >
                       {isHidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                     </button>
