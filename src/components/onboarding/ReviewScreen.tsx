@@ -22,6 +22,7 @@ interface ReviewScreenProps {
   onDiffIntroChange: (s: string) => void;
   groupNameMap: Record<string, string>;
   onFinish: () => void;
+  onBack?: () => void;
   saving: boolean;
   addedBundles?: Set<string>;
   onAddBundle?: (bundleName: string) => void;
