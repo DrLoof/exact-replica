@@ -25,6 +25,8 @@ interface ReviewScreenProps {
   saving: boolean;
   addedBundles?: Set<string>;
   onAddBundle?: (bundleName: string) => void;
+  teamMembers: any[];
+  onTeamMembersChange: (members: any[]) => void;
 }
 
 export function ReviewScreen({
