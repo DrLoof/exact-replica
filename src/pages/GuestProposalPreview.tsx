@@ -600,7 +600,7 @@ export default function GuestProposalPreview() {
                     onClick={() => switchTemplate(tmpl.id)}
                     className={cn(
                       'flex-1 rounded-lg overflow-hidden border-2 transition-all',
-                      isActive ? 'border-brand ring-1 ring-brand/30' : 'border-border hover:border-muted-foreground/30'
+                      isActive ? 'border-[#2A2118] ring-1 ring-[#2A2118]/20' : 'border-border hover:border-muted-foreground/30'
                     )}
                   >
                     <div className="h-8 relative" style={{ background: tmpl.colors.background }}>
