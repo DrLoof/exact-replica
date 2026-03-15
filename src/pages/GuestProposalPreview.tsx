@@ -164,6 +164,17 @@ export default function GuestProposalPreview() {
     (guestOnboarding?.testimonials || []).filter((t: any) => t.approved)
   );
 
+  // Sync testimonial edits back to localStorage
+  const saveGuestTestimonials = useCallback((updated: any[]) => {
+    try {
+      const raw = localStorage.getItem('propopad_guest_onboarding');
+      const onboarding = raw ? JSON.parse(raw) : {};
+      const unapproved = (onboarding.testimonials || []).filter((t: any) => !t.approved);
+      onboarding.testimonials = [...updated, ...unapproved];
+      localStorage.setItem('propopad_guest_onboarding', JSON.stringify(onboarding));
+    } catch {}
+  }, []);
+
   const saveGuestTeam = useCallback((team: any[]) => {
     try {
       const raw = localStorage.getItem('propopad_guest_onboarding');
