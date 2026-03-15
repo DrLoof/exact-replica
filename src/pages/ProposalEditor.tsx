@@ -310,9 +310,30 @@ export default function ProposalEditor() {
 
   const updateField = async (field: string, value: any) => {
     if (!proposal) return;
+    // Store undo state
+    undoRef.current = { field, value: (proposal as any)[field] };
     await supabase.from('proposals').update({ [field]: value }).eq('id', proposal.id);
     setProposal(prev => prev ? { ...prev, [field]: value } : prev);
   };
+
+  // Undo last change with Ctrl+Z / Cmd+Z
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
+        const active = document.activeElement;
+        if (active && active.getAttribute('contenteditable') === 'true') return; // let browser handle it
+        if (undoRef.current && proposal) {
+          e.preventDefault();
+          const { field, value } = undoRef.current;
+          undoRef.current = null;
+          updateField(field, value);
+          toast.success('Change undone');
+        }
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [proposal]);
 
   // Save team selection when it changes
   const saveProposalTeam = useCallback(async (team: any[]) => {
