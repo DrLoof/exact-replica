@@ -649,34 +649,50 @@ export default function ProposalEditor() {
           </div>
 
           {/* Section navigation */}
-          {sectionNames.map((name, idx) => (
-            !deletedSections.has(idx) && (
+          {sectionNames.map((name, idx) => {
+            const isLocked = idx === 0 || idx === 2 || idx === 4; // Cover, Scope, Investment
+            const isHidden = deletedSections.has(idx);
+            return (
               <div
                 key={idx}
                 className="group/nav flex items-center gap-1"
               >
                 <button
                   onClick={() => {
-                    setActiveSection(idx);
-                    document.getElementById(`section-${idx}`)?.scrollIntoView({ behavior: 'smooth' });
+                    if (!isHidden) {
+                      setActiveSection(idx);
+                      document.getElementById(`section-${idx}`)?.scrollIntoView({ behavior: 'smooth' });
+                    }
                   }}
                   className={cn(
                     'flex-1 flex items-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors text-left',
+                    isHidden ? 'text-muted-foreground/40' :
                     activeSection === idx ? 'bg-accent font-medium text-accent-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
                   )}
                 >
                   {name}
                 </button>
-                <button
-                  onClick={() => deleteSection(idx)}
-                  className="opacity-0 group-hover/nav:opacity-100 p-1 rounded text-muted-foreground hover:text-destructive transition-all"
-                  title={`Remove ${name}`}
-                >
-                  <X className="h-3 w-3" />
-                </button>
+                {isLocked ? (
+                  <span className="p-1 text-muted-foreground/30" title="Required section">
+                    <Lock className="h-3 w-3" />
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => isHidden ? restoreSection(idx) : deleteSection(idx)}
+                    className={cn(
+                      'p-1 rounded transition-all',
+                      isHidden
+                        ? 'text-muted-foreground/40 hover:text-foreground'
+                        : 'opacity-0 group-hover/nav:opacity-100 text-muted-foreground hover:text-foreground'
+                    )}
+                    title={isHidden ? `Show ${name}` : `Hide ${name}`}
+                  >
+                    {isHidden ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                  </button>
+                )}
               </div>
-            )
-          ))}
+            );
+          })}
 
           {/* Scope display toggles */}
           <div className="mt-3 pt-3 border-t border-border">
