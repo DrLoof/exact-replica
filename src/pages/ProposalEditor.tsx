@@ -1520,8 +1520,8 @@ export default function ProposalEditor() {
                 </div>
               </SectionWrapper>}
 
-              {/* Section 7: Portfolio */}
-              {!deletedSections.has(7) && <SectionWrapper idx={7} onDelete={deleteSection} label="Portfolio">
+              {/* Section 6: Portfolio */}
+              {!deletedSections.has(6) && <SectionWrapper idx={6} onDelete={deleteSection} label="Portfolio">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="08">
                     <SectionHeader number="08" title={(proposal as any).portfolio_section_title || 'Our Work'} subtitle="Selected projects from our portfolio"
