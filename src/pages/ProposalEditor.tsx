@@ -452,6 +452,22 @@ export default function ProposalEditor() {
     }
   };
 
+  // Logo upload handler — saves to Supabase Storage + agency settings
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !agency?.id) return;
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+    const path = `${agency.id}/logo.${ext}`;
+    const { error: uploadError } = await supabase.storage.from('agency-logos').upload(path, file, { upsert: true });
+    if (uploadError) { toast.error('Upload failed'); return; }
+    const { data: urlData } = supabase.storage.from('agency-logos').getPublicUrl(path);
+    const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+    await supabase.from('agencies').update({ logo_url: publicUrl }).eq('id', agency.id);
+    setLocalLogoUrl(publicUrl);
+    toast.success('Logo updated and saved to settings');
+    e.target.value = '';
+  };
+
   const PRESET_COLORS = ['#E8825C', '#2563EB', '#34D399', '#f9b564', '#8B5CF6', '#EC4899', '#14B8A6', '#F59E0B', '#EF4444', '#1E1B4B'];
 
   const currentTemplate = templates[templateId] || templates.classic;
