@@ -123,7 +123,11 @@ export function PortfolioStep({ onContinue, onSkip, serviceGroups, detectedPortf
     toast.success('Project added');
   };
 
-  const allCategories = [...new Set([...serviceGroups, 'Other', ...items.map(i => i.category)])];
+  const allCategories = [...new Set([...serviceGroups, 'Other', ...items.map(i => i.category), ...scrapedProjects.map(p => p.category)])];
+
+  const updateScrapedCategory = (idx: number, category: string) => {
+    setScrapedProjects(prev => prev.map((p, i) => i === idx ? { ...p, category } : p));
+  };
 
   return (
     <div className="mx-auto max-w-[720px] px-6 py-12">
