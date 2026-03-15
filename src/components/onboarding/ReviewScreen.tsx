@@ -414,35 +414,38 @@ export function ReviewScreen({
                 className="font-display text-lg font-bold text-foreground truncate bg-transparent border-b border-transparent focus:border-brass outline-none w-full"
               />
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                {agencyIdentity.brand_color && (
-                  <>
-                    <span className="inline-block h-4 w-4 rounded-full border border-border" style={{ backgroundColor: agencyIdentity.brand_color }} />
-                    <span>Brand color</span>
-                    <span>·</span>
-                  </>
-                )}
-                {agencyIdentity.email ? (
-                  <span>{agencyIdentity.email}</span>
-                ) : (
-                  <button
-                    onClick={() => setEditingSection(editingSection === 'agency' ? null : 'agency')}
-                    className="italic text-brass hover:text-foreground"
-                  >
-                    Add email
-                  </button>
-                )}
-                {agencyIdentity.phone && <><span>·</span><span>{agencyIdentity.phone}</span></>}
-                {!agencyIdentity.phone && (
-                  <>
-                    {agencyIdentity.email && <span>·</span>}
-                    <button
-                      onClick={() => setEditingSection(editingSection === 'agency' ? null : 'agency')}
-                      className="italic text-brass hover:text-foreground"
-                    >
-                      Add phone
-                    </button>
-                  </>
-                )}
+                {/* Inline color picker */}
+                <label className="relative inline-flex items-center gap-1.5 cursor-pointer group">
+                  <span
+                    className="inline-block h-4 w-4 rounded-full border border-border group-hover:ring-2 group-hover:ring-brass/30 transition-shadow"
+                    style={{ backgroundColor: agencyIdentity.brand_color || '#E8825C' }}
+                  />
+                  <span className="group-hover:text-foreground transition-colors">Brand color</span>
+                  <input
+                    type="color"
+                    value={agencyIdentity.brand_color || '#E8825C'}
+                    onChange={e => onAgencyChange({ ...agencyIdentity, brand_color: e.target.value })}
+                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                  />
+                </label>
+                <span>·</span>
+                {/* Inline email */}
+                <input
+                  type="email"
+                  value={agencyIdentity.email || ''}
+                  onChange={e => onAgencyChange({ ...agencyIdentity, email: e.target.value })}
+                  placeholder="Add email"
+                  className="bg-transparent border-b border-transparent focus:border-brass outline-none text-xs text-muted-foreground placeholder:italic placeholder:text-brass hover:text-foreground focus:text-foreground transition-colors max-w-[180px]"
+                />
+                <span>·</span>
+                {/* Inline phone */}
+                <input
+                  type="tel"
+                  value={agencyIdentity.phone || ''}
+                  onChange={e => onAgencyChange({ ...agencyIdentity, phone: e.target.value })}
+                  placeholder="Add phone"
+                  className="bg-transparent border-b border-transparent focus:border-brass outline-none text-xs text-muted-foreground placeholder:italic placeholder:text-brass hover:text-foreground focus:text-foreground transition-colors max-w-[140px]"
+                />
               </div>
             </div>
           </div>
