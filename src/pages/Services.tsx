@@ -81,6 +81,8 @@ export default function Services() {
       default_timeline: mod.default_timeline || '',
       deliverables: (mod.deliverables || []).join('\n'),
       service_type: mod.service_type || 'core',
+      client_responsibilities: (mod.client_responsibilities || []).join('\n'),
+      out_of_scope: (mod.out_of_scope || []).join('\n'),
     });
     setShowModal(true);
   };
