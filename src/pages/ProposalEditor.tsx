@@ -1308,7 +1308,7 @@ export default function ProposalEditor() {
               {!deletedSections.has(8) && <SectionWrapper idx={8} onDelete={deleteSection} label="Testimonials">
                 <div className="rounded-2xl overflow-hidden shadow-lg bg-white">
                   <PageWrapper pageNumber="09">
-                    <SectionHeader number="07" title="What Our Clients Say" subtitle="Proof of impact"
+                    <SectionHeader number="09" title="What Our Clients Say" subtitle="Proof of impact"
                       onTitleEdit={(val) => updateField('title', val)}
                       onSubtitleEdit={(val) => updateField('subtitle', val)} />
                     {testimonials.length === 0 ? (
