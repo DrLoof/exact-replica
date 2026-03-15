@@ -701,13 +701,8 @@ export default function GuestProposalPreview() {
                     isActive && !isHidden ? '' : 'hover:bg-[#F4F0EA]',
                   )}
                   style={isActive && !isHidden ? {
-                    backgroundColor: 'hsl(24 28% 13% / 0.08)',
-                    borderLeft: '3px solid hsl(24 28% 13%)',
-                    paddingLeft: '9px',
-                  } : {
-                    borderLeft: '3px solid transparent',
-                    paddingLeft: '9px',
-                  }}
+                    backgroundColor: 'hsl(24 28% 13%)',
+                  } : {}}
                   onClick={() => {
                     if (!isHidden) {
                       setActiveSection(idx);
@@ -719,13 +714,13 @@ export default function GuestProposalPreview() {
                   <span className={cn(
                     'flex-1 text-[13px] font-normal transition-colors',
                     isHidden ? 'line-through' : '',
-                  )} style={{ color: isActive && !isHidden ? '#2A2118' : isHidden ? '#C8C3BB' : '#7A7265' }}>
+                  )} style={{ color: isActive && !isHidden ? '#FFFFFF' : isHidden ? '#C8C3BB' : '#7A7265' }}>
                     {name}
                   </span>
 
                   {/* Lock or eye toggle */}
                   {isLocked ? (
-                    <span style={{ color: '#D5CFC7' }}><Lock className="h-3 w-3" /></span>
+                    <span style={{ color: isActive && !isHidden ? '#FFFFFF80' : '#D5CFC7' }}><Lock className="h-3 w-3" /></span>
                   ) : (
                     <button
                       onClick={(e) => {
@@ -739,7 +734,7 @@ export default function GuestProposalPreview() {
                         }
                       }}
                       className="p-0.5 rounded transition-all"
-                      style={{ color: isHidden ? '#C8C3BB' : '#B8B0A5' }}
+                      style={{ color: isHidden ? '#C8C3BB' : isActive ? '#FFFFFF80' : '#B8B0A5' }}
                     >
                       {isHidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                     </button>
