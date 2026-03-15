@@ -35,9 +35,9 @@ export function HighlightPanel({
         accentColor: "white",
       },
       dark: {
-        bg: dark, border: "none",
-        textColor: "white", labelColor: "rgba(255,255,255,0.6)",
-        accentColor: "white",
+        bg: '#2A2520', border: "none",
+        textColor: "white", labelColor: "rgba(255,255,255,0.5)",
+        accentColor: accent,
       },
     };
     const ss = softStyles[variant];
