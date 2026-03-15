@@ -600,7 +600,7 @@ export default function GuestProposalPreview() {
                     onClick={() => switchTemplate(tmpl.id)}
                     className={cn(
                       'flex-1 rounded-lg overflow-hidden border-2 transition-all',
-                      isActive ? 'border-brand ring-1 ring-brand/30' : 'border-border hover:border-muted-foreground/30'
+                      isActive ? 'border-[#2A2118] ring-1 ring-[#2A2118]/20' : 'border-border hover:border-muted-foreground/30'
                     )}
                   >
                     <div className="h-8 relative" style={{ background: tmpl.colors.background }}>
@@ -755,13 +755,13 @@ export default function GuestProposalPreview() {
             <label className="flex items-center gap-2 px-2 py-1.5 cursor-pointer group">
               <input type="checkbox" checked={showClientResponsibilities}
                 onChange={(e) => setShowClientResponsibilities(e.target.checked)}
-                className="rounded border-border text-brand focus:ring-brand h-3.5 w-3.5" />
+                className="rounded border-border text-[#2A2118] focus:ring-[#2A2118] h-3.5 w-3.5 accent-[#2A2118]" />
               <span className="text-xs group-hover:text-foreground transition-colors" style={{ color: '#7A7265' }}>Client Responsibilities</span>
             </label>
             <label className="flex items-center gap-2 px-2 py-1.5 cursor-pointer group">
               <input type="checkbox" checked={showOutOfScope}
                 onChange={(e) => setShowOutOfScope(e.target.checked)}
-                className="rounded border-border text-brand focus:ring-brand h-3.5 w-3.5" />
+                className="rounded border-border text-[#2A2118] focus:ring-[#2A2118] h-3.5 w-3.5 accent-[#2A2118]" />
               <span className="text-xs group-hover:text-foreground transition-colors" style={{ color: '#7A7265' }}>Out of Scope</span>
             </label>
           </div>
@@ -774,7 +774,7 @@ export default function GuestProposalPreview() {
                 onClick={() => setPortfolioVisible(!portfolioVisible)}
                 className={cn(
                   'relative w-8 h-[18px] rounded-full transition-colors',
-                  portfolioVisible ? 'bg-brand' : 'bg-[#D5CFC7]'
+                  portfolioVisible ? 'bg-[#2A2118]' : 'bg-[#D5CFC7]'
                 )}
               >
                 <span className={cn(
