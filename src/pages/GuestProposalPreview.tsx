@@ -587,104 +587,6 @@ export default function GuestProposalPreview() {
       <div className="flex">
         {/* Section Nav */}
         <div className="sticky top-[57px] hidden h-[calc(100vh-57px)] w-52 flex-col gap-1 overflow-y-auto border-r border-border bg-background p-3 lg:flex print:hidden">
-          {/* Template Picker */}
-          <div className="mb-3">
-            <span className="block px-2 mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Template</span>
-            <div className="flex gap-2">
-              {Object.values(templates).map((tmpl) => {
-                const isActive = templateId === tmpl.id;
-                const isLocked = tmpl.isPro;
-                return (
-                  <button
-                    key={tmpl.id}
-                    onClick={() => switchTemplate(tmpl.id)}
-                    className={cn(
-                      'flex-1 rounded-lg overflow-hidden border-2 transition-all',
-                      isActive ? 'border-[#2A2118] ring-1 ring-[#2A2118]/20' : 'border-border hover:border-muted-foreground/30'
-                    )}
-                  >
-                    <div className="h-8 relative" style={{ background: tmpl.colors.background }}>
-                      <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: tmpl.colors.primaryAccent }} />
-                      {isLocked && (
-                        <div className="absolute top-1 right-1 flex items-center gap-0.5 bg-foreground/80 text-background rounded px-1 py-0.5">
-                          <Lock className="h-2.5 w-2.5" />
-                          <span style={{ fontSize: '8px', fontWeight: 700 }}>PRO</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="px-2 py-1.5 bg-background">
-                      <span className={cn('block text-center', isActive ? 'text-foreground font-semibold' : 'text-muted-foreground')} style={{ fontSize: '11px' }}>
-                        {tmpl.name}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Color Customizer — preview allowed, saving gated */}
-          <div className="mb-3 pb-3 border-b border-border">
-            <div className="flex items-center gap-2 px-2 mb-2">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Colors</span>
-              <span className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground/60 bg-muted rounded px-1.5 py-0.5">Preview</span>
-            </div>
-            <div className="flex items-center gap-3 px-2 relative" ref={colorPickerRef}>
-              {/* Primary */}
-              <div className="flex flex-col items-center gap-1">
-                <button
-                  onClick={() => setColorPickerOpen(colorPickerOpen === 'primaryAccent' ? null : 'primaryAccent')}
-                  className="w-6 h-6 rounded-full border-2 border-border hover:scale-110 transition-transform"
-                  style={{ background: activePrimary }}
-                  title="Primary accent"
-                />
-                <span className="text-muted-foreground/50" style={{ fontSize: '9px' }}>Primary</span>
-              </div>
-              {/* Secondary */}
-              <div className="flex flex-col items-center gap-1">
-                <button
-                  onClick={() => setColorPickerOpen(colorPickerOpen === 'secondaryAccent' ? null : 'secondaryAccent')}
-                  className="w-6 h-6 rounded-full border-2 border-border hover:scale-110 transition-transform"
-                  style={{ background: activeSecondary }}
-                  title="Secondary accent"
-                />
-                <span className="text-muted-foreground/50" style={{ fontSize: '9px' }}>Secondary</span>
-              </div>
-              {customColors && (
-                <button onClick={resetColors} className="text-muted-foreground hover:text-foreground ml-auto" title="Reset colors">
-                  <RefreshCw className="h-3 w-3" />
-                </button>
-              )}
-
-              {/* Color picker popover */}
-              {colorPickerOpen && (
-                <div className="absolute left-0 top-full mt-2 z-50 bg-popover border border-border rounded-lg shadow-lg p-3 w-48">
-                  <div className="grid grid-cols-5 gap-1.5 mb-2">
-                    {PRESET_COLORS.map(c => (
-                      <button
-                        key={c}
-                        onClick={() => { updateCustomColor(colorPickerOpen, c); setColorPickerOpen(null); }}
-                        className={cn('w-7 h-7 rounded-full border-2 hover:scale-110 transition-transform', (customColors?.[colorPickerOpen] || currentTemplate.colors[colorPickerOpen]) === c ? 'border-foreground' : 'border-transparent')}
-                        style={{ background: c }}
-                      />
-                    ))}
-                  </div>
-                  <div className="flex gap-1.5 items-center">
-                    <span className="text-[10px] text-muted-foreground">#</span>
-                    <input
-                      value={hexInput}
-                      onChange={e => setHexInput(e.target.value.replace(/[^0-9a-fA-F]/g, '').slice(0, 6))}
-                      onKeyDown={e => { if (e.key === 'Enter' && hexInput.length >= 3) { updateCustomColor(colorPickerOpen, `#${hexInput}`); setColorPickerOpen(null); } }}
-                      placeholder="HEX"
-                      className="flex-1 text-xs bg-muted rounded px-2 py-1 border-none outline-none"
-                    />
-                  </div>
-                  <p className="text-[9px] text-muted-foreground/60 mt-2">Sign up to save colors</p>
-                </div>
-              )}
-            </div>
-          </div>
-
           {/* Section navigation */}
           {sectionNames.map((name, idx) => {
             const isActive = activeSection === idx;
@@ -777,6 +679,98 @@ export default function GuestProposalPreview() {
                   portfolioVisible ? 'left-[16px]' : 'left-[2px]'
                 )} />
               </button>
+            </div>
+          </div>
+
+          {/* TEMPLATE zone */}
+          <div className="mt-3 pt-3" style={{ borderTop: '1px solid #EEEAE3' }}>
+            <span className="block px-2 mb-2 text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#B8B0A5' }}>Template</span>
+            <div className="flex items-center justify-between px-1">
+              {Object.values(templates).map((tmpl) => {
+                const isActive = templateId === tmpl.id;
+                const isLocked = tmpl.isPro;
+                return (
+                  <button
+                    key={tmpl.id}
+                    onClick={() => switchTemplate(tmpl.id)}
+                    className="flex flex-col items-center gap-1.5 group"
+                  >
+                    <div className={cn(
+                      'relative w-10 h-10 rounded-full border-2 transition-all flex items-center justify-center overflow-hidden',
+                      isActive ? 'border-[#2A2118] ring-2 ring-[#2A2118]/20 scale-110' : 'border-[#EEEAE3] hover:border-[#D5CFC7] hover:scale-105'
+                    )} style={{ background: tmpl.colors.background }}>
+                      <div className="absolute inset-0 rounded-full" style={{ background: `linear-gradient(135deg, ${tmpl.colors.primaryAccent}40, transparent 60%)` }} />
+                      <div className="w-5 h-0.5 rounded-full" style={{ background: tmpl.colors.primaryAccent }} />
+                      {isLocked && (
+                        <div className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 rounded-full text-white" style={{ backgroundColor: '#2A2118', fontSize: '6px', fontWeight: 800 }}>
+                          P
+                        </div>
+                      )}
+                    </div>
+                    <span className={cn('text-[10px] transition-colors', isActive ? 'font-medium' : '')} style={{ color: isActive ? '#2A2118' : '#B8B0A5' }}>
+                      {tmpl.name}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* COLORS zone */}
+          <div className="mt-3 pt-3" style={{ borderTop: '1px solid #EEEAE3' }}>
+            <div className="flex items-center gap-2 px-2 mb-2">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#B8B0A5' }}>Colors</span>
+              <span className="text-[8px] font-bold uppercase tracking-wider rounded px-1.5 py-0.5" style={{ color: '#B8B0A5', backgroundColor: '#F4F0EA' }}>Preview</span>
+            </div>
+            <div className="flex items-center gap-3 px-2 relative" ref={colorPickerRef}>
+              <div className="flex flex-col items-center gap-1">
+                <button
+                  onClick={() => setColorPickerOpen(colorPickerOpen === 'primaryAccent' ? null : 'primaryAccent')}
+                  className="w-6 h-6 rounded-full border-2 border-border hover:scale-110 transition-transform"
+                  style={{ background: activePrimary }}
+                  title="Primary accent"
+                />
+                <span style={{ fontSize: '9px', color: '#B8B0A5' }}>Primary</span>
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <button
+                  onClick={() => setColorPickerOpen(colorPickerOpen === 'secondaryAccent' ? null : 'secondaryAccent')}
+                  className="w-6 h-6 rounded-full border-2 border-border hover:scale-110 transition-transform"
+                  style={{ background: activeSecondary }}
+                  title="Secondary accent"
+                />
+                <span style={{ fontSize: '9px', color: '#B8B0A5' }}>Secondary</span>
+              </div>
+              {customColors && (
+                <button onClick={resetColors} className="ml-auto hover:text-foreground" style={{ fontSize: '10px', color: '#B8B0A5' }}>
+                  <RefreshCw className="h-3 w-3" />
+                </button>
+              )}
+              {colorPickerOpen && (
+                <div className="absolute left-0 top-full mt-2 z-50 bg-popover border border-border rounded-lg shadow-lg p-3 w-48">
+                  <div className="grid grid-cols-5 gap-1.5 mb-2">
+                    {PRESET_COLORS.map(c => (
+                      <button
+                        key={c}
+                        onClick={() => { updateCustomColor(colorPickerOpen, c); setColorPickerOpen(null); }}
+                        className={cn('w-7 h-7 rounded-full border-2 hover:scale-110 transition-transform', (customColors?.[colorPickerOpen] || currentTemplate.colors[colorPickerOpen]) === c ? 'border-foreground' : 'border-transparent')}
+                        style={{ background: c }}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex gap-1.5 items-center">
+                    <span className="text-[10px] text-muted-foreground">#</span>
+                    <input
+                      value={hexInput}
+                      onChange={e => setHexInput(e.target.value.replace(/[^0-9a-fA-F]/g, '').slice(0, 6))}
+                      onKeyDown={e => { if (e.key === 'Enter' && hexInput.length >= 3) { updateCustomColor(colorPickerOpen, `#${hexInput}`); setColorPickerOpen(null); } }}
+                      placeholder="HEX"
+                      className="flex-1 text-xs bg-muted rounded px-2 py-1 border-none outline-none"
+                    />
+                  </div>
+                  <p className="text-[9px] text-muted-foreground/60 mt-2">Sign up to save colors</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
