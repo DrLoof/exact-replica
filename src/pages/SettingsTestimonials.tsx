@@ -249,8 +249,24 @@ export default function SettingsTestimonials() {
                 </div>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Avatar URL</label>
-                <input value={form.avatar_url} onChange={e => setForm(p => ({ ...p, avatar_url: e.target.value }))} placeholder="https://..." className={inputCls} />
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Photo</label>
+                <div className="flex items-center gap-4">
+                  <div
+                    className="relative w-14 h-14 rounded-full overflow-hidden cursor-pointer group border-2 border-dashed border-border hover:border-brand transition-colors flex items-center justify-center bg-muted"
+                    onClick={() => avatarInputRef.current?.click()}
+                  >
+                    <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarSelect} />
+                    {avatarPreview ? (
+                      <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <Camera className="h-5 w-5 text-muted-foreground" />
+                    )}
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Upload className="h-4 w-4 text-white" />
+                    </div>
+                  </div>
+                  <span className="text-xs text-muted-foreground">Click to upload a photo</span>
+                </div>
               </div>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={form.is_featured} onChange={e => setForm(p => ({ ...p, is_featured: e.target.checked }))}
