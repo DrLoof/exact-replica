@@ -255,18 +255,15 @@ export const defaultModulesByGroup: Record<string, DefaultModule[]> = {
         'KPI dashboard setup and measurement framework',
       ],
       clientResponsibilities: [
-        'Share business goals, target audience, and competitive landscape',
-        'Provide access to existing content assets and analytics',
-        'Designate a content point of contact',
+        'Share business goals and target audience information',
+        'Provide access to existing content and analytics',
         'Participate in strategy workshop (2-3 hours)',
         'Approve editorial calendar and content briefs',
       ],
       outOfScope: [
-        'Content creation or writing',
+        'Content creation or writing (available as separate service)',
         'Graphic design for content',
-        'Video production',
         'Paid media strategy',
-        'Social media community management',
       ],
       defaultTimeline: '3-4 weeks. Audit & research (Week 1), Strategy development (Week 2), Calendar & playbook (Week 3), Finalization (Week 4). Includes 2 rounds of revisions.',
       suggestedKpis: [
