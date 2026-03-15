@@ -462,6 +462,8 @@ export function OnboardingWizard() {
             saving={saving}
             addedBundles={addedBundles}
             onAddBundle={(name) => setAddedBundles(prev => new Set([...prev, name]))}
+            teamMembers={teamMembers}
+            onTeamMembersChange={setTeamMembers}
           />
         )}
       </div>
