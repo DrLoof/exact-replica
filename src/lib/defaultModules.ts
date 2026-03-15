@@ -474,18 +474,14 @@ export const defaultModulesByGroup: Record<string, DefaultModule[]> = {
       clientResponsibilities: [
         'Provide social platform login credentials',
         'Approve monthly content calendar before publishing',
-        'Share company news, events, and promotions for content',
-        'Provide product/service photos and behind-the-scenes content',
-        'Flag any sensitive topics or customer issues for response',
-        'Respond to DMs requiring business-specific expertise',
+        'Share company news, events, and promotions',
+        'Provide product photos and behind-the-scenes content',
       ],
       outOfScope: [
-        'Paid social advertising',
+        'Paid social advertising (available as separate service)',
         'Influencer marketing and partnerships',
-        'Video production (short-form video add-on available)',
-        'Crisis communications management',
-        'Personal social media accounts for executives',
-        'Social media platform ad account setup fees',
+        'Professional video production',
+        'Crisis communications',
       ],
       defaultTimeline: 'Onboarding: 1-2 weeks (strategy + first month calendar). Ongoing monthly with content delivered 1 week in advance for approval. Minimum 3-month commitment recommended.',
       suggestedKpis: [
