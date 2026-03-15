@@ -12,7 +12,7 @@ import { templates } from '@/lib/proposalTemplates';
 import {
   BrandProvider, HeroCover, SectionHeader, ServiceCard, PricingSummary,
   WhyUsCard, TestimonialCard, TermsSection, SignatureBlock,
-  TextContent, PageWrapper, HighlightPanel, EditableText, TimelineStep, TeamMemberCard,
+  TextContent, PageWrapper, HighlightPanel, EditableText, TimelineStep, TeamMemberCard, PortfolioCard,
 } from '@/components/proposal-template';
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 
@@ -24,7 +24,7 @@ function getDefaultAboutText(yearsExperience?: number | null): string {
 
 const sectionNames = [
   'Cover', 'Executive Summary', 'Scope of Services', 'Timeline',
-  'Investment', 'Why Us', 'Testimonials', 'Terms', 'Signature',
+  'Investment', 'Why Us', 'Portfolio', 'Testimonials', 'Terms', 'Signature',
 ];
 
 export default function GuestProposalPreview() {
@@ -979,11 +979,39 @@ export default function GuestProposalPreview() {
                 </div>
               )}
 
-              {/* Section 6: Testimonials */}
-              {!deletedSections.has(6) && testimonials.length > 0 && (
-                <div id="guest-section-6" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
-                  <PageWrapper pageNumber="07">
-                    <SectionHeader number="06" title="What Our Clients Say" subtitle="Proof of impact" />
+              {/* Section 6: Portfolio */}
+              {!deletedSections.has(6) && (() => {
+                const portfolioItems = guestOnboarding?.portfolioItems || [];
+                if (portfolioItems.length === 0) return null;
+                return (
+                  <div id="guest-section-6" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
+                    <PageWrapper pageNumber="07">
+                      <SectionHeader number="06" title="Our Work" subtitle="Selected projects from our portfolio" />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {portfolioItems.filter((p: any) => p.is_active !== false).slice(0, 6).map((item: any, idx: number) => (
+                          <PortfolioCard
+                            key={item.id || idx}
+                            title={item.title}
+                            category={item.category}
+                            description={item.description}
+                            results={item.results}
+                            imageUrl={item.images?.[0]?.url}
+                            imageAlt={item.images?.[0]?.alt_text}
+                            delay={idx * 0.1}
+                          />
+                        ))}
+                      </div>
+                    </PageWrapper>
+                    <PreviewWatermark />
+                  </div>
+                );
+              })()}
+
+              {/* Section 7: Testimonials */}
+              {!deletedSections.has(7) && testimonials.length > 0 && (
+                <div id="guest-section-7" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
+                  <PageWrapper pageNumber="08">
+                    <SectionHeader number="07" title="What Our Clients Say" subtitle="Proof of impact" />
                     <div className="space-y-6">
                       {testimonials.slice(0, 4).map((t: any, i: number) => (
                         <TestimonialCard key={i} clientName={t.client_name} clientTitle={t.client_title} clientCompany={t.client_company} quote={t.quote} metricValue={t.metric_value} metricLabel={t.metric_label} avatarUrl={t.avatar_url} featured={i === 0} delay={i * 0.1} />
@@ -994,11 +1022,11 @@ export default function GuestProposalPreview() {
                 </div>
               )}
 
-              {/* Section 7: Terms */}
-              {!deletedSections.has(7) && (
-                <div id="guest-section-7" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
-                  <PageWrapper pageNumber="08">
-                    <SectionHeader number="07" title="Terms & Conditions" />
+              {/* Section 8: Terms */}
+              {!deletedSections.has(8) && (
+                <div id="guest-section-8" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
+                  <PageWrapper pageNumber="09">
+                    <SectionHeader number="08" title="Terms & Conditions" />
                     <TermsSection clauses={[
                       ...defaultTerms,
                       ...(localServices.some((s: any) => s.client_responsibilities?.length || s.out_of_scope?.length) ? [{
@@ -1011,10 +1039,10 @@ export default function GuestProposalPreview() {
                 </div>
               )}
 
-              {/* Section 8: Signature */}
-              {!deletedSections.has(8) && (
-                <div id="guest-section-8" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
-                  <PageWrapper pageNumber="09">
+              {/* Section 9: Signature */}
+              {!deletedSections.has(9) && (
+                <div id="guest-section-9" className="relative scroll-mt-20 rounded-2xl overflow-hidden shadow-lg bg-white">
+                  <PageWrapper pageNumber="10">
                     <SignatureBlock
                       client={{ role: 'Client', companyName: clientName }}
                       agency={{ role: 'Agency', companyName: agencyName }}
