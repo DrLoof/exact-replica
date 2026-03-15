@@ -120,6 +120,10 @@ export default function ProposalNew() {
   const [saving, setSaving] = useState(false);
   const [showSignupGate, setShowSignupGate] = useState(false);
   const [showGenerating, setShowGenerating] = useState(false);
+  const [portfolioSuggestionDismissed, setPortfolioSuggestionDismissed] = useState(false);
+  const [portfolioAccepted, setPortfolioAccepted] = useState(false);
+  const [allPortfolioItems, setAllPortfolioItems] = useState<any[]>([]);
+  const [matchedPortfolioIds, setMatchedPortfolioIds] = useState<string[]>([]);
 
   // Pre-fill from query params
   const prefilledClientId = searchParams.get('client');
