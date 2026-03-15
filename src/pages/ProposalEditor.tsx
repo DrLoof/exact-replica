@@ -717,34 +717,7 @@ export default function ProposalEditor() {
             </label>
           </div>
 
-          {/* Add page button */}
-          {deletedSections.size > 0 && (
-            <div className="relative mt-2">
-              <button
-                onClick={() => setShowAddPage(!showAddPage)}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 w-full text-left transition-colors"
-              >
-                <Plus className="h-3 w-3" />
-                Add page
-              </button>
-              {showAddPage && (
-                <div className="absolute left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-30 py-1">
-                  {sectionNames.map((name, idx) => (
-                    deletedSections.has(idx) && (
-                      <button
-                        key={idx}
-                        onClick={() => { restoreSection(idx); setShowAddPage(false); }}
-                        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-left text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-                      >
-                        <Plus className="h-3 w-3" />
-                        {name}
-                      </button>
-                    )
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          {/* Add page button removed — eye toggles handle show/hide inline */}
         </div>
 
         {/* Proposal Content — rendered with template components */}
