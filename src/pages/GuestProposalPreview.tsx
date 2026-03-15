@@ -42,6 +42,8 @@ export default function GuestProposalPreview() {
   const [regenerating, setRegenerating] = useState(false);
   const editCountRef = useRef(0);
   const startTimeRef = useRef(Date.now());
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const [localLogoUrl, setLocalLogoUrl] = useState<string | null>(null);
 
   // Template & color state
   const [templateId, setTemplateId] = useState<string>('classic');
