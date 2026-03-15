@@ -852,8 +852,16 @@ export default function ProposalEditor() {
                                 pricingModel={(svc.module?.pricing_model || 'fixed') as any}
                                 description={svc.module?.description || svc.module?.short_description || ''}
                                 deliverables={svc.custom_deliverables || svc.module?.deliverables || []}
-                                clientResponsibilities={svc.module?.client_responsibilities || []}
-                                outOfScope={svc.module?.out_of_scope || []}
+                                clientResponsibilities={
+                                  (proposal.show_client_responsibilities ?? true) && (svc.show_responsibilities !== false)
+                                    ? (svc.client_responsibilities || svc.module?.client_responsibilities || [])
+                                    : []
+                                }
+                                outOfScope={
+                                  (proposal.show_out_of_scope ?? false) && (svc.show_out_of_scope !== false)
+                                    ? (svc.out_of_scope || svc.module?.out_of_scope || [])
+                                    : []
+                                }
                                 isAddon={svc.is_addon || false}
                                 delay={i * 0.1}
                                 onNameEdit={async (val) => {
@@ -870,6 +878,15 @@ export default function ProposalEditor() {
                                   await supabase.from('proposal_services').update({ custom_deliverables: dels }).eq('id', svc.id);
                                   setServices(prev => prev.map(s => s.id === svc.id ? { ...s, custom_deliverables: dels } : s));
                                 }}
+                                onClientResponsibilitiesEdit={async (items) => {
+                                  await supabase.from('proposal_services').update({ client_responsibilities: items } as any).eq('id', svc.id);
+                                  setServices(prev => prev.map(s => s.id === svc.id ? { ...s, client_responsibilities: items } : s));
+                                }}
+                                onOutOfScopeEdit={async (items) => {
+                                  await supabase.from('proposal_services').update({ out_of_scope: items } as any).eq('id', svc.id);
+                                  setServices(prev => prev.map(s => s.id === svc.id ? { ...s, out_of_scope: items } : s));
+                                }}
+                              />
                               />
                             </div>
                           ))}
