@@ -1065,7 +1065,13 @@ export default function GuestProposalPreview() {
                     <SectionHeader number="07" title="What Our Clients Say" subtitle="Proof of impact" />
                     <div className="space-y-6">
                       {testimonials.slice(0, 4).map((t: any, i: number) => (
-                        <TestimonialCard key={i} clientName={t.client_name} clientTitle={t.client_title} clientCompany={t.client_company} quote={t.quote} metricValue={t.metric_value} metricLabel={t.metric_label} avatarUrl={t.avatar_url} featured={i === 0} delay={i * 0.1} />
+                        <TestimonialCard key={i} clientName={t.client_name} clientTitle={t.client_title} clientCompany={t.client_company} quote={t.quote} metricValue={t.metric_value} metricLabel={t.metric_label} avatarUrl={t.avatar_url} featured={i === 0} delay={i * 0.1}
+                          onQuoteEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, quote: val } : x))}
+                          onNameEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, client_name: val } : x))}
+                          onTitleEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, client_title: val } : x))}
+                          onCompanyEdit={(val) => setLocalTestimonials(prev => prev.map((x, j) => j === i ? { ...x, client_company: val } : x))}
+                          onRemove={() => setLocalTestimonials(prev => prev.filter((_, j) => j !== i))}
+                        />
                       ))}
                     </div>
                   </PageWrapper>
