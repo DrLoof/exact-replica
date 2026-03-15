@@ -161,6 +161,9 @@ export default function GuestProposalPreview() {
   );
 
   const [localDifferentiators, setLocalDifferentiators] = useState<any[]>(guestOnboarding?.differentiators || []);
+  const [localTestimonials, setLocalTestimonials] = useState<any[]>(
+    (guestOnboarding?.testimonials || []).filter((t: any) => t.approved)
+  );
 
   const saveGuestTeam = useCallback((team: any[]) => {
     try {
