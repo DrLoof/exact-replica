@@ -412,11 +412,36 @@ export default function PublicProposal() {
           </PageWrapper>
         )}
 
-        {/* Section 8: Testimonials */}
-        {testimonials.length > 0 && (
+        {/* Section 7b: Portfolio */}
+        {portfolioItems.length > 0 && (proposal as any).portfolio_section_visible && (
           <PageWrapper pageNumber="08">
             <SectionHeader
               number="07"
+              title={(proposal as any).portfolio_section_title || 'Our Work'}
+              subtitle="Selected projects from our portfolio"
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {portfolioItems.map((item: any, idx: number) => (
+                <PortfolioCard
+                  key={item.id}
+                  title={item.title}
+                  category={item.category}
+                  description={item.description}
+                  results={item.results}
+                  imageUrl={item.images?.[0]?.url}
+                  imageAlt={item.images?.[0]?.alt_text}
+                  delay={idx * 0.1}
+                />
+              ))}
+            </div>
+          </PageWrapper>
+        )}
+
+        {/* Section 8: Testimonials */}
+        {testimonials.length > 0 && (
+          <PageWrapper pageNumber="09">
+            <SectionHeader
+              number="08"
               title="What Our Clients Say"
               subtitle="Real results from real partnerships."
             />
@@ -455,7 +480,7 @@ export default function PublicProposal() {
         )}
 
         {/* Section 9: Signature + Accept/Decline */}
-        <PageWrapper pageNumber="09">
+        <PageWrapper pageNumber="10">
           <SignatureBlock
             client={{
               role: 'Client',
