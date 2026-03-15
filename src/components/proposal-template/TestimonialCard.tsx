@@ -193,13 +193,7 @@ export function TestimonialCard({
         )}
         <div className="pt-5" style={{ borderTop: `1px solid ${border}` }}>
           <div className="flex items-center gap-3">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt={clientName} className="w-10 h-10 rounded-xl object-cover" />
-            ) : (
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: bg, color: accent }}>
-                <span style={{ fontSize: "14px", fontWeight: 600 }}>{clientName.charAt(0)}</span>
-              </div>
-            )}
+            {renderAvatar('sm', 'rounded-xl', { backgroundColor: bg, color: accent }, { fontSize: "14px", fontWeight: 600 })}
             <div>
               <span className="block" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>{onNameEdit ? renderName() : clientName}</span>
               {renderTitleCompany({ fontSize: "12px", fontWeight: 400, color: template.colors.textFaint })}
