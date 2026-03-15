@@ -774,7 +774,7 @@ export default function GuestProposalPreview() {
                 onClick={() => setPortfolioVisible(!portfolioVisible)}
                 className={cn(
                   'relative w-8 h-[18px] rounded-full transition-colors',
-                  portfolioVisible ? 'bg-brand' : 'bg-[#D5CFC7]'
+                  portfolioVisible ? 'bg-[#2A2118]' : 'bg-[#D5CFC7]'
                 )}
               >
                 <span className={cn(
