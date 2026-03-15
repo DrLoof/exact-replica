@@ -437,11 +437,7 @@ export function TestimonialCard({
         )}
         <div>
           <span className="block" style={{ fontSize: "14px", fontWeight: 600, color: brand.darkColor }}>{onNameEdit ? renderName() : clientName}</span>
-          {(clientTitle || clientCompany) && (
-            <span className="block text-[#999]" style={{ fontSize: "12px", fontWeight: 400 }}>
-              {clientTitle}{clientTitle && clientCompany ? " · " : ""}{clientCompany}
-            </span>
-          )}
+          {renderTitleCompany({ fontSize: "12px", fontWeight: 400, color: "#999" })}
         </div>
       </div>
     </motion.div>
