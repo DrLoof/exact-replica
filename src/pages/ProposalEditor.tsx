@@ -67,6 +67,10 @@ interface ProposalService {
   display_order: number | null;
   is_addon: boolean | null;
   custom_deliverables: string[] | null;
+  client_responsibilities: string[] | null;
+  out_of_scope: string[] | null;
+  show_responsibilities: boolean | null;
+  show_out_of_scope: boolean | null;
   module?: {
     name: string;
     description: string | null;
