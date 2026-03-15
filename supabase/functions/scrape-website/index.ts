@@ -334,8 +334,13 @@ function extractLogo(html: string, baseUrl: string): string | null {
 
   console.log(`Logo detection result: score=${bestScore}, url=${bestLogo?.slice(0, 100)}`);
   
-  // If best score is very low, it's likely not a real logo
-  if (bestScore < 3) return null;
+  // If best score is very low, fall back to Google Favicon API
+  if (bestScore < 5) {
+    const domain = urlObj.hostname;
+    const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+    console.log(`Logo score too low (${bestScore}), using Google Favicon fallback: ${faviconUrl}`);
+    return faviconUrl;
+  }
   
   return bestLogo;
 }
