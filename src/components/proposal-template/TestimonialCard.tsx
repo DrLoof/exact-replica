@@ -22,6 +22,7 @@ interface TestimonialCardProps {
   onMetricValueEdit?: (value: string) => void;
   onMetricLabelEdit?: (value: string) => void;
   onAvatarUpload?: (file: File) => void;
+  onRemove?: () => void;
 }
 
 export function TestimonialCard({
