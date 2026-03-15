@@ -713,18 +713,15 @@ export const defaultModulesByGroup: Record<string, DefaultModule[]> = {
         'Data quality audit and cleanup',
       ],
       clientResponsibilities: [
-        'Provide website and platform access for tag installation',
+        'Provide website and platform access for tracking setup',
         'Provide Google Analytics and Tag Manager access',
         'Define key business metrics and goals',
-        'Ensure developer availability for tracking implementation',
-        'Review and act on reporting insights',
+        'Ensure developer availability for tag installation',
       ],
       outOfScope: [
         'Data warehousing or BI tool development',
         'CRM analytics or sales reporting',
-        'A/B testing tool setup',
         'Custom data science or machine learning',
-        'Platform-specific ad reporting (covered in ad modules)',
       ],
       defaultTimeline: 'Setup: 2-4 weeks. Dashboards: delivered with setup. Ongoing reporting: monthly or weekly cadence.',
       suggestedKpis: [
