@@ -420,7 +420,7 @@ export function ReviewScreen({
                 {(agencyIdentity.name || 'A').charAt(0).toUpperCase()}
               </button>
             )}
-            <div className="min-w-0">
+            <div className="min-w-0 overflow-visible">
               <input
                 value={agencyIdentity.name || ''}
                 onChange={(e) => onAgencyChange({ ...agencyIdentity, name: e.target.value })}
