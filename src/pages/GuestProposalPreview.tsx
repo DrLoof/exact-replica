@@ -754,6 +754,7 @@ export default function GuestProposalPreview() {
             contactPhone: identity.phone || '',
             currency: currencySymbol,
           }}>
+            <input ref={logoInputRef} type="file" accept=".png,.jpg,.jpeg,.svg,.webp" onChange={handleLogoUpload} className="hidden" />
             <div className="mx-auto max-w-[900px] py-8 px-4 space-y-6">
 
               {/* Section 0: Cover */}
@@ -765,6 +766,7 @@ export default function GuestProposalPreview() {
                     date={proposalDate}
                     proposalNumber="DRAFT-001"
                     onTitleEdit={handleTitleEdit}
+                    onLogoClick={() => logoInputRef.current?.click()}
                   />
                   <PreviewWatermark />
                 </div>
