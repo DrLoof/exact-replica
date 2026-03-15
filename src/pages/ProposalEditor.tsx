@@ -302,7 +302,41 @@ export default function ProposalEditor() {
     setProposal(prev => prev ? { ...prev, [field]: value } : prev);
   };
 
-  const regenerateExecutiveSummary = async () => {
+  // Save team selection when it changes
+  const saveProposalTeam = useCallback(async (team: any[]) => {
+    if (!proposal) return;
+    await supabase.from('proposals').update({ team } as any).eq('id', proposal.id);
+  }, [proposal]);
+
+  const toggleTeamMember = (member: any) => {
+    setProposalTeam(prev => {
+      const exists = prev.find((m: any) => m.member_id === member.id);
+      let next: any[];
+      if (exists) {
+        next = prev.filter((m: any) => m.member_id !== member.id);
+      } else {
+        next = [...prev, {
+          member_id: member.id,
+          name: member.name,
+          title: member.title,
+          photo_url: member.photo_url,
+          role_on_project: '',
+        }];
+      }
+      saveProposalTeam(next);
+      return next;
+    });
+  };
+
+  const updateTeamRole = (memberId: string, role: string) => {
+    setProposalTeam(prev => {
+      const next = prev.map((m: any) => m.member_id === memberId ? { ...m, role_on_project: role } : m);
+      saveProposalTeam(next);
+      return next;
+    });
+  };
+
+
     if (!proposal || !agency) return;
     setRegenerating(true);
     try {
