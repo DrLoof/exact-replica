@@ -690,7 +690,7 @@ serve(async (req) => {
           console.log(`Fetched ${path} — ${text.length} chars, status ${resp.status}`);
           
           const normalizedPath = path.replace(/\/$/, '');
-          const isCasePage = /\/(kundcase|case-studies|cases|work|portfolio|testimonials|reviews|referencer|references|kunder)\/?$/i.test(path);
+          const isCasePage = /\/(kundcase|case-study|case-studies|cases|work|our-work|portfolio|projects|client-success|success-stories|testimonials|reviews|referencer|references|kunder)\/?$/i.test(path);
           const isTeamPage = /\/(team|our-team|people|staff|meet-the-team|kontakta|medarbetare)\/?/i.test(path)
             || text.toLowerCase().includes('meet the team') || text.toLowerCase().includes('our team')
             || text.toLowerCase().includes('meet our');
