@@ -976,6 +976,54 @@ export default function ProposalEditor() {
                             }}
                           />
                         ))}
+                        {/* Add/Remove phase controls */}
+                        <div className="flex items-center gap-3 mt-4 print:hidden">
+                          <button
+                            onClick={() => {
+                              const phases = [...(proposal.phases as any[]), { name: `Phase ${(proposal.phases as any[]).length + 1}`, duration: '2 weeks', description: '' }];
+                              updateField('phases', phases);
+                            }}
+                            className="flex items-center gap-1.5 rounded-lg border border-dashed border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+                          >
+                            <Plus className="h-3 w-3" /> Add Phase
+                          </button>
+                          {(proposal.phases as any[]).length > 1 && (
+                            <button
+                              onClick={() => {
+                                const phases = [...(proposal.phases as any[])];
+                                phases.pop();
+                                updateField('phases', phases);
+                              }}
+                              className="flex items-center gap-1.5 rounded-lg border border-dashed border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-colors"
+                            >
+                              <X className="h-3 w-3" /> Remove Last
+                            </button>
+                          )}
+                          <button
+                            onClick={async () => {
+                              if (!confirm('Regenerate timeline? Your current edits will be replaced with a new AI-generated version.')) return;
+                              setRegeneratingTimeline(true);
+                              try {
+                                const serviceNames = services.map(s => ({ name: s.module?.name || 'Service' }));
+                                const durationMatch = (proposal.estimated_duration || '16 weeks').match(/(\d+)/);
+                                const totalWeeks = durationMatch ? parseInt(durationMatch[1]) : 16;
+                                const { data } = await supabase.functions.invoke('generate-timeline', {
+                                  body: { services: serviceNames, clientName: client?.company_name || 'Client', totalWeeks },
+                                });
+                                if (data?.phases) {
+                                  await updateField('phases', data.phases);
+                                  toast.success('Timeline regenerated!');
+                                }
+                              } catch { toast.error('Failed to regenerate timeline'); }
+                              setRegeneratingTimeline(false);
+                            }}
+                            disabled={regeneratingTimeline}
+                            className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors disabled:opacity-50 ml-auto"
+                          >
+                            {regeneratingTimeline ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCcw className="h-3 w-3" />}
+                            {regeneratingTimeline ? 'Regenerating...' : 'Regenerate'}
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       <div className="mt-10 text-center py-12">
