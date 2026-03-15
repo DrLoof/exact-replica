@@ -22,6 +22,7 @@ interface ReviewScreenProps {
   onDiffIntroChange: (s: string) => void;
   groupNameMap: Record<string, string>;
   onFinish: () => void;
+  onBack?: () => void;
   saving: boolean;
   addedBundles?: Set<string>;
   onAddBundle?: (bundleName: string) => void;
@@ -42,6 +43,7 @@ export function ReviewScreen({
   onDiffIntroChange,
   groupNameMap,
   onFinish,
+  onBack,
   saving,
   addedBundles = new Set(),
   onAddBundle,
@@ -329,10 +331,10 @@ export function ReviewScreen({
     <div className="mx-auto max-w-[720px] px-6 py-10">
       {/* Progress indicator */}
       <div className="mb-8 flex items-center justify-center gap-3 text-xs">
-        <div className="flex items-center gap-1.5">
+        <button onClick={onBack} className="flex items-center gap-1.5 hover:opacity-70 transition-opacity cursor-pointer">
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brass text-[10px] font-bold text-primary-foreground">✓</span>
           <span className="text-muted-foreground font-medium">Enter website</span>
-        </div>
+        </button>
         <div className="h-px w-8 bg-border" />
         <div className="flex items-center gap-1.5">
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-ink text-[10px] font-bold text-primary-foreground">●</span>
