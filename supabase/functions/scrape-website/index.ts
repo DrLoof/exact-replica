@@ -444,7 +444,7 @@ serve(async (req) => {
     // Meta description (tagline)
     const descMatch = homepageHtml.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i)
       || homepageHtml.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']description["']/i);
-    if (descMatch) result.tagline = descMatch[1].trim().slice(0, 200);
+    if (descMatch) result.tagline = decodeHtmlEntities(descMatch[1].trim().slice(0, 200));
 
     // Logo detection (improved)
     const detectedLogo = extractLogo(homepageHtml, targetUrl);
