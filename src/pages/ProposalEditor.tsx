@@ -107,6 +107,8 @@ export default function ProposalEditor() {
   const [differentiators, setDifferentiators] = useState<any[]>([]);
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [termsClauses, setTermsClauses] = useState<any[]>([]);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [proposalTeam, setProposalTeam] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletedSections, setDeletedSections] = useState<Set<number>>(new Set());
   const [activeSection, setActiveSection] = useState(0);
