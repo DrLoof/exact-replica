@@ -41,6 +41,8 @@ export function OnboardingWizard() {
   // Differentiators
   const [differentiators, setDifferentiators] = useState<any[]>([]);
   const [diffIntro, setDiffIntro] = useState('');
+  // Team members from scrape
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
   // Agency identity
   const [agencyIdentity, setAgencyIdentity] = useState<any>({});
   // Service group lookup
