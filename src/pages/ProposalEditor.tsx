@@ -772,7 +772,7 @@ export default function ProposalEditor() {
             <label className="flex items-center gap-2 px-2 py-1.5 cursor-pointer group">
               <input
                 type="checkbox"
-                checked={proposal.show_out_of_scope ?? false}
+                checked={proposal.show_out_of_scope ?? true}
                 onChange={(e) => updateField('show_out_of_scope', e.target.checked)}
                 className="rounded border-border text-brand focus:ring-brand h-3.5 w-3.5"
               />
