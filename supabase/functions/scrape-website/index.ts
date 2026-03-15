@@ -653,6 +653,7 @@ serve(async (req) => {
     const caseStudyLinks: string[] = [];
     const allExtractedQuotes: { quote: string; attribution: string; context: string }[] = [];
     const allExtractedTeam: { name: string; title: string; photo_url: string | null; bio: string | null }[] = [];
+    let detectedPortfolioUrl: string | null = null;
     
     const fetchPromises = allPaths.slice(0, 20).map(async (path) => {
       try {
@@ -672,6 +673,11 @@ serve(async (req) => {
             || text.toLowerCase().includes('meet our');
           
           if (isCasePage) {
+            // Track the first successfully fetched portfolio/work page
+            if (!detectedPortfolioUrl) {
+              detectedPortfolioUrl = urlObj.origin + path;
+              console.log(`Portfolio page detected: ${detectedPortfolioUrl}`);
+            }
             const subLinks = [...text.matchAll(/<a[^>]*href=["']([^"'#]+)["'][^>]*>/gi)]
               .map(m => {
                 try { return new URL(m[1], urlObj.origin).pathname; } catch { return null; }
@@ -1015,6 +1021,12 @@ TEAM MEMBER EXTRACTION — CRITICAL RULES:
     };
     if (tld && tldCurrencyMap[tld]) {
       result.detected_currency = tldCurrencyMap[tld];
+    }
+
+    // Track detected portfolio URL
+    if (detectedPortfolioUrl) {
+      result.portfolio_url = detectedPortfolioUrl;
+      console.log(`Portfolio URL included in response: ${detectedPortfolioUrl}`);
     }
 
     // Count fields found
