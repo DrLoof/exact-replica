@@ -118,6 +118,78 @@ export function TestimonialCard({
   };
 
   const [showMetricInputs, setShowMetricInputs] = useState(false);
+  const [metricDraft, setMetricDraft] = useState({ value: '', label: '' });
+
+  const handleSaveMetric = () => {
+    if (metricDraft.value.trim() && onMetricValueEdit) {
+      onMetricValueEdit(metricDraft.value.trim());
+      if (onMetricLabelEdit && metricDraft.label.trim()) {
+        onMetricLabelEdit(metricDraft.label.trim());
+      }
+    }
+    setShowMetricInputs(false);
+    setMetricDraft({ value: '', label: '' });
+  };
+
+  const renderMetricPopover = () => {
+    if (!showMetricInputs) return null;
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center print:hidden" onClick={() => setShowMetricInputs(false)}>
+        <div className="absolute inset-0 bg-black/20" />
+        <div
+          className="relative bg-white rounded-xl shadow-xl p-5 w-[320px]"
+          onClick={(e) => e.stopPropagation()}
+          style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+        >
+          <h4 className="text-[14px] font-semibold mb-3" style={{ color: '#2D2A26' }}>Add KPI</h4>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-[11px] font-medium mb-1 uppercase tracking-wide" style={{ color: '#999' }}>Metric value</label>
+              <input
+                autoFocus
+                type="text"
+                placeholder="e.g. +265%"
+                value={metricDraft.value}
+                onChange={(e) => setMetricDraft(prev => ({ ...prev, value: e.target.value }))}
+                onKeyDown={(e) => e.key === 'Enter' && handleSaveMetric()}
+                className="w-full px-3 py-2 text-[14px] rounded-lg border border-[#E5E0D8] focus:outline-none focus:ring-2 focus:ring-[#E8825C]/30 focus:border-[#E8825C]"
+                style={{ color: '#2D2A26' }}
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium mb-1 uppercase tracking-wide" style={{ color: '#999' }}>Label</label>
+              <input
+                type="text"
+                placeholder="e.g. Facebook ROAS"
+                value={metricDraft.label}
+                onChange={(e) => setMetricDraft(prev => ({ ...prev, label: e.target.value }))}
+                onKeyDown={(e) => e.key === 'Enter' && handleSaveMetric()}
+                className="w-full px-3 py-2 text-[14px] rounded-lg border border-[#E5E0D8] focus:outline-none focus:ring-2 focus:ring-[#E8825C]/30 focus:border-[#E8825C]"
+                style={{ color: '#2D2A26' }}
+              />
+            </div>
+          </div>
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={() => setShowMetricInputs(false)}
+              className="flex-1 px-3 py-2 text-[13px] font-medium rounded-lg border border-[#E5E0D8] hover:bg-[#F5F0EB] transition-colors"
+              style={{ color: '#7A7266' }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSaveMetric}
+              disabled={!metricDraft.value.trim()}
+              className="flex-1 px-3 py-2 text-[13px] font-medium rounded-lg text-white transition-colors disabled:opacity-40"
+              style={{ backgroundColor: '#E8825C' }}
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const renderMetric = (valueStyle: React.CSSProperties, labelStyle: React.CSSProperties, containerStyle?: React.CSSProperties, containerClass?: string) => {
     // Has metric data — show it (editable or static)
@@ -140,32 +212,23 @@ export function TestimonialCard({
       );
     }
 
-    // No metric but user activated the inline inputs
-    if (showMetricInputs && onMetricValueEdit) {
-      return (
-        <div className={containerClass || "inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5"} style={containerStyle}>
-          <EditableText value="" placeholder="e.g. +265%" onSave={(val) => { onMetricValueEdit(val); }} as="span" style={valueStyle} />
-          {onMetricLabelEdit && (
-            <EditableText value="" placeholder="e.g. ROAS" onSave={onMetricLabelEdit} as="span" style={labelStyle} />
-          )}
-        </div>
-      );
-    }
-
     // No metric, callbacks available — show "Add KPI" button (hidden in print)
     if (onMetricValueEdit && !metricValue) {
       return (
-        <button
-          onClick={() => setShowMetricInputs(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full mb-5 text-[12px] font-medium transition-all duration-200 opacity-60 hover:opacity-100 print:hidden"
-          style={{ 
-            backgroundColor: containerStyle?.background as string || 'rgba(110,154,122,0.1)', 
-            color: valueStyle.color as string || '#6E9A7A' 
-          }}
-        >
-          <TrendingUp className="h-3.5 w-3.5" />
-          + Add KPI
-        </button>
+        <>
+          {renderMetricPopover()}
+          <button
+            onClick={() => setShowMetricInputs(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full mb-5 text-[12px] font-medium transition-all duration-200 opacity-60 hover:opacity-100 print:hidden"
+            style={{ 
+              backgroundColor: containerStyle?.background as string || 'rgba(110,154,122,0.1)', 
+              color: valueStyle.color as string || '#6E9A7A' 
+            }}
+          >
+            <TrendingUp className="h-3.5 w-3.5" />
+            + Add KPI
+          </button>
+        </>
       );
     }
 
