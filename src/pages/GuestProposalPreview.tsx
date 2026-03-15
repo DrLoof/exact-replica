@@ -686,63 +686,104 @@ export default function GuestProposalPreview() {
           </div>
 
           {/* Section navigation */}
-          {sectionNames.map((name, idx) => (
-            !deletedSections.has(idx) && (
-              <div
-                key={idx}
-                className="group/nav flex items-center gap-1"
-              >
-                <button
-                  onClick={() => {
-                    setActiveSection(idx);
-                    document.getElementById(`guest-section-${idx}`)?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  className={cn(
-                    'flex-1 flex items-center gap-2 rounded-lg px-3 py-2 text-xs transition-colors text-left',
-                    activeSection === idx ? 'bg-ink font-medium text-white' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
-                  )}
-                >
-                  {name}
-                </button>
-                <button
-                  onClick={() => deleteSection(idx)}
-                  className="opacity-0 group-hover/nav:opacity-100 p-1 rounded text-muted-foreground hover:text-destructive transition-all"
-                  title={`Remove ${name}`}
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            )
-          ))}
+          {sectionNames.map((name, idx) => {
+            const isActive = activeSection === idx;
+            const isHidden = deletedSections.has(idx) || (idx === 6 && !portfolioVisible);
+            const LOCKED_SECTIONS = [0, 2, 4]; // Cover, Scope, Investment
+            const isLocked = LOCKED_SECTIONS.includes(idx);
 
-          {/* Add page button */}
-          {deletedSections.size > 0 && (
-            <div className="relative mt-2">
-              <button
-                onClick={() => setShowAddPage(!showAddPage)}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 w-full text-left transition-colors"
-              >
-                <Plus className="h-3 w-3" />
-                Add page
-              </button>
-              {showAddPage && (
-                <div className="absolute left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-30 py-1">
-                  {sectionNames.map((name, idx) => (
-                    deletedSections.has(idx) && (
-                      <button
-                        key={idx}
-                        onClick={() => { restoreSection(idx); setShowAddPage(false); }}
-                        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-left text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-                      >
-                        <Plus className="h-3 w-3" />
-                        {name}
-                      </button>
-                    )
-                  ))}
+            return (
+              <div key={idx}>
+                <div
+                  className={cn(
+                    'group flex items-center gap-1.5 rounded-lg px-3 py-2.5 transition-all duration-200 cursor-pointer',
+                    isHidden ? 'opacity-50' : '',
+                    isActive && !isHidden ? '' : 'hover:bg-[#F4F0EA]',
+                  )}
+                  style={isActive && !isHidden ? {
+                    backgroundColor: '#FAF5EF',
+                    borderLeft: '3px solid #E8825C',
+                    paddingLeft: '9px',
+                  } : {
+                    borderLeft: '3px solid transparent',
+                    paddingLeft: '9px',
+                  }}
+                  onClick={() => {
+                    if (!isHidden) {
+                      setActiveSection(idx);
+                      document.getElementById(`guest-section-${idx}`)?.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                >
+                  {/* Section name */}
+                  <span className={cn(
+                    'flex-1 text-[13px] font-medium transition-colors',
+                    isHidden ? 'line-through' : '',
+                  )} style={{ color: isActive && !isHidden ? '#2A2118' : isHidden ? '#C8C3BB' : '#7A7265' }}>
+                    {name}
+                  </span>
+
+                  {/* Lock or eye toggle */}
+                  {isLocked ? (
+                    <span style={{ color: '#D5CFC7' }}><Lock className="h-3 w-3" /></span>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (idx === 6) {
+                          setPortfolioVisible(!portfolioVisible);
+                        } else if (isHidden) {
+                          restoreSection(idx);
+                        } else {
+                          deleteSection(idx);
+                        }
+                      }}
+                      className="p-0.5 rounded transition-all"
+                      style={{ color: isHidden ? '#C8C3BB' : '#B8B0A5' }}
+                    >
+                      {isHidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                    </button>
+                  )}
                 </div>
-              )}
+              </div>
+            );
+          })}
+
+          {/* Scope Display toggles */}
+          <div className="mt-3 pt-3" style={{ borderTop: '1px solid #EEEAE3' }}>
+            <span className="block px-2 mb-2 text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#B8B0A5' }}>Scope Display</span>
+            <label className="flex items-center gap-2 px-2 py-1.5 cursor-pointer group">
+              <input type="checkbox" checked={showClientResponsibilities}
+                onChange={(e) => setShowClientResponsibilities(e.target.checked)}
+                className="rounded border-border text-brand focus:ring-brand h-3.5 w-3.5" />
+              <span className="text-xs group-hover:text-foreground transition-colors" style={{ color: '#7A7265' }}>Client Responsibilities</span>
+            </label>
+            <label className="flex items-center gap-2 px-2 py-1.5 cursor-pointer group">
+              <input type="checkbox" checked={showOutOfScope}
+                onChange={(e) => setShowOutOfScope(e.target.checked)}
+                className="rounded border-border text-brand focus:ring-brand h-3.5 w-3.5" />
+              <span className="text-xs group-hover:text-foreground transition-colors" style={{ color: '#7A7265' }}>Out of Scope</span>
+            </label>
+          </div>
+
+          {/* Portfolio toggle */}
+          <div className="mt-3 pt-3" style={{ borderTop: '1px solid #EEEAE3' }}>
+            <div className="flex items-center justify-between px-2">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#B8B0A5' }}>Portfolio</span>
+              <button
+                onClick={() => setPortfolioVisible(!portfolioVisible)}
+                className={cn(
+                  'relative w-8 h-[18px] rounded-full transition-colors',
+                  portfolioVisible ? 'bg-brand' : 'bg-[#D5CFC7]'
+                )}
+              >
+                <span className={cn(
+                  'absolute top-[2px] h-[14px] w-[14px] rounded-full bg-white transition-transform shadow-sm',
+                  portfolioVisible ? 'left-[16px]' : 'left-[2px]'
+                )} />
+              </button>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Proposal Content */}
