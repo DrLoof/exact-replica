@@ -9,6 +9,19 @@ const corsHeaders = {
 
 const AI_GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
+// Decode common HTML entities
+function decodeHtmlEntities(s: string): string {
+  return s
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .replace(/&#x2F;/g, '/')
+    .replace(/&nbsp;/g, ' ');
+}
+
 // Extract quotes from HTML with rich patterns
 function extractQuotesFromHtml(html: string, pagePath: string): { quote: string; attribution: string; context: string }[] {
   const quotes: { quote: string; attribution: string; context: string }[] = [];
