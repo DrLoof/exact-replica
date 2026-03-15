@@ -702,7 +702,12 @@ export default function GuestProposalPreview() {
                   )}
                   style={isActive && !isHidden ? {
                     backgroundColor: '#FAF5EF',
-                  } : {}}
+                    borderLeft: '3px solid #E8825C',
+                    paddingLeft: '9px',
+                  } : {
+                    borderLeft: '3px solid transparent',
+                    paddingLeft: '9px',
+                  }}
                   onClick={() => {
                     if (!isHidden) {
                       setActiveSection(idx);
