@@ -491,6 +491,12 @@ export function TestimonialCard({
       ) : (
         <blockquote className="text-[#555] mb-6" style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.6, fontFamily: "'Inter', sans-serif" }}>"{quote}"</blockquote>
       )}
+      {renderMetric(
+        { fontSize: "14px", fontWeight: 700, color: brand.primaryColor },
+        { fontSize: "10px", fontWeight: 500, color: brand.primaryColor, textTransform: "uppercase" as const, letterSpacing: "0.1em" },
+        { background: `${brand.primaryColor}10` },
+        "inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-5"
+      )}
       <div className="flex items-center gap-3">
         {renderAvatar('sm', 'rounded-full', { backgroundColor: `${brand.primaryColor}15`, color: brand.primaryColor }, { fontSize: "14px", fontWeight: 700 })}
         <div>
