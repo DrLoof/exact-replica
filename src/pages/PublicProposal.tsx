@@ -4,21 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { AlertTriangle, Layers, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import {
-  BrandProvider,
-  HeroCover,
-  SectionHeader,
-  TextContent,
-  HighlightPanel,
-  BundleCard,
-  ServiceCard,
-  PricingSummary,
-  TimelineStep,
-  TermsSection,
-  WhyUsCard,
-  TestimonialCard,
-  SignatureBlock,
-  PageWrapper,
-  TeamMemberCard,
+  BrandProvider, HeroCover, SectionHeader, TextContent, HighlightPanel,
+  BundleCard, ServiceCard, PricingSummary, TimelineStep, TermsSection,
+  WhyUsCard, TestimonialCard, SignatureBlock, PageWrapper, TeamMemberCard, PortfolioCard,
 } from '@/components/proposal-template';
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 
