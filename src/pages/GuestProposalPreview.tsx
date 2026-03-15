@@ -972,8 +972,7 @@ export default function GuestProposalPreview() {
                             <UserPlus className="h-4 w-4" />
                             Add team member
                           </button>
-                        </div>
-                      )}
+                      </div>
                     </div>
                   </PageWrapper>
                   <PreviewWatermark />
