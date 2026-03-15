@@ -406,36 +406,52 @@ export function ServiceCard({
         </div>
 
         {/* Client Responsibilities */}
-        {hasResponsibilities && (
+        {(hasResponsibilities || editableResp) && (
           <div className="pt-4 mt-4" style={{ borderTop: `1px solid ${border}` }}>
             <span className="block mb-2.5 uppercase tracking-widest"
               style={{ fontSize: "10px", fontWeight: 600, color: `${accent}99` }}>Client Responsibilities</span>
-            <CollapsibleList
-              items={clientResponsibilities!}
-              renderItem={(item, idx) => (
-                <li key={idx} className="flex items-start gap-2.5">
-                  <span className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: `${accent}33` }} />
-                  <span style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: muted }}>{item}</span>
-                </li>
-              )}
-            />
+            {hasResponsibilities && (
+              <CollapsibleList
+                items={clientResponsibilities!}
+                renderItem={(item, idx) => (
+                  <li key={idx} className="group/resp flex items-start gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: `${accent}33` }} />
+                    <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: muted }}>{item}</span>
+                    {editableResp && (
+                      <button onClick={() => onClientResponsibilitiesEdit!(clientResponsibilities!.filter((_, i) => i !== idx))}
+                        className="shrink-0 mt-0.5 opacity-0 group-hover/resp:opacity-100 transition-opacity text-[#CCC] hover:text-red-400 print:hidden"
+                        title="Remove"><X className="h-3 w-3" /></button>
+                    )}
+                  </li>
+                )}
+              />
+            )}
+            {renderResponsibilitiesEdit()}
           </div>
         )}
 
         {/* Out of Scope */}
-        {hasOutOfScope && (
+        {(hasOutOfScope || editableOos) && (
           <div className="pt-4 mt-4" style={{ borderTop: `1px solid ${border}` }}>
             <span className="block mb-2.5 uppercase tracking-widest"
               style={{ fontSize: "10px", fontWeight: 600, color: faint }}>Out of Scope</span>
-            <CollapsibleList
-              items={outOfScope!}
-              renderItem={(item, idx) => (
-                <li key={idx} className="flex items-start gap-2">
-                  <span className="mt-1.5 shrink-0" style={{ fontSize: "10px", color: faint }}>✕</span>
-                  <span style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: faint }}>{item}</span>
-                </li>
-              )}
-            />
+            {hasOutOfScope && (
+              <CollapsibleList
+                items={outOfScope!}
+                renderItem={(item, idx) => (
+                  <li key={idx} className="group/oos flex items-start gap-2">
+                    <span className="mt-1.5 shrink-0" style={{ fontSize: "10px", color: faint }}>✕</span>
+                    <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: faint }}>{item}</span>
+                    {editableOos && (
+                      <button onClick={() => onOutOfScopeEdit!(outOfScope!.filter((_, i) => i !== idx))}
+                        className="shrink-0 mt-0.5 opacity-0 group-hover/oos:opacity-100 transition-opacity text-[#CCC] hover:text-red-400 print:hidden"
+                        title="Remove"><X className="h-3 w-3" /></button>
+                    )}
+                  </li>
+                )}
+              />
+            )}
+            {renderOutOfScopeEdit()}
           </div>
         )}
       </motion.div>
