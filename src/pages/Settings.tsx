@@ -1,5 +1,5 @@
 import { AppShell } from '@/components/layout/AppShell';
-import { Building2, Palette, Receipt, UserPlus, ChevronRight, Quote, Award } from 'lucide-react';
+import { Building2, Palette, Receipt, UserPlus, ChevronRight, Quote, Award, Image } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const settingsSections = [
