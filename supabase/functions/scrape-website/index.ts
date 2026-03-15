@@ -162,10 +162,9 @@ function extractTeamFromHtml(html: string, baseUrl: string): { name: string; tit
 // Extract logo from HTML with multiple strategies
 function extractLogo(html: string, baseUrl: string): string | null {
   const urlObj = new URL(baseUrl);
-  const decodeEntities = (s: string) => s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#x27;/g, "'").replace(/&#x2F;/g, '/');
   const resolveUrl = (u: string) => {
     if (!u) return '';
-    u = decodeEntities(u);
+    u = decodeHtmlEntities(u);
     if (u.startsWith('http')) return u;
     if (u.startsWith('//')) return 'https:' + u;
     if (u.startsWith('/')) return urlObj.origin + u;
