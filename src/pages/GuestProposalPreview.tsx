@@ -397,10 +397,14 @@ export default function GuestProposalPreview() {
         const { data: et } = await supabase.from('terms_clauses').select('id').eq('agency_id', freshAgency.id);
         if (!et?.length) {
           await supabase.from('terms_clauses').insert([
-            { title: 'Payment Terms', content: 'All fees are due according to the payment schedule outlined in the Investment section.', display_order: 1 },
-            { title: 'Revision Policy', content: 'This proposal includes the number of revision rounds specified per deliverable.', display_order: 2 },
-            { title: 'Intellectual Property', content: 'Upon receipt of full payment, the client receives full ownership of all final deliverables.', display_order: 3 },
-            { title: 'Termination', content: 'Either party may terminate with written notice as specified in the notice period.', display_order: 4 },
+            { title: 'Payment Terms', content: 'All fees are due according to the payment schedule outlined in the Investment section of this proposal. Invoices will be issued at each milestone and are payable within 14 days of receipt.', display_order: 1 },
+            { title: 'Project Timeline & Milestones', content: 'The project timeline outlined in this proposal is an estimate based on the defined scope of work. Actual timelines may vary depending on the timely provision of client feedback, content, assets, and approvals.', display_order: 2 },
+            { title: 'Revision Policy', content: 'This proposal includes the number of revision rounds specified per deliverable. Additional revision rounds beyond the included allowance will be billed at our standard hourly rate.', display_order: 3 },
+            { title: 'Intellectual Property', content: 'Upon receipt of full and final payment, the client will receive full ownership of all final deliverables created specifically for this project.', display_order: 4 },
+            { title: 'Confidentiality', content: 'Both parties agree to keep confidential any proprietary or sensitive information shared during the course of this engagement.', display_order: 5 },
+            { title: 'Termination', content: 'Either party may terminate this agreement with written notice as specified in the notice period above.', display_order: 6 },
+            { title: 'Liability', content: "The agency's total liability under this agreement shall not exceed the total fees paid by the client for the services.", display_order: 7 },
+            { title: 'Governing Law', content: 'This agreement shall be governed by and construed in accordance with the laws of the jurisdiction where the agency is registered.', display_order: 8 },
           ].map(t => ({ ...t, agency_id: freshAgency.id, is_default: true })));
         }
         const { data: ep } = await supabase.from('payment_templates').select('id').eq('agency_id', freshAgency.id);
@@ -483,10 +487,14 @@ export default function GuestProposalPreview() {
   };
 
   const defaultTerms = [
-    { title: 'Payment Terms', content: 'All fees are due according to the payment schedule outlined in the Investment section of this proposal.' },
-    { title: 'Revision Policy', content: 'This proposal includes the number of revision rounds specified per deliverable.' },
-    { title: 'Intellectual Property', content: 'Upon receipt of full payment, the client receives full ownership of all final deliverables.' },
-    { title: 'Termination', content: 'Either party may terminate this agreement with written notice as specified in the notice period.' },
+    { title: 'Payment Terms', content: 'All fees are due according to the payment schedule outlined in the Investment section of this proposal. Invoices will be issued at each milestone and are payable within 14 days of receipt.' },
+    { title: 'Project Timeline & Milestones', content: 'The project timeline outlined in this proposal is an estimate based on the defined scope of work. Actual timelines may vary depending on the timely provision of client feedback, content, assets, and approvals.' },
+    { title: 'Revision Policy', content: 'This proposal includes the number of revision rounds specified per deliverable. Additional revision rounds beyond the included allowance will be billed at our standard hourly rate.' },
+    { title: 'Intellectual Property', content: 'Upon receipt of full and final payment, the client will receive full ownership of all final deliverables created specifically for this project.' },
+    { title: 'Confidentiality', content: 'Both parties agree to keep confidential any proprietary or sensitive information shared during the course of this engagement.' },
+    { title: 'Termination', content: 'Either party may terminate this agreement with written notice as specified in the notice period above.' },
+    { title: 'Liability', content: "The agency's total liability under this agreement shall not exceed the total fees paid by the client for the services." },
+    { title: 'Governing Law', content: 'This agreement shall be governed by and construed in accordance with the laws of the jurisdiction where the agency is registered.' },
   ];
 
   const defaultPhases = [
