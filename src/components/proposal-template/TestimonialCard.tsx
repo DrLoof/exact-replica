@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useRef } from "react";
 import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
 import { EditableText } from "./EditableText";
-import { Quote } from "lucide-react";
+import { Quote, Camera } from "lucide-react";
 
 interface TestimonialCardProps {
   clientName: string;
@@ -21,6 +21,7 @@ interface TestimonialCardProps {
   onCompanyEdit?: (value: string) => void;
   onMetricValueEdit?: (value: string) => void;
   onMetricLabelEdit?: (value: string) => void;
+  onAvatarUpload?: (file: File) => void;
 }
 
 export function TestimonialCard({
