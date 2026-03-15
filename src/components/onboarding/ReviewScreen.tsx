@@ -28,6 +28,10 @@ interface ReviewScreenProps {
   onAddBundle?: (bundleName: string) => void;
   teamMembers: any[];
   onTeamMembersChange: (members: any[]) => void;
+  portfolioItems: any[];
+  onPortfolioItemsChange: (items: any[]) => void;
+  detectedPortfolioUrl?: string | null;
+  serviceGroups: string[];
 }
 
 export function ReviewScreen({
