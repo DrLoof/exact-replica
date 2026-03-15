@@ -768,8 +768,8 @@ export default function ProposalEditor() {
                           isActive && !isHidden ? '' : 'hover:bg-[#F4F0EA]',
                         )}
                         style={isActive && !isHidden ? {
-                          backgroundColor: '#FAF5EF',
-                          borderLeft: '3px solid #E8825C',
+                          backgroundColor: 'hsl(24 28% 13% / 0.08)',
+                          borderLeft: '3px solid hsl(24 28% 13%)',
                           paddingLeft: '9px',
                         } : {
                           borderLeft: '3px solid transparent',
@@ -791,7 +791,7 @@ export default function ProposalEditor() {
 
                         {/* Section name */}
                         <span className={cn(
-                          'flex-1 text-[13px] font-medium transition-colors',
+                          'flex-1 text-[13px] font-normal transition-colors',
                           isHidden ? 'line-through' : '',
                         )} style={{ color: isActive && !isHidden ? '#2A2118' : isHidden ? '#C8C3BB' : '#7A7265' }}>
                           {name}
