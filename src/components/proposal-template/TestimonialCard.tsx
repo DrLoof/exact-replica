@@ -104,11 +104,11 @@ export function TestimonialCard({
             "{quote}"
           </blockquote>
         )}
-        {metricValue && (
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6" style={{ background: "rgba(255,255,255,0.15)" }}>
-            <span style={{ fontSize: "18px", fontWeight: 600, color: "white" }}>{metricValue}</span>
-            {metricLabel && <span style={{ fontSize: "11px", fontWeight: 500, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{metricLabel}</span>}
-          </div>
+        {renderMetric(
+          { fontSize: "18px", fontWeight: 600, color: "white" },
+          { fontSize: "11px", fontWeight: 500, color: "rgba(255,255,255,0.7)", textTransform: "uppercase" as const, letterSpacing: "0.05em" },
+          { background: "rgba(255,255,255,0.15)" },
+          "inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
         )}
         <div className="pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}>
           <div className="flex items-center gap-4">
@@ -121,11 +121,7 @@ export function TestimonialCard({
             )}
             <div>
               <span className="block text-white" style={{ fontSize: "15px", fontWeight: 600 }}>{onNameEdit ? renderName() : clientName}</span>
-              {(clientTitle || clientCompany) && (
-                <span className="block" style={{ fontSize: "13px", fontWeight: 400, color: "rgba(255,255,255,0.5)" }}>
-                  {clientTitle}{clientTitle && clientCompany ? " · " : ""}{clientCompany}
-                </span>
-              )}
+              {renderTitleCompany({ fontSize: "13px", fontWeight: 400, color: "rgba(255,255,255,0.5)" })}
             </div>
           </div>
         </div>
