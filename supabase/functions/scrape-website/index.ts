@@ -642,7 +642,7 @@ serve(async (req) => {
       '/kontakta/oss', '/kontakta/oss/', '/kontakta-oss',
       '/services', '/what-we-do', '/tjanster', '/tjanster/',
       '/testimonials', '/reviews', '/clients', '/kunder', '/referenser',
-      '/work', '/case-studies', '/cases', '/kundcase', '/kundcase/', '/portfolio',
+      '/work', '/our-work', '/projects', '/case-study', '/case-studies', '/cases', '/kundcase', '/kundcase/', '/portfolio', '/client-success', '/success-stories',
       '/contact', '/kontakt',
       '/references', '/referenties', '/projekte', '/projets',
     ];
@@ -659,17 +659,26 @@ serve(async (req) => {
       })
       .filter(Boolean) as { path: string; text: string }[];
 
-    // Prioritize team-related nav links
+    // Prioritize team- and portfolio-related nav links
     const teamKeywords = ['team', 'staff', 'people', 'about', 'om oss', 'kontakt', 'meet', 'our team', 'medarbetare', 'anställda'];
+    const portfolioKeywords = ['portfolio', 'work', 'our work', 'case study', 'case studies', 'client success', 'success stories', 'projects', 'references'];
+    const portfolioPathRegex = /\/(portfolio|work|our-work|case-study|case-studies|cases|client-success|success-stories|projects|references?)\/?$/i;
+
     const teamNavLinks = navLinks.filter(({ text }) => teamKeywords.some(kw => text.includes(kw)));
-    const otherNavLinks = navLinks.filter(({ text }) => !teamKeywords.some(kw => text.includes(kw)));
+    const portfolioNavLinks = navLinks.filter(({ text, path }) =>
+      portfolioKeywords.some(kw => text.includes(kw)) || portfolioPathRegex.test(path)
+    );
+    const otherNavLinks = navLinks.filter(({ text, path }) =>
+      !teamKeywords.some(kw => text.includes(kw)) && !portfolioPathRegex.test(path)
+    );
     
     const allPaths = [...new Set([
       ...teamNavLinks.map(l => l.path),
-      ...otherNavLinks.slice(0, 15).map(l => l.path),
+      ...portfolioNavLinks.map(l => l.path),
+      ...otherNavLinks.slice(0, 12).map(l => l.path),
       ...pagesToFetch
     ])];
-    console.log(`Will try ${Math.min(allPaths.length, 20)} paths. Team nav links: ${teamNavLinks.map(l => l.path).join(', ')}. Nav links: ${navLinks.length}`);
+    console.log(`Will try ${Math.min(allPaths.length, 30)} paths. Team nav links: ${teamNavLinks.map(l => l.path).join(', ')}. Portfolio nav links: ${portfolioNavLinks.map(l => l.path).join(', ')}. Nav links: ${navLinks.length}`);
     
     const additionalContent: string[] = [];
     const teamContent: { path: string; html: string }[] = [];
@@ -678,7 +687,7 @@ serve(async (req) => {
     const allExtractedTeam: { name: string; title: string; photo_url: string | null; bio: string | null }[] = [];
     let detectedPortfolioUrl: string | null = null;
     
-    const fetchPromises = allPaths.slice(0, 20).map(async (path) => {
+    const fetchPromises = allPaths.slice(0, 30).map(async (path) => {
       try {
         const pageUrl = urlObj.origin + path;
         const resp = await fetch(pageUrl, {
@@ -690,7 +699,7 @@ serve(async (req) => {
           console.log(`Fetched ${path} — ${text.length} chars, status ${resp.status}`);
           
           const normalizedPath = path.replace(/\/$/, '');
-          const isCasePage = /\/(kundcase|case-studies|cases|work|portfolio|testimonials|reviews|referencer|references|kunder)\/?$/i.test(path);
+          const isCasePage = /\/(kundcase|case-study|case-studies|cases|work|our-work|portfolio|projects|client-success|success-stories|testimonials|reviews|referencer|references|kunder)\/?$/i.test(path);
           const isTeamPage = /\/(team|our-team|people|staff|meet-the-team|kontakta|medarbetare)\/?/i.test(path)
             || text.toLowerCase().includes('meet the team') || text.toLowerCase().includes('our team')
             || text.toLowerCase().includes('meet our');
