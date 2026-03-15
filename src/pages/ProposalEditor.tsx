@@ -652,7 +652,7 @@ export default function ProposalEditor() {
             {/* SECTIONS zone */}
             <div>
               <div className="flex items-center justify-between px-2 mb-2">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#B8B0A5' }}>Sections</span>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#B8B0A5' }}>Pages</span>
                 {isReordered && (
                   <button onClick={resetOrder} className="text-[11px] hover:text-foreground transition-colors" style={{ color: '#B8B0A5' }}>Reset order</button>
                 )}

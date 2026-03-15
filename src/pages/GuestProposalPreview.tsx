@@ -588,6 +588,9 @@ export default function GuestProposalPreview() {
         {/* Section Nav */}
         <div className="sticky top-[57px] hidden h-[calc(100vh-57px)] w-52 flex-col gap-1 overflow-y-auto border-r border-border bg-background p-3 lg:flex print:hidden">
           {/* Section navigation */}
+          <div className="mb-2 px-2">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#B8B0A5' }}>Pages</span>
+          </div>
           {sectionNames.map((name, idx) => {
             const isActive = activeSection === idx;
             const isHidden = deletedSections.has(idx) || (idx === 6 && !portfolioVisible);
