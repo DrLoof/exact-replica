@@ -33,17 +33,15 @@ export const defaultModulesByGroup: Record<string, DefaultModule[]> = {
       ],
       clientResponsibilities: [
         'Provide brand vision, values, and target audience overview',
-        'Share examples of brands they admire and dislike',
-        'Designate one decision-maker for feedback rounds',
-        'Complete creative brief questionnaire within 5 business days',
-        'Provide timely feedback within agreed review windows (3 business days)',
+        'Designate one decision-maker for feedback and approvals',
+        'Provide timely feedback within 5 business days per review round',
+        'Share examples of brands you admire for creative direction',
       ],
       outOfScope: [
         'Copywriting or tagline development',
         'Website design or development',
-        'Print collateral design beyond templates',
         'Brand photography or video production',
-        'Trademark search or legal registration',
+        'Trademark registration',
       ],
       defaultTimeline: '4-6 weeks. Discovery (Week 1), Concept Development (Weeks 2-3), Refinement (Week 4), Final Delivery (Weeks 5-6). Includes 2 rounds of revisions.',
       suggestedKpis: [
