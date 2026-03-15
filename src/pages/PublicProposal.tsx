@@ -18,6 +18,7 @@ export default function PublicProposal() {
   const [agency, setAgency] = useState<any>(null);
   const [client, setClient] = useState<any>(null);
   const [services, setServices] = useState<any[]>([]);
+  const [portfolioItems, setPortfolioItems] = useState<any[]>([]);
   const [differentiators, setDifferentiators] = useState<any[]>([]);
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [termsClauses, setTermsClauses] = useState<any[]>([]);
