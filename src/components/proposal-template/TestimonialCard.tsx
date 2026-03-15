@@ -421,14 +421,7 @@ export function TestimonialCard({
         <blockquote className="text-[#555] mb-6" style={{ fontSize: "15px", fontWeight: 400, lineHeight: 1.6, fontFamily: "'Inter', sans-serif" }}>"{quote}"</blockquote>
       )}
       <div className="flex items-center gap-3">
-        {avatarUrl ? (
-          <img src={avatarUrl} alt={clientName} className="w-10 h-10 rounded-full object-cover" />
-        ) : (
-          <div className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: `${brand.primaryColor}15`, color: brand.primaryColor }}>
-            <span style={{ fontSize: "14px", fontWeight: 700 }}>{clientName.charAt(0)}</span>
-          </div>
-        )}
+        {renderAvatar('sm', 'rounded-full', { backgroundColor: `${brand.primaryColor}15`, color: brand.primaryColor }, { fontSize: "14px", fontWeight: 700 })}
         <div>
           <span className="block" style={{ fontSize: "14px", fontWeight: 600, color: brand.darkColor }}>{onNameEdit ? renderName() : clientName}</span>
           {renderTitleCompany({ fontSize: "12px", fontWeight: 400, color: "#999" })}
