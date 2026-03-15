@@ -35,6 +35,9 @@ export default function GuestProposalPreview() {
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState(0);
   const [deletedSections, setDeletedSections] = useState<Set<number>>(new Set());
+  const [showClientResponsibilities, setShowClientResponsibilities] = useState(true);
+  const [showOutOfScope, setShowOutOfScope] = useState(false);
+  const [portfolioVisible, setPortfolioVisible] = useState(true);
   const [showAddPage, setShowAddPage] = useState(false);
   const [showAutoSaved, setShowAutoSaved] = useState(false);
   const [showNudge, setShowNudge] = useState(false);
