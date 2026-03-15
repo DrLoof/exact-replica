@@ -775,6 +775,157 @@ export default function ProposalEditor() {
             </label>
           </div>
 
+          {/* Portfolio Controls */}
+          <div className="mt-3 pt-3 border-t border-border">
+            <div className="flex items-center justify-between px-2 mb-2">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Portfolio</span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={(proposal as any)?.portfolio_section_visible ?? false}
+                  onChange={(e) => {
+                    updateField('portfolio_section_visible', e.target.checked);
+                    if (e.target.checked && deletedSections.has(7)) {
+                      restoreSection(7);
+                    }
+                    if (!e.target.checked && !deletedSections.has(7)) {
+                      deleteSection(7);
+                    }
+                  }}
+                  className="sr-only peer"
+                />
+                <div className="w-7 h-4 bg-muted rounded-full peer peer-checked:bg-brand transition-colors after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full" />
+              </label>
+            </div>
+
+            {(proposal as any)?.portfolio_section_visible && (
+              <div className="space-y-2 px-1">
+                {/* Selected count */}
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-[11px] text-muted-foreground">
+                    {portfolioItems.length} of {allPortfolioItems.length} selected
+                  </span>
+                  {portfolioItems.length >= 6 && (
+                    <span className="text-[10px] text-amber-600 font-medium">Maximum 6</span>
+                  )}
+                </div>
+
+                {/* Portfolio item list */}
+                <div className="max-h-[280px] overflow-y-auto space-y-1 pr-1">
+                  {(() => {
+                    // Smart suggestions: get service group names from proposal services
+                    const proposalGroupNames = new Set<string>();
+                    services.forEach((svc: any) => {
+                      const groupName = svc.module?.service_groups?.name || '';
+                      if (groupName) proposalGroupNames.add(groupName.toLowerCase());
+                    });
+
+                    const isMatch = (item: any) => {
+                      if (proposalGroupNames.size === 0) return false;
+                      const cat = (item.category || '').toLowerCase();
+                      return Array.from(proposalGroupNames).some(g =>
+                        cat.includes(g) || g.includes(cat) ||
+                        cat.split(/[&,]/).some((c: string) => g.includes(c.trim())) ||
+                        g.split(/[&,]/).some((c: string) => cat.includes(c.trim()))
+                      );
+                    };
+
+                    const suggested = allPortfolioItems.filter(isMatch);
+                    const others = allPortfolioItems.filter(p => !isMatch(p));
+                    const hasSuggestions = suggested.length > 0 && others.length > 0;
+
+                    const renderItem = (item: any) => {
+                      const isSelected = portfolioItems.some(p => p.id === item.id);
+                      const heroImg = item.images?.[0]?.url;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            if (isSelected) {
+                              const updated = portfolioItems.filter(p => p.id !== item.id);
+                              setPortfolioItems(updated);
+                              updateField('selected_portfolio_ids', updated.map((p: any) => p.id));
+                            } else if (portfolioItems.length < 6) {
+                              const updated = [...portfolioItems, item];
+                              setPortfolioItems(updated);
+                              updateField('selected_portfolio_ids', updated.map((p: any) => p.id));
+                            }
+                          }}
+                          disabled={!isSelected && portfolioItems.length >= 6}
+                          className={cn(
+                            'w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-all text-xs',
+                            isSelected
+                              ? 'bg-brand/10 border border-brand/40'
+                              : 'border border-transparent hover:bg-muted/50 disabled:opacity-40'
+                          )}
+                        >
+                          {/* Thumbnail */}
+                          <div className="h-9 w-9 flex-shrink-0 rounded-md overflow-hidden bg-muted">
+                            {heroImg ? (
+                              <img src={heroImg} alt="" className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center">
+                                <Image className="h-3.5 w-3.5 text-muted-foreground/50" />
+                              </div>
+                            )}
+                          </div>
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium truncate text-foreground" style={{ fontSize: '11px' }}>{item.title}</p>
+                            <p className="truncate text-muted-foreground" style={{ fontSize: '10px' }}>{item.category}</p>
+                          </div>
+                          {/* Check */}
+                          {isSelected && (
+                            <Check className="h-3.5 w-3.5 flex-shrink-0 text-brand" />
+                          )}
+                        </button>
+                      );
+                    };
+
+                    return (
+                      <>
+                        {hasSuggestions && (
+                          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider px-1 pt-1">Suggested</p>
+                        )}
+                        {(hasSuggestions ? suggested : allPortfolioItems).map(renderItem)}
+                        {hasSuggestions && (
+                          <>
+                            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider px-1 pt-2">Other projects</p>
+                            {others.map(renderItem)}
+                          </>
+                        )}
+                        {allPortfolioItems.length === 0 && (
+                          <p className="text-[11px] text-muted-foreground text-center py-3">No portfolio items yet.</p>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
+
+                {/* Section title */}
+                <div className="px-1 pt-1">
+                  <label className="text-[10px] font-medium text-muted-foreground">Section title</label>
+                  <input
+                    type="text"
+                    value={(proposal as any)?.portfolio_section_title || 'Our Work'}
+                    onChange={(e) => updateField('portfolio_section_title', e.target.value)}
+                    className="mt-0.5 w-full rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground outline-none focus:border-brand"
+                  />
+                </div>
+
+                {/* Manage link */}
+                <a
+                  href="/settings/portfolio"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 px-1 pt-1 text-[11px] text-brand hover:text-brand-hover transition-colors"
+                >
+                  Manage portfolio <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            )}
+          </div>
+
           {/* Add page button removed — eye toggles handle show/hide inline */}
         </div>
 
