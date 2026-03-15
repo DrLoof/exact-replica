@@ -437,7 +437,7 @@ serve(async (req) => {
             break;
           }
         }
-        result.name = title;
+        result.name = decodeHtmlEntities(title);
       }
     }
 
