@@ -114,7 +114,7 @@ export default function GuestProposalPreview() {
     if (guestProposal) {
       setProposalTitle(guestProposal.title || `Proposal for ${guestProposal.clientName || 'Client'}`);
       setExecutiveSummary(guestProposal.executiveSummary || '');
-      setLocalServices(guestProposal.services || []);
+      setLocalServices((guestProposal.services || []).filter((s: any) => s && s.name));
       setLocalPhases(guestProposal.phases || []);
       setLocalAboutText(guestProposal.aboutText || guestOnboarding?.agencyIdentity?.about_text || '');
       if (guestProposal.templateId) setTemplateId(guestProposal.templateId);
