@@ -751,18 +751,15 @@ export const defaultModulesByGroup: Record<string, DefaultModule[]> = {
         'Monthly strategy review sessions (if ongoing)',
       ],
       clientResponsibilities: [
-        'Share business goals, revenue targets, and constraints',
+        'Share business goals, revenue targets, and budget constraints',
         'Provide access to existing marketing data and spend',
         'Participate actively in strategy sessions',
         'Designate decision-maker with authority to approve strategy',
-        'Commit resources to execute on strategy recommendations',
       ],
       outOfScope: [
-        'Tactical execution of strategy',
+        'Tactical execution of strategy recommendations',
         'Sales strategy or process optimization',
         'Product development strategy',
-        'Organizational restructuring',
-        'Market research beyond desk research',
       ],
       defaultTimeline: 'Strategy project: 3-5 weeks. Advisory: ongoing monthly with quarterly deep-dives.',
       suggestedKpis: [
