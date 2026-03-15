@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Share2, Download, FileText, EyeOff, Check, RefreshCw, Loader2, X, Lock, Palette, Plus } from 'lucide-react';
+import { ArrowLeft, Share2, Download, FileText, EyeOff, Check, RefreshCw, Loader2, X, Lock, Palette, Plus, UserPlus } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -153,6 +153,19 @@ export default function GuestProposalPreview() {
     } catch {}
   }, [trackEdit]);
 
+  const [guestTeamMembers, setGuestTeamMembers] = useState<any[]>(() => 
+    (guestOnboarding?.teamMembers || []).filter((m: any) => m.name)
+  );
+
+  const saveGuestTeam = useCallback((team: any[]) => {
+    try {
+      const raw = localStorage.getItem('propopad_guest_onboarding');
+      const onboarding = raw ? JSON.parse(raw) : {};
+      onboarding.teamMembers = team;
+      localStorage.setItem('propopad_guest_onboarding', JSON.stringify(onboarding));
+    } catch {}
+  }, []);
+
   // Guard: redirect if no guest data (use effect to avoid render-time side effects)
   useEffect(() => {
     if (!guestProposal) {
@@ -168,7 +181,6 @@ export default function GuestProposalPreview() {
   const currencySymbol = guestProposal.currencySymbol || '$';
   const differentiators = guestOnboarding?.differentiators || [];
   const testimonials = (guestOnboarding?.testimonials || []).filter((t: any) => t.approved);
-  const guestTeamMembers = (guestOnboarding?.teamMembers || []).filter((m: any) => m.name);
   const clientName = guestProposal.clientName || 'Client';
   const agencyName = identity.name || 'Your Agency';
   const brandColor = identity.brand_color || '#E8825C';
@@ -902,11 +914,11 @@ export default function GuestProposalPreview() {
                       ))}
                     </div>
                     {/* Team Members Block */}
-                    {guestTeamMembers.length > 0 && (
-                      <div className="mt-12">
-                        <p className="mb-6 text-center" style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#999' }}>
-                          The Team Behind Your Project
-                        </p>
+                    <div className="mt-12">
+                      <p className="mb-6 text-center" style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#999' }}>
+                        The Team Behind Your Project
+                      </p>
+                      {guestTeamMembers.length > 0 && (
                         <div className={`grid gap-6 justify-center ${guestTeamMembers.length <= 2 ? 'grid-cols-2 max-w-md mx-auto' : guestTeamMembers.length === 3 ? 'grid-cols-3 max-w-lg mx-auto' : 'grid-cols-2 sm:grid-cols-4'}`}>
                           {guestTeamMembers.slice(0, 4).map((member: any, i: number) => (
                             <TeamMemberCard
@@ -915,11 +927,44 @@ export default function GuestProposalPreview() {
                               title={member.title}
                               photoUrl={member.photo_url}
                               delay={i * 0.1}
+                              onRemove={() => {
+                                const next = guestTeamMembers.filter((_: any, idx: number) => idx !== i);
+                                setGuestTeamMembers(next);
+                                saveGuestTeam(next);
+                                toast.success(`${member.name} removed`);
+                              }}
+                              onNameEdit={(val) => {
+                                const next = guestTeamMembers.map((m: any, idx: number) => idx === i ? { ...m, name: val } : m);
+                                setGuestTeamMembers(next);
+                                saveGuestTeam(next);
+                              }}
+                              onTitleEdit={(val) => {
+                                const next = guestTeamMembers.map((m: any, idx: number) => idx === i ? { ...m, title: val } : m);
+                                setGuestTeamMembers(next);
+                                saveGuestTeam(next);
+                              }}
                             />
                           ))}
                         </div>
-                      </div>
-                    )}
+                      )}
+                      {guestTeamMembers.length < 4 && (
+                        <div className="flex justify-center mt-4 print:hidden">
+                          <button
+                            onClick={() => {
+                              const newMember = { id: crypto.randomUUID(), name: 'New Member', title: 'Role', photo_url: null };
+                              const next = [...guestTeamMembers, newMember];
+                              setGuestTeamMembers(next);
+                              saveGuestTeam(next);
+                              toast.success('Team member added');
+                            }}
+                            className="flex items-center gap-2 rounded-lg border border-dashed border-muted-foreground/30 px-4 py-2.5 text-sm text-muted-foreground hover:border-muted-foreground/60 hover:text-foreground transition-colors"
+                          >
+                            <UserPlus className="h-4 w-4" />
+                            Add team member
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </PageWrapper>
                   <PreviewWatermark />
                 </div>
