@@ -403,12 +403,14 @@ export function TestimonialCard({
   if (featured) {
     return (
       <motion.div
+        {...wrapProps}
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.6, ease: "easeOut" }}
-        className="rounded-2xl p-10 lg:p-12"
+        className="rounded-2xl p-10 lg:p-12 relative"
         style={{ fontFamily: "'Space Grotesk', sans-serif", backgroundColor: brand.darkColor }}
       >
+        {removeButton}
         <Quote size={28} className="text-white/20 mb-6" />
         {onQuoteEdit ? (
           <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
