@@ -291,17 +291,14 @@ export const defaultModulesByGroup: Record<string, DefaultModule[]> = {
       ],
       clientResponsibilities: [
         'Approve content briefs and topics',
-        'Provide subject matter expertise or access to SMEs for interviews',
+        'Provide subject matter expertise or access to internal experts',
         'Review and approve drafts within 3 business days',
-        'Provide CMS access for publishing (if agency publishes)',
-        'Share brand voice guidelines',
+        'Provide CMS access if agency publishes directly',
       ],
       outOfScope: [
         'Graphic design or custom illustrations',
-        'Video or multimedia content creation',
         'Content promotion or social distribution',
         'Technical SEO implementation',
-        'Translation or localization',
       ],
       defaultTimeline: 'Per piece: 5-7 business days from brief approval to final draft. Monthly packages: rolling delivery per editorial calendar. Includes 1 round of revisions per article.',
       suggestedKpis: [
