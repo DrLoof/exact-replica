@@ -436,14 +436,12 @@ export const defaultModulesByGroup: Record<string, DefaultModule[]> = {
         'Provide Google Business Profile access',
         'Verify business information accuracy',
         'Respond to customer reviews (or approve agency responses)',
-        'Provide photos of business, team, and products/services',
+        'Provide photos of business location and team',
       ],
       outOfScope: [
-        'Reputation management beyond review strategy',
-        'Physical signage or print advertising',
-        'Multi-location enterprise SEO',
-        'Paid local ads (Google Local Services)',
+        'Paid local advertising',
         'Website development',
+        'Multi-location enterprise SEO',
       ],
       defaultTimeline: 'Setup: 2 weeks. Ongoing monthly management. Results visible within 2-4 months.',
       suggestedKpis: [
