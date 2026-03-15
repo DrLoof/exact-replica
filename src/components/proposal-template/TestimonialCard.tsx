@@ -189,14 +189,16 @@ export function TestimonialCard({
     const bg = template.colors.background;
     return (
       <motion.div
+        {...wrapProps}
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.5, ease: "easeOut" }}
-        className="rounded-2xl p-8 transition-all duration-300"
+        className="rounded-2xl p-8 transition-all duration-300 relative"
         style={{ fontFamily: "'DM Sans', sans-serif", background: "white", border: `1px solid ${border}` }}
-        onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${accent}40`; }}
-        onMouseLeave={(e) => { e.currentTarget.style.borderColor = border; }}
+        onMouseEnter={(e) => { setHovered(true); e.currentTarget.style.borderColor = `${accent}40`; }}
+        onMouseLeave={(e) => { setHovered(false); e.currentTarget.style.borderColor = border; }}
       >
+        {removeButton}
         <Quote size={20} style={{ color: `${accent}33` }} className="mb-4" />
         {onQuoteEdit ? (
           <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
