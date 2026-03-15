@@ -191,6 +191,27 @@ export default function ProposalEditor() {
       setDifferentiators(diffRes.data || []);
       setTestimonials(testRes.data || []);
       setTermsClauses(termsRes.data || []);
+
+      // Load team members from agency
+      const { data: agencyData } = await supabase.from('agencies').select('team_members').eq('id', propRes.data.agency_id).single();
+      const agencyTeam = Array.isArray((agencyData as any)?.team_members) ? (agencyData as any).team_members : [];
+      setTeamMembers(agencyTeam);
+
+      // Load proposal-specific team selection
+      const proposalTeamData = (propRes.data as any).team;
+      if (Array.isArray(proposalTeamData) && proposalTeamData.length > 0) {
+        setProposalTeam(proposalTeamData);
+      } else if (agencyTeam.length > 0) {
+        // Default: pre-select first 3 team members
+        const defaultTeam = agencyTeam.slice(0, 3).map((m: any) => ({
+          member_id: m.id,
+          name: m.name,
+          title: m.title,
+          photo_url: m.photo_url,
+          role_on_project: '',
+        }));
+        setProposalTeam(defaultTeam);
+      }
     }
 
     setLoading(false);
