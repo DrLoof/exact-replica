@@ -678,6 +678,29 @@ export default function ProposalEditor() {
             )
           ))}
 
+          {/* Scope display toggles */}
+          <div className="mt-3 pt-3 border-t border-border">
+            <span className="block px-2 mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Scope Display</span>
+            <label className="flex items-center gap-2 px-2 py-1.5 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={proposal.show_client_responsibilities ?? true}
+                onChange={(e) => updateField('show_client_responsibilities', e.target.checked)}
+                className="rounded border-border text-brand focus:ring-brand h-3.5 w-3.5"
+              />
+              <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">Client Responsibilities</span>
+            </label>
+            <label className="flex items-center gap-2 px-2 py-1.5 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={proposal.show_out_of_scope ?? false}
+                onChange={(e) => updateField('show_out_of_scope', e.target.checked)}
+                className="rounded border-border text-brand focus:ring-brand h-3.5 w-3.5"
+              />
+              <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">Out of Scope</span>
+            </label>
+          </div>
+
           {/* Add page button */}
           {deletedSections.size > 0 && (
             <div className="relative mt-2">
