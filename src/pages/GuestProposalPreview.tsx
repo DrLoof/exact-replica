@@ -705,8 +705,8 @@ export default function GuestProposalPreview() {
                       <div className="absolute inset-0 rounded-full" style={{ background: `linear-gradient(135deg, ${tmpl.colors.primaryAccent}40, transparent 60%)` }} />
                       <div className="w-5 h-0.5 rounded-full" style={{ background: tmpl.colors.primaryAccent }} />
                       {isLocked && (
-                        <div className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 rounded-full text-white" style={{ backgroundColor: '#2A2118', fontSize: '6px', fontWeight: 800 }}>
-                          P
+                        <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 flex items-center justify-center rounded-full text-white px-1.5 py-0.5" style={{ backgroundColor: '#2A2118', fontSize: '7px', fontWeight: 700, letterSpacing: '0.05em' }}>
+                          PRO
                         </div>
                       )}
                     </div>
