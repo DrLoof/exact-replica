@@ -800,6 +800,7 @@ export default function ProposalEditor() {
                       updateField('project_start_date', val);
                       setProposal({ ...proposal, project_start_date: val });
                     }}
+                    onLogoClick={() => logoInputRef.current?.click()}
                   />
                 </div>
               </SectionWrapper>}
