@@ -867,12 +867,24 @@ export default function GuestProposalPreview() {
                         className="min-h-[80px]"
                       />
                     </TextContent>
-                    <div className="mt-12">
+                    <div className="mt-12 space-y-4">
                       <HighlightPanel items={[
                         { label: 'Investment', value: totalStr, accent: true },
-                        { label: 'Timeline', value: phases.length > 0 ? `${phases.length} phases` : `${Math.max(localServices.length * 2, 4)} weeks est.` },
-                        { label: 'Goal', value: guestProposal.clientGoal || `${localServices.length} services` },
+                        { label: 'Timeline', value: calculateTimeline(phases) },
+                        { label: 'Objectives', value: getObjectivesStat(guestProposal.goals, guestProposal.clientGoal, localServices.length) },
                       ]} />
+                      {(() => {
+                        const kpiItems = getKpiBarItems(guestProposal.goals);
+                        if (!kpiItems) return null;
+                        const hasNumbers = kpiItems.some(k => /\d/.test(k.value));
+                        return (
+                          <HighlightPanel variant="dark" items={kpiItems.map(k => ({
+                            label: k.label,
+                            value: k.value,
+                            accent: hasNumbers && /\d/.test(k.value),
+                          }))} />
+                        );
+                      })()}
                     </div>
                   </PageWrapper>
                   <PreviewWatermark />
