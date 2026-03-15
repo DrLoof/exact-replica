@@ -838,6 +838,43 @@ export default function ProposalNew() {
         />
       </div>
 
+      {/* Portfolio suggestion */}
+      {!isGuestMode && !portfolioSuggestionDismissed && matchedPortfolioIds.length > 0 && hasServices && (
+        <div className="border-t border-brand/20 px-6 py-3" style={{ background: '#FAF8F5' }}>
+          <div className="mx-auto flex max-w-[720px] items-center justify-between gap-4">
+            <p className="text-[13px] text-foreground">
+              <span className="mr-1.5">💡</span>
+              You have {matchedPortfolioIds.length} portfolio item{matchedPortfolioIds.length > 1 ? 's' : ''} matching these services.
+              {!portfolioAccepted && ' Include them in this proposal?'}
+              {portfolioAccepted && <span className="ml-1.5 text-brand font-medium">Added ✓</span>}
+            </p>
+            {!portfolioAccepted ? (
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <button
+                  onClick={() => { setPortfolioAccepted(true); }}
+                  className="rounded-lg bg-foreground px-3.5 py-1.5 text-xs font-medium text-background hover:opacity-90 transition-opacity"
+                >
+                  Yes, add them
+                </button>
+                <button
+                  onClick={() => setPortfolioSuggestionDismissed(true)}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  No thanks
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => { setPortfolioAccepted(false); setPortfolioSuggestionDismissed(true); }}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+              >
+                Undo
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Sticky bottom action bar */}
       <div className="sticky bottom-0 border-t border-parchment bg-card/95 backdrop-blur px-6 py-4">
         <div className="mx-auto flex max-w-[720px] items-center justify-between">
