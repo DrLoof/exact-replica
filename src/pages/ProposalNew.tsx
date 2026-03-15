@@ -453,6 +453,9 @@ export default function ProposalNew() {
         client_context_note: clientContextNote || null,
         template_id: (agency as any).default_template || 'classic',
         custom_colors: agency.brand_color ? { primaryAccent: agency.brand_color } : null,
+        selected_portfolio_ids: portfolioAccepted && matchedPortfolioIds.length > 0 ? matchedPortfolioIds : null,
+        portfolio_section_visible: portfolioAccepted && matchedPortfolioIds.length > 0,
+        portfolio_section_title: 'Our Work',
       } as any).select('id').single();
       if (pError) throw pError;
 
