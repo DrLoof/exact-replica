@@ -252,6 +252,7 @@ export function OnboardingWizard() {
         proposal_prefix: (agencyIdentity.name || targetAgency.name || 'AGY').replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase(),
         onboarding_complete: true,
         onboarding_step: 7,
+        team_members: teamMembers.length > 0 ? teamMembers : [],
       } as any).eq('id', targetAgency.id);
 
       // 2. Save selected service modules
