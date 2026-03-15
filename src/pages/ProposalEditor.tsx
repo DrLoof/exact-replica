@@ -1405,15 +1405,27 @@ export default function ProposalEditor() {
                                 saveProposalTeam(next);
                                 toast.success(`${member.name} removed from team`);
                               }}
-                              onNameEdit={(val) => {
+                              onNameEdit={async (val) => {
                                 const next = proposalTeam.map((m: any) => m.member_id === member.member_id ? { ...m, name: val } : m);
                                 setProposalTeam(next);
                                 saveProposalTeam(next);
+                                // Sync to agency team
+                                if (agency?.id) {
+                                  const updatedAgencyTeam = teamMembers.map((m: any) => m.id === member.member_id ? { ...m, name: val } : m);
+                                  setTeamMembers(updatedAgencyTeam);
+                                  await supabase.from('agencies').update({ team_members: updatedAgencyTeam as any }).eq('id', agency.id);
+                                }
                               }}
-                              onTitleEdit={(val) => {
+                              onTitleEdit={async (val) => {
                                 const next = proposalTeam.map((m: any) => m.member_id === member.member_id ? { ...m, title: val } : m);
                                 setProposalTeam(next);
                                 saveProposalTeam(next);
+                                // Sync to agency team
+                                if (agency?.id) {
+                                  const updatedAgencyTeam = teamMembers.map((m: any) => m.id === member.member_id ? { ...m, title: val } : m);
+                                  setTeamMembers(updatedAgencyTeam);
+                                  await supabase.from('agencies').update({ team_members: updatedAgencyTeam as any }).eq('id', agency.id);
+                                }
                               }}
                             />
                           ))}
