@@ -28,6 +28,7 @@ import {
   HighlightPanel,
   EditableText,
   TeamMemberCard,
+  PortfolioCard,
 } from '@/components/proposal-template';
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 
