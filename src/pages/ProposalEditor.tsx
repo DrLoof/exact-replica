@@ -74,6 +74,8 @@ interface ProposalService {
     price_monthly: number | null;
     price_hourly: number | null;
     deliverables: string[] | null;
+    client_responsibilities: string[] | null;
+    out_of_scope: string[] | null;
     icon: string | null;
   };
 }
