@@ -714,7 +714,7 @@ export default function GuestProposalPreview() {
                   <span className={cn(
                     'flex-1 text-[13px] font-normal transition-colors',
                     isHidden ? 'line-through' : '',
-                  )} style={{ color: isActive && !isHidden ? '#2A2118' : isHidden ? '#C8C3BB' : '#7A7265' }}>
+                  )} style={{ color: isActive && !isHidden ? '#FFFFFF' : isHidden ? '#C8C3BB' : '#7A7265' }}>
                     {name}
                   </span>
 
