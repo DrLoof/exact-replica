@@ -20,6 +20,7 @@ const settingsNav = [
   { label: 'Agency Profile', icon: Building2, path: '/settings/agency' },
   { label: 'Branding', icon: Palette, path: '/settings/branding' },
   { label: 'Pricing & Terms', icon: Receipt, path: '/settings/pricing' },
+  { label: 'Portfolio', icon: Image, path: '/settings/portfolio' },
   { label: 'Team', icon: UserPlus, path: '/settings/team' },
 ];
 

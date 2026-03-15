@@ -61,6 +61,7 @@ const App = () => (
             <Route path="/settings/pricing" element={<ProtectedRoute><SettingsPricing /></ProtectedRoute>} />
             <Route path="/settings/testimonials" element={<ProtectedRoute><SettingsTestimonials /></ProtectedRoute>} />
             <Route path="/settings/differentiators" element={<ProtectedRoute><SettingsDifferentiators /></ProtectedRoute>} />
+            <Route path="/settings/portfolio" element={<ProtectedRoute><SettingsPortfolio /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <CookieConsent />
