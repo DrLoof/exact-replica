@@ -27,21 +27,6 @@ import {
   PageWrapper,
   HighlightPanel,
   EditableText,
-import {
-  BrandProvider,
-  HeroCover,
-  SectionHeader,
-  ServiceCard,
-  PricingSummary,
-  TimelineStep,
-  WhyUsCard,
-  TestimonialCard,
-  TermsSection,
-  SignatureBlock,
-  TextContent,
-  PageWrapper,
-  HighlightPanel,
-  EditableText,
   TeamMemberCard,
 } from '@/components/proposal-template';
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
