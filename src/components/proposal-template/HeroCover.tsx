@@ -510,14 +510,16 @@ export function HeroCover(props: HeroCoverProps) {
           transition={{ delay: 0.3, duration: 0.5 }}
           className="flex items-center gap-3"
         >
+          <div onClick={props.onLogoClick} style={{ cursor: props.onLogoClick ? 'pointer' : undefined }} title={props.onLogoClick ? 'Click to replace logo' : undefined}>
           {brand.logoUrl ? (
-            <img src={brand.logoUrl} alt={brand.agencyName} className="h-32 w-auto object-contain" />
+            <img src={brand.logoUrl} alt={brand.agencyName} className="h-32 w-auto object-contain hover:opacity-80 transition-opacity" />
           ) : (
             <span className="tracking-[0.15em] uppercase"
               style={{ fontSize: "18px", fontWeight: 700, color: brand.darkColor, letterSpacing: "0.08em" }}>
               {brand.agencyFullName}
             </span>
           )}
+          </div>
         </motion.div>
         {proposalNumber && (
           <motion.span
