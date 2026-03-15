@@ -10,6 +10,7 @@ import {
 import * as LucideIcons from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { templates } from '@/lib/proposalTemplates';
+import { calculateTimeline, getObjectivesStat, getKpiBarItems } from '@/lib/proposalStats';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -1074,16 +1075,27 @@ export default function ProposalEditor() {
                       )}
                     </div>
 
-                    {/* Key highlights with GOAL stat */}
-                    <div className="mt-12">
+                    {/* Key highlights — Bar 1 (always) + Bar 2 (KPIs, conditional) */}
+                    <div className="mt-12 space-y-4">
                       <HighlightPanel
                         items={[
                           { label: 'Investment', value: totalStr, accent: true },
-                          { label: 'Timeline', value: proposal.estimated_duration || `${services.length * 2} weeks est.` },
-                          { label: 'Services', value: `${services.length} included` },
-                          { label: 'Goal', value: (proposal as any).client_goal || 'Grow the business' },
+                          { label: 'Timeline', value: calculateTimeline(proposal.phases as any[] || []) || proposal.estimated_duration || `${services.length * 2} weeks est.` },
+                          { label: 'Objectives', value: getObjectivesStat((proposal as any).goals, (proposal as any).client_goal, services.length) },
                         ]}
                       />
+                      {(() => {
+                        const kpiItems = getKpiBarItems((proposal as any).goals);
+                        if (!kpiItems) return null;
+                        const hasNumbers = kpiItems.some(k => /\d/.test(k.value));
+                        return (
+                          <HighlightPanel variant="dark" items={kpiItems.map(k => ({
+                            label: k.label,
+                            value: k.value,
+                            accent: hasNumbers && /\d/.test(k.value),
+                          }))} />
+                        );
+                      })()}
                     </div>
                   </PageWrapper>
                 </div>
