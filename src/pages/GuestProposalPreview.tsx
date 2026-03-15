@@ -236,6 +236,27 @@ export default function GuestProposalPreview() {
     setShowSignupGate(true);
   };
 
+  // Logo upload handler for guest mode
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setLocalLogoUrl(dataUrl);
+      // Save to onboarding identity in localStorage
+      try {
+        const raw = localStorage.getItem('propopad_guest_onboarding');
+        const onboarding = raw ? JSON.parse(raw) : {};
+        onboarding.agencyIdentity = { ...(onboarding.agencyIdentity || {}), logo_url: dataUrl };
+        localStorage.setItem('propopad_guest_onboarding', JSON.stringify(onboarding));
+      } catch {}
+      toast.success('Logo updated');
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
   // Edit handlers that auto-save
   const handleTitleEdit = (val: string) => {
     setProposalTitle(val);
