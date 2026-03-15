@@ -1,7 +1,7 @@
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, Users, Layers, Package,
-  Building2, Palette, Receipt, UserPlus, LogOut, Zap, X,
+  Building2, Palette, Receipt, UserPlus, LogOut, Zap, X, Image,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import logoOrange from '@/assets/logo_propopad_small.svg';
