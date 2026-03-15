@@ -920,7 +920,7 @@ export default function GuestProposalPreview() {
                       </p>
                       {guestTeamMembers.length > 0 && (
                         <div className={`grid gap-6 justify-center ${guestTeamMembers.length <= 2 ? 'grid-cols-2 max-w-md mx-auto' : guestTeamMembers.length === 3 ? 'grid-cols-3 max-w-lg mx-auto' : 'grid-cols-2 sm:grid-cols-4'}`}>
-                          {guestTeamMembers.slice(0, 4).map((member: any, i: number) => (
+                          {guestTeamMembers.map((member: any, i: number) => (
                             <TeamMemberCard
                               key={member.id || i}
                               name={member.name}
@@ -958,8 +958,7 @@ export default function GuestProposalPreview() {
                           ))}
                         </div>
                       )}
-                      {guestTeamMembers.length < 4 && (
-                        <div className="flex justify-center mt-4 print:hidden">
+                      <div className="flex justify-center mt-4 print:hidden">
                           <button
                             onClick={() => {
                               const newMember = { id: crypto.randomUUID(), name: 'New Member', title: 'Role', photo_url: null };
@@ -973,8 +972,7 @@ export default function GuestProposalPreview() {
                             <UserPlus className="h-4 w-4" />
                             Add team member
                           </button>
-                        </div>
-                      )}
+                      </div>
                     </div>
                   </PageWrapper>
                   <PreviewWatermark />
