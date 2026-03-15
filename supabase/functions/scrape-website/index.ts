@@ -1023,6 +1023,12 @@ TEAM MEMBER EXTRACTION — CRITICAL RULES:
       result.detected_currency = tldCurrencyMap[tld];
     }
 
+    // Track detected portfolio URL
+    if (detectedPortfolioUrl) {
+      result.portfolio_url = detectedPortfolioUrl;
+      console.log(`Portfolio URL included in response: ${detectedPortfolioUrl}`);
+    }
+
     // Count fields found
     const fieldsFound = ["name", "email", "phone", "brand_color", "logo_url", "tagline", "about_text"]
       .filter(f => result[f]).length;
