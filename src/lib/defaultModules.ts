@@ -589,18 +589,14 @@ export const defaultModulesByGroup: Record<string, DefaultModule[]> = {
       clientResponsibilities: [
         'Provide ad platform access and Business Manager admin',
         'Fund ad spend directly',
-        'Provide or approve product/service imagery and video',
-        'Approve ad copy and creative before launch',
-        'Share audience insights and customer data for targeting',
-        'Respond to leads and inquiries from campaigns',
+        'Provide or approve imagery and video for ads',
+        'Share audience insights and customer data',
       ],
       outOfScope: [
         'Ad spend budget',
         'Professional photography or video production',
         'Organic social media management',
         'Landing page creation',
-        'Influencer partnerships',
-        'CRM or marketing automation integration',
       ],
       defaultTimeline: 'Setup: 1-2 weeks. Optimization: ongoing monthly. Minimum 3-month commitment. Learning phase: 2-4 weeks per campaign.',
       suggestedKpis: [
