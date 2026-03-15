@@ -1,9 +1,9 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
 import { EditableText } from "./EditableText";
-import { Quote, Camera } from "lucide-react";
+import { Quote, Camera, X } from "lucide-react";
 
 interface TestimonialCardProps {
   clientName: string;
