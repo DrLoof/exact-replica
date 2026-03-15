@@ -420,7 +420,7 @@ serve(async (req) => {
     const ogSiteNameMatch = homepageHtml.match(/<meta[^>]*property=["']og:site_name["'][^>]*content=["']([^"']+)["']/i)
       || homepageHtml.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:site_name["']/i);
     if (ogSiteNameMatch) {
-      result.name = ogSiteNameMatch[1].trim();
+      result.name = decodeHtmlEntities(ogSiteNameMatch[1].trim());
     } else {
       const titleMatch = homepageHtml.match(/<title[^>]*>([^<]+)<\/title>/i);
       if (titleMatch) {
