@@ -208,6 +208,8 @@ function extractLogo(html: string, baseUrl: string): string | null {
     if (lower.match(/\.webp(\?|$|&)/i)) score -= 3;
     if (lower.match(/\.jpe?g(\?|$|&)/i)) score -= 3;
     if (lower.includes('wp-content/uploads/')) score -= 10;
+    if (lower.includes('wp-content/plugins/')) score -= 20;
+    if (lower.includes('/admin/')) score -= 10;
     if (lower.includes('/uploads/')) score -= 5;
     if (lower.match(/\d{3,4}x\d{3,4}/)) score -= 8;
     if (lower.match(/width=\d{4,}/)) score -= 8;
