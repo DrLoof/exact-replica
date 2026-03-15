@@ -209,6 +209,7 @@ export default function ProposalEditor() {
       setDifferentiators(diffRes.data || []);
       setTestimonials(testRes.data || []);
       setTermsClauses(termsRes.data || []);
+      setServiceGroups(sgRes.data || []);
 
       // Portfolio items
       const allPi = (portfolioRes.data || []).map((d: any) => ({ ...d, images: d.images || [] }));
