@@ -825,7 +825,10 @@ export default function ProposalEditor() {
                     {/* Regenerate button */}
                     <div className="mt-4 flex items-center gap-3 print:hidden">
                       <button
-                        onClick={regenerateExecutiveSummary}
+                        onClick={() => {
+                          if (!confirm('Regenerate this section? Your current edits will be replaced with a new AI-generated version.')) return;
+                          regenerateExecutiveSummary();
+                        }}
                         disabled={regenerating}
                         className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground hover:bg-muted/50 disabled:opacity-50"
                       >
