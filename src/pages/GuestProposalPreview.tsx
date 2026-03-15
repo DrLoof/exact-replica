@@ -153,6 +153,19 @@ export default function GuestProposalPreview() {
     } catch {}
   }, [trackEdit]);
 
+  const [guestTeamMembers, setGuestTeamMembers] = useState<any[]>(() => 
+    (guestOnboarding?.teamMembers || []).filter((m: any) => m.name)
+  );
+
+  const saveGuestTeam = useCallback((team: any[]) => {
+    try {
+      const raw = localStorage.getItem('propopad_guest_onboarding');
+      const onboarding = raw ? JSON.parse(raw) : {};
+      onboarding.teamMembers = team;
+      localStorage.setItem('propopad_guest_onboarding', JSON.stringify(onboarding));
+    } catch {}
+  }, []);
+
   // Guard: redirect if no guest data (use effect to avoid render-time side effects)
   useEffect(() => {
     if (!guestProposal) {
@@ -168,18 +181,6 @@ export default function GuestProposalPreview() {
   const currencySymbol = guestProposal.currencySymbol || '$';
   const differentiators = guestOnboarding?.differentiators || [];
   const testimonials = (guestOnboarding?.testimonials || []).filter((t: any) => t.approved);
-  const [guestTeamMembers, setGuestTeamMembers] = useState<any[]>(() => 
-    (guestOnboarding?.teamMembers || []).filter((m: any) => m.name)
-  );
-
-  const saveGuestTeam = useCallback((team: any[]) => {
-    try {
-      const raw = localStorage.getItem('propopad_guest_onboarding');
-      const onboarding = raw ? JSON.parse(raw) : {};
-      onboarding.teamMembers = team;
-      localStorage.setItem('propopad_guest_onboarding', JSON.stringify(onboarding));
-    } catch {}
-  }, []);
   const clientName = guestProposal.clientName || 'Client';
   const agencyName = identity.name || 'Your Agency';
   const brandColor = identity.brand_color || '#E8825C';
