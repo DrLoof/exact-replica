@@ -492,6 +492,8 @@ export default function GuestProposalPreview() {
             is_addon: (realMod?.service_type || s.service_type) === 'addon',
             custom_deliverables: s.deliverables || null,
             custom_description: s.customDescription || null,
+            client_responsibilities: s.client_responsibilities || [],
+            out_of_scope: s.out_of_scope || [],
           };
         }).filter((s: any) => s.module_id);
         if (svcInserts.length > 0) await supabase.from('proposal_services').insert(svcInserts);

@@ -44,7 +44,10 @@ function buildGuestData(guestOnboarding: any) {
         group_id: `group-${groupName}`,
         is_active: true,
         deliverables: mod.deliverables,
+        client_responsibilities: mod.clientResponsibilities || [],
+        out_of_scope: mod.outOfScope || [],
         default_timeline: mod.defaultTimeline,
+        ai_context: mod.aiContext || null,
       });
     });
   }
@@ -470,6 +473,8 @@ export default function ProposalNew() {
           pricing_model_override: null,
           is_addon: (realMod?.service_type || mod.service_type) === 'addon',
           bundle_id: bundleModuleIdSet.has(mod.id) ? selectedBundleId : null,
+          client_responsibilities: mod.client_responsibilities || [],
+          out_of_scope: mod.out_of_scope || [],
         };
       }).filter((s: any) => s.module_id);
 
