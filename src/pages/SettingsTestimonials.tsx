@@ -69,6 +69,44 @@ export default function SettingsTestimonials() {
   const handleSave = async () => {
     if (!agency || !form.client_name.trim() || !form.quote.trim()) return;
     setSaving(true);
+
+    let avatarUrl = form.avatar_url || null;
+
+    // If we're editing, use existing id; for new, we need to insert first to get the id
+    if (avatarFile) {
+      const ext = avatarFile.name.split('.').pop() || 'jpg';
+      // For new testimonials, insert first to get id, then upload
+      if (!editId) {
+        const { data: inserted, error: insertErr } = await supabase.from('testimonials').insert({
+          agency_id: agency.id,
+          client_name: form.client_name.trim(),
+          client_title: form.client_title || null,
+          client_company: form.client_company || null,
+          quote: form.quote.trim(),
+          metric_value: form.metric_value || null,
+          metric_label: form.metric_label || null,
+          avatar_url: null,
+          is_featured: form.is_featured,
+        }).select('id').single();
+        if (insertErr || !inserted) { toast.error('Failed to create'); setSaving(false); return; }
+        const path = `${agency.id}/testimonials/${inserted.id}.${ext}`;
+        await supabase.storage.from('agency-logos').upload(path, avatarFile, { upsert: true });
+        const { data: urlData } = supabase.storage.from('agency-logos').getPublicUrl(path);
+        avatarUrl = urlData.publicUrl + '?t=' + Date.now();
+        await supabase.from('testimonials').update({ avatar_url: avatarUrl }).eq('id', inserted.id);
+        toast.success('Testimonial added');
+        setShowModal(false);
+        setSaving(false);
+        load();
+        return;
+      } else {
+        const path = `${agency.id}/testimonials/${editId}.${ext}`;
+        await supabase.storage.from('agency-logos').upload(path, avatarFile, { upsert: true });
+        const { data: urlData } = supabase.storage.from('agency-logos').getPublicUrl(path);
+        avatarUrl = urlData.publicUrl + '?t=' + Date.now();
+      }
+    }
+
     const payload = {
       agency_id: agency.id,
       client_name: form.client_name.trim(),
@@ -77,7 +115,7 @@ export default function SettingsTestimonials() {
       quote: form.quote.trim(),
       metric_value: form.metric_value || null,
       metric_label: form.metric_label || null,
-      avatar_url: form.avatar_url || null,
+      avatar_url: avatarUrl,
       is_featured: form.is_featured,
     };
 
