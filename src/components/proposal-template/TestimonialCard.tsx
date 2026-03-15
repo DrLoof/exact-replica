@@ -17,12 +17,17 @@ interface TestimonialCardProps {
   delay?: number;
   onQuoteEdit?: (value: string) => void;
   onNameEdit?: (value: string) => void;
+  onTitleEdit?: (value: string) => void;
+  onCompanyEdit?: (value: string) => void;
+  onMetricValueEdit?: (value: string) => void;
+  onMetricLabelEdit?: (value: string) => void;
 }
 
 export function TestimonialCard({
   clientName, clientTitle, clientCompany, quote,
   metricValue, metricLabel, avatarUrl,
   featured = false, delay = 0, onQuoteEdit, onNameEdit,
+  onTitleEdit, onCompanyEdit, onMetricValueEdit, onMetricLabelEdit,
 }: TestimonialCardProps) {
   const brand = useBrand();
   const template = useTemplate();
