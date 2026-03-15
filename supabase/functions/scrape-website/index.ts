@@ -220,6 +220,22 @@ function extractLogo(html: string, baseUrl: string): string | null {
     if (lower.includes('login') || lower.includes('signin') || lower.includes('sign-in')) score -= 15;
     if (lower.includes('avatar') || lower.includes('profile')) score -= 5;
     if (lower.includes('gravatar')) score -= 10;
+    if (lower.includes('carousel') || lower.includes('swiper')) score -= 15;
+    
+    // Check img tag context for carousel/client logo containers
+    if (imgTag) {
+      const tagLower = imgTag.toLowerCase();
+      if (tagLower.includes('sp-lc-') || tagLower.includes('carousel') || tagLower.includes('swiper')) score -= 20;
+      const altMatch2 = imgTag.match(/alt=["']([^"']*)["']/i);
+      if (altMatch2) {
+        const alt = altMatch2[1].toLowerCase();
+        // Penalize client/partner logos in carousels
+        if ((alt.includes('logo') && !alt.includes(urlObj.hostname.split('.')[0].toLowerCase())) && 
+            (tagLower.includes('carousel') || tagLower.includes('swiper') || tagLower.includes('sp-lc'))) {
+          score -= 25;
+        }
+      }
+    }
     
     // Context
     if (context === 'header') score += 3;
