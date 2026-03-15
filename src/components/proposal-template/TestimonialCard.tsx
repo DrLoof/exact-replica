@@ -1,9 +1,9 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
 import { EditableText } from "./EditableText";
-import { Quote, Camera } from "lucide-react";
+import { Quote, Camera, X } from "lucide-react";
 
 interface TestimonialCardProps {
   clientName: string;
@@ -22,6 +22,7 @@ interface TestimonialCardProps {
   onMetricValueEdit?: (value: string) => void;
   onMetricLabelEdit?: (value: string) => void;
   onAvatarUpload?: (file: File) => void;
+  onRemove?: () => void;
 }
 
 export function TestimonialCard({
@@ -29,10 +30,22 @@ export function TestimonialCard({
   metricValue, metricLabel, avatarUrl,
   featured = false, delay = 0, onQuoteEdit, onNameEdit,
   onTitleEdit, onCompanyEdit, onMetricValueEdit, onMetricLabelEdit,
-  onAvatarUpload,
+  onAvatarUpload, onRemove,
 }: TestimonialCardProps) {
   const brand = useBrand();
   const template = useTemplate();
+  const [hovered, setHovered] = useState(false);
+
+  const removeButton = onRemove ? (
+    <button
+      onClick={(e) => { e.stopPropagation(); onRemove(); }}
+      className={`absolute top-3 right-3 z-10 p-1.5 rounded-full transition-opacity duration-200 print:hidden ${hovered ? 'opacity-100' : 'opacity-0'}`}
+      style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+      title="Remove testimonial"
+    >
+      <X className="h-3.5 w-3.5 text-white" />
+    </button>
+  ) : null;
   const isModern = template.id === 'modern';
   const isElegant = template.id === 'elegant';
   const isSoft = template.id === 'soft';
@@ -123,16 +136,24 @@ export function TestimonialCard({
     );
   };
 
+  // Wrap helper for hover remove button
+  const wrapProps = {
+    onMouseEnter: () => setHovered(true),
+    onMouseLeave: () => setHovered(false),
+  };
+
   // Soft featured
   if (isSoft && featured) {
     return (
       <motion.div
+        {...wrapProps}
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.6, ease: "easeOut" }}
-        className="rounded-2xl p-10"
+        className="rounded-2xl p-10 relative"
         style={{ fontFamily: "'DM Sans', sans-serif", backgroundColor: accent }}
       >
+        {removeButton}
         <Quote size={28} style={{ color: "rgba(255,255,255,0.25)" }} className="mb-6" />
         {onQuoteEdit ? (
           <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
@@ -168,14 +189,16 @@ export function TestimonialCard({
     const bg = template.colors.background;
     return (
       <motion.div
+        {...wrapProps}
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.5, ease: "easeOut" }}
-        className="rounded-2xl p-8 transition-all duration-300"
+        className="rounded-2xl p-8 transition-all duration-300 relative"
         style={{ fontFamily: "'DM Sans', sans-serif", background: "white", border: `1px solid ${border}` }}
-        onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${accent}40`; }}
-        onMouseLeave={(e) => { e.currentTarget.style.borderColor = border; }}
+        onMouseEnter={(e) => { setHovered(true); e.currentTarget.style.borderColor = `${accent}40`; }}
+        onMouseLeave={(e) => { setHovered(false); e.currentTarget.style.borderColor = border; }}
       >
+        {removeButton}
         <Quote size={20} style={{ color: `${accent}33` }} className="mb-4" />
         {onQuoteEdit ? (
           <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
@@ -208,12 +231,14 @@ export function TestimonialCard({
   if (isElegant && featured) {
     return (
       <motion.div
+        {...wrapProps}
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.6, ease: "easeOut" }}
-        className="rounded-3xl p-10"
+        className="rounded-3xl p-10 relative"
         style={{ fontFamily: "'DM Sans', sans-serif", backgroundColor: accent }}
       >
+        {removeButton}
         <Quote size={28} style={{ color: "rgba(255,255,255,0.25)" }} className="mb-6" />
         {onQuoteEdit ? (
           <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
@@ -250,14 +275,16 @@ export function TestimonialCard({
     const accentTint = `${accent}0F`;
     return (
       <motion.div
+        {...wrapProps}
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.5, ease: "easeOut" }}
-        className="rounded-3xl p-8 transition-all duration-300"
+        className="rounded-3xl p-8 transition-all duration-300 relative"
         style={{ fontFamily: "'DM Sans', sans-serif", background: "white", border: `1px solid ${border}` }}
-        onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${accent}40`; }}
-        onMouseLeave={(e) => { e.currentTarget.style.borderColor = border; }}
+        onMouseEnter={(e) => { setHovered(true); e.currentTarget.style.borderColor = `${accent}40`; }}
+        onMouseLeave={(e) => { setHovered(false); e.currentTarget.style.borderColor = border; }}
       >
+        {removeButton}
         <Quote size={20} style={{ color: `${accent}26` }} className="mb-4" />
         {onQuoteEdit ? (
           <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
@@ -292,12 +319,14 @@ export function TestimonialCard({
   if (isModern && featured) {
     return (
       <motion.div
+        {...wrapProps}
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.6, ease: "easeOut" }}
-        className="rounded-3xl p-10"
+        className="rounded-3xl p-10 relative"
         style={{ fontFamily: "'Outfit', sans-serif", backgroundColor: dark, boxShadow: `0 12px 40px ${dark}33` }}
       >
+        {removeButton}
         <Quote size={28} style={{ color: secondary }} className="mb-6" />
         {onQuoteEdit ? (
           <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
@@ -332,12 +361,14 @@ export function TestimonialCard({
   if (isModern) {
     return (
       <motion.div
+        {...wrapProps}
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.5, ease: "easeOut" }}
-        className="rounded-3xl p-8 transition-transform duration-300 hover:-translate-y-1"
+        className="rounded-3xl p-8 transition-transform duration-300 hover:-translate-y-1 relative"
         style={{ fontFamily: "'Outfit', sans-serif", background: template.colors.cardBackground, border: `2px solid ${template.colors.border}`, boxShadow: `0 2px 12px ${dark}0A` }}
       >
+        {removeButton}
         <Quote size={20} style={{ color: `${accent}30` }} className="mb-4" />
         {onQuoteEdit ? (
           <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
@@ -372,12 +403,14 @@ export function TestimonialCard({
   if (featured) {
     return (
       <motion.div
+        {...wrapProps}
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.6, ease: "easeOut" }}
-        className="rounded-2xl p-10 lg:p-12"
+        className="rounded-2xl p-10 lg:p-12 relative"
         style={{ fontFamily: "'Space Grotesk', sans-serif", backgroundColor: brand.darkColor }}
       >
+        {removeButton}
         <Quote size={28} className="text-white/20 mb-6" />
         {onQuoteEdit ? (
           <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
@@ -406,12 +439,14 @@ export function TestimonialCard({
   // Classic non-featured
   return (
     <motion.div
+      {...wrapProps}
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5, ease: "easeOut" }}
-      className="bg-white border border-[#EBEBEB] rounded-2xl p-8"
+      className="bg-white border border-[#EBEBEB] rounded-2xl p-8 relative"
       style={{ fontFamily: "'Space Grotesk', sans-serif" }}
     >
+      {removeButton}
       <Quote size={20} style={{ color: `${brand.primaryColor}40` }} className="mb-4" />
       {onQuoteEdit ? (
         <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
