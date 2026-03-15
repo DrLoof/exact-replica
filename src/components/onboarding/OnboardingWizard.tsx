@@ -166,9 +166,23 @@ export function OnboardingWizard() {
     setScreen('review');
   };
 
-  const handleFinishAttempt = () => {
+  const handleReviewComplete = () => {
+    // Move to portfolio step instead of finishing
+    setScreen('portfolio');
+  };
+
+  const handlePortfolioContinue = (items: any[]) => {
+    setPortfolioItemsOnboarding(items);
+    handleFinalFinish();
+  };
+
+  const handlePortfolioSkip = () => {
+    setPortfolioItemsOnboarding([]);
+    handleFinalFinish();
+  };
+
+  const handleFinalFinish = () => {
     if (!user) {
-      // Guest: save all onboarding data to localStorage so ProposalNew can use it
       const guestData = {
         agencyIdentity,
         selectedModuleKeys: [...selectedModuleKeys],
