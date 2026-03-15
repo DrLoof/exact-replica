@@ -361,12 +361,14 @@ export function TestimonialCard({
   if (isModern) {
     return (
       <motion.div
+        {...wrapProps}
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.5, ease: "easeOut" }}
-        className="rounded-3xl p-8 transition-transform duration-300 hover:-translate-y-1"
+        className="rounded-3xl p-8 transition-transform duration-300 hover:-translate-y-1 relative"
         style={{ fontFamily: "'Outfit', sans-serif", background: template.colors.cardBackground, border: `2px solid ${template.colors.border}`, boxShadow: `0 2px 12px ${dark}0A` }}
       >
+        {removeButton}
         <Quote size={20} style={{ color: `${accent}30` }} className="mb-4" />
         {onQuoteEdit ? (
           <EditableText value={quote} placeholder="Click to add a quote..." onSave={onQuoteEdit} as="p"
