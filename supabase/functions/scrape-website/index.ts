@@ -298,6 +298,11 @@ function extractLogo(html: string, baseUrl: string): string | null {
     }
   }
 
+  console.log(`Logo detection result: score=${bestScore}, url=${bestLogo?.slice(0, 100)}`);
+  
+  // If best score is very low, it's likely not a real logo
+  if (bestScore < 3) return null;
+  
   return bestLogo;
 }
 
