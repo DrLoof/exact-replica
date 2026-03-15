@@ -132,6 +132,8 @@ export default function ProposalEditor() {
   const [colorPickerOpen, setColorPickerOpen] = useState<string | null>(null);
   const [hexInput, setHexInput] = useState('');
   const colorPickerRef = useRef<HTMLDivElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const [localLogoUrl, setLocalLogoUrl] = useState<string | null>(null);
   const currencySymbol = agency?.currency_symbol || '$';
   const undoRef = useRef<{ field: string; value: any } | null>(null);
 
@@ -450,6 +452,22 @@ export default function ProposalEditor() {
     }
   };
 
+  // Logo upload handler — saves to Supabase Storage + agency settings
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !agency?.id) return;
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+    const path = `${agency.id}/logo.${ext}`;
+    const { error: uploadError } = await supabase.storage.from('agency-logos').upload(path, file, { upsert: true });
+    if (uploadError) { toast.error('Upload failed'); return; }
+    const { data: urlData } = supabase.storage.from('agency-logos').getPublicUrl(path);
+    const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+    await supabase.from('agencies').update({ logo_url: publicUrl }).eq('id', agency.id);
+    setLocalLogoUrl(publicUrl);
+    toast.success('Logo updated and saved to settings');
+    e.target.value = '';
+  };
+
   const PRESET_COLORS = ['#E8825C', '#2563EB', '#34D399', '#f9b564', '#8B5CF6', '#EC4899', '#14B8A6', '#F59E0B', '#EF4444', '#1E1B4B'];
 
   const currentTemplate = templates[templateId] || templates.classic;
@@ -752,13 +770,14 @@ export default function ProposalEditor() {
             agencyFullName: agency?.name || 'Agency',
             primaryColor: customColors?.primaryAccent || agency?.brand_color || '#fc956e',
             darkColor: agency?.dark_color || '#0A0A0A',
-            logoUrl: agency?.logo_url || null,
+            logoUrl: localLogoUrl || agency?.logo_url || null,
             logoInitial: (agency?.name || 'A').charAt(0).toUpperCase(),
             contactEmail: agency?.email || '',
             contactWebsite: agency?.website || '',
             contactPhone: agency?.phone || '',
             currency: agency?.currency_symbol || '$',
           }}>
+            <input ref={logoInputRef} type="file" accept=".png,.jpg,.jpeg,.svg,.webp" onChange={handleLogoUpload} className="hidden" />
             <div className="mx-auto max-w-[900px] py-8 px-4 space-y-6 print:max-w-none print:p-0 print:space-y-0">
               
 
@@ -781,6 +800,7 @@ export default function ProposalEditor() {
                       updateField('project_start_date', val);
                       setProposal({ ...proposal, project_start_date: val });
                     }}
+                    onLogoClick={() => logoInputRef.current?.click()}
                   />
                 </div>
               </SectionWrapper>}

@@ -16,11 +16,12 @@ interface HeroCoverProps {
   onSubtitleEdit?: (value: string) => void;
   onClientNameEdit?: (value: string) => void;
   onDateEdit?: (value: string) => void;
+  onLogoClick?: () => void;
 }
 
 function ElegantHeroCover({
   proposalTitle, subtitle, clientName, date, proposalNumber,
-  onTitleEdit, onSubtitleEdit, onClientNameEdit, onDateEdit,
+  onTitleEdit, onSubtitleEdit, onClientNameEdit, onDateEdit, onLogoClick,
 }: HeroCoverProps) {
   const brand = useBrand();
   const template = useTemplate();
@@ -51,9 +52,9 @@ function ElegantHeroCover({
         className="relative z-10 flex items-center justify-between px-10 pt-10 lg:px-16 lg:pt-14"
         style={{ fontFamily: "'DM Sans', sans-serif" }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3" onClick={onLogoClick} style={{ cursor: onLogoClick ? 'pointer' : undefined }} title={onLogoClick ? 'Click to replace logo' : undefined}>
           {brand.logoUrl ? (
-            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain" />
+            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain hover:opacity-80 transition-opacity" />
           ) : (
             <>
               <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: accent }}>
@@ -144,7 +145,7 @@ function ElegantHeroCover({
 
 function ModernHeroCover({
   proposalTitle, subtitle, clientName, date, proposalNumber,
-  onTitleEdit, onSubtitleEdit, onClientNameEdit, onDateEdit,
+  onTitleEdit, onSubtitleEdit, onClientNameEdit, onDateEdit, onLogoClick,
 }: HeroCoverProps) {
   const brand = useBrand();
   const template = useTemplate();
@@ -211,9 +212,9 @@ function ModernHeroCover({
         transition={{ delay: 0.2, duration: 0.5 }}
         className="relative z-10 flex items-center justify-between px-8 pt-8 lg:px-14 lg:pt-12"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3" onClick={onLogoClick} style={{ cursor: onLogoClick ? 'pointer' : undefined }} title={onLogoClick ? 'Click to replace logo' : undefined}>
           {brand.logoUrl ? (
-            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain" />
+            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain hover:opacity-80 transition-opacity" />
           ) : (
             <>
               <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
@@ -345,7 +346,7 @@ function ModernHeroCover({
 
 function SoftHeroCover({
   proposalTitle, subtitle, clientName, date, proposalNumber,
-  onTitleEdit, onSubtitleEdit, onClientNameEdit, onDateEdit,
+  onTitleEdit, onSubtitleEdit, onClientNameEdit, onDateEdit, onLogoClick,
 }: HeroCoverProps) {
   const brand = useBrand();
   const template = useTemplate();
@@ -376,9 +377,9 @@ function SoftHeroCover({
         transition={{ delay: 0.2, duration: 0.5 }}
         className="relative z-10 flex items-center justify-between px-10 pt-10 lg:px-16 lg:pt-14"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3" onClick={onLogoClick} style={{ cursor: onLogoClick ? 'pointer' : undefined }} title={onLogoClick ? 'Click to replace logo' : undefined}>
           {brand.logoUrl ? (
-            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain brightness-0 invert" />
+            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain brightness-0 invert hover:opacity-80 transition-opacity" />
           ) : (
             <span className="tracking-[0.2em] uppercase" style={{ fontSize: "14px", fontWeight: 600, color: "white" }}>
               {brand.agencyName}
@@ -509,14 +510,16 @@ export function HeroCover(props: HeroCoverProps) {
           transition={{ delay: 0.3, duration: 0.5 }}
           className="flex items-center gap-3"
         >
+          <div onClick={props.onLogoClick} style={{ cursor: props.onLogoClick ? 'pointer' : undefined }} title={props.onLogoClick ? 'Click to replace logo' : undefined}>
           {brand.logoUrl ? (
-            <img src={brand.logoUrl} alt={brand.agencyName} className="h-32 w-auto object-contain" />
+            <img src={brand.logoUrl} alt={brand.agencyName} className="h-32 w-auto object-contain hover:opacity-80 transition-opacity" />
           ) : (
             <span className="tracking-[0.15em] uppercase"
               style={{ fontSize: "18px", fontWeight: 700, color: brand.darkColor, letterSpacing: "0.08em" }}>
               {brand.agencyFullName}
             </span>
           )}
+          </div>
         </motion.div>
         {proposalNumber && (
           <motion.span

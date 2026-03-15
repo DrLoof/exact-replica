@@ -42,6 +42,8 @@ export default function GuestProposalPreview() {
   const [regenerating, setRegenerating] = useState(false);
   const editCountRef = useRef(0);
   const startTimeRef = useRef(Date.now());
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const [localLogoUrl, setLocalLogoUrl] = useState<string | null>(null);
 
   // Template & color state
   const [templateId, setTemplateId] = useState<string>('classic');
@@ -232,6 +234,27 @@ export default function GuestProposalPreview() {
   const requireSignup = (trigger: SignupTrigger) => {
     setSignupTrigger(trigger);
     setShowSignupGate(true);
+  };
+
+  // Logo upload handler for guest mode
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setLocalLogoUrl(dataUrl);
+      // Save to onboarding identity in localStorage
+      try {
+        const raw = localStorage.getItem('propopad_guest_onboarding');
+        const onboarding = raw ? JSON.parse(raw) : {};
+        onboarding.agencyIdentity = { ...(onboarding.agencyIdentity || {}), logo_url: dataUrl };
+        localStorage.setItem('propopad_guest_onboarding', JSON.stringify(onboarding));
+      } catch {}
+      toast.success('Logo updated');
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   // Edit handlers that auto-save
@@ -724,13 +747,14 @@ export default function GuestProposalPreview() {
             agencyFullName: agencyName,
             primaryColor: customColors?.primaryAccent || brandColor,
             darkColor: '#0A0A0A',
-            logoUrl: identity.logo_url || null,
+            logoUrl: localLogoUrl || identity.logo_url || null,
             logoInitial: (agencyName || 'A').charAt(0).toUpperCase(),
             contactEmail: identity.email || '',
             contactWebsite: '',
             contactPhone: identity.phone || '',
             currency: currencySymbol,
           }}>
+            <input ref={logoInputRef} type="file" accept=".png,.jpg,.jpeg,.svg,.webp" onChange={handleLogoUpload} className="hidden" />
             <div className="mx-auto max-w-[900px] py-8 px-4 space-y-6">
 
               {/* Section 0: Cover */}
@@ -742,6 +766,7 @@ export default function GuestProposalPreview() {
                     date={proposalDate}
                     proposalNumber="DRAFT-001"
                     onTitleEdit={handleTitleEdit}
+                    onLogoClick={() => logoInputRef.current?.click()}
                   />
                   <PreviewWatermark />
                 </div>
