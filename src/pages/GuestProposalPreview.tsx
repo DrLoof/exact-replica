@@ -1024,7 +1024,7 @@ export default function GuestProposalPreview() {
               )}
 
               {/* Section 6: Portfolio */}
-              {!deletedSections.has(6) && (() => {
+              {!deletedSections.has(6) && portfolioVisible && (() => {
                 const portfolioItems = guestOnboarding?.portfolioItems || [];
                 if (portfolioItems.length === 0) return null;
                 return (
