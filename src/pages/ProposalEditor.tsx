@@ -74,6 +74,8 @@ interface ProposalService {
     price_monthly: number | null;
     price_hourly: number | null;
     deliverables: string[] | null;
+    client_responsibilities: string[] | null;
+    out_of_scope: string[] | null;
     icon: string | null;
   };
 }
@@ -157,7 +159,7 @@ export default function ProposalEditor() {
     const [propRes, svcRes] = await Promise.all([
       supabase.from('proposals').select('*').eq('id', id).single(),
       supabase.from('proposal_services')
-        .select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, icon)')
+        .select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, client_responsibilities, out_of_scope, icon)')
         .eq('proposal_id', id)
         .order('display_order'),
     ]);
@@ -255,7 +257,7 @@ export default function ProposalEditor() {
             price_override: removedService.price_override,
             custom_deliverables: removedService.custom_deliverables,
             bundle_id: removedService.bundle_id,
-          }).select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, icon)').single();
+          }).select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, client_responsibilities, out_of_scope, icon)').single();
           if (restored) {
             const mapped = { ...restored, module: restored.service_modules };
             setServices(prev => [...prev, mapped].sort((a, b) => (a.display_order || 0) - (b.display_order || 0)));
@@ -280,7 +282,7 @@ export default function ProposalEditor() {
       module_id: mod.id,
       display_order: services.length,
       is_addon: mod.service_type === 'addon',
-    }).select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, icon)').single();
+    }).select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, client_responsibilities, out_of_scope, icon)').single();
     if (error) { toast.error('Failed to add service'); return; }
     const mapped = { ...newSvc, module: newSvc.service_modules };
     const updated = [...services, mapped];
@@ -819,6 +821,8 @@ export default function ProposalEditor() {
                                 pricingModel={(svc.module?.pricing_model || 'fixed') as any}
                                 description={svc.module?.description || svc.module?.short_description || ''}
                                 deliverables={svc.custom_deliverables || svc.module?.deliverables || []}
+                                clientResponsibilities={svc.module?.client_responsibilities || []}
+                                outOfScope={svc.module?.out_of_scope || []}
                                 isAddon={svc.is_addon || false}
                                 delay={i * 0.1}
                                 onNameEdit={async (val) => {
@@ -999,7 +1003,13 @@ export default function ProposalEditor() {
                       </div>
                     ) : (
                       <TermsSection
-                        clauses={termsClauses.map(c => ({ title: c.title, content: c.content }))}
+                        clauses={[
+                          ...termsClauses.map(c => ({ title: c.title, content: c.content })),
+                          ...(services.some(s => s.module?.client_responsibilities?.length || s.module?.out_of_scope?.length) ? [{
+                            title: 'Scope & Responsibilities',
+                            content: 'The client is responsible for providing timely feedback, required access credentials, and content/assets as outlined in each service\'s scope. Work beyond the deliverables listed for each service is considered out of scope and may require a separate agreement.'
+                          }] : []),
+                        ]}
                         onClauseEdit={async (index, field, value) => {
                           const clause = termsClauses[index];
                           if (!clause) return;

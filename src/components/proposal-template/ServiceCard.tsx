@@ -1,6 +1,6 @@
 import React, { type ReactNode, useState } from "react";
 import { motion } from "motion/react";
-import { Plus, X } from "lucide-react";
+import { Plus, X, ChevronDown } from "lucide-react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
 import { EditableText } from "./EditableText";
@@ -12,6 +12,8 @@ interface ServiceCardProps {
   pricingModel?: "fixed" | "monthly" | "hourly" | "per_unit";
   description: string;
   deliverables: string[];
+  clientResponsibilities?: string[];
+  outOfScope?: string[];
   isAddon?: boolean;
   delay?: number;
   onNameEdit?: (value: string) => void;
@@ -26,8 +28,44 @@ const MODEL_LABELS: Record<string, string> = {
   per_unit: "/unit",
 };
 
+const MAX_COLLAPSED = 3;
+
+function CollapsibleList({
+  items,
+  renderItem,
+}: {
+  items: string[];
+  renderItem: (item: string, idx: number) => React.ReactNode;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const visible = expanded ? items : items.slice(0, MAX_COLLAPSED);
+  const hasMore = items.length > MAX_COLLAPSED;
+
+  return (
+    <>
+      <ul className="space-y-1.5">
+        {visible.map((item, idx) => renderItem(item, idx))}
+      </ul>
+      {hasMore && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="flex items-center gap-1 mt-1.5 text-[11px] font-medium opacity-60 hover:opacity-100 transition-opacity"
+          style={{ color: "inherit" }}
+        >
+          <ChevronDown
+            className="h-3 w-3 transition-transform"
+            style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)" }}
+          />
+          {expanded ? "Show less" : `+${items.length - MAX_COLLAPSED} more`}
+        </button>
+      )}
+    </>
+  );
+}
+
 export function ServiceCard({
   icon, name, price, pricingModel, description, deliverables,
+  clientResponsibilities, outOfScope,
   isAddon = false, delay = 0,
   onNameEdit, onDescriptionEdit, onDeliverablesEdit,
 }: ServiceCardProps) {
@@ -43,6 +81,9 @@ export function ServiceCard({
   const [newItem, setNewItem] = useState("");
   const [adding, setAdding] = useState(false);
   const editable = !!onDeliverablesEdit;
+
+  const hasResponsibilities = clientResponsibilities && clientResponsibilities.length > 0;
+  const hasOutOfScope = outOfScope && outOfScope.length > 0;
 
   const handleRemove = (idx: number) => {
     if (!onDeliverablesEdit) return;
@@ -89,6 +130,7 @@ export function ServiceCard({
     )
   );
 
+  // ── Soft template ──
   if (isSoft) {
     const border = template.colors.border;
     const bg = template.colors.background;
@@ -157,6 +199,45 @@ export function ServiceCard({
             ))}
           </ul>
           {renderDeliverablesEdit()}
+
+          {/* Client Responsibilities */}
+          {hasResponsibilities && (
+            <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${border}` }}>
+              <span className="block mb-2" style={{ fontSize: "10px", fontWeight: 600, color: template.colors.textMuted, textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                Client Responsibilities
+              </span>
+              <CollapsibleList
+                items={clientResponsibilities!}
+                renderItem={(item, idx) => (
+                  <li key={idx} className="flex items-start gap-2.5">
+                    <svg className="w-4 h-4 mt-0.5 shrink-0" viewBox="0 0 16 16" fill="none">
+                      <path d="M3 8.5L6.5 12L13 4" stroke={accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
+                    </svg>
+                    <span style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: template.colors.textMuted }}>{item}</span>
+                  </li>
+                )}
+              />
+            </div>
+          )}
+
+          {/* Out of Scope */}
+          {hasOutOfScope && (
+            <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${border}` }}>
+              <span className="block mb-2" style={{ fontSize: "10px", fontWeight: 600, color: template.colors.textFaint, textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                Out of Scope
+              </span>
+              <CollapsibleList
+                items={outOfScope!}
+                renderItem={(item, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <span className="mt-1.5 shrink-0" style={{ fontSize: "10px", color: template.colors.textFaint }}>—</span>
+                    <span style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: template.colors.textFaint }}>{item}</span>
+                  </li>
+                )}
+              />
+            </div>
+          )}
+
           <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${border}` }}>
             <span style={{ fontSize: "13px", fontWeight: 500, color: template.colors.textMuted }}>
               {price}{suffix && <span style={{ fontWeight: 400, opacity: 0.6 }}>{suffix}</span>}
@@ -167,6 +248,7 @@ export function ServiceCard({
     );
   }
 
+  // ── Elegant template ──
   if (isElegant) {
     const accentTint = `${accent}0F`;
     const secondaryTint = `${secondary}26`;
@@ -201,7 +283,6 @@ export function ServiceCard({
           </div>
         </div>
 
-        {/* Add-on tag */}
         {isAddon && (
           <span className="inline-block px-3 py-1 rounded-full mb-3 uppercase tracking-wider"
             style={{ background: secondaryTint, color: secondary, fontSize: "10px", fontWeight: 600 }}>
@@ -209,7 +290,6 @@ export function ServiceCard({
           </span>
         )}
 
-        {/* Icon */}
         <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 transition-all duration-300"
           style={{ background: accentTint, color: accent }}
           onMouseEnter={(e) => { e.currentTarget.style.background = accent; e.currentTarget.style.color = "white"; }}
@@ -218,7 +298,6 @@ export function ServiceCard({
           {icon}
         </div>
 
-        {/* Name */}
         {onNameEdit ? (
           <EditableText value={name} placeholder="Service name..." onSave={onNameEdit} as="h3"
             className="mb-3"
@@ -229,7 +308,6 @@ export function ServiceCard({
           </h3>
         )}
 
-        {/* Description */}
         {onDescriptionEdit ? (
           <EditableText value={description} placeholder="Click to add a description..." onSave={onDescriptionEdit} as="p"
             className="mb-6" style={{ fontSize: "14px", fontWeight: 400, lineHeight: 1.7, color: muted }} />
@@ -263,14 +341,50 @@ export function ServiceCard({
           </ul>
           {renderDeliverablesEdit()}
         </div>
+
+        {/* Client Responsibilities */}
+        {hasResponsibilities && (
+          <div className="pt-4 mt-4" style={{ borderTop: `1px solid ${border}` }}>
+            <span className="block mb-2.5 uppercase tracking-widest"
+              style={{ fontSize: "10px", fontWeight: 600, color: `${accent}99` }}>Client Responsibilities</span>
+            <CollapsibleList
+              items={clientResponsibilities!}
+              renderItem={(item, idx) => (
+                <li key={idx} className="flex items-start gap-2.5">
+                  <span className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: `${accent}33` }} />
+                  <span style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: muted }}>{item}</span>
+                </li>
+              )}
+            />
+          </div>
+        )}
+
+        {/* Out of Scope */}
+        {hasOutOfScope && (
+          <div className="pt-4 mt-4" style={{ borderTop: `1px solid ${border}` }}>
+            <span className="block mb-2.5 uppercase tracking-widest"
+              style={{ fontSize: "10px", fontWeight: 600, color: faint }}>Out of Scope</span>
+            <CollapsibleList
+              items={outOfScope!}
+              renderItem={(item, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="mt-1.5 shrink-0" style={{ fontSize: "10px", color: faint }}>✕</span>
+                  <span style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: faint }}>{item}</span>
+                </li>
+              )}
+            />
+          </div>
+        )}
       </motion.div>
     );
   }
 
+  // ── Modern template ──
   if (isModern) {
     const borderColor = template.colors.border;
     const muted = template.colors.textMuted;
     const body = template.colors.textBody;
+    const faint = template.colors.textFaint;
     return (
       <motion.div
         initial={{ opacity: 0, y: 24 }}
@@ -339,11 +453,45 @@ export function ServiceCard({
           </ul>
           {renderDeliverablesEdit()}
         </div>
+
+        {/* Client Responsibilities */}
+        {hasResponsibilities && (
+          <div className="pt-4 mt-4" style={{ borderTop: `2px dashed ${borderColor}` }}>
+            <span className="block mb-2.5 uppercase tracking-widest"
+              style={{ fontSize: "10px", fontWeight: 700, color: accent }}>Client Responsibilities</span>
+            <CollapsibleList
+              items={clientResponsibilities!}
+              renderItem={(item, idx) => (
+                <li key={idx} className="flex items-start gap-2.5">
+                  <span className="mt-1.5 shrink-0" style={{ fontSize: "11px", color: accent }}>→</span>
+                  <span style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: body }}>{item}</span>
+                </li>
+              )}
+            />
+          </div>
+        )}
+
+        {/* Out of Scope */}
+        {hasOutOfScope && (
+          <div className="pt-4 mt-4" style={{ borderTop: `2px dashed ${borderColor}` }}>
+            <span className="block mb-2.5 uppercase tracking-widest"
+              style={{ fontSize: "10px", fontWeight: 700, color: faint }}>Out of Scope</span>
+            <CollapsibleList
+              items={outOfScope!}
+              renderItem={(item, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="mt-1 shrink-0" style={{ fontSize: "11px", fontWeight: 700, color: faint }}>×</span>
+                  <span style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: muted }}>{item}</span>
+                </li>
+              )}
+            />
+          </div>
+        )}
       </motion.div>
     );
   }
 
-  // Classic rendering (unchanged)
+  // ── Classic template ──
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -413,6 +561,42 @@ export function ServiceCard({
         </ul>
         {renderDeliverablesEdit()}
       </div>
+
+      {/* Client Responsibilities */}
+      {hasResponsibilities && (
+        <div className="border-t border-[#F0F0F0] pt-4 mt-4">
+          <span className="block text-[#CCC] uppercase tracking-[0.2em] mb-2.5" style={{ fontSize: "10px", fontWeight: 600 }}>
+            Client Responsibilities
+          </span>
+          <CollapsibleList
+            items={clientResponsibilities!}
+            renderItem={(item, idx) => (
+              <li key={idx} className="flex items-start gap-2.5">
+                <span className="mt-1.5 shrink-0 text-[#BBB]" style={{ fontSize: "11px" }}>→</span>
+                <span className="text-[#888]" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5 }}>{item}</span>
+              </li>
+            )}
+          />
+        </div>
+      )}
+
+      {/* Out of Scope */}
+      {hasOutOfScope && (
+        <div className="border-t border-[#F0F0F0] pt-4 mt-4">
+          <span className="block text-[#DDD] uppercase tracking-[0.2em] mb-2.5" style={{ fontSize: "10px", fontWeight: 600 }}>
+            Out of Scope
+          </span>
+          <CollapsibleList
+            items={outOfScope!}
+            renderItem={(item, idx) => (
+              <li key={idx} className="flex items-start gap-2">
+                <span className="mt-1 shrink-0 text-[#CCC]" style={{ fontSize: "11px", fontWeight: 700 }}>×</span>
+                <span className="text-[#AAA]" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5 }}>{item}</span>
+              </li>
+            )}
+          />
+        </div>
+      )}
     </motion.div>
   );
 }

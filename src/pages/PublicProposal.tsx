@@ -67,7 +67,7 @@ export default function PublicProposal() {
     const [agencyRes, clientRes, svcRes, diffRes, testRes, termsRes, phasesRes, ptRes] = await Promise.all([
       prop.agency_id ? supabase.from('agencies').select('*').eq('id', prop.agency_id).single() : { data: null },
       prop.client_id ? supabase.from('clients').select('*').eq('id', prop.client_id).single() : { data: null },
-      supabase.from('proposal_services').select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, icon, service_type)').eq('proposal_id', prop.id).order('display_order'),
+      supabase.from('proposal_services').select('*, service_modules(name, description, short_description, pricing_model, price_fixed, price_monthly, price_hourly, deliverables, client_responsibilities, out_of_scope, icon, service_type)').eq('proposal_id', prop.id).order('display_order'),
       prop.agency_id ? supabase.from('differentiators').select('*').eq('agency_id', prop.agency_id).order('display_order') : { data: [] },
       prop.agency_id ? supabase.from('testimonials').select('*').eq('agency_id', prop.agency_id).order('created_at', { ascending: false }) : { data: [] },
       prop.agency_id ? supabase.from('terms_clauses').select('*').eq('agency_id', prop.agency_id).order('display_order') : { data: [] },
@@ -263,6 +263,8 @@ export default function PublicProposal() {
                   pricingModel={svc.module?.pricing_model || 'fixed'}
                   description={svc.module?.description || svc.module?.short_description || ''}
                   deliverables={svc.module?.deliverables || []}
+                  clientResponsibilities={svc.module?.client_responsibilities || []}
+                  outOfScope={svc.module?.out_of_scope || []}
                   isAddon={svc.is_addon || svc.module?.service_type === 'addon'}
                   delay={idx * 0.08}
                 />
@@ -352,7 +354,13 @@ export default function PublicProposal() {
               variant="dark"
             />
             <div className="mt-10">
-              <TermsSection clauses={termsClauses.map((c: any) => ({ title: c.title, content: c.content }))} />
+              <TermsSection clauses={[
+                ...termsClauses.map((c: any) => ({ title: c.title, content: c.content })),
+                ...(services.some((s: any) => s.module?.client_responsibilities?.length || s.module?.out_of_scope?.length) ? [{
+                  title: 'Scope & Responsibilities',
+                  content: 'The client is responsible for providing timely feedback, required access credentials, and content/assets as outlined in each service\'s scope. Work beyond the deliverables listed for each service is considered out of scope and may require a separate agreement.'
+                }] : []),
+              ]} />
             </div>
           </PageWrapper>
         )}
