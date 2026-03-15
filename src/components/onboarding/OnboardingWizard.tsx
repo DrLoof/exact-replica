@@ -8,7 +8,6 @@ import { getDefaultModulesForGroup } from '@/lib/defaultModules';
 import { defaultBundles, findDefaultModule, calculateBundlePricing } from '@/lib/defaultBundles';
 import { ScanScreen } from './ScanScreen';
 import { ReviewScreen } from './ReviewScreen';
-import { PortfolioStep } from './PortfolioStep';
 import { SignupGate } from './SignupGate';
 
 /** Deduplicate testimonials by comparing normalized first 50 chars of quote text */
@@ -30,7 +29,7 @@ function deduplicateTestimonials(testimonials: any[]): any[] {
 export function OnboardingWizard() {
   const navigate = useNavigate();
   const { agency, userProfile, user } = useAuth();
-  const [screen, setScreen] = useState<'scan' | 'review' | 'portfolio'>('scan');
+  const [screen, setScreen] = useState<'scan' | 'review'>('scan');
   const [saving, setSaving] = useState(false);
   const [scrapeData, setScrapeData] = useState<any>(null);
   const [showSignupGate, setShowSignupGate] = useState(false);
@@ -167,17 +166,6 @@ export function OnboardingWizard() {
   };
 
   const handleReviewComplete = () => {
-    // Move to portfolio step instead of finishing
-    setScreen('portfolio');
-  };
-
-  const handlePortfolioContinue = (items: any[]) => {
-    setPortfolioItemsOnboarding(items);
-    handleFinalFinish();
-  };
-
-  const handlePortfolioSkip = () => {
-    setPortfolioItemsOnboarding([]);
     handleFinalFinish();
   };
 
@@ -499,15 +487,10 @@ export function OnboardingWizard() {
             onAddBundle={(name) => setAddedBundles(prev => new Set([...prev, name]))}
             teamMembers={teamMembers}
             onTeamMembersChange={setTeamMembers}
-          />
-        )}
-        {screen === 'portfolio' && (
-          <PortfolioStep
-            onContinue={handlePortfolioContinue}
-            onSkip={handlePortfolioSkip}
-            serviceGroups={Object.values(groupNameMap)}
+            portfolioItems={portfolioItemsOnboarding}
+            onPortfolioItemsChange={setPortfolioItemsOnboarding}
             detectedPortfolioUrl={scrapeData?.portfolio_url || null}
-            saving={saving}
+            serviceGroups={Object.values(groupNameMap)}
           />
         )}
       </div>

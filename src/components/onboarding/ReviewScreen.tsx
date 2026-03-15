@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo, useEffect } from 'react';
-import { Check, Pencil, X, Plus, Upload, Loader2, Quote, Target, BarChart3, Users, Trophy, Zap, Layers, Package, ArrowRight, ChevronDown, CheckCircle2 } from 'lucide-react';
+import { Check, Pencil, X, Plus, Upload, Loader2, Quote, Target, BarChart3, Users, Trophy, Zap, Layers, Package, ArrowRight, ChevronDown, CheckCircle2, Globe, Image, Briefcase } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { getDefaultModulesForGroup } from '@/lib/defaultModules';
@@ -28,6 +28,10 @@ interface ReviewScreenProps {
   onAddBundle?: (bundleName: string) => void;
   teamMembers: any[];
   onTeamMembersChange: (members: any[]) => void;
+  portfolioItems: any[];
+  onPortfolioItemsChange: (items: any[]) => void;
+  detectedPortfolioUrl?: string | null;
+  serviceGroups: string[];
 }
 
 export function ReviewScreen({
@@ -49,6 +53,10 @@ export function ReviewScreen({
   onAddBundle,
   teamMembers,
   onTeamMembersChange,
+  portfolioItems,
+  onPortfolioItemsChange,
+  detectedPortfolioUrl,
+  serviceGroups,
 }: ReviewScreenProps) {
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [showAllServices, setShowAllServices] = useState(false);
@@ -761,6 +769,13 @@ export function ReviewScreen({
           <Plus className="h-3.5 w-3.5" /> Add testimonial
         </button>
       </section>
+      {/* Section: Portfolio (collapsible) */}
+      <PortfolioSection
+        portfolioItems={portfolioItems}
+        onPortfolioItemsChange={onPortfolioItemsChange}
+        detectedPortfolioUrl={detectedPortfolioUrl}
+        serviceGroups={serviceGroups}
+      />
 
       {/* Section: Why Choose You */}
       <section className="mt-4 rounded-2xl border border-border bg-card p-6">
@@ -1081,5 +1096,162 @@ export function ReviewScreen({
         </div>
       )}
     </div>
+  );
+}
+
+/* ─── Collapsible Portfolio Section ─── */
+interface PortfolioSectionProps {
+  portfolioItems: any[];
+  onPortfolioItemsChange: (items: any[]) => void;
+  detectedPortfolioUrl?: string | null;
+  serviceGroups: string[];
+}
+
+interface ScrapedProject {
+  title: string;
+  description: string | null;
+  category: string;
+  image_urls: string[];
+  selected: boolean;
+}
+
+function PortfolioSection({ portfolioItems, onPortfolioItemsChange, detectedPortfolioUrl, serviceGroups }: PortfolioSectionProps) {
+  const [expanded, setExpanded] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [scanned, setScanned] = useState(false);
+  const [scrapedProjects, setScrapedProjects] = useState<ScrapedProject[]>([]);
+  const [scanMessage, setScanMessage] = useState('');
+
+  // Auto-scan if portfolio URL detected and not yet scanned
+  useEffect(() => {
+    if (detectedPortfolioUrl && !scanned && !scanning) {
+      handleScan(detectedPortfolioUrl);
+    }
+  }, [detectedPortfolioUrl]);
+
+  const handleScan = async (url: string) => {
+    setScanning(true);
+    setScrapedProjects([]);
+    setScanMessage('');
+    try {
+      const { data, error } = await supabase.functions.invoke('scrape-portfolio', {
+        body: { url, service_groups: serviceGroups },
+      });
+      if (error || data?.error) {
+        setScanMessage("Couldn't detect portfolio items.");
+        setScanning(false);
+        setScanned(true);
+        return;
+      }
+      const projects: ScrapedProject[] = (data?.projects || []).map((p: any) => ({ ...p, selected: true }));
+      if (projects.length === 0) {
+        setScanMessage(data?.message || "No portfolio items detected.");
+      } else {
+        setScrapedProjects(projects);
+        // Auto-import selected
+        const imported = projects.filter(p => p.selected).map((p, i) => ({
+          id: `port_${Date.now()}_${i}`,
+          title: p.title,
+          category: p.category || 'Other',
+          description: p.description,
+          results: null,
+          images: (p.image_urls || []).map((url: string, j: number) => ({ url, alt_text: '', sort_order: j })),
+        }));
+        onPortfolioItemsChange(imported);
+      }
+    } catch {
+      setScanMessage("An error occurred while scanning.");
+    }
+    setScanning(false);
+    setScanned(true);
+  };
+
+  const toggleProject = (idx: number) => {
+    const updated = [...scrapedProjects];
+    updated[idx] = { ...updated[idx], selected: !updated[idx].selected };
+    setScrapedProjects(updated);
+    // Sync to portfolioItems
+    const imported = updated.filter(p => p.selected).map((p, i) => ({
+      id: `port_${Date.now()}_${i}`,
+      title: p.title,
+      category: p.category || 'Other',
+      description: p.description,
+      results: null,
+      images: (p.image_urls || []).map((url: string, j: number) => ({ url, alt_text: '', sort_order: j })),
+    }));
+    onPortfolioItemsChange(imported);
+  };
+
+  const hasItems = scrapedProjects.length > 0 || portfolioItems.length > 0;
+  const selectedCount = scrapedProjects.filter(p => p.selected).length || portfolioItems.length;
+
+  return (
+    <section className="mt-4 rounded-2xl border border-border bg-card">
+      {/* Header — always visible, clickable to expand */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="flex w-full items-center justify-between p-6 text-left"
+      >
+        <div className="flex items-center gap-2">
+          <h2 className="label-overline">Portfolio</h2>
+          {scanning ? (
+            <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <Loader2 className="h-3 w-3 animate-spin" /> Scanning...
+            </span>
+          ) : hasItems ? (
+            <span className="rounded-full bg-brass/10 px-2 py-0.5 text-[11px] font-medium text-brass">{selectedCount}</span>
+          ) : null}
+        </div>
+        <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", expanded && "rotate-180")} />
+      </button>
+
+      {/* Expanded content */}
+      {expanded && (
+        <div className="px-6 pb-6 -mt-2">
+          {scanning ? (
+            <div className="text-center py-8">
+              <Loader2 className="h-6 w-6 text-brass animate-spin mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">Scanning portfolio page...</p>
+            </div>
+          ) : scrapedProjects.length > 0 ? (
+            <div className="space-y-2">
+              {scrapedProjects.map((p, idx) => (
+                <div key={idx} className={cn(
+                  "flex items-center gap-3 rounded-lg border p-3 transition-colors cursor-pointer",
+                  p.selected ? "border-brass/30 bg-brass/5" : "border-border opacity-60"
+                )} onClick={() => toggleProject(idx)}>
+                  <div className={cn(
+                    "flex h-5 w-5 shrink-0 items-center justify-center rounded border",
+                    p.selected ? "border-ink bg-ink" : "border-muted-foreground/30"
+                  )}>
+                    {p.selected && <Check className="h-3 w-3 text-primary-foreground" />}
+                  </div>
+                  {p.image_urls?.[0] && (
+                    <img src={p.image_urls[0]} alt="" className="h-10 w-14 rounded object-cover shrink-0 bg-muted" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-foreground truncate">{p.title}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">{p.category}{p.description ? ` · ${p.description}` : ''}</p>
+                  </div>
+                </div>
+              ))}
+              <p className="text-[11px] text-muted-foreground mt-2">
+                Uncheck items you don't want to import. Edit details later in Settings.
+              </p>
+            </div>
+          ) : (
+            <div className="text-center py-6 border border-dashed border-border rounded-lg">
+              <Briefcase className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">
+                {scanMessage || "No portfolio page detected. You can add portfolio items later in Settings."}
+              </p>
+              <a href="/settings/portfolio" className="mt-2 inline-block text-xs font-medium text-brass hover:text-foreground">
+                Add manually →
+              </a>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
   );
 }
