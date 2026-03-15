@@ -16,18 +16,6 @@ import {
 } from '@/components/proposal-template';
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 
-  // Sync testimonial edits back to localStorage
-  const saveGuestTestimonials = useCallback((testimonials: any[]) => {
-    try {
-      const raw = localStorage.getItem('propopad_guest_onboarding');
-      const onboarding = raw ? JSON.parse(raw) : {};
-      const unapproved = (onboarding.testimonials || []).filter((t: any) => !t.approved);
-      onboarding.testimonials = [...testimonials, ...unapproved];
-      localStorage.setItem('propopad_guest_onboarding', JSON.stringify(onboarding));
-    } catch {}
-  }, []);
-
-
 function getDefaultAboutText(yearsExperience?: number | null): string {
   const yearsPart = yearsExperience ? `Over the past ${yearsExperience} years` : 'Over the past years';
   return `${yearsPart}, we've helped ambitious brands transform their market position through the intersection of strategy, design, and technology. We're not the biggest agency — and that's by design. Our deliberately lean structure means faster decisions, fewer layers, and more senior attention on every engagement.`;
