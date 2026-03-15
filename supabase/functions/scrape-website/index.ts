@@ -653,6 +653,7 @@ serve(async (req) => {
     const caseStudyLinks: string[] = [];
     const allExtractedQuotes: { quote: string; attribution: string; context: string }[] = [];
     const allExtractedTeam: { name: string; title: string; photo_url: string | null; bio: string | null }[] = [];
+    let detectedPortfolioUrl: string | null = null;
     
     const fetchPromises = allPaths.slice(0, 20).map(async (path) => {
       try {
