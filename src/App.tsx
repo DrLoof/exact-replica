@@ -21,6 +21,7 @@ import SettingsBranding from "./pages/SettingsBranding";
 import SettingsPricing from "./pages/SettingsPricing";
 import SettingsTestimonials from "./pages/SettingsTestimonials";
 import SettingsDifferentiators from "./pages/SettingsDifferentiators";
+import SettingsPortfolio from "./pages/SettingsPortfolio";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Onboarding from "./pages/Onboarding";
