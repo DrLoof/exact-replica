@@ -39,6 +39,7 @@ interface ServiceCardProps {
   onDeliverablesEdit?: (deliverables: string[]) => void;
   onClientResponsibilitiesEdit?: (items: string[]) => void;
   onOutOfScopeEdit?: (items: string[]) => void;
+  onRemove?: () => void;
 }
 
 const MODEL_LABELS: Record<string, string> = {
@@ -157,6 +158,7 @@ export function ServiceCard({
   isAddon = false, delay = 0,
   onNameEdit, onDescriptionEdit, onDeliverablesEdit,
   onClientResponsibilitiesEdit, onOutOfScopeEdit,
+  onRemove,
 }: ServiceCardProps) {
   const brand = useBrand();
   const template = useTemplate();
@@ -198,6 +200,30 @@ export function ServiceCard({
     updated[idx] = val;
     onDeliverablesEdit(updated);
   };
+
+  const handleRespEdit = (idx: number, val: string) => {
+    if (!onClientResponsibilitiesEdit || !clientResponsibilities) return;
+    const updated = [...clientResponsibilities];
+    updated[idx] = val;
+    onClientResponsibilitiesEdit(updated);
+  };
+
+  const handleOosEdit = (idx: number, val: string) => {
+    if (!onOutOfScopeEdit || !outOfScope) return;
+    const updated = [...outOfScope];
+    updated[idx] = val;
+    onOutOfScopeEdit(updated);
+  };
+
+  const renderRemoveButton = () => onRemove && (
+    <button
+      onClick={onRemove}
+      className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100 print:hidden"
+      title="Remove service"
+    >
+      <X className="h-3 w-3" />
+    </button>
+  );
 
   const renderDeliverablesEdit = () => (
     editable && (
@@ -262,6 +288,7 @@ export function ServiceCard({
           e.currentTarget.style.boxShadow = "none";
         }}
       >
+        {renderRemoveButton()}
         {isAddon && (
           <span className="absolute top-4 right-4 px-3 py-1 rounded-full text-white uppercase tracking-wider"
             style={{ background: accent, fontSize: "10px", fontWeight: 600 }}>
@@ -321,7 +348,12 @@ export function ServiceCard({
                       <svg className="w-4 h-4 mt-0.5 shrink-0" viewBox="0 0 16 16" fill="none">
                         <path d="M3 8.5L6.5 12L13 4" stroke={accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
                       </svg>
-                      <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: template.colors.textMuted }}>{item}</span>
+                      {editableResp ? (
+                        <EditableText value={item} placeholder="Responsibility..." onSave={(val) => handleRespEdit(idx, val)} as="span"
+                          className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: template.colors.textMuted }} />
+                      ) : (
+                        <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: template.colors.textMuted }}>{item}</span>
+                      )}
                       {editableResp && (
                         <button onClick={() => onClientResponsibilitiesEdit!(clientResponsibilities!.filter((_, i) => i !== idx))}
                           className="shrink-0 mt-0.5 opacity-0 group-hover/resp:opacity-100 transition-opacity text-[#CCC] hover:text-red-400 print:hidden"
@@ -347,7 +379,12 @@ export function ServiceCard({
                   renderItem={(item, idx) => (
                     <li key={idx} className="group/oos flex items-start gap-2">
                       <span className="mt-1.5 shrink-0" style={{ fontSize: "10px", color: template.colors.textFaint }}>—</span>
-                      <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: template.colors.textFaint }}>{item}</span>
+                      {editableOos ? (
+                        <EditableText value={item} placeholder="Out of scope item..." onSave={(val) => handleOosEdit(idx, val)} as="span"
+                          className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: template.colors.textFaint }} />
+                      ) : (
+                        <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: template.colors.textFaint }}>{item}</span>
+                      )}
                       {editableOos && (
                         <button onClick={() => onOutOfScopeEdit!(outOfScope!.filter((_, i) => i !== idx))}
                           className="shrink-0 mt-0.5 opacity-0 group-hover/oos:opacity-100 transition-opacity text-[#CCC] hover:text-red-400 print:hidden"
@@ -398,6 +435,7 @@ export function ServiceCard({
           e.currentTarget.style.boxShadow = "none";
         }}
       >
+        {renderRemoveButton()}
         {/* Price Badge */}
         <div className="absolute top-6 right-6">
           <div className="px-4 py-1.5 rounded-full"
@@ -476,7 +514,12 @@ export function ServiceCard({
                 renderItem={(item, idx) => (
                   <li key={idx} className="group/resp flex items-start gap-2.5">
                     <span className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: `${accent}33` }} />
-                    <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: muted }}>{item}</span>
+                    {editableResp ? (
+                      <EditableText value={item} placeholder="Responsibility..." onSave={(val) => handleRespEdit(idx, val)} as="span"
+                        className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: muted }} />
+                    ) : (
+                      <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: muted }}>{item}</span>
+                    )}
                     {editableResp && (
                       <button onClick={() => onClientResponsibilitiesEdit!(clientResponsibilities!.filter((_, i) => i !== idx))}
                         className="shrink-0 mt-0.5 opacity-0 group-hover/resp:opacity-100 transition-opacity text-[#CCC] hover:text-red-400 print:hidden"
@@ -501,7 +544,12 @@ export function ServiceCard({
                 renderItem={(item, idx) => (
                   <li key={idx} className="group/oos flex items-start gap-2">
                     <span className="mt-1.5 shrink-0" style={{ fontSize: "10px", color: faint }}>✕</span>
-                    <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: faint }}>{item}</span>
+                    {editableOos ? (
+                      <EditableText value={item} placeholder="Out of scope item..." onSave={(val) => handleOosEdit(idx, val)} as="span"
+                        className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: faint }} />
+                    ) : (
+                      <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: faint }}>{item}</span>
+                    )}
                     {editableOos && (
                       <button onClick={() => onOutOfScopeEdit!(outOfScope!.filter((_, i) => i !== idx))}
                         className="shrink-0 mt-0.5 opacity-0 group-hover/oos:opacity-100 transition-opacity text-[#CCC] hover:text-red-400 print:hidden"
@@ -536,6 +584,7 @@ export function ServiceCard({
           boxShadow: `0 2px 12px ${dark}0A`,
         }}
       >
+        {renderRemoveButton()}
         <div className="absolute -top-3 -right-2 z-10">
           <div className="px-4 py-2 rounded-2xl"
             style={{ background: dark, color: "white", fontSize: "14px", fontWeight: 700, boxShadow: `3px 3px 0px ${accent}` }}>
@@ -604,7 +653,12 @@ export function ServiceCard({
                 renderItem={(item, idx) => (
                   <li key={idx} className="group/resp flex items-start gap-2.5">
                     <span className="mt-1.5 shrink-0" style={{ fontSize: "11px", color: accent }}>→</span>
-                    <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: body }}>{item}</span>
+                    {editableResp ? (
+                      <EditableText value={item} placeholder="Responsibility..." onSave={(val) => handleRespEdit(idx, val)} as="span"
+                        className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: body }} />
+                    ) : (
+                      <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: body }}>{item}</span>
+                    )}
                     {editableResp && (
                       <button onClick={() => onClientResponsibilitiesEdit!(clientResponsibilities!.filter((_, i) => i !== idx))}
                         className="shrink-0 mt-0.5 opacity-0 group-hover/resp:opacity-100 transition-opacity text-[#CCC] hover:text-red-400 print:hidden"
@@ -629,7 +683,12 @@ export function ServiceCard({
                 renderItem={(item, idx) => (
                   <li key={idx} className="group/oos flex items-start gap-2">
                     <span className="mt-1 shrink-0" style={{ fontSize: "11px", fontWeight: 700, color: faint }}>×</span>
-                    <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: muted }}>{item}</span>
+                    {editableOos ? (
+                      <EditableText value={item} placeholder="Out of scope item..." onSave={(val) => handleOosEdit(idx, val)} as="span"
+                        className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: muted }} />
+                    ) : (
+                      <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: muted }}>{item}</span>
+                    )}
                     {editableOos && (
                       <button onClick={() => onOutOfScopeEdit!(outOfScope!.filter((_, i) => i !== idx))}
                         className="shrink-0 mt-0.5 opacity-0 group-hover/oos:opacity-100 transition-opacity text-[#CCC] hover:text-red-400 print:hidden"
@@ -663,6 +722,7 @@ export function ServiceCard({
         e.currentTarget.style.boxShadow = "none";
       }}
     >
+      {renderRemoveButton()}
       <div className="absolute top-6 right-6">
         <span className="inline-block text-white px-4 py-1.5 rounded-full"
           style={{ fontSize: "13px", fontWeight: 600, backgroundColor: brand.darkColor }}>
@@ -729,7 +789,12 @@ export function ServiceCard({
               renderItem={(item, idx) => (
                 <li key={idx} className="group/resp flex items-start gap-2.5">
                   <span className="mt-1.5 shrink-0 text-[#BBB]" style={{ fontSize: "11px" }}>→</span>
-                  <span className="text-[#888] flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5 }}>{item}</span>
+                  {editableResp ? (
+                    <EditableText value={item} placeholder="Responsibility..." onSave={(val) => handleRespEdit(idx, val)} as="span"
+                      className="text-[#888] flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5 }} />
+                  ) : (
+                    <span className="text-[#888] flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5 }}>{item}</span>
+                  )}
                   {editableResp && (
                     <button onClick={() => onClientResponsibilitiesEdit!(clientResponsibilities!.filter((_, i) => i !== idx))}
                       className="shrink-0 mt-0.5 opacity-0 group-hover/resp:opacity-100 transition-opacity text-[#CCC] hover:text-red-400 print:hidden"
@@ -755,7 +820,12 @@ export function ServiceCard({
               renderItem={(item, idx) => (
                 <li key={idx} className="group/oos flex items-start gap-2">
                   <span className="mt-1 shrink-0 text-[#CCC]" style={{ fontSize: "11px", fontWeight: 700 }}>×</span>
-                  <span className="text-[#AAA] flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5 }}>{item}</span>
+                  {editableOos ? (
+                    <EditableText value={item} placeholder="Out of scope item..." onSave={(val) => handleOosEdit(idx, val)} as="span"
+                      className="text-[#AAA] flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5 }} />
+                  ) : (
+                    <span className="text-[#AAA] flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5 }}>{item}</span>
+                  )}
                   {editableOos && (
                     <button onClick={() => onOutOfScopeEdit!(outOfScope!.filter((_, i) => i !== idx))}
                       className="shrink-0 mt-0.5 opacity-0 group-hover/oos:opacity-100 transition-opacity text-[#CCC] hover:text-red-400 print:hidden"
