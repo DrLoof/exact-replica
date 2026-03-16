@@ -940,7 +940,7 @@ export function ReviewScreen({
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {teamMembers.map((member, idx) => (
+                {(teamExpanded || editingSection === 'team' ? teamMembers : teamMembers.slice(0, 6)).map((member, idx) => (
                   <div key={member.id || idx} className="rounded-xl border border-border bg-background p-4 flex flex-col items-center text-center relative group">
                     {editingSection === 'team' && (
                       <button
@@ -1048,6 +1048,18 @@ export function ReviewScreen({
                   </div>
                 ))}
               </div>
+
+              {teamMembers.length > 6 && editingSection !== 'team' && (
+                <div className="flex justify-center mt-3">
+                  <button
+                    onClick={() => setTeamExpanded(!teamExpanded)}
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {teamExpanded ? 'Show less' : `Show all ${teamMembers.length} team members`}
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${teamExpanded ? 'rotate-180' : ''}`} />
+                  </button>
+                </div>
+              )}
 
               {editingSection === 'team' && (
                 <button
