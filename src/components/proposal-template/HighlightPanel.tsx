@@ -241,7 +241,7 @@ export function HighlightPanel({
             {onItemEdit ? (
               <EditableText value={item.value} placeholder="Value..." onSave={(val) => onItemEdit(idx, 'value', val)} as="span"
                 className="block"
-                style={{ fontSize: "24px", fontWeight: 700, lineHeight: 1.2, color: item.accent ? brand.primaryColor : s.text }} />
+                style={{ fontSize: "24px", fontWeight: 700, lineHeight: 1.2, color: item.accent ? s.accent : s.text }} />
             ) : (
               <span className="block"
                 style={{ fontSize: "24px", fontWeight: 700, lineHeight: 1.2, color: item.accent ? brand.primaryColor : s.text }}>
