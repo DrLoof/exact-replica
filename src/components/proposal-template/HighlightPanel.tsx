@@ -244,7 +244,7 @@ export function HighlightPanel({
                 style={{ fontSize: "24px", fontWeight: 700, lineHeight: 1.2, color: item.accent ? s.accent : s.text }} />
             ) : (
               <span className="block"
-                style={{ fontSize: "24px", fontWeight: 700, lineHeight: 1.2, color: item.accent ? brand.primaryColor : s.text }}>
+                style={{ fontSize: "24px", fontWeight: 700, lineHeight: 1.2, color: item.accent ? s.accent : s.text }}>
                 {item.value}
               </span>
             )}
