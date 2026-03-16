@@ -98,8 +98,8 @@ export function HighlightPanel({
       },
       dark: {
         bg: '#1E1B3A', border: "none",
-        textColor: "white", labelColor: "rgba(255,255,255,0.7)",
-        accentColor: secondary,
+        textColor: "white", labelColor: "#A8ADB8",
+        accentColor: "white",
       },
     };
     const es = elegantStyles[variant];
