@@ -210,9 +210,9 @@ export function HighlightPanel({
 
   // Classic variant
   const styles = {
-    default: { bg: "#FAFAFA", text: brand.darkColor, label: "#999", border: "#EBEBEB" },
-    accent: { bg: brand.primaryColor, text: "#FFFFFF", label: "rgba(255,255,255,0.6)", border: "rgba(255,255,255,0.15)" },
-    dark: { bg: "#0A0A0A", text: "#FFFFFF", label: "#A8ADB8", border: "rgba(255,255,255,0.1)" },
+    default: { bg: "#FAFAFA", text: brand.darkColor, label: "#999", border: "#EBEBEB", accent: brand.primaryColor },
+    accent: { bg: brand.primaryColor, text: "#FFFFFF", label: "rgba(255,255,255,0.6)", border: "rgba(255,255,255,0.15)", accent: "#FFFFFF" },
+    dark: { bg: "#0A0A0A", text: "#FFFFFF", label: "#A8ADB8", border: "rgba(255,255,255,0.1)", accent: "#FFFFFF" },
   };
   const s = styles[variant];
 
@@ -241,10 +241,10 @@ export function HighlightPanel({
             {onItemEdit ? (
               <EditableText value={item.value} placeholder="Value..." onSave={(val) => onItemEdit(idx, 'value', val)} as="span"
                 className="block"
-                style={{ fontSize: "24px", fontWeight: 700, lineHeight: 1.2, color: item.accent ? brand.primaryColor : s.text }} />
+                style={{ fontSize: "24px", fontWeight: 700, lineHeight: 1.2, color: item.accent ? s.accent : s.text }} />
             ) : (
               <span className="block"
-                style={{ fontSize: "24px", fontWeight: 700, lineHeight: 1.2, color: item.accent ? brand.primaryColor : s.text }}>
+                style={{ fontSize: "24px", fontWeight: 700, lineHeight: 1.2, color: item.accent ? s.accent : s.text }}>
                 {item.value}
               </span>
             )}
