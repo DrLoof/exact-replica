@@ -67,6 +67,7 @@ export function ReviewScreen({
   const [uploadingTeamPhoto, setUploadingTeamPhoto] = useState<number | null>(null);
   const teamPhotoInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
   const [expandedServices, setExpandedServices] = useState<Set<string>>(new Set());
+  const [teamExpanded, setTeamExpanded] = useState(false);
   const [editingDeliverable, setEditingDeliverable] = useState<{ key: string; index: number } | null>(null);
   const [deliverableDraft, setDeliverableDraft] = useState('');
   const [deliverableOverrides, setDeliverableOverrides] = useState<Record<string, string[]>>({});
