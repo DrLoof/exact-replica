@@ -288,6 +288,7 @@ export function ServiceCard({
           e.currentTarget.style.boxShadow = "none";
         }}
       >
+        {renderRemoveButton()}
         {isAddon && (
           <span className="absolute top-4 right-4 px-3 py-1 rounded-full text-white uppercase tracking-wider"
             style={{ background: accent, fontSize: "10px", fontWeight: 600 }}>
