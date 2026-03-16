@@ -122,6 +122,7 @@ export default function ProposalEditor() {
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [termsClauses, setTermsClauses] = useState<any[]>([]);
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [teamExpanded, setTeamExpanded] = useState(false);
   const [portfolioItems, setPortfolioItems] = useState<any[]>([]);
   const [allPortfolioItems, setAllPortfolioItems] = useState<any[]>([]);
   const [serviceGroups, setServiceGroups] = useState<any[]>([]);
@@ -1431,66 +1432,81 @@ export default function ProposalEditor() {
                       <p className="mb-6 text-center" style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#999' }}>
                         The Team Behind Your Project
                       </p>
-                      {proposalTeam.length > 0 && (
-                        <div className={`grid gap-6 justify-center ${proposalTeam.length <= 2 ? 'grid-cols-2 max-w-md mx-auto' : proposalTeam.length === 3 ? 'grid-cols-3 max-w-lg mx-auto' : 'grid-cols-2 sm:grid-cols-4'}`}>
-                          {proposalTeam.map((member: any, i: number) => (
-                            <TeamMemberCard
-                              key={member.member_id}
-                              name={member.name}
-                              title={member.title}
-                              photoUrl={member.photo_url}
-                              roleOnProject={member.role_on_project}
-                              delay={i * 0.1}
-                              onRemove={() => {
-                                const next = proposalTeam.filter((m: any) => m.member_id !== member.member_id);
-                                setProposalTeam(next);
-                                saveProposalTeam(next);
-                                toast.success(`${member.name} removed from team`);
-                              }}
-                              onNameEdit={async (val) => {
-                                const next = proposalTeam.map((m: any) => m.member_id === member.member_id ? { ...m, name: val } : m);
-                                setProposalTeam(next);
-                                saveProposalTeam(next);
-                                // Sync to agency team
-                                if (agency?.id) {
-                                  const updatedAgencyTeam = teamMembers.map((m: any) => m.id === member.member_id ? { ...m, name: val } : m);
-                                  setTeamMembers(updatedAgencyTeam);
-                                  await supabase.from('agencies').update({ team_members: updatedAgencyTeam as any }).eq('id', agency.id);
-                                }
-                              }}
-                              onTitleEdit={async (val) => {
-                                const next = proposalTeam.map((m: any) => m.member_id === member.member_id ? { ...m, title: val } : m);
-                                setProposalTeam(next);
-                                saveProposalTeam(next);
-                                // Sync to agency team
-                                if (agency?.id) {
-                                  const updatedAgencyTeam = teamMembers.map((m: any) => m.id === member.member_id ? { ...m, title: val } : m);
-                                  setTeamMembers(updatedAgencyTeam);
-                                  await supabase.from('agencies').update({ team_members: updatedAgencyTeam as any }).eq('id', agency.id);
-                                }
-                              }}
-                              onPhotoUpload={async (file) => {
-                                if (!agency?.id) return;
-                                const ext = file.name.split('.').pop() || 'jpg';
-                                const path = `${agency.id}/team/${member.member_id}.${ext}`;
-                                const { error } = await supabase.storage.from('agency-logos').upload(path, file, { upsert: true });
-                                if (error) { toast.error('Upload failed'); return; }
-                                const { data: urlData } = supabase.storage.from('agency-logos').getPublicUrl(path);
-                                const photoUrl = urlData.publicUrl + '?t=' + Date.now();
-                                // Update proposal team
-                                const next = proposalTeam.map((m: any) => m.member_id === member.member_id ? { ...m, photo_url: photoUrl } : m);
-                                setProposalTeam(next);
-                                saveProposalTeam(next);
-                                // Sync to agency team
-                                const updatedAgencyTeam = teamMembers.map((m: any) => m.id === member.member_id ? { ...m, photo_url: photoUrl } : m);
-                                setTeamMembers(updatedAgencyTeam);
-                                await supabase.from('agencies').update({ team_members: updatedAgencyTeam as any }).eq('id', agency.id);
-                                toast.success('Photo updated');
-                              }}
-                            />
-                          ))}
-                        </div>
-                      )}
+                      {proposalTeam.length > 0 && (() => {
+                        const TEAM_PREVIEW_COUNT = 6;
+                        const hasMore = proposalTeam.length > TEAM_PREVIEW_COUNT;
+                        const visibleMembers = teamExpanded ? proposalTeam : proposalTeam.slice(0, TEAM_PREVIEW_COUNT);
+                        const gridClass = `grid gap-6 justify-center ${visibleMembers.length <= 2 ? 'grid-cols-2 max-w-md mx-auto' : visibleMembers.length === 3 ? 'grid-cols-3 max-w-lg mx-auto' : 'grid-cols-2 sm:grid-cols-4'}`;
+                        return (
+                          <>
+                            <div className={gridClass}>
+                              {visibleMembers.map((member: any, i: number) => (
+                                <TeamMemberCard
+                                  key={member.member_id}
+                                  name={member.name}
+                                  title={member.title}
+                                  photoUrl={member.photo_url}
+                                  roleOnProject={member.role_on_project}
+                                  delay={i * 0.1}
+                                  onRemove={() => {
+                                    const next = proposalTeam.filter((m: any) => m.member_id !== member.member_id);
+                                    setProposalTeam(next);
+                                    saveProposalTeam(next);
+                                    toast.success(`${member.name} removed from team`);
+                                  }}
+                                  onNameEdit={async (val) => {
+                                    const next = proposalTeam.map((m: any) => m.member_id === member.member_id ? { ...m, name: val } : m);
+                                    setProposalTeam(next);
+                                    saveProposalTeam(next);
+                                    if (agency?.id) {
+                                      const updatedAgencyTeam = teamMembers.map((m: any) => m.id === member.member_id ? { ...m, name: val } : m);
+                                      setTeamMembers(updatedAgencyTeam);
+                                      await supabase.from('agencies').update({ team_members: updatedAgencyTeam as any }).eq('id', agency.id);
+                                    }
+                                  }}
+                                  onTitleEdit={async (val) => {
+                                    const next = proposalTeam.map((m: any) => m.member_id === member.member_id ? { ...m, title: val } : m);
+                                    setProposalTeam(next);
+                                    saveProposalTeam(next);
+                                    if (agency?.id) {
+                                      const updatedAgencyTeam = teamMembers.map((m: any) => m.id === member.member_id ? { ...m, title: val } : m);
+                                      setTeamMembers(updatedAgencyTeam);
+                                      await supabase.from('agencies').update({ team_members: updatedAgencyTeam as any }).eq('id', agency.id);
+                                    }
+                                  }}
+                                  onPhotoUpload={async (file) => {
+                                    if (!agency?.id) return;
+                                    const ext = file.name.split('.').pop() || 'jpg';
+                                    const path = `${agency.id}/team/${member.member_id}.${ext}`;
+                                    const { error } = await supabase.storage.from('agency-logos').upload(path, file, { upsert: true });
+                                    if (error) { toast.error('Upload failed'); return; }
+                                    const { data: urlData } = supabase.storage.from('agency-logos').getPublicUrl(path);
+                                    const photoUrl = urlData.publicUrl + '?t=' + Date.now();
+                                    const next = proposalTeam.map((m: any) => m.member_id === member.member_id ? { ...m, photo_url: photoUrl } : m);
+                                    setProposalTeam(next);
+                                    saveProposalTeam(next);
+                                    const updatedAgencyTeam = teamMembers.map((m: any) => m.id === member.member_id ? { ...m, photo_url: photoUrl } : m);
+                                    setTeamMembers(updatedAgencyTeam);
+                                    await supabase.from('agencies').update({ team_members: updatedAgencyTeam as any }).eq('id', agency.id);
+                                    toast.success('Photo updated');
+                                  }}
+                                />
+                              ))}
+                            </div>
+                            {hasMore && (
+                              <div className="flex justify-center mt-4 print:hidden">
+                                <button
+                                  onClick={() => setTeamExpanded(!teamExpanded)}
+                                  className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                  {teamExpanded ? 'Show less' : `Show all ${proposalTeam.length} team members`}
+                                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${teamExpanded ? 'rotate-180' : ''}`} />
+                                </button>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                       <div className="flex justify-center mt-4 print:hidden">
                           <button
                             onClick={async () => {
