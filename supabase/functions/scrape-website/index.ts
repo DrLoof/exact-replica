@@ -993,7 +993,7 @@ TEAM MEMBER EXTRACTION — CRITICAL RULES:
         result.team_members = aiResult.team_members;
       } else if (allExtractedTeam.length > 0) {
         // Use HTML-extracted team directly if AI didn't return any
-        result.team_members = allExtractedTeam.slice(0, 6);
+        result.team_members = allExtractedTeam.slice(0, 15);
       }
     } else if (allExtractedTeam.length > 0) {
       // No AI result at all, use HTML-extracted team
