@@ -156,7 +156,7 @@ function extractTeamFromHtml(html: string, baseUrl: string): { name: string; tit
     }
   }
 
-  return members.slice(0, 12);
+  return members.slice(0, 15);
 }
 
 // Extract logo from HTML with multiple strategies
