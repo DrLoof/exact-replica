@@ -584,6 +584,7 @@ export function ServiceCard({
           boxShadow: `0 2px 12px ${dark}0A`,
         }}
       >
+        {renderRemoveButton()}
         <div className="absolute -top-3 -right-2 z-10">
           <div className="px-4 py-2 rounded-2xl"
             style={{ background: dark, color: "white", fontSize: "14px", fontWeight: 700, boxShadow: `3px 3px 0px ${accent}` }}>
