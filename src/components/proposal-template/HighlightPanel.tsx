@@ -98,7 +98,7 @@ export function HighlightPanel({
       },
       dark: {
         bg: '#1E1B3A', border: "none",
-        textColor: "white", labelColor: "rgba(255,255,255,0.5)",
+        textColor: "white", labelColor: "rgba(255,255,255,0.7)",
         accentColor: secondary,
       },
     };
