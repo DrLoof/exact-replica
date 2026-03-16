@@ -159,7 +159,7 @@ export function HighlightPanel({
       },
       dark: {
         bg: '#1A1A3E', border: `2px dashed rgba(255,255,255,0.1)`,
-        textColor: "white", labelColor: "rgba(255,255,255,0.45)",
+        textColor: "white", labelColor: "rgba(255,255,255,0.65)",
         accentColor: accent, shadow: `0 8px 30px #1A1A3E26`,
       },
     };
