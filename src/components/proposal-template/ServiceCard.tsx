@@ -514,7 +514,12 @@ export function ServiceCard({
                 renderItem={(item, idx) => (
                   <li key={idx} className="group/resp flex items-start gap-2.5">
                     <span className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: `${accent}33` }} />
-                    <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: muted }}>{item}</span>
+                    {editableResp ? (
+                      <EditableText value={item} placeholder="Responsibility..." onSave={(val) => handleRespEdit(idx, val)} as="span"
+                        className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: muted }} />
+                    ) : (
+                      <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: muted }}>{item}</span>
+                    )}
                     {editableResp && (
                       <button onClick={() => onClientResponsibilitiesEdit!(clientResponsibilities!.filter((_, i) => i !== idx))}
                         className="shrink-0 mt-0.5 opacity-0 group-hover/resp:opacity-100 transition-opacity text-[#CCC] hover:text-red-400 print:hidden"
