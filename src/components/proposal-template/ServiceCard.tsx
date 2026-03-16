@@ -435,6 +435,7 @@ export function ServiceCard({
           e.currentTarget.style.boxShadow = "none";
         }}
       >
+        {renderRemoveButton()}
         {/* Price Badge */}
         <div className="absolute top-6 right-6">
           <div className="px-4 py-1.5 rounded-full"
