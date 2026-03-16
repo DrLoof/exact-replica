@@ -933,7 +933,7 @@ TEAM MEMBER EXTRACTION — CRITICAL RULES:
 3. Also check the "TEAM PAGE CONTENT" section for any additional team members the HTML parser may have missed.
 4. Look for people with [IMG:...] markers near their names in the team page content — these are photo URLs.
 5. Translate job titles to English (e.g. "VD" → "CEO", "Art director" stays "Art Director", "Projektledare" → "Project Manager").
-6. Maximum 6 team members. Prioritize leadership and senior roles.
+6. Maximum 15 team members. Prioritize leadership and senior roles first, then include remaining staff.
 7. If no team data found anywhere, return an empty array. Do NOT fabricate team members.
 
 - For differentiators, ONLY use real data found on the website (mark as "scraped"). Do NOT invent or generate fake stats.
