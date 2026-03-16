@@ -36,7 +36,7 @@ export function HighlightPanel({
       },
       dark: {
         bg: '#2A2520', border: "none",
-        textColor: "white", labelColor: "rgba(255,255,255,0.5)",
+        textColor: "white", labelColor: "rgba(255,255,255,0.7)",
         accentColor: accent,
       },
     };
@@ -98,7 +98,7 @@ export function HighlightPanel({
       },
       dark: {
         bg: '#1E1B3A', border: "none",
-        textColor: "white", labelColor: "rgba(255,255,255,0.5)",
+        textColor: "white", labelColor: "rgba(255,255,255,0.7)",
         accentColor: secondary,
       },
     };
@@ -159,7 +159,7 @@ export function HighlightPanel({
       },
       dark: {
         bg: '#1A1A3E', border: `2px dashed rgba(255,255,255,0.1)`,
-        textColor: "white", labelColor: "rgba(255,255,255,0.45)",
+        textColor: "white", labelColor: "rgba(255,255,255,0.65)",
         accentColor: accent, shadow: `0 8px 30px #1A1A3E26`,
       },
     };
@@ -212,7 +212,7 @@ export function HighlightPanel({
   const styles = {
     default: { bg: "#FAFAFA", text: brand.darkColor, label: "#999", border: "#EBEBEB" },
     accent: { bg: brand.primaryColor, text: "#FFFFFF", label: "rgba(255,255,255,0.6)", border: "rgba(255,255,255,0.15)" },
-    dark: { bg: "#0A0A0A", text: "#FFFFFF", label: "rgba(255,255,255,0.6)", border: "rgba(255,255,255,0.1)" },
+    dark: { bg: "#0A0A0A", text: "#FFFFFF", label: "rgba(255,255,255,0.7)", border: "rgba(255,255,255,0.1)" },
   };
   const s = styles[variant];
 
