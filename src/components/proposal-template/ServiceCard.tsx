@@ -158,6 +158,7 @@ export function ServiceCard({
   isAddon = false, delay = 0,
   onNameEdit, onDescriptionEdit, onDeliverablesEdit,
   onClientResponsibilitiesEdit, onOutOfScopeEdit,
+  onRemove,
 }: ServiceCardProps) {
   const brand = useBrand();
   const template = useTemplate();
