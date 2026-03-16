@@ -1120,14 +1120,7 @@ export default function ProposalEditor() {
                       <>
                         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                           {services.map((svc, i) => (
-                            <div key={svc.id} className="group/svc relative">
-                              <button
-                                onClick={() => removeService(svc.id)}
-                                className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white opacity-0 shadow-md transition-opacity group-hover/svc:opacity-100 print:hidden"
-                                title="Remove service"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
+                            <div key={svc.id} className="relative">
                               <ServiceCard
                                 icon={resolveIcon(svc.module?.icon)}
                                 name={svc.module?.name || 'Service'}
@@ -1149,6 +1142,7 @@ export default function ProposalEditor() {
                                 moduleDefaultOutOfScope={svc.module?.out_of_scope || []}
                                 isAddon={svc.is_addon || false}
                                 delay={i * 0.1}
+                                onRemove={() => removeService(svc.id)}
                                 onNameEdit={async (val) => {
                                   if (svc.module_id) {
                                     await supabase.from('service_modules').update({ name: val }).eq('id', svc.module_id);
