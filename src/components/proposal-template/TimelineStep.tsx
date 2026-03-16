@@ -237,10 +237,10 @@ export function TimelineStep({
           {onDurationEdit ? (
             <EditableText value={duration} placeholder="Duration..." onSave={onDurationEdit} as="span"
               className="inline-block rounded-full px-3 py-0.5 border uppercase tracking-wider"
-              style={{ fontSize: "11px", fontWeight: 700, borderColor: "#4880FF", color: "#4880FF", backgroundColor: "transparent" }} />
+              style={{ fontSize: "11px", fontWeight: 700, borderColor: accent, color: accent, backgroundColor: "transparent" }} />
           ) : (
             <span className="inline-block rounded-full px-3 py-0.5 border uppercase tracking-wider"
-              style={{ fontSize: "11px", fontWeight: 700, borderColor: "#4880FF", color: "#4880FF", backgroundColor: "transparent" }}>
+              style={{ fontSize: "11px", fontWeight: 700, borderColor: accent, color: accent, backgroundColor: "transparent" }}>
               {duration}
             </span>
           )}
