@@ -159,6 +159,7 @@ export default function GuestProposalPreview() {
   const [guestTeamMembers, setGuestTeamMembers] = useState<any[]>(() => 
     (guestOnboarding?.teamMembers || []).filter((m: any) => m.name)
   );
+  const [guestTeamExpanded, setGuestTeamExpanded] = useState(false);
 
   const [localDifferentiators, setLocalDifferentiators] = useState<any[]>(guestOnboarding?.differentiators || []);
   const [localTestimonials, setLocalTestimonials] = useState<any[]>(

@@ -122,6 +122,7 @@ export default function ProposalEditor() {
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [termsClauses, setTermsClauses] = useState<any[]>([]);
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [teamExpanded, setTeamExpanded] = useState(false);
   const [portfolioItems, setPortfolioItems] = useState<any[]>([]);
   const [allPortfolioItems, setAllPortfolioItems] = useState<any[]>([]);
   const [serviceGroups, setServiceGroups] = useState<any[]>([]);
