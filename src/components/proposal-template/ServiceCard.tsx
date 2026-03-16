@@ -201,6 +201,30 @@ export function ServiceCard({
     onDeliverablesEdit(updated);
   };
 
+  const handleRespEdit = (idx: number, val: string) => {
+    if (!onClientResponsibilitiesEdit || !clientResponsibilities) return;
+    const updated = [...clientResponsibilities];
+    updated[idx] = val;
+    onClientResponsibilitiesEdit(updated);
+  };
+
+  const handleOosEdit = (idx: number, val: string) => {
+    if (!onOutOfScopeEdit || !outOfScope) return;
+    const updated = [...outOfScope];
+    updated[idx] = val;
+    onOutOfScopeEdit(updated);
+  };
+
+  const renderRemoveButton = () => onRemove && (
+    <button
+      onClick={onRemove}
+      className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100 print:hidden"
+      title="Remove service"
+    >
+      <X className="h-3 w-3" />
+    </button>
+  );
+
   const renderDeliverablesEdit = () => (
     editable && (
       <div className="mt-3 print:hidden">
