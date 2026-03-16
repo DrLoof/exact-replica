@@ -992,46 +992,65 @@ export default function GuestProposalPreview() {
                       <p className="mb-6 text-center" style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#999' }}>
                         The Team Behind Your Project
                       </p>
-                      {guestTeamMembers.length > 0 && (
-                        <div className={`grid gap-6 justify-center ${guestTeamMembers.length <= 2 ? 'grid-cols-2 max-w-md mx-auto' : guestTeamMembers.length === 3 ? 'grid-cols-3 max-w-lg mx-auto' : 'grid-cols-2 sm:grid-cols-4'}`}>
-                          {guestTeamMembers.map((member: any, i: number) => (
-                            <TeamMemberCard
-                              key={member.id || i}
-                              name={member.name}
-                              title={member.title}
-                              photoUrl={member.photo_url}
-                              delay={i * 0.1}
-                              onRemove={() => {
-                                const next = guestTeamMembers.filter((_: any, idx: number) => idx !== i);
-                                setGuestTeamMembers(next);
-                                saveGuestTeam(next);
-                                toast.success(`${member.name} removed`);
-                              }}
-                              onNameEdit={(val) => {
-                                const next = guestTeamMembers.map((m: any, idx: number) => idx === i ? { ...m, name: val } : m);
-                                setGuestTeamMembers(next);
-                                saveGuestTeam(next);
-                              }}
-                              onTitleEdit={(val) => {
-                                const next = guestTeamMembers.map((m: any, idx: number) => idx === i ? { ...m, title: val } : m);
-                                setGuestTeamMembers(next);
-                                saveGuestTeam(next);
-                              }}
-                              onPhotoUpload={(file) => {
-                                const reader = new FileReader();
-                                reader.onload = (e) => {
-                                  const dataUrl = e.target?.result as string;
-                                  const next = guestTeamMembers.map((m: any, idx2: number) => idx2 === i ? { ...m, photo_url: dataUrl } : m);
-                                  setGuestTeamMembers(next);
-                                  saveGuestTeam(next);
-                                  toast.success('Photo updated');
-                                };
-                                reader.readAsDataURL(file);
-                              }}
-                            />
-                          ))}
-                        </div>
-                      )}
+                      {guestTeamMembers.length > 0 && (() => {
+                        const TEAM_PREVIEW_COUNT = 6;
+                        const hasMore = guestTeamMembers.length > TEAM_PREVIEW_COUNT;
+                        const visibleMembers = guestTeamExpanded ? guestTeamMembers : guestTeamMembers.slice(0, TEAM_PREVIEW_COUNT);
+                        const gridClass = `grid gap-6 justify-center ${visibleMembers.length <= 2 ? 'grid-cols-2 max-w-md mx-auto' : visibleMembers.length === 3 ? 'grid-cols-3 max-w-lg mx-auto' : 'grid-cols-2 sm:grid-cols-4'}`;
+                        return (
+                          <>
+                            <div className={gridClass}>
+                              {visibleMembers.map((member: any, i: number) => (
+                                <TeamMemberCard
+                                  key={member.id || i}
+                                  name={member.name}
+                                  title={member.title}
+                                  photoUrl={member.photo_url}
+                                  delay={i * 0.1}
+                                  onRemove={() => {
+                                    const next = guestTeamMembers.filter((_: any, idx: number) => idx !== i);
+                                    setGuestTeamMembers(next);
+                                    saveGuestTeam(next);
+                                    toast.success(`${member.name} removed`);
+                                  }}
+                                  onNameEdit={(val) => {
+                                    const next = guestTeamMembers.map((m: any, idx: number) => idx === i ? { ...m, name: val } : m);
+                                    setGuestTeamMembers(next);
+                                    saveGuestTeam(next);
+                                  }}
+                                  onTitleEdit={(val) => {
+                                    const next = guestTeamMembers.map((m: any, idx: number) => idx === i ? { ...m, title: val } : m);
+                                    setGuestTeamMembers(next);
+                                    saveGuestTeam(next);
+                                  }}
+                                  onPhotoUpload={(file) => {
+                                    const reader = new FileReader();
+                                    reader.onload = (e) => {
+                                      const dataUrl = e.target?.result as string;
+                                      const next = guestTeamMembers.map((m: any, idx2: number) => idx2 === i ? { ...m, photo_url: dataUrl } : m);
+                                      setGuestTeamMembers(next);
+                                      saveGuestTeam(next);
+                                      toast.success('Photo updated');
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }}
+                                />
+                              ))}
+                            </div>
+                            {hasMore && (
+                              <div className="flex justify-center mt-4 print:hidden">
+                                <button
+                                  onClick={() => setGuestTeamExpanded(!guestTeamExpanded)}
+                                  className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                  {guestTeamExpanded ? 'Show less' : `Show all ${guestTeamMembers.length} team members`}
+                                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${guestTeamExpanded ? 'rotate-180' : ''}`} />
+                                </button>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                       <div className="flex justify-center mt-4 print:hidden">
                           <button
                             onClick={() => {
