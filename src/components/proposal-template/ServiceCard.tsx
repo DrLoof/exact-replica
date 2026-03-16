@@ -722,6 +722,7 @@ export function ServiceCard({
         e.currentTarget.style.boxShadow = "none";
       }}
     >
+      {renderRemoveButton()}
       <div className="absolute top-6 right-6">
         <span className="inline-block text-white px-4 py-1.5 rounded-full"
           style={{ fontSize: "13px", fontWeight: 600, backgroundColor: brand.darkColor }}>
