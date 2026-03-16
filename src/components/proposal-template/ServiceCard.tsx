@@ -39,6 +39,7 @@ interface ServiceCardProps {
   onDeliverablesEdit?: (deliverables: string[]) => void;
   onClientResponsibilitiesEdit?: (items: string[]) => void;
   onOutOfScopeEdit?: (items: string[]) => void;
+  onRemove?: () => void;
 }
 
 const MODEL_LABELS: Record<string, string> = {
