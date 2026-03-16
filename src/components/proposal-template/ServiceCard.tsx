@@ -379,7 +379,12 @@ export function ServiceCard({
                   renderItem={(item, idx) => (
                     <li key={idx} className="group/oos flex items-start gap-2">
                       <span className="mt-1.5 shrink-0" style={{ fontSize: "10px", color: template.colors.textFaint }}>—</span>
-                      <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: template.colors.textFaint }}>{item}</span>
+                      {editableOos ? (
+                        <EditableText value={item} placeholder="Out of scope item..." onSave={(val) => handleOosEdit(idx, val)} as="span"
+                          className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: template.colors.textFaint }} />
+                      ) : (
+                        <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: template.colors.textFaint }}>{item}</span>
+                      )}
                       {editableOos && (
                         <button onClick={() => onOutOfScopeEdit!(outOfScope!.filter((_, i) => i !== idx))}
                           className="shrink-0 mt-0.5 opacity-0 group-hover/oos:opacity-100 transition-opacity text-[#CCC] hover:text-red-400 print:hidden"
