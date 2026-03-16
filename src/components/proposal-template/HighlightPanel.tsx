@@ -36,7 +36,7 @@ export function HighlightPanel({
       },
       dark: {
         bg: '#2A2520', border: "none",
-        textColor: "white", labelColor: "rgba(255,255,255,0.5)",
+        textColor: "white", labelColor: "rgba(255,255,255,0.7)",
         accentColor: accent,
       },
     };
