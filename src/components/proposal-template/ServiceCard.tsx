@@ -348,7 +348,12 @@ export function ServiceCard({
                       <svg className="w-4 h-4 mt-0.5 shrink-0" viewBox="0 0 16 16" fill="none">
                         <path d="M3 8.5L6.5 12L13 4" stroke={accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
                       </svg>
-                      <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: template.colors.textMuted }}>{item}</span>
+                      {editableResp ? (
+                        <EditableText value={item} placeholder="Responsibility..." onSave={(val) => handleRespEdit(idx, val)} as="span"
+                          className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: template.colors.textMuted }} />
+                      ) : (
+                        <span className="flex-1" style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: template.colors.textMuted }}>{item}</span>
+                      )}
                       {editableResp && (
                         <button onClick={() => onClientResponsibilitiesEdit!(clientResponsibilities!.filter((_, i) => i !== idx))}
                           className="shrink-0 mt-0.5 opacity-0 group-hover/resp:opacity-100 transition-opacity text-[#CCC] hover:text-red-400 print:hidden"
