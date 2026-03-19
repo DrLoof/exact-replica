@@ -289,6 +289,21 @@ export default function Dashboard() {
                       </button>
                     );
                   })}
+                  <button
+                    onClick={() => navigate('/services')}
+                    className="transition-all duration-150 hover:bg-muted/50"
+                    style={{
+                      borderRadius: '7px',
+                      padding: '6px 12px',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                      background: 'transparent',
+                      color: '#8A7F72',
+                      border: '1px dashed #D4CFC8',
+                    }}
+                  >
+                    + Add
+                  </button>
                 </div>
               </div>
             )}
