@@ -23,17 +23,17 @@ interface ModuleForm {
   price_hourly: string;
   estimated_hours: string;
   default_timeline: string;
-  deliverables: string;
+  deliverables: string[];
   service_type: string;
-  client_responsibilities: string;
-  out_of_scope: string;
+  client_responsibilities: string[];
+  out_of_scope: string[];
 }
 
 const emptyForm: ModuleForm = {
   name: '', short_description: '', description: '', group_id: '',
   pricing_model: 'fixed', price_fixed: '', price_monthly: '', price_hourly: '',
-  estimated_hours: '', default_timeline: '', deliverables: '', service_type: 'core',
-  client_responsibilities: '', out_of_scope: '',
+  estimated_hours: '', default_timeline: '', deliverables: [], service_type: 'core',
+  client_responsibilities: [], out_of_scope: [],
 };
 
 export default function Services() {
