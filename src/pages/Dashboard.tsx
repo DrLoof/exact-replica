@@ -291,7 +291,15 @@ export default function Dashboard() {
                   })}
                   <button
                     onClick={() => navigate('/services')}
-                    className="flex items-center gap-1 rounded-full bg-foreground px-3 py-1.5 text-[11px] font-medium text-background transition-opacity hover:opacity-90"
+                    className="flex items-center gap-1 transition-all duration-150"
+                    style={{
+                      borderRadius: '7px',
+                      padding: '6px 12px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      background: '#2A2118',
+                      color: '#FAF9F6',
+                    }}
                   >
                     <Plus className="h-3 w-3" />
                     Add
