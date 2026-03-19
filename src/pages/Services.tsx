@@ -270,15 +270,9 @@ export default function Services() {
                 </F>
               </div>
 
-              <F label="Deliverables (one per line)">
-                <textarea value={form.deliverables} onChange={e => setForm(p => ({ ...p, deliverables: e.target.value }))} rows={3} placeholder="Logo design&#10;Brand guidelines&#10;Color palette" className={inputCls} />
-              </F>
-              <F label="Client Responsibilities (one per line)">
-                <textarea value={form.client_responsibilities} onChange={e => setForm(p => ({ ...p, client_responsibilities: e.target.value }))} rows={3} placeholder="Provide brand guidelines&#10;Designate decision-maker&#10;Provide timely feedback" className={inputCls} />
-              </F>
-              <F label="Out of Scope (one per line)">
-                <textarea value={form.out_of_scope} onChange={e => setForm(p => ({ ...p, out_of_scope: e.target.value }))} rows={3} placeholder="Copywriting&#10;Photography&#10;Ongoing maintenance" className={inputCls} />
-              </F>
+              <ListField label="Deliverables" items={form.deliverables} onChange={items => setForm(p => ({ ...p, deliverables: items }))} placeholder="Add deliverable..." />
+              <ListField label="Client Responsibilities" items={form.client_responsibilities} onChange={items => setForm(p => ({ ...p, client_responsibilities: items }))} placeholder="Add responsibility..." />
+              <ListField label="Out of Scope" items={form.out_of_scope} onChange={items => setForm(p => ({ ...p, out_of_scope: items }))} placeholder="Add item..." />
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-3">
