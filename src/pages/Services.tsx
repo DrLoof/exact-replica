@@ -79,10 +79,10 @@ export default function Services() {
       price_hourly: mod.price_hourly?.toString() || '',
       estimated_hours: mod.estimated_hours?.toString() || '',
       default_timeline: mod.default_timeline || '',
-      deliverables: (mod.deliverables || []).join('\n'),
+      deliverables: mod.deliverables || [],
       service_type: mod.service_type || 'core',
-      client_responsibilities: (mod.client_responsibilities || []).join('\n'),
-      out_of_scope: (mod.out_of_scope || []).join('\n'),
+      client_responsibilities: mod.client_responsibilities || [],
+      out_of_scope: mod.out_of_scope || [],
     });
     setShowModal(true);
   };
