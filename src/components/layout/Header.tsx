@@ -88,9 +88,9 @@ export function Header({ onMenuToggle, showMenuButton }: HeaderProps) {
       <div className="flex items-center gap-2 sm:gap-3">
         <Link
           to="/proposals/new"
-          className="flex items-center gap-2 rounded-lg bg-brand px-3 sm:px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover"
+          className="flex items-center gap-1.5 rounded-full bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-90"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">New Proposal</span>
         </Link>
 
