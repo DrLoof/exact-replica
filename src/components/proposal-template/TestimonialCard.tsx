@@ -79,7 +79,7 @@ export function TestimonialCard({
           <img src={avatarUrl} alt={clientName} className={`${sizeClass} ${rounded} object-cover`} />
         ) : (
           <div className={`${sizeClass} ${rounded} flex items-center justify-center`} style={bgStyle}>
-            <span style={textStyle}>{clientName.charAt(0)}</span>
+            <span style={textStyle}>{(clientName || '?').charAt(0)}</span>
           </div>
         )}
         {canUpload && (
