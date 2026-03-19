@@ -103,9 +103,9 @@ export default function Services() {
       price_hourly: form.price_hourly ? parseFloat(form.price_hourly) : null,
       estimated_hours: form.estimated_hours ? parseInt(form.estimated_hours) : null,
       default_timeline: form.default_timeline || null,
-      deliverables: form.deliverables ? form.deliverables.split('\n').filter(Boolean) : null,
-      client_responsibilities: form.client_responsibilities ? form.client_responsibilities.split('\n').filter(Boolean) : null,
-      out_of_scope: form.out_of_scope ? form.out_of_scope.split('\n').filter(Boolean) : null,
+      deliverables: form.deliverables.length > 0 ? form.deliverables : null,
+      client_responsibilities: form.client_responsibilities.length > 0 ? form.client_responsibilities : null,
+      out_of_scope: form.out_of_scope.length > 0 ? form.out_of_scope : null,
       service_type: form.service_type,
       is_active: true,
     };
