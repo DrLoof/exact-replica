@@ -23,17 +23,17 @@ interface ModuleForm {
   price_hourly: string;
   estimated_hours: string;
   default_timeline: string;
-  deliverables: string;
+  deliverables: string[];
   service_type: string;
-  client_responsibilities: string;
-  out_of_scope: string;
+  client_responsibilities: string[];
+  out_of_scope: string[];
 }
 
 const emptyForm: ModuleForm = {
   name: '', short_description: '', description: '', group_id: '',
   pricing_model: 'fixed', price_fixed: '', price_monthly: '', price_hourly: '',
-  estimated_hours: '', default_timeline: '', deliverables: '', service_type: 'core',
-  client_responsibilities: '', out_of_scope: '',
+  estimated_hours: '', default_timeline: '', deliverables: [], service_type: 'core',
+  client_responsibilities: [], out_of_scope: [],
 };
 
 export default function Services() {
@@ -79,10 +79,10 @@ export default function Services() {
       price_hourly: mod.price_hourly?.toString() || '',
       estimated_hours: mod.estimated_hours?.toString() || '',
       default_timeline: mod.default_timeline || '',
-      deliverables: (mod.deliverables || []).join('\n'),
+      deliverables: mod.deliverables || [],
       service_type: mod.service_type || 'core',
-      client_responsibilities: (mod.client_responsibilities || []).join('\n'),
-      out_of_scope: (mod.out_of_scope || []).join('\n'),
+      client_responsibilities: mod.client_responsibilities || [],
+      out_of_scope: mod.out_of_scope || [],
     });
     setShowModal(true);
   };
@@ -103,9 +103,9 @@ export default function Services() {
       price_hourly: form.price_hourly ? parseFloat(form.price_hourly) : null,
       estimated_hours: form.estimated_hours ? parseInt(form.estimated_hours) : null,
       default_timeline: form.default_timeline || null,
-      deliverables: form.deliverables ? form.deliverables.split('\n').filter(Boolean) : null,
-      client_responsibilities: form.client_responsibilities ? form.client_responsibilities.split('\n').filter(Boolean) : null,
-      out_of_scope: form.out_of_scope ? form.out_of_scope.split('\n').filter(Boolean) : null,
+      deliverables: form.deliverables.length > 0 ? form.deliverables : null,
+      client_responsibilities: form.client_responsibilities.length > 0 ? form.client_responsibilities : null,
+      out_of_scope: form.out_of_scope.length > 0 ? form.out_of_scope : null,
       service_type: form.service_type,
       is_active: true,
     };
@@ -138,6 +138,43 @@ export default function Services() {
   );
 
   const inputCls = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20";
+
+  const ListField = ({ label, items, onChange, placeholder }: { label: string; items: string[]; onChange: (items: string[]) => void; placeholder: string }) => {
+    const [draft, setDraft] = useState('');
+    const addItem = () => {
+      const val = draft.trim();
+      if (val && !items.includes(val)) {
+        onChange([...items, val]);
+        setDraft('');
+      }
+    };
+    return (
+      <F label={label}>
+        <div className="space-y-1.5">
+          {items.map((item, i) => (
+            <div key={i} className="group flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-1.5 text-sm text-foreground">
+              <span className="flex-1">{item}</span>
+              <button type="button" onClick={() => onChange(items.filter((_, j) => j !== i))} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ))}
+          <div className="flex gap-2">
+            <input
+              value={draft}
+              onChange={e => setDraft(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addItem(); } }}
+              placeholder={placeholder}
+              className={inputCls}
+            />
+            <button type="button" onClick={addItem} disabled={!draft.trim()} className="shrink-0 rounded-lg bg-muted px-3 py-2 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-40">
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </F>
+    );
+  };
 
   return (
     <AppShell>
@@ -270,15 +307,9 @@ export default function Services() {
                 </F>
               </div>
 
-              <F label="Deliverables (one per line)">
-                <textarea value={form.deliverables} onChange={e => setForm(p => ({ ...p, deliverables: e.target.value }))} rows={3} placeholder="Logo design&#10;Brand guidelines&#10;Color palette" className={inputCls} />
-              </F>
-              <F label="Client Responsibilities (one per line)">
-                <textarea value={form.client_responsibilities} onChange={e => setForm(p => ({ ...p, client_responsibilities: e.target.value }))} rows={3} placeholder="Provide brand guidelines&#10;Designate decision-maker&#10;Provide timely feedback" className={inputCls} />
-              </F>
-              <F label="Out of Scope (one per line)">
-                <textarea value={form.out_of_scope} onChange={e => setForm(p => ({ ...p, out_of_scope: e.target.value }))} rows={3} placeholder="Copywriting&#10;Photography&#10;Ongoing maintenance" className={inputCls} />
-              </F>
+              <ListField label="Deliverables" items={form.deliverables} onChange={items => setForm(p => ({ ...p, deliverables: items }))} placeholder="Add deliverable..." />
+              <ListField label="Client Responsibilities" items={form.client_responsibilities} onChange={items => setForm(p => ({ ...p, client_responsibilities: items }))} placeholder="Add responsibility..." />
+              <ListField label="Out of Scope" items={form.out_of_scope} onChange={items => setForm(p => ({ ...p, out_of_scope: items }))} placeholder="Add item..." />
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-3">
