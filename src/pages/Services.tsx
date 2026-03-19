@@ -139,6 +139,43 @@ export default function Services() {
 
   const inputCls = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20";
 
+  const ListField = ({ label, items, onChange, placeholder }: { label: string; items: string[]; onChange: (items: string[]) => void; placeholder: string }) => {
+    const [draft, setDraft] = useState('');
+    const addItem = () => {
+      const val = draft.trim();
+      if (val && !items.includes(val)) {
+        onChange([...items, val]);
+        setDraft('');
+      }
+    };
+    return (
+      <F label={label}>
+        <div className="space-y-1.5">
+          {items.map((item, i) => (
+            <div key={i} className="group flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-1.5 text-sm text-foreground">
+              <span className="flex-1">{item}</span>
+              <button type="button" onClick={() => onChange(items.filter((_, j) => j !== i))} className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ))}
+          <div className="flex gap-2">
+            <input
+              value={draft}
+              onChange={e => setDraft(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addItem(); } }}
+              placeholder={placeholder}
+              className={inputCls}
+            />
+            <button type="button" onClick={addItem} disabled={!draft.trim()} className="shrink-0 rounded-lg bg-muted px-3 py-2 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-40">
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </F>
+    );
+  };
+
   return (
     <AppShell>
       <div className="mb-6 flex items-center justify-between">
