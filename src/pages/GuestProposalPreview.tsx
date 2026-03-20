@@ -225,7 +225,7 @@ export default function GuestProposalPreview() {
   })();
 
   const pricingItems = localServices.map((s: any) => {
-    const price = s.priceOverride ?? s.price_fixed ?? s.price_monthly ?? s.price_hourly ?? 0;
+    const price = s.priceOverride ?? getModulePriceByModel(s);
     const suffix = s.pricing_model === 'monthly' ? '/mo' : s.pricing_model === 'hourly' ? '/hr' : '';
     return {
       service: s.name,
