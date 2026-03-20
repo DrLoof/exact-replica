@@ -37,8 +37,51 @@ export function Sidebar({ onClose }: SidebarProps) {
   const navigate = useNavigate();
   const { userProfile, agency, signOut } = useAuth();
   const { data: proposals = [] } = useProposals();
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const activeProposalCount = proposals.filter((p: any) => p.status === 'sent' && !p.viewed_at).length;
+
+  useEffect(() => {
+    if (!userProfile?.id) return;
+    loadNotifications();
+    const channel = supabase
+      .channel('sidebar-notifications')
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'notifications',
+        filter: `user_id=eq.${userProfile.id}`,
+      }, (payload) => {
+        setNotifications(prev => [payload.new as any, ...prev]);
+        setUnreadCount(prev => prev + 1);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [userProfile?.id]);
+
+  const loadNotifications = async () => {
+    if (!userProfile?.id) return;
+    const { data } = await supabase.from('notifications').select('*')
+      .eq('user_id', userProfile.id).order('created_at', { ascending: false }).limit(20);
+    setNotifications(data || []);
+    setUnreadCount((data || []).filter((n: any) => !n.is_read).length);
+  };
+
+  const markAllRead = async () => {
+    if (!userProfile?.id) return;
+    await supabase.from('notifications').update({ is_read: true }).eq('user_id', userProfile.id).eq('is_read', false);
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    setUnreadCount(0);
+  };
+
+  const timeAgo = (date: string) => {
+    const mins = Math.floor((Date.now() - new Date(date).getTime()) / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  };
 
   const handleSignOut = async () => {
     await signOut();
