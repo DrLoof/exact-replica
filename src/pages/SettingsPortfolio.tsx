@@ -239,10 +239,12 @@ export default function SettingsPortfolio() {
 
   const downloadAndUploadImage = async (imageUrl: string): Promise<string | null> => {
     try {
-      const resp = await fetch(imageUrl);
+      const resp = await fetch(imageUrl, { mode: 'cors' });
       if (!resp.ok) return null;
       const blob = await resp.blob();
       if (blob.size > 5 * 1024 * 1024) return null;
+      // Verify it's actually an image
+      if (!blob.type.startsWith('image/')) return null;
 
       const contentType = blob.type || 'image/jpeg';
       const extMap: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' };
@@ -255,7 +257,8 @@ export default function SettingsPortfolio() {
       const { data: urlData } = supabase.storage.from('portfolio-images').getPublicUrl(path);
       return urlData.publicUrl;
     } catch (e) {
-      console.error('Image download failed:', e);
+      // CORS or network error — can't re-upload from browser
+      console.warn('Image re-upload failed (likely CORS), will use original URL:', imageUrl);
       return null;
     }
   };
@@ -271,12 +274,15 @@ export default function SettingsPortfolio() {
     for (let i = 0; i < selected.length; i++) {
       const project = selected[i];
 
-      // Download and re-upload images to storage
+      // Download and re-upload images to storage; fall back to original URL if CORS blocks
       const images: PortfolioImage[] = [];
       for (let j = 0; j < Math.min(project.image_urls.length, 6); j++) {
-        const uploadedUrl = await downloadAndUploadImage(project.image_urls[j]);
-        if (uploadedUrl) {
-          images.push({ url: uploadedUrl, alt_text: project.title, sort_order: images.length });
+        const originalUrl = project.image_urls[j];
+        const uploadedUrl = await downloadAndUploadImage(originalUrl);
+        // Use uploaded URL if available, otherwise keep the original external URL
+        const finalUrl = uploadedUrl || originalUrl;
+        if (finalUrl) {
+          images.push({ url: finalUrl, alt_text: project.title, sort_order: images.length });
         }
       }
 
