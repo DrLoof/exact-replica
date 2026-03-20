@@ -1809,6 +1809,27 @@ export default function ProposalEditor() {
           isGeneratingPDF={isGeneratingPDF}
         />
       )}
+
+      {/* Hidden PDF Renderer */}
+      {isGeneratingPDF && (
+        <ProposalPDFRenderer
+          ref={pdfContainerRef}
+          proposal={proposal}
+          agency={agency}
+          client={client}
+          services={services}
+          differentiators={differentiators}
+          testimonials={testimonials}
+          termsClauses={termsClauses}
+          portfolioItems={portfolioItems}
+          proposalTeam={proposalTeam}
+          deletedSections={deletedSections}
+          sectionOrder={sectionOrder}
+          templateId={templateId}
+          customColors={customColors ? { primaryAccent: activePrimary, secondaryAccent: activeSecondary, ...customColors } : null}
+          currencySymbol={currencySymbol}
+        />
+      )}
     </div>
   );
 }
