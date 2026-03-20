@@ -1,4 +1,5 @@
 import React from 'react';
+import { MotionConfig } from 'motion/react';
 import { Layers } from 'lucide-react';
 import {
   BrandProvider, HeroCover, SectionHeader, ServiceCard, PricingSummary,
@@ -357,28 +358,30 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
     const visibleSections = sectionOrder.filter(idx => !deletedSections.has(idx));
 
     return (
-      <TemplateProvider templateId={templateId} customColors={{ primaryAccent: activePrimary, secondaryAccent: activeSecondary, ...(customColors || {}) }}>
-        <BrandProvider brand={brandData}>
-          <div
-            ref={ref}
-            id="pdf-render-container"
-            style={{
-              width: '794px',
-              background: 'white',
-              position: 'absolute',
-              left: '-9999px',
-              top: 0,
-              fontFamily: "'Satoshi', system-ui, sans-serif",
-            }}
-          >
-            {visibleSections.map(sectionIdx => {
-              const content = renderSection(sectionIdx);
-              if (!content) return null;
-              return <React.Fragment key={sectionIdx}>{content}</React.Fragment>;
-            })}
-          </div>
-        </BrandProvider>
-      </TemplateProvider>
+      <MotionConfig reducedMotion="always">
+        <TemplateProvider templateId={templateId} isPDFMode={true} customColors={{ primaryAccent: activePrimary, secondaryAccent: activeSecondary, ...(customColors || {}) }}>
+          <BrandProvider brand={brandData}>
+            <div
+              ref={ref}
+              id="pdf-render-container"
+              style={{
+                width: '794px',
+                background: 'white',
+                position: 'absolute',
+                left: '-9999px',
+                top: 0,
+                fontFamily: "'Satoshi', system-ui, sans-serif",
+              }}
+            >
+              {visibleSections.map(sectionIdx => {
+                const content = renderSection(sectionIdx);
+                if (!content) return null;
+                return <React.Fragment key={sectionIdx}>{content}</React.Fragment>;
+              })}
+            </div>
+          </BrandProvider>
+        </TemplateProvider>
+      </MotionConfig>
     );
   }
 );
