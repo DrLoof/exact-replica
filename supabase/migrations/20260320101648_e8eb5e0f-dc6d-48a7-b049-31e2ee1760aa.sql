@@ -1,0 +1,1 @@
+ALTER TABLE public.bundles ADD COLUMN IF NOT EXISTS display_order integer DEFAULT 0;
