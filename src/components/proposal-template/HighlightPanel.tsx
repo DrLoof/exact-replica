@@ -25,7 +25,7 @@ export function HighlightPanel({
   if (isSoft) {
     const softStyles = {
       default: {
-        bg: template.colors.background, border: `1px solid ${accent}26`,
+        bg: template.colors.background, border: "none",
         textColor: dark, labelColor: template.colors.textBody,
         accentColor: accent,
       },
