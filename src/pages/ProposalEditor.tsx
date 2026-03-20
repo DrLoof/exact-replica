@@ -151,6 +151,8 @@ export default function ProposalEditor() {
   const [localLogoUrl, setLocalLogoUrl] = useState<string | null>(null);
   const currencySymbol = agency?.currency_symbol || '$';
   const undoRef = useRef<{ field: string; value: any } | null>(null);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const pdfContainerRef = useRef<HTMLDivElement>(null);
 
   // Warn user before leaving if an editable field is focused (unsaved inline edit)
   useBeforeUnload(
