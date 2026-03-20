@@ -1148,6 +1148,10 @@ export default function GuestProposalPreview() {
                     <SignatureBlock
                       client={{ role: 'Client', companyName: clientName }}
                       agency={{ role: 'Agency', companyName: agencyName }}
+                      onClosingHeadingEdit={(val) => {}}
+                      onClosingSubtitleEdit={(val) => {}}
+                      onClosingEmailEdit={(val) => {}}
+                      onClosingPhoneEdit={(val) => {}}
                     />
                   </PageWrapper>
                   <PreviewWatermark />

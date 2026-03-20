@@ -19,12 +19,22 @@ interface SignatureBlockProps {
   agency?: SignatureParty;
   onHeadingEdit?: (value: string) => void;
   onSubtitleEdit?: (value: string) => void;
+  closingHeading?: string;
+  closingSubtitle?: string;
+  closingEmail?: string;
+  closingPhone?: string;
+  onClosingHeadingEdit?: (value: string) => void;
+  onClosingSubtitleEdit?: (value: string) => void;
+  onClosingEmailEdit?: (value: string) => void;
+  onClosingPhoneEdit?: (value: string) => void;
 }
 
 export function SignatureBlock({
   heading = "Ready to proceed?",
   subtitle = "By signing below, both parties agree to the terms outlined in this proposal.",
   client, agency, onHeadingEdit, onSubtitleEdit,
+  closingHeading, closingSubtitle, closingEmail, closingPhone,
+  onClosingHeadingEdit, onClosingSubtitleEdit, onClosingEmailEdit, onClosingPhoneEdit,
 }: SignatureBlockProps) {
   const brand = useBrand();
   const template = useTemplate();
@@ -39,6 +49,126 @@ export function SignatureBlock({
     role: "Agency",
     companyName: brand.agencyFullName,
   };
+
+  const resolvedClosingHeading = closingHeading ?? `Thank you for considering ${brand.agencyFullName}.`;
+  const resolvedClosingSubtitle = closingSubtitle ?? "We're excited about the possibility of working together.";
+  const resolvedEmail = closingEmail ?? brand.contactEmail;
+  const resolvedPhone = closingPhone ?? brand.contactPhone;
+
+  // Helper to render the closing/footer section with editable fields
+  function renderClosingSection(opts: {
+    logoStyle?: React.CSSProperties;
+    headingStyle: React.CSSProperties;
+    subtitleStyle: React.CSSProperties;
+    contactStyle: React.CSSProperties;
+    separatorStyle?: React.CSSProperties;
+    disclaimerStyle: React.CSSProperties;
+    contactLayout: 'inline' | 'pills';
+    pillStyle?: React.CSSProperties;
+  }) {
+    const editable = !!(onClosingHeadingEdit || onClosingSubtitleEdit || onClosingEmailEdit || onClosingPhoneEdit);
+
+    return (
+      <>
+        <div className="mt-20 text-center">
+          <div className="inline-block">
+            {brand.logoUrl ? (
+              <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain mx-auto mb-4" />
+            ) : opts.contactLayout === 'pills' ? (
+              // Modern fallback
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                style={{ backgroundColor: dark }}>
+                <span className="text-white" style={{ fontSize: "16px", fontWeight: 800 }}>
+                  {brand.agencyName?.charAt(0) || 'A'}
+                </span>
+              </div>
+            ) : template.id === 'elegant' ? (
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                style={{ backgroundColor: accent }}>
+                <span className="text-white" style={{ fontSize: "14px", fontWeight: 600, fontFamily: "'Fraunces', serif" }}>
+                  {brand.agencyName?.charAt(0) || 'A'}
+                </span>
+              </div>
+            ) : template.id === 'soft' ? (
+              <span className="block mb-4 uppercase tracking-[0.15em]" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>
+                {brand.agencyName}
+              </span>
+            ) : (
+              <div className="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4"
+                style={{ backgroundColor: brand.darkColor }}>
+                <span className="text-white tracking-tighter" style={{ fontSize: "13px", fontWeight: 700 }}>{brand.logoInitial}</span>
+              </div>
+            )}
+
+            {onClosingHeadingEdit ? (
+              <EditableText value={resolvedClosingHeading} placeholder="Closing heading..." onSave={onClosingHeadingEdit} as="p"
+                className="mb-2" style={opts.headingStyle} />
+            ) : (
+              <p className="mb-2" style={opts.headingStyle}>{resolvedClosingHeading}</p>
+            )}
+
+            {onClosingSubtitleEdit ? (
+              <EditableText value={resolvedClosingSubtitle} placeholder="Closing subtitle..." onSave={onClosingSubtitleEdit} as="p"
+                style={opts.subtitleStyle} />
+            ) : (
+              <p style={opts.subtitleStyle}>{resolvedClosingSubtitle}</p>
+            )}
+
+            {opts.contactLayout === 'pills' ? (
+              <div className="mt-6 flex items-center justify-center gap-3 flex-wrap">
+                {resolvedEmail && (
+                  onClosingEmailEdit ? (
+                    <EditableText value={resolvedEmail} placeholder="Email..." onSave={onClosingEmailEdit} as="span"
+                      className="px-4 py-2 rounded-full inline-block" style={opts.pillStyle} />
+                  ) : (
+                    <span className="px-4 py-2 rounded-full" style={opts.pillStyle}>{resolvedEmail}</span>
+                  )
+                )}
+                {brand.contactWebsite && (
+                  <span className="px-4 py-2 rounded-full" style={opts.pillStyle}>{brand.contactWebsite}</span>
+                )}
+                {resolvedPhone && (
+                  onClosingPhoneEdit ? (
+                    <EditableText value={resolvedPhone} placeholder="Phone..." onSave={onClosingPhoneEdit} as="span"
+                      className="px-4 py-2 rounded-full inline-block" style={opts.pillStyle} />
+                  ) : (
+                    <span className="px-4 py-2 rounded-full" style={opts.pillStyle}>{resolvedPhone}</span>
+                  )
+                )}
+              </div>
+            ) : (
+              <div className="mt-6 flex items-center justify-center gap-6">
+                {resolvedEmail && (
+                  onClosingEmailEdit ? (
+                    <EditableText value={resolvedEmail} placeholder="Email..." onSave={onClosingEmailEdit} as="span"
+                      className="inline-block" style={opts.contactStyle} />
+                  ) : (
+                    <span style={opts.contactStyle}>{resolvedEmail}</span>
+                  )
+                )}
+                {resolvedEmail && brand.contactWebsite && <span style={opts.separatorStyle}>|</span>}
+                {brand.contactWebsite && <span style={opts.contactStyle}>{brand.contactWebsite}</span>}
+                {brand.contactWebsite && resolvedPhone && <span style={opts.separatorStyle}>|</span>}
+                {resolvedPhone && (
+                  onClosingPhoneEdit ? (
+                    <EditableText value={resolvedPhone} placeholder="Phone..." onSave={onClosingPhoneEdit} as="span"
+                      className="inline-block" style={opts.contactStyle} />
+                  ) : (
+                    <span style={opts.contactStyle}>{resolvedPhone}</span>
+                  )
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="mt-10 text-center">
+          <p style={opts.disclaimerStyle}>
+            This document constitutes a binding agreement upon signature by both parties.
+          </p>
+        </div>
+      </>
+    );
+  }
 
   if (isSoft) {
     const border = template.colors.border;
@@ -108,35 +238,14 @@ export function SignatureBlock({
             </motion.div>
           ))}
         </div>
-        <div className="mt-20 text-center">
-          <div className="inline-block">
-            {brand.logoUrl ? (
-              <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain mx-auto mb-4" />
-            ) : (
-              <span className="block mb-4 uppercase tracking-[0.15em]" style={{ fontSize: "14px", fontWeight: 600, color: dark }}>
-                {brand.agencyName}
-              </span>
-            )}
-            <p className="mb-2" style={{ fontSize: "20px", fontWeight: 600, color: dark }}>
-              Thank you for considering {brand.agencyFullName}.
-            </p>
-            <p style={{ fontSize: "14px", fontWeight: 400, color: muted }}>
-              We're excited about the possibility of working together.
-            </p>
-            <div className="mt-6 flex items-center justify-center gap-6">
-              {brand.contactEmail && <span style={{ fontSize: "13px", color: faint }}>{brand.contactEmail}</span>}
-              {brand.contactEmail && brand.contactWebsite && <span style={{ color: border }}>|</span>}
-              {brand.contactWebsite && <span style={{ fontSize: "13px", color: faint }}>{brand.contactWebsite}</span>}
-              {brand.contactWebsite && brand.contactPhone && <span style={{ color: border }}>|</span>}
-              {brand.contactPhone && <span style={{ fontSize: "13px", color: faint }}>{brand.contactPhone}</span>}
-            </div>
-          </div>
-        </div>
-        <div className="mt-10 text-center">
-          <p style={{ fontSize: "12px", fontWeight: 400, color: faint }}>
-            This document constitutes a binding agreement upon signature by both parties.
-          </p>
-        </div>
+        {renderClosingSection({
+          headingStyle: { fontSize: "20px", fontWeight: 600, color: dark },
+          subtitleStyle: { fontSize: "14px", fontWeight: 400, color: muted },
+          contactStyle: { fontSize: "13px", color: faint },
+          separatorStyle: { color: border },
+          disclaimerStyle: { fontSize: "12px", fontWeight: 400, color: faint },
+          contactLayout: 'inline',
+        })}
       </motion.div>
     );
   }
@@ -231,39 +340,14 @@ export function SignatureBlock({
           ))}
         </div>
 
-        <div className="mt-20 text-center">
-          <div className="inline-block">
-            {brand.logoUrl ? (
-              <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain mx-auto mb-4" />
-            ) : (
-              <div className="w-10 h-10 rounded-2xl flex items-center justify-center mx-auto mb-4"
-                style={{ backgroundColor: accent }}>
-                <span className="text-white" style={{ fontSize: "14px", fontWeight: 600, fontFamily: "'Fraunces', serif" }}>
-                  {brand.agencyName?.charAt(0) || 'A'}
-                </span>
-              </div>
-            )}
-            <p className="mb-2" style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 500, color: dark }}>
-              Thank you for considering {brand.agencyFullName}.
-            </p>
-            <p style={{ fontSize: "14px", fontWeight: 400, color: muted }}>
-              We're excited about the possibility of working together.
-            </p>
-            <div className="mt-6 flex items-center justify-center gap-6">
-              {brand.contactEmail && <span style={{ fontSize: "13px", color: faint }}>{brand.contactEmail}</span>}
-              {brand.contactEmail && brand.contactWebsite && <span style={{ color: border }}>|</span>}
-              {brand.contactWebsite && <span style={{ fontSize: "13px", color: faint }}>{brand.contactWebsite}</span>}
-              {brand.contactWebsite && brand.contactPhone && <span style={{ color: border }}>|</span>}
-              {brand.contactPhone && <span style={{ fontSize: "13px", color: faint }}>{brand.contactPhone}</span>}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-10 text-center">
-          <p style={{ fontSize: "12px", fontWeight: 400, color: faint }}>
-            This document constitutes a binding agreement upon signature by both parties.
-          </p>
-        </div>
+        {renderClosingSection({
+          headingStyle: { fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 500, color: dark },
+          subtitleStyle: { fontSize: "14px", fontWeight: 400, color: muted },
+          contactStyle: { fontSize: "13px", color: faint },
+          separatorStyle: { color: border },
+          disclaimerStyle: { fontSize: "12px", fontWeight: 400, color: faint },
+          contactLayout: 'inline',
+        })}
       </motion.div>
     );
   }
@@ -359,49 +443,14 @@ export function SignatureBlock({
           ))}
         </div>
 
-        <div className="mt-20 text-center">
-          <div className="inline-block">
-            {brand.logoUrl ? (
-              <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain mx-auto mb-4" />
-            ) : (
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4"
-                style={{ backgroundColor: dark }}>
-                <span className="text-white" style={{ fontSize: "16px", fontWeight: 800 }}>
-                  {brand.agencyName?.charAt(0) || 'A'}
-                </span>
-              </div>
-            )}
-            <p className="mb-2" style={{ fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, color: dark }}>
-              Thank you for considering {brand.agencyFullName}.
-            </p>
-            <p style={{ fontSize: "14px", fontWeight: 400, color: template.colors.textMuted }}>
-              We're excited about the possibility of working together.
-            </p>
-            <div className="mt-6 flex items-center justify-center gap-3 flex-wrap">
-              {brand.contactEmail && (
-                <span className="px-4 py-2 rounded-full" style={{ background: `${accent}10`, color: accent, fontSize: "13px", fontWeight: 500 }}>
-                  {brand.contactEmail}
-                </span>
-              )}
-              {brand.contactWebsite && (
-                <span className="px-4 py-2 rounded-full" style={{ background: `${accent}10`, color: accent, fontSize: "13px", fontWeight: 500 }}>
-                  {brand.contactWebsite}
-                </span>
-              )}
-              {brand.contactPhone && (
-                <span className="px-4 py-2 rounded-full" style={{ background: `${accent}10`, color: accent, fontSize: "13px", fontWeight: 500 }}>
-                  {brand.contactPhone}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-10 text-center">
-          <p style={{ fontSize: "12px", fontWeight: 400, color: template.colors.textFaint }}>
-            This document constitutes a binding agreement upon signature by both parties.
-          </p>
-        </div>
+        {renderClosingSection({
+          headingStyle: { fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700, color: dark },
+          subtitleStyle: { fontSize: "14px", fontWeight: 400, color: template.colors.textMuted },
+          contactStyle: { fontSize: "13px", fontWeight: 500 },
+          disclaimerStyle: { fontSize: "12px", fontWeight: 400, color: template.colors.textFaint },
+          contactLayout: 'pills',
+          pillStyle: { background: `${accent}10`, color: accent, fontSize: "13px", fontWeight: 500 },
+        })}
       </motion.div>
     );
   }
@@ -479,37 +528,14 @@ export function SignatureBlock({
         ))}
       </div>
 
-      <div className="mt-20 text-center">
-        <div className="inline-block">
-          {brand.logoUrl ? (
-            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain mx-auto mb-4" />
-          ) : (
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4"
-              style={{ backgroundColor: brand.darkColor }}>
-              <span className="text-white tracking-tighter" style={{ fontSize: "13px", fontWeight: 700 }}>{brand.logoInitial}</span>
-            </div>
-          )}
-          <p className="tracking-tight mb-2" style={{ fontSize: "20px", fontWeight: 700, color: brand.darkColor }}>
-            Thank you for considering {brand.agencyFullName}.
-          </p>
-          <p className="text-[#999]" style={{ fontSize: "14px", fontWeight: 400 }}>
-            We're excited about the possibility of working together.
-          </p>
-          <div className="mt-6 flex items-center justify-center gap-6">
-            {brand.contactEmail && <span className="text-[#BBB]" style={{ fontSize: "13px" }}>{brand.contactEmail}</span>}
-            {brand.contactEmail && brand.contactWebsite && <span className="text-[#E0E0E0]">|</span>}
-            {brand.contactWebsite && <span className="text-[#BBB]" style={{ fontSize: "13px" }}>{brand.contactWebsite}</span>}
-            {brand.contactWebsite && brand.contactPhone && <span className="text-[#E0E0E0]">|</span>}
-            {brand.contactPhone && <span className="text-[#BBB]" style={{ fontSize: "13px" }}>{brand.contactPhone}</span>}
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-10 text-center">
-        <p className="text-[#CCC]" style={{ fontSize: "12px", fontWeight: 400 }}>
-          This document constitutes a binding agreement upon signature by both parties.
-        </p>
-      </div>
+      {renderClosingSection({
+        headingStyle: { fontSize: "20px", fontWeight: 700, color: brand.darkColor },
+        subtitleStyle: { fontSize: "14px", fontWeight: 400, color: '#999' },
+        contactStyle: { fontSize: "13px", color: '#BBB' },
+        separatorStyle: { color: '#E0E0E0' },
+        disclaimerStyle: { fontSize: "12px", fontWeight: 400, color: '#CCC' },
+        contactLayout: 'inline',
+      })}
     </motion.div>
   );
 }
