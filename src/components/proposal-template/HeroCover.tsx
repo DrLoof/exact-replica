@@ -105,7 +105,7 @@ function ElegantHeroCover({
               {proposalTitle}
             </h1>
           )}
-          {(subtitle || onSubtitleEdit) && (
+          {(onSubtitleEdit || hasRealSubtitle(subtitle)) && (
             onSubtitleEdit ? (
               <EditableText value={subtitle || ''} placeholder="Click to add a subtitle..." onSave={onSubtitleEdit} as="p"
                 className="max-w-lg mt-6"
