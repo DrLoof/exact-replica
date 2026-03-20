@@ -351,7 +351,7 @@ function SoftHeroCover({
   const isPDF = usePDFMode();
   const accent = template.colors.primaryAccent;
   const dark = template.colors.primaryDark;
-  const displayDate = date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const displayDate = formatDisplayDate(date);
 
   const Wrapper = isPDF ? 'div' : motion.div;
   const wrapperProps = (props: any) => isPDF ? {} : props;
