@@ -16,6 +16,7 @@ import {
   TextContent, PageWrapper, HighlightPanel, EditableText, TimelineStep, TeamMemberCard, PortfolioCard,
 } from '@/components/proposal-template';
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
+import { getModulePriceByModel } from '@/lib/pricing';
 
 function getDefaultAboutText(yearsExperience?: number | null): string {
   const yearsPart = yearsExperience ? `Over the past ${yearsExperience} years` : 'Over the past years';

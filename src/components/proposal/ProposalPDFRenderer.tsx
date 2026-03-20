@@ -8,6 +8,7 @@ import {
 } from '@/components/proposal-template';
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 import { calculateTimeline, getObjectivesStat, getKpiBarItems } from '@/lib/proposalStats';
+import { getModulePriceByModel } from '@/lib/pricing';
 
 interface ProposalPDFRendererProps {
   proposal: any;

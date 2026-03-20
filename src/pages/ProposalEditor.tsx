@@ -35,6 +35,7 @@ import {
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 import { ProposalPDFRenderer } from '@/components/proposal/ProposalPDFRenderer';
 import { generateProposalPDF } from '@/lib/generateProposalPDF';
+import { getModulePriceByModel } from '@/lib/pricing';
 
 
 interface ProposalData {
