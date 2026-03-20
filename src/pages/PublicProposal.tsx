@@ -302,7 +302,7 @@ export default function PublicProposal() {
                     { label: 'Total Duration', value: `${tw} Weeks` },
                     { label: 'Projected Launch', value: launchDate, accent: true },
                   ]}
-                  variant="default"
+                  variant="accent"
                 />
               );
             })()}

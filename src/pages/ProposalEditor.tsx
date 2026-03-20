@@ -1209,6 +1209,7 @@ export default function ProposalEditor() {
                             { label: 'Total Duration', value: `${totalWeeks} Weeks` },
                             { label: 'Projected Launch', value: launchDate, accent: true },
                           ]}
+                          variant="accent"
                         />
                       );
                     })()}
