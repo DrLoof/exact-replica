@@ -150,6 +150,26 @@ export default function ProposalNew() {
     }
   }, [initialBundleId, bundles.length, modules.length]);
 
+  // Pre-fill from package URL param
+  useEffect(() => {
+    if (initialPackageId && packages.length > 0 && modules.length > 0) {
+      const pkg = packages.find((p: any) => p.id === initialPackageId);
+      if (pkg) {
+        const pkgModuleIds = (pkg.package_modules || []).map((pm: any) => pm.module_id);
+        setSelectedModuleIds(prev => {
+          const next = new Set(prev);
+          pkgModuleIds.forEach((id: string) => next.add(id));
+          return next;
+        });
+        // Track usage
+        supabase.from('packages').update({
+          usage_count: (pkg.usage_count || 0) + 1,
+          last_used_at: new Date().toISOString(),
+        }).eq('id', pkg.id).then(() => {});
+      }
+    }
+  }, [initialPackageId, packages.length, modules.length]);
+
   useEffect(() => {
     if (prefilledClientId && clients.length > 0 && !selectedClient) {
       const found = clients.find((c: any) => c.id === prefilledClientId);
