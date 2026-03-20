@@ -275,7 +275,7 @@ function ModernHeroCover({
             </h1>
           )}
 
-          {(subtitle || onSubtitleEdit) && (
+          {(onSubtitleEdit || hasRealSubtitle(subtitle)) && (
             onSubtitleEdit ? (
               <EditableText
                 value={subtitle || ''}
