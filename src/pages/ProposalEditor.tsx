@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link, useBeforeUnload } from 'react-router-dom';
 import {
   ArrowLeft, Eye, EyeOff, Share2, Download, Send, LinkIcon,
