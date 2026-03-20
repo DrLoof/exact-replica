@@ -295,7 +295,7 @@ export function ServiceCard({
             Add-on
           </span>
         )}
-        <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-105"
+        <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover/card:scale-105"
           style={{ background: bg, color: accent }}>
           {icon}
         </div>
