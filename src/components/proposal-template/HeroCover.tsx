@@ -462,7 +462,7 @@ function SoftHeroCover({
   );
 }
 
-// Classic cover — redesigned to match Figma spec with circular blobs
+// Classic cover — bold geometric panel on right, clean sans-serif
 function ClassicHeroCoverInner({
   proposalTitle, subtitle, clientName, date, proposalNumber,
   confidential = true, onTitleEdit, onSubtitleEdit, onClientNameEdit, onDateEdit, onLogoClick,
@@ -472,67 +472,68 @@ function ClassicHeroCoverInner({
   const Wrapper = isPDF ? 'div' : motion.div;
   const wrapperProps = (props: any) => isPDF ? {} : props;
 
-  // Lighten brand color for blobs
-  const blobColor = `${brand.primaryColor}18`;
-  const blobColorMed = `${brand.primaryColor}12`;
-
   return (
     <div
       className="relative min-h-screen w-full bg-white overflow-hidden flex flex-col"
       style={{ fontFamily: "'Space Grotesk', sans-serif" }}
     >
-      {/* Decorative circular blobs */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Top-right large blob */}
+      {/* Bold geometric panel on right */}
+      <div className="absolute top-0 right-0 w-[38%] lg:w-[42%] h-full overflow-hidden pointer-events-none hidden md:block">
         <Wrapper
-          {...wrapperProps({ initial: { scale: 0.8, opacity: 0 }, animate: { scale: 1, opacity: 1 }, transition: { duration: 1, ease: "easeOut" } })}
-          className="absolute -top-[10%] -right-[10%] rounded-full"
-          style={{ width: '55%', height: '55%', backgroundColor: blobColor }}
-        />
-        {/* Mid-right blob */}
-        <Wrapper
-          {...wrapperProps({ initial: { scale: 0.8, opacity: 0 }, animate: { scale: 1, opacity: 1 }, transition: { delay: 0.2, duration: 1, ease: "easeOut" } })}
-          className="absolute top-[40%] -right-[5%] rounded-full"
-          style={{ width: '30%', height: '30%', backgroundColor: blobColorMed }}
-        />
-        {/* Bottom-right blob */}
-        <Wrapper
-          {...wrapperProps({ initial: { scale: 0.8, opacity: 0 }, animate: { scale: 1, opacity: 1 }, transition: { delay: 0.4, duration: 1, ease: "easeOut" } })}
-          className="absolute bottom-[5%] right-[15%] rounded-full"
-          style={{ width: '22%', height: '22%', backgroundColor: blobColor }}
-        />
-        {/* Small decorative dot */}
-        <div className="absolute top-[18%] left-[14%] w-3 h-3 rounded-full" style={{ backgroundColor: `${brand.primaryColor}25` }} />
-        <div className="absolute bottom-[42%] left-[6%] w-2 h-2 rounded-full" style={{ backgroundColor: `${brand.primaryColor}20` }} />
+          {...wrapperProps({ initial: { x: 100, opacity: 0 }, animate: { x: 0, opacity: 1 }, transition: { duration: 0.8, ease: "easeOut" } })}
+          className="absolute inset-0"
+        >
+          {/* Main colored block */}
+          <div
+            className="absolute top-0 right-0 w-full h-[62%] rounded-bl-[80px]"
+            style={{ backgroundColor: brand.primaryColor }}
+          />
+          {/* Accent circle */}
+          <div className="absolute bottom-[28%] right-[12%] w-44 h-44 rounded-full bg-white/90" />
+          {/* Small brand dot */}
+          <div
+            className="absolute top-[22%] right-[65%] w-5 h-5 rounded-full"
+            style={{ backgroundColor: 'rgba(255,255,255,0.4)' }}
+          />
+          {/* Thin horizontal line */}
+          <div
+            className="absolute bottom-[18%] left-0 w-[75%] h-px"
+            style={{ backgroundColor: `${brand.primaryColor}25` }}
+          />
+          {/* Bottom accent block */}
+          <div
+            className="absolute bottom-0 right-0 w-[60%] h-[15%] rounded-tl-[40px]"
+            style={{ backgroundColor: `${brand.primaryColor}15` }}
+          />
+        </Wrapper>
       </div>
+
+      {/* Mobile accent bar */}
+      <div
+        className="absolute top-0 right-0 w-2 h-full md:hidden"
+        style={{ backgroundColor: brand.primaryColor }}
+      />
 
       {/* Header */}
       <div className="relative z-10 flex items-center justify-between px-12 pt-10 lg:px-16 lg:pt-14">
         <Wrapper
           {...wrapperProps({ initial: { opacity: 0, y: -20 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.3, duration: 0.5 } })}
-          className="flex items-center gap-3"
         >
           <div onClick={onLogoClick} style={{ cursor: onLogoClick ? 'pointer' : undefined }} title={onLogoClick ? 'Click to replace logo' : undefined}>
             {brand.logoUrl ? (
-              <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain brightness-0 hover:opacity-80 transition-opacity" />
+              <img src={brand.logoUrl} alt={brand.agencyName} className="h-32 w-auto object-contain brightness-0 hover:opacity-80 transition-opacity" />
             ) : (
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl text-white font-bold text-lg"
-                  style={{ backgroundColor: brand.darkColor }}>
-                  {brand.agencyName?.[0] || 'A'}
-                </div>
-                <span className="tracking-[0.08em] uppercase"
-                  style={{ fontSize: "16px", fontWeight: 700, color: brand.darkColor }}>
-                  {brand.agencyFullName}
-                </span>
-              </div>
+              <span className="tracking-[0.15em] uppercase"
+                style={{ fontSize: "18px", fontWeight: 700, color: brand.darkColor, letterSpacing: "0.08em" }}>
+                {brand.agencyFullName}
+              </span>
             )}
           </div>
         </Wrapper>
         {proposalNumber && (
           <Wrapper
             {...wrapperProps({ initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { delay: 0.5, duration: 0.5 } })}
-            className="rounded-full px-4 py-1.5 text-xs font-medium tracking-wider uppercase border"
+            className="rounded-full px-4 py-1.5 text-xs font-medium tracking-wider uppercase border relative z-10"
             style={{ color: brand.primaryColor, borderColor: `${brand.primaryColor}30`, backgroundColor: `${brand.primaryColor}08` }}
           >
             {proposalNumber}
@@ -541,95 +542,85 @@ function ClassicHeroCoverInner({
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 flex-1 flex flex-col justify-center px-12 lg:px-16 max-w-full md:max-w-[60%] lg:max-w-[55%]">
+      <div className="relative z-10 flex-1 flex flex-col justify-center px-12 lg:px-16 max-w-full md:max-w-[58%] lg:max-w-[55%]">
         <Wrapper
           {...wrapperProps({ initial: { opacity: 0, y: 40 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.2, duration: 0.7, ease: "easeOut" } })}
         >
-          {/* "Proposal for" pill */}
-          <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-8"
-            style={{ backgroundColor: `${brand.primaryColor}10`, color: brand.primaryColor }}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 1L9.5 6.5L15 8L9.5 9.5L8 15L6.5 9.5L1 8L6.5 6.5L8 1Z" fill="currentColor" opacity="0.7"/>
-            </svg>
-            <span style={{ fontSize: "13px", fontWeight: 600 }}>Proposal for {clientName}</span>
-          </div>
-
+          <span className="inline-block uppercase tracking-[0.25em] mb-6"
+            style={{ fontSize: "13px", fontWeight: 600, color: brand.primaryColor }}>
+            Proposal for {clientName}
+          </span>
           {onTitleEdit ? (
             <EditableText value={proposalTitle} placeholder="Enter proposal title..." onSave={onTitleEdit} as="h1"
               className="mb-4 tracking-tight"
-              style={{ fontSize: isPDF ? "48px" : "clamp(36px, 5vw, 56px)", fontWeight: 700, lineHeight: 1.1, color: brand.darkColor }} />
+              style={{ fontSize: isPDF ? "48px" : "clamp(36px, 5vw, 64px)", fontWeight: 700, lineHeight: 1.05, color: brand.darkColor }} />
           ) : (
             <h1 className="mb-4 tracking-tight"
-              style={{ fontSize: isPDF ? "48px" : "clamp(36px, 5vw, 56px)", fontWeight: 700, lineHeight: 1.1, color: brand.darkColor }}>
+              style={{ fontSize: isPDF ? "48px" : "clamp(36px, 5vw, 64px)", fontWeight: 700, lineHeight: 1.05, color: brand.darkColor }}>
               {proposalTitle}
             </h1>
           )}
           {(onSubtitleEdit || hasRealSubtitle(subtitle)) && (
             onSubtitleEdit ? (
               <EditableText value={subtitle || ''} placeholder="Click to add a subtitle..." onSave={onSubtitleEdit} as="p"
-                className="max-w-lg mt-4" style={{ fontSize: "17px", fontWeight: 400, lineHeight: 1.7, color: "#888" }} />
+                className="max-w-lg mt-4" style={{ fontSize: "18px", fontWeight: 300, lineHeight: 1.6, color: "#666" }} />
             ) : (
-              <p className="max-w-lg mt-4" style={{ fontSize: "17px", fontWeight: 400, lineHeight: 1.7, color: "#888" }}>
+              <p className="text-[#666] max-w-lg mt-4" style={{ fontSize: "18px", fontWeight: 300, lineHeight: 1.6 }}>
                 {subtitle}
               </p>
             )
           )}
         </Wrapper>
 
-        {/* Meta cards + CTA */}
         <Wrapper
           {...wrapperProps({ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.5, duration: 0.6 } })}
-          className="mt-14 flex flex-wrap items-stretch gap-3"
+          className="mt-16 flex items-center gap-8"
         >
-          {/* Prepared for card */}
-          <div className="rounded-2xl bg-white/80 border border-[#eee] shadow-sm px-6 py-4 backdrop-blur-sm">
-            <span className="block uppercase tracking-[0.15em] mb-1" style={{ fontSize: "10px", fontWeight: 600, color: brand.primaryColor }}>
+          <div>
+            <span className="block text-[#999] uppercase tracking-[0.15em] mb-1" style={{ fontSize: "11px", fontWeight: 500 }}>
               Prepared for
             </span>
             {onClientNameEdit ? (
               <EditableText value={clientName} placeholder="Client name" onSave={onClientNameEdit} as="span"
-                style={{ fontSize: "16px", fontWeight: 600, color: brand.darkColor }} />
+                style={{ fontSize: "18px", fontWeight: 600, color: brand.darkColor }} />
             ) : (
-              <span style={{ fontSize: "16px", fontWeight: 600, color: brand.darkColor }}>{clientName}</span>
+              <span style={{ fontSize: "18px", fontWeight: 600, color: brand.darkColor }}>{clientName}</span>
             )}
           </div>
-
-          {/* Date card */}
-          <div className="rounded-2xl bg-white/80 border border-[#eee] shadow-sm px-6 py-4 backdrop-blur-sm">
-            <span className="block uppercase tracking-[0.15em] mb-1" style={{ fontSize: "10px", fontWeight: 600, color: brand.primaryColor }}>
+          <div className="w-px h-10 bg-[#E0E0E0]" />
+          <div>
+            <span className="block text-[#999] uppercase tracking-[0.15em] mb-1" style={{ fontSize: "11px", fontWeight: 500 }}>
               Date
             </span>
             {onDateEdit ? (
               <EditableText value={formatDisplayDate(date)} placeholder="Date" onSave={onDateEdit} as="span"
-                style={{ fontSize: "16px", fontWeight: 600, color: brand.darkColor }} />
+                style={{ fontSize: "18px", fontWeight: 600, color: brand.darkColor }} />
             ) : (
-              <span style={{ fontSize: "16px", fontWeight: 600, color: brand.darkColor }}>
+              <span style={{ fontSize: "18px", fontWeight: 600, color: brand.darkColor }}>
                 {formatDisplayDate(date)}
               </span>
             )}
           </div>
-
-          {/* Let's go CTA */}
-          <div className="flex items-center">
-            <div className="rounded-2xl px-6 py-4 flex items-center gap-2 text-white font-semibold"
-              style={{ backgroundColor: brand.primaryColor, fontSize: "14px", letterSpacing: "0.03em" }}>
-              <span className="uppercase" style={{ fontSize: "12px", fontWeight: 700 }}>Let's go</span>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 8H13M10 5L13 8L10 11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-          </div>
         </Wrapper>
       </div>
 
-      {/* Bottom decorative dots */}
+      {/* Footer */}
       <Wrapper
-        {...wrapperProps({ initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { delay: 0.8, duration: 0.5 } })}
-        className="relative z-10 px-12 lg:px-16 pb-10 flex items-center gap-2"
+        {...wrapperProps({ initial: { scaleX: 0 }, animate: { scaleX: 1 }, transition: { delay: 0.6, duration: 0.8, ease: "easeOut" } })}
+        className="relative z-10 mx-12 lg:mx-16 mb-10 h-px bg-[#E0E0E0] origin-left"
+      />
+      <Wrapper
+        {...wrapperProps({ initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { delay: 1, duration: 0.5 } })}
+        className="relative z-10 px-12 lg:px-16 pb-10 flex items-center justify-between"
       >
-        {[0,1,2,3,4].map(i => (
-          <div key={i} className="w-2 h-2 rounded-full" style={{ backgroundColor: i === 0 ? brand.primaryColor : `${brand.primaryColor}30` }} />
-        ))}
+        {confidential && (
+          <span className="text-[#BBB] uppercase tracking-[0.15em]" style={{ fontSize: "11px" }}>
+            Confidential
+          </span>
+        )}
+        <span className="text-[#BBB] uppercase tracking-[0.15em]" style={{ fontSize: "11px" }}>
+          Page 01
+        </span>
       </Wrapper>
     </div>
   );
