@@ -60,6 +60,24 @@ export function useServiceModules() {
   });
 }
 
+export function useAllServiceModules() {
+  const { agency } = useAuth();
+  return useQuery({
+    queryKey: ['all_service_modules', agency?.id],
+    queryFn: async () => {
+      if (!agency?.id) return [];
+      const { data, error } = await supabase
+        .from('service_modules')
+        .select('*, service_groups(id, name, icon)')
+        .eq('agency_id', agency.id)
+        .order('display_order');
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!agency?.id,
+  });
+}
+
 export function useServiceGroups() {
   return useQuery({
     queryKey: ['service_groups'],

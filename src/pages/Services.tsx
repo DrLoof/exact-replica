@@ -1,13 +1,25 @@
 import { AppShell } from '@/components/layout/AppShell';
-import { Plus, Search, ChevronDown, ChevronRight, MoreHorizontal, Layers, Pencil, Trash2, X, Save } from 'lucide-react';
+import { Plus, Search, ChevronDown, ChevronRight, MoreVertical, Layers, Pencil, X, Save, Copy, ArrowRight, BookOpen } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import * as Icons from 'lucide-react';
-import { useServiceModules, useServiceGroups } from '@/hooks/useAgencyData';
+import { useAllServiceModules, useServiceGroups } from '@/hooks/useAgencyData';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
+import { Switch } from '@/components/ui/switch';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { defaultModulesByGroup } from '@/lib/defaultModules';
 
 const pricingLabels: Record<string, string> = { fixed: '', monthly: '/mo', hourly: '/hr' };
 
@@ -38,15 +50,19 @@ const emptyForm: ModuleForm = {
 
 export default function Services() {
   const { agency } = useAuth();
-  const { data: modules = [], isLoading: loadingModules } = useServiceModules();
+  const { data: modules = [], isLoading: loadingModules } = useAllServiceModules();
   const { data: groups = [], isLoading: loadingGroups } = useServiceGroups();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [showModal, setShowModal] = useState(false);
+  const [showLibrary, setShowLibrary] = useState<string | null>(null);
   const [form, setForm] = useState<ModuleForm>(emptyForm);
   const [saving, setSaving] = useState(false);
   const currencySymbol = agency?.currency_symbol || '$';
+
+  const activeCount = modules.filter((m: any) => m.is_active).length;
+  const inactiveCount = modules.filter((m: any) => !m.is_active).length;
 
   const groupedModules = groups
     .map((g: any) => ({
@@ -61,8 +77,8 @@ export default function Services() {
   const toggle = (id: string) => setExpanded((p) => ({ ...p, [id]: !isExpanded(id) }));
   const isLoading = loadingModules || loadingGroups;
 
-  const openCreate = () => {
-    setForm({ ...emptyForm, group_id: groups[0]?.id || '' });
+  const openCreate = (groupId?: string) => {
+    setForm({ ...emptyForm, group_id: groupId || groups[0]?.id || '' });
     setShowModal(true);
   };
 
@@ -118,16 +134,74 @@ export default function Services() {
       if (error) toast.error('Failed to create'); else toast.success('Service created');
     }
 
+    queryClient.invalidateQueries({ queryKey: ['all_service_modules'] });
     queryClient.invalidateQueries({ queryKey: ['service_modules'] });
     setShowModal(false);
     setSaving(false);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this service module?')) return;
-    await supabase.from('service_modules').update({ is_active: false }).eq('id', id);
+  const handleToggleActive = async (mod: any) => {
+    const newActive = !mod.is_active;
+    await supabase.from('service_modules').update({ is_active: newActive }).eq('id', mod.id);
+    queryClient.invalidateQueries({ queryKey: ['all_service_modules'] });
     queryClient.invalidateQueries({ queryKey: ['service_modules'] });
-    toast.success('Service removed');
+    toast.success(newActive ? 'Service activated' : 'Service deactivated');
+  };
+
+  const handleDuplicate = async (mod: any) => {
+    if (!agency) return;
+    const { id, service_groups, ...rest } = mod;
+    const { error } = await supabase.from('service_modules').insert({
+      ...rest,
+      name: `${mod.name} (copy)`,
+      agency_id: agency.id,
+    });
+    if (error) toast.error('Failed to duplicate');
+    else toast.success('Service duplicated');
+    queryClient.invalidateQueries({ queryKey: ['all_service_modules'] });
+    queryClient.invalidateQueries({ queryKey: ['service_modules'] });
+  };
+
+  const handleMove = async (modId: string, newGroupId: string) => {
+    await supabase.from('service_modules').update({ group_id: newGroupId }).eq('id', modId);
+    queryClient.invalidateQueries({ queryKey: ['all_service_modules'] });
+    queryClient.invalidateQueries({ queryKey: ['service_modules'] });
+    toast.success('Service moved');
+  };
+
+  const handleDelete = async (mod: any) => {
+    if (!confirm(`Delete ${mod.name}? This can't be undone. Active proposals using this service won't be affected.`)) return;
+    await supabase.from('service_modules').delete().eq('id', mod.id);
+    queryClient.invalidateQueries({ queryKey: ['all_service_modules'] });
+    queryClient.invalidateQueries({ queryKey: ['service_modules'] });
+    toast.success('Service deleted');
+  };
+
+  const handleActivateFromLibrary = async (groupName: string, libModule: any) => {
+    if (!agency) return;
+    const group = groups.find((g: any) => g.name === groupName);
+    if (!group) return;
+    const { error } = await supabase.from('service_modules').insert({
+      agency_id: agency.id,
+      name: libModule.name,
+      short_description: libModule.shortDesc,
+      description: libModule.description,
+      group_id: group.id,
+      pricing_model: libModule.pricingModel,
+      price_fixed: libModule.pricingModel === 'fixed' ? libModule.price : null,
+      price_monthly: libModule.pricingModel === 'monthly' ? libModule.price : null,
+      price_hourly: libModule.pricingModel === 'hourly' ? libModule.price : null,
+      deliverables: libModule.deliverables,
+      client_responsibilities: libModule.clientResponsibilities,
+      out_of_scope: libModule.outOfScope,
+      default_timeline: libModule.defaultTimeline,
+      service_type: libModule.serviceType,
+      is_active: true,
+    });
+    if (error) toast.error('Failed to add service');
+    else toast.success(`${libModule.name} added`);
+    queryClient.invalidateQueries({ queryKey: ['all_service_modules'] });
+    queryClient.invalidateQueries({ queryKey: ['service_modules'] });
   };
 
   const F = ({ label, children }: { label: string; children: React.ReactNode }) => (
@@ -176,12 +250,35 @@ export default function Services() {
     );
   };
 
+  // Find the group name for library lookup
+  const getGroupName = (groupId: string) => groups.find((g: any) => g.id === groupId)?.name || '';
+
+  // Get library modules for a group, excluding already-added ones
+  const getLibraryModules = (groupName: string) => {
+    const lib = defaultModulesByGroup[groupName] || [];
+    const existingNames = modules.filter((m: any) => {
+      const gn = getGroupName(m.group_id);
+      return gn === groupName;
+    }).map((m: any) => m.name.toLowerCase());
+    return lib.filter(l => !existingNames.includes(l.name.toLowerCase()));
+  };
+
   return (
     <AppShell>
+      {/* Header with count summary (Spec #5) */}
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">Services</h1>
-        <button onClick={openCreate} className="flex items-center gap-2 rounded-lg bg-brand px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover">
-          <Plus className="h-4 w-4" /> Add Service
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-foreground">Services</h1>
+          <span className="text-[13px] text-[hsl(24,8%,49%)]">
+            {activeCount} active{inactiveCount > 0 && ` · ${inactiveCount} inactive`}
+          </span>
+        </div>
+        {/* Toned-down global add button (Spec #2) */}
+        <button
+          onClick={() => openCreate()}
+          className="flex items-center gap-2 rounded-lg border border-[hsl(34,14%,91%)] bg-transparent px-4 py-2 text-[13px] font-medium text-foreground transition-colors hover:bg-[hsl(40,20%,97%)] hover:border-[hsl(34,14%,83%)]"
+        >
+          <Plus className="h-4 w-4 text-[hsl(24,8%,49%)]" /> Add Service
         </button>
       </div>
 
@@ -204,27 +301,75 @@ export default function Services() {
           {groupedModules.map((group: any) => {
             const IconComp = (Icons as any)[group.icon] || Icons.Layers;
             const isOpen = isExpanded(group.id);
+            const groupActiveCount = group.modules.filter((m: any) => m.is_active).length;
+            const groupName = group.name;
+            const libraryModules = getLibraryModules(groupName);
+
             return (
               <div key={group.id} className="rounded-xl border border-border bg-card overflow-hidden">
-                <button onClick={() => toggle(group.id)} className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-muted/50">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent">
-                    <IconComp className="h-4 w-4 text-accent-foreground" />
-                  </div>
-                  <div className="flex-1">
-                    <span className="text-sm font-semibold text-foreground">{group.name}</span>
-                    <span className="ml-2 text-xs text-muted-foreground">{group.modules.length} active</span>
-                  </div>
-                  {isOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
-                </button>
+                {/* Group header with per-category + button (Spec #1) */}
+                <div className="flex w-full items-center gap-3 px-5 py-4 transition-colors hover:bg-muted/50">
+                  <button onClick={() => toggle(group.id)} className="flex flex-1 items-center gap-3 text-left">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent">
+                      <IconComp className="h-4 w-4 text-accent-foreground" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-sm font-semibold text-foreground">{group.name}</span>
+                      <span className="ml-2 text-xs text-muted-foreground">{groupActiveCount} active</span>
+                    </div>
+                  </button>
+                  {/* Per-category + button */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); openCreate(group.id); }}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-[hsl(24,8%,49%)] transition-colors hover:bg-[hsl(34,14%,94%)] md:opacity-0 md:group-hover:opacity-100"
+                    style={{ opacity: undefined }}
+                    title={`Add service to ${group.name}`}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                  <button onClick={() => toggle(group.id)} className="text-muted-foreground">
+                    {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </button>
+                </div>
+
                 {isOpen && (
                   <div className="border-t border-border">
                     {group.modules.length === 0 ? (
-                      <div className="px-5 py-4 text-center text-xs text-muted-foreground">No services in this group</div>
+                      /* Improved empty state (Spec #3) */
+                      <div className="flex flex-col items-center justify-center py-8 px-5 text-center">
+                        <p className="text-[13px] font-medium text-[hsl(24,19%,24%)]">No services yet.</p>
+                        <p className="mt-1 text-[12px] text-[hsl(24,8%,49%)]">
+                          Add your {groupName.toLowerCase()} services, or activate from our pre-built library.
+                        </p>
+                        <div className="mt-4 flex items-center gap-4">
+                          <button
+                            onClick={() => openCreate(group.id)}
+                            className="flex items-center gap-1.5 text-[13px] font-medium text-foreground hover:underline"
+                          >
+                            <Plus className="h-3.5 w-3.5" /> Add service
+                          </button>
+                          {libraryModules.length > 0 && (
+                            <button
+                              onClick={() => setShowLibrary(group.id)}
+                              className="flex items-center gap-1.5 text-[13px] text-[hsl(24,8%,49%)] hover:text-foreground"
+                            >
+                              Browse library <ArrowRight className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     ) : group.modules.map((mod: any) => (
-                      <div key={mod.id} className="flex items-center gap-4 border-b border-border px-5 py-3 last:border-0 transition-colors hover:bg-muted/30">
+                      /* Service row with toggle + more menu (Spec #4) */
+                      <div
+                        key={mod.id}
+                        className={cn(
+                          "flex items-center gap-4 border-b border-border px-5 py-3 last:border-0 transition-colors hover:bg-muted/30",
+                          !mod.is_active && "opacity-50"
+                        )}
+                      >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className="text-sm font-medium text-foreground">{mod.name}</p>
+                            <p className={cn("text-sm font-medium text-foreground", !mod.is_active && "line-through decoration-muted-foreground/50")}>{mod.name}</p>
                             {mod.service_type === 'addon' && <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">ADD-ON</span>}
                           </div>
                           <p className="text-xs text-muted-foreground truncate">{mod.short_description}</p>
@@ -233,8 +378,51 @@ export default function Services() {
                           {currencySymbol}{(mod.price_fixed || mod.price_monthly || mod.price_hourly || 0).toLocaleString()}{pricingLabels[mod.pricing_model] || ''}
                         </span>
                         <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">{mod.pricing_model}</span>
-                        <button onClick={() => openEdit(mod)} className="text-muted-foreground hover:text-foreground"><Pencil className="h-3.5 w-3.5" /></button>
-                        <button onClick={() => handleDelete(mod.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
+
+                        {/* Toggle switch */}
+                        <Switch
+                          checked={!!mod.is_active}
+                          onCheckedChange={() => handleToggleActive(mod)}
+                          className="data-[state=checked]:bg-foreground data-[state=unchecked]:bg-muted-foreground/30"
+                        />
+
+                        {/* Edit button */}
+                        <button onClick={() => openEdit(mod)} className="text-muted-foreground hover:text-foreground">
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+
+                        {/* More menu */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="text-muted-foreground hover:text-foreground">
+                              <MoreVertical className="h-3.5 w-3.5" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={() => handleDuplicate(mod)}>
+                              <Copy className="mr-2 h-4 w-4" /> Duplicate
+                            </DropdownMenuItem>
+                            <DropdownMenuSub>
+                              <DropdownMenuSubTrigger>
+                                <ArrowRight className="mr-2 h-4 w-4" /> Move to…
+                              </DropdownMenuSubTrigger>
+                              <DropdownMenuSubContent>
+                                {groups.filter((g: any) => g.id !== mod.group_id).map((g: any) => (
+                                  <DropdownMenuItem key={g.id} onClick={() => handleMove(mod.id, g.id)}>
+                                    {g.name}
+                                  </DropdownMenuItem>
+                                ))}
+                              </DropdownMenuSubContent>
+                            </DropdownMenuSub>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(mod)}
+                              className="text-[hsl(0,30%,56%)] focus:text-[hsl(0,30%,56%)]"
+                            >
+                              <X className="mr-2 h-4 w-4" /> Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     ))}
                   </div>
@@ -244,6 +432,47 @@ export default function Services() {
           })}
         </div>
       )}
+
+      {/* Browse Library Modal */}
+      {showLibrary && (() => {
+        const group = groups.find((g: any) => g.id === showLibrary);
+        const groupName = group?.name || '';
+        const libMods = getLibraryModules(groupName);
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/50 backdrop-blur-sm" onClick={() => setShowLibrary(null)}>
+            <div className="w-full max-w-md max-h-[80vh] overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-xl" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-display text-lg font-bold text-foreground">{groupName} Library</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Pre-built services you can activate with one click</p>
+                </div>
+                <button onClick={() => setShowLibrary(null)} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
+              </div>
+              {libMods.length === 0 ? (
+                <p className="py-8 text-center text-sm text-muted-foreground">All library services have been added.</p>
+              ) : (
+                <div className="space-y-2">
+                  {libMods.map((lm, i) => (
+                    <div key={i} className="flex items-center justify-between rounded-xl border border-border p-4 hover:bg-muted/30 transition-colors">
+                      <div className="flex-1 min-w-0 mr-3">
+                        <p className="text-sm font-medium text-foreground">{lm.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">{lm.shortDesc}</p>
+                      </div>
+                      <button
+                        onClick={() => handleActivateFromLibrary(groupName, lm)}
+                        className="shrink-0 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
+                      >
+                        + Add
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Service Module Modal */}
       {showModal && (
