@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { Check, ChevronDown, ChevronUp, Package } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Check, ChevronDown, ChevronUp, Package, FolderOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { InlinePrice } from './InlinePrice';
 
@@ -7,6 +7,7 @@ interface ServiceZoneProps {
   modules: any[];
   groups: any[];
   bundles: any[];
+  packages?: any[];
   selectedModuleIds: Set<string>;
   toggleModule: (id: string) => void;
   selectedBundleId: string | null;
@@ -24,7 +25,7 @@ interface ServiceZoneProps {
 }
 
 export function ServiceZone({
-  modules, groups, bundles,
+  modules, groups, bundles, packages = [],
   selectedModuleIds, toggleModule,
   selectedBundleId, handleBundleSelect,
   expandedGroups, toggleGroup,
@@ -32,6 +33,8 @@ export function ServiceZone({
   currencySymbol, bundleModuleIdSet,
   selectedBundle, totalStr, bundleSavings, addonCount,
 }: ServiceZoneProps) {
+  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
+
   const groupedModules = useMemo(() =>
     groups.map((g: any) => ({
       ...g,
@@ -49,6 +52,21 @@ export function ServiceZone({
       .map((m: any) => m.name);
   };
 
+  const handlePackageSelect = (pkg: any) => {
+    const pkgModuleIds = (pkg.package_modules || []).map((pm: any) => pm.module_id);
+    if (selectedPackageId === pkg.id) {
+      setSelectedPackageId(null);
+      pkgModuleIds.forEach((id: string) => {
+        if (selectedModuleIds.has(id)) toggleModule(id);
+      });
+    } else {
+      setSelectedPackageId(pkg.id);
+      pkgModuleIds.forEach((id: string) => {
+        if (!selectedModuleIds.has(id)) toggleModule(id);
+      });
+    }
+  };
+
   return (
     <section className="rounded-xl border border-parchment bg-card p-6 shadow-card">
       <p className="mb-4 text-[14px] font-semibold text-foreground">What are you proposing?</p>
@@ -56,7 +74,7 @@ export function ServiceZone({
       {/* Bundle cards */}
       {bundles.length > 0 && (
         <div className="mb-6">
-          <p className="mb-3 label-overline">Bundles</p>
+          <p className="mb-3 label-overline">Bundles <span className="font-normal text-muted-foreground">save your client money</span></p>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {bundles.map((b: any) => {
               const bundleModuleNames = getBundleModuleNames(b);
@@ -97,6 +115,43 @@ export function ServiceZone({
                       </span>
                     )}
                   </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Package cards */}
+      {packages.length > 0 && (
+        <div className="mb-6">
+          <p className="mb-3 label-overline">Your Packages <span className="font-normal text-muted-foreground">quick-select</span></p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {packages.map((pkg: any) => {
+              const pkgModuleIds = (pkg.package_modules || []).map((pm: any) => pm.module_id);
+              const pkgModules = pkgModuleIds.map((mid: string) => modules.find((m: any) => m.id === mid)).filter(Boolean);
+              const isSelected = selectedPackageId === pkg.id;
+
+              return (
+                <button
+                  key={pkg.id}
+                  onClick={() => handlePackageSelect(pkg)}
+                  className={cn(
+                    'rounded-xl border-2 p-4 text-left transition-all',
+                    isSelected
+                      ? 'border-foreground bg-ivory'
+                      : 'border-parchment hover:border-muted-foreground/30'
+                  )}
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="text-[13px] font-semibold text-foreground">{pkg.name}</p>
+                    {isSelected && (
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground">
+                        <Check className="h-3 w-3 text-primary-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  <p className="mt-1 text-[11px] text-muted-foreground">{pkgModules.length} service{pkgModules.length !== 1 ? 's' : ''}</p>
                 </button>
               );
             })}

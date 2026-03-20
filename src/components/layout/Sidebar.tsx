@@ -1,6 +1,6 @@
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, FileText, Users, Layers, Package,
+  LayoutDashboard, FileText, Users, Layers, Package, FolderOpen,
   Building2, Palette, Receipt, UserPlus, LogOut, Zap, X, Image,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -13,6 +13,7 @@ const mainNav = [
   { label: 'Proposals', icon: FileText, path: '/proposals', showCount: true },
   { label: 'Clients', icon: Users, path: '/clients' },
   { label: 'Services', icon: Layers, path: '/services' },
+  { label: 'Packages', icon: FolderOpen, path: '/packages' },
   { label: 'Bundles', icon: Package, path: '/bundles' },
 ];
 

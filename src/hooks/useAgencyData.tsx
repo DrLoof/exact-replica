@@ -110,6 +110,25 @@ export function useBundles() {
   });
 }
 
+export function usePackages() {
+  const { agency } = useAuth();
+  return useQuery({
+    queryKey: ['packages', agency?.id],
+    queryFn: async () => {
+      if (!agency?.id) return [];
+      const { data, error } = await supabase
+        .from('packages')
+        .select('*, package_modules(id, module_id, display_order)')
+        .eq('agency_id', agency.id)
+        .eq('is_active', true)
+        .order('display_order');
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!agency?.id,
+  });
+}
+
 export function useTimelinePhases() {
   const { agency } = useAuth();
   return useQuery({

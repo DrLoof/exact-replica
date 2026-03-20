@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useClients, useServiceModules, useServiceGroups, useBundles, useTimelinePhases } from '@/hooks/useAgencyData';
+import { useClients, useServiceModules, useServiceGroups, useBundles, useTimelinePhases, usePackages } from '@/hooks/useAgencyData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { SignupGate } from '@/components/onboarding/SignupGate';
@@ -74,11 +74,13 @@ export default function ProposalNew() {
   const { data: dbModules = [] } = useServiceModules();
   const { data: dbGroups = [] } = useServiceGroups();
   const { data: dbBundles = [] } = useBundles();
+  const { data: dbPackages = [] } = usePackages();
   const { data: timelinePhases = [] } = useTimelinePhases();
 
   const modules = isGuestMode ? (guestData?.virtualModules || []) : dbModules;
   const groups = isGuestMode ? (guestData?.virtualGroups || []) : dbGroups;
   const bundles = isGuestMode ? [] : dbBundles;
+  const packages = isGuestMode ? [] : dbPackages;
   const currencySymbol = isGuestMode
     ? (guestOnboarding?.scrapeData?.detected_currency?.symbol || '$')
     : (agency?.currency_symbol || '$');
@@ -132,6 +134,7 @@ export default function ProposalNew() {
   const prefilledClientId = searchParams.get('client');
   const repeatMode = searchParams.get('repeat') === 'true';
   const initialBundleId = searchParams.get('bundle');
+  const initialPackageId = searchParams.get('package');
 
   useEffect(() => {
     if (initialBundleId && bundles.length > 0 && modules.length > 0) {
@@ -146,6 +149,26 @@ export default function ProposalNew() {
       }
     }
   }, [initialBundleId, bundles.length, modules.length]);
+
+  // Pre-fill from package URL param
+  useEffect(() => {
+    if (initialPackageId && packages.length > 0 && modules.length > 0) {
+      const pkg = packages.find((p: any) => p.id === initialPackageId);
+      if (pkg) {
+        const pkgModuleIds = (pkg.package_modules || []).map((pm: any) => pm.module_id);
+        setSelectedModuleIds(prev => {
+          const next = new Set(prev);
+          pkgModuleIds.forEach((id: string) => next.add(id));
+          return next;
+        });
+        // Track usage
+        supabase.from('packages').update({
+          usage_count: (pkg.usage_count || 0) + 1,
+          last_used_at: new Date().toISOString(),
+        }).eq('id', pkg.id).then(() => {});
+      }
+    }
+  }, [initialPackageId, packages.length, modules.length]);
 
   useEffect(() => {
     if (prefilledClientId && clients.length > 0 && !selectedClient) {
@@ -799,6 +822,7 @@ export default function ProposalNew() {
           modules={modules}
           groups={groups}
           bundles={bundles}
+          packages={packages}
           selectedModuleIds={selectedModuleIds}
           toggleModule={toggleModule}
           selectedBundleId={selectedBundleId}
