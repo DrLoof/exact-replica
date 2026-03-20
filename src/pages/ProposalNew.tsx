@@ -482,6 +482,8 @@ export default function ProposalNew() {
         selected_portfolio_ids: portfolioAccepted && matchedPortfolioIds.length > 0 ? matchedPortfolioIds : null,
         portfolio_section_visible: portfolioAccepted && matchedPortfolioIds.length > 0,
         portfolio_section_title: 'Our Work',
+        show_client_responsibilities: false,
+        show_out_of_scope: false,
       } as any).select('id').single();
       if (pError) throw pError;
 

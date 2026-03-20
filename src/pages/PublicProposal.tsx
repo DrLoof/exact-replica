@@ -261,12 +261,12 @@ export default function PublicProposal() {
                   description={svc.module?.description || svc.module?.short_description || ''}
                   deliverables={svc.module?.deliverables || []}
                   clientResponsibilities={
-                    (proposal.show_client_responsibilities ?? true) && (svc.show_responsibilities !== false)
+                    (proposal.show_client_responsibilities ?? false) && (svc.show_responsibilities !== false)
                       ? (svc.client_responsibilities || svc.module?.client_responsibilities || [])
                       : []
                   }
                   outOfScope={
-                    (proposal.show_out_of_scope ?? true) && (svc.show_out_of_scope !== false)
+                    (proposal.show_out_of_scope ?? false) && (svc.show_out_of_scope !== false)
                       ? (svc.out_of_scope || svc.module?.out_of_scope || [])
                       : []
                   }

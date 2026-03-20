@@ -878,13 +878,13 @@ export default function ProposalEditor() {
               <div className="mt-3 pt-3" style={{ borderTop: '1px solid #EEEAE3' }}>
                 <span className="block px-2 mb-2 text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#B8B0A5' }}>Scope Display</span>
                 <label className="flex items-center gap-2 px-2 py-1.5 cursor-pointer group">
-                  <input type="checkbox" checked={proposal.show_client_responsibilities ?? true}
+                  <input type="checkbox" checked={proposal.show_client_responsibilities ?? false}
                     onChange={(e) => updateField('show_client_responsibilities', e.target.checked)}
                     className="rounded border-border text-[#2A2118] focus:ring-[#2A2118] h-3.5 w-3.5 accent-[#2A2118]" />
                   <span className="text-xs group-hover:text-foreground transition-colors" style={{ color: '#7A7265' }}>Client Responsibilities</span>
                 </label>
                 <label className="flex items-center gap-2 px-2 py-1.5 cursor-pointer group">
-                  <input type="checkbox" checked={proposal.show_out_of_scope ?? true}
+                  <input type="checkbox" checked={proposal.show_out_of_scope ?? false}
                     onChange={(e) => updateField('show_out_of_scope', e.target.checked)}
                     className="rounded border-border text-[#2A2118] focus:ring-[#2A2118] h-3.5 w-3.5 accent-[#2A2118]" />
                   <span className="text-xs group-hover:text-foreground transition-colors" style={{ color: '#7A7265' }}>Out of Scope</span>
@@ -1129,12 +1129,12 @@ export default function ProposalEditor() {
                                 description={svc.module?.description || svc.module?.short_description || ''}
                                 deliverables={svc.custom_deliverables || svc.module?.deliverables || []}
                                 clientResponsibilities={
-                                  (proposal.show_client_responsibilities ?? true) && (svc.show_responsibilities !== false)
+                                  (proposal.show_client_responsibilities ?? false) && (svc.show_responsibilities !== false)
                                     ? (svc.client_responsibilities || svc.module?.client_responsibilities || [])
                                     : []
                                 }
                                 outOfScope={
-                                  (proposal.show_out_of_scope ?? true) && (svc.show_out_of_scope !== false)
+                                  (proposal.show_out_of_scope ?? false) && (svc.show_out_of_scope !== false)
                                     ? (svc.out_of_scope || svc.module?.out_of_scope || [])
                                     : []
                                 }
@@ -1157,14 +1157,14 @@ export default function ProposalEditor() {
                                   await supabase.from('proposal_services').update({ custom_deliverables: dels }).eq('id', svc.id);
                                   setServices(prev => prev.map(s => s.id === svc.id ? { ...s, custom_deliverables: dels } : s));
                                 }}
-                                onClientResponsibilitiesEdit={async (items) => {
+                                onClientResponsibilitiesEdit={(proposal.show_client_responsibilities ?? false) ? async (items) => {
                                   await supabase.from('proposal_services').update({ client_responsibilities: items } as any).eq('id', svc.id);
                                   setServices(prev => prev.map(s => s.id === svc.id ? { ...s, client_responsibilities: items } : s));
-                                }}
-                                onOutOfScopeEdit={async (items) => {
+                                } : undefined}
+                                onOutOfScopeEdit={(proposal.show_out_of_scope ?? false) ? async (items) => {
                                   await supabase.from('proposal_services').update({ out_of_scope: items } as any).eq('id', svc.id);
                                   setServices(prev => prev.map(s => s.id === svc.id ? { ...s, out_of_scope: items } : s));
-                                }}
+                                } : undefined}
                               />
                             </div>
                           ))}
