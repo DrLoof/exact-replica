@@ -46,7 +46,7 @@ function ElegantHeroCover({
   const muted = template.colors.textMuted;
   const faint = template.colors.textFaint;
   const border = template.colors.border;
-  const displayDate = date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const displayDate = formatDisplayDate(date);
   const agencyInitial = brand.agencyName?.charAt(0) || 'A';
 
   const Wrapper = isPDF ? 'div' : motion.div;
