@@ -884,7 +884,7 @@ export default function ProposalEditor() {
                   <span className="text-xs group-hover:text-foreground transition-colors" style={{ color: '#7A7265' }}>Client Responsibilities</span>
                 </label>
                 <label className="flex items-center gap-2 px-2 py-1.5 cursor-pointer group">
-                  <input type="checkbox" checked={proposal.show_out_of_scope ?? true}
+                  <input type="checkbox" checked={proposal.show_out_of_scope ?? false}
                     onChange={(e) => updateField('show_out_of_scope', e.target.checked)}
                     className="rounded border-border text-[#2A2118] focus:ring-[#2A2118] h-3.5 w-3.5 accent-[#2A2118]" />
                   <span className="text-xs group-hover:text-foreground transition-colors" style={{ color: '#7A7265' }}>Out of Scope</span>
