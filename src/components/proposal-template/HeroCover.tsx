@@ -585,11 +585,11 @@ function ClassicHeroCoverInner({
               Date
             </span>
             {onDateEdit ? (
-              <EditableText value={date || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} placeholder="Date" onSave={onDateEdit} as="span"
+              <EditableText value={formatDisplayDate(date)} placeholder="Date" onSave={onDateEdit} as="span"
                 style={{ fontSize: "18px", fontWeight: 600, color: brand.darkColor }} />
             ) : (
               <span style={{ fontSize: "18px", fontWeight: 600, color: brand.darkColor }}>
-                {date || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                {formatDisplayDate(date)}
               </span>
             )}
           </div>
