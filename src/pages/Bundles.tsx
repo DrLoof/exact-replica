@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AppShell } from '@/components/layout/AppShell';
-import { Plus, Package, Trash2, Pencil, X, Save, Check, Library, Loader2, ArrowRight } from 'lucide-react';
+import { Plus, Package, Trash2, Pencil, X, Save, Check, Library, Loader2, ArrowRight, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBundles, useServiceModules } from '@/hooks/useAgencyData';
 import { useAuth } from '@/hooks/useAuth';
@@ -23,6 +23,13 @@ const emptyForm: BundleForm = {
   name: '', tagline: '', description: '', bundle_price: '', selectedModuleIds: new Set(),
 };
 
+/** Format bundle price with "fixed" label for mixed pricing (Spec #4) */
+function formatBundlePriceLabeled(fixed: number, monthly: number, symbol = '$'): string {
+  if (fixed > 0 && monthly > 0) return `${symbol}${fixed.toLocaleString()} fixed + ${symbol}${monthly.toLocaleString()}/mo`;
+  if (monthly > 0) return `${symbol}${monthly.toLocaleString()}/mo`;
+  return `${symbol}${fixed.toLocaleString()}`;
+}
+
 export default function Bundles() {
   const { agency } = useAuth();
   const { data: bundles = [], isLoading } = useBundles();
@@ -33,6 +40,7 @@ export default function Bundles() {
   const [form, setForm] = useState<BundleForm>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [addingTemplate, setAddingTemplate] = useState<string | null>(null);
+  const [expandedTemplate, setExpandedTemplate] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this bundle?')) return;
@@ -47,10 +55,7 @@ export default function Bundles() {
   const openEdit = async (bundle: any) => {
     const { data: bms } = await supabase.from('bundle_modules').select('module_id').eq('bundle_id', bundle.id);
     setForm({
-      id: bundle.id,
-      name: bundle.name,
-      tagline: bundle.tagline || '',
-      description: bundle.description || '',
+      id: bundle.id, name: bundle.name, tagline: bundle.tagline || '', description: bundle.description || '',
       bundle_price: bundle.bundle_price?.toString() || '',
       selectedModuleIds: new Set((bms || []).map((bm: any) => bm.module_id).filter(Boolean)),
     });
@@ -77,21 +82,15 @@ export default function Bundles() {
       return;
     }
     setSaving(true);
-
     const payload = {
-      agency_id: agency.id,
-      name: form.name.trim(),
-      tagline: form.tagline || null,
-      description: form.description || null,
-      bundle_price: bundlePrice || null,
+      agency_id: agency.id, name: form.name.trim(), tagline: form.tagline || null,
+      description: form.description || null, bundle_price: bundlePrice || null,
       individual_total: individualTotal || null,
       savings_amount: savingsAmount > 0 ? savingsAmount : null,
       savings_label: savingsAmount > 0 ? `Save ${currencySymbol}${savingsAmount.toLocaleString()}` : null,
       is_active: true,
     };
-
     let bundleId = form.id;
-
     if (form.id) {
       const { error } = await supabase.from('bundles').update(payload).eq('id', form.id);
       if (error) { toast.error('Failed to update'); setSaving(false); return; }
@@ -101,54 +100,28 @@ export default function Bundles() {
       if (error) { toast.error('Failed to create'); setSaving(false); return; }
       bundleId = data.id;
     }
-
-    const bmInserts = Array.from(form.selectedModuleIds).map(moduleId => ({
-      bundle_id: bundleId!,
-      module_id: moduleId,
-    }));
-    if (bmInserts.length > 0) {
-      await supabase.from('bundle_modules').insert(bmInserts);
-    }
-
+    const bmInserts = Array.from(form.selectedModuleIds).map(moduleId => ({ bundle_id: bundleId!, module_id: moduleId }));
+    if (bmInserts.length > 0) await supabase.from('bundle_modules').insert(bmInserts);
     toast.success(form.id ? 'Bundle updated' : 'Bundle created');
-    setShowModal(false);
-    setSaving(false);
+    setShowModal(false); setSaving(false);
     queryClient.invalidateQueries({ queryKey: ['bundles'] });
   };
 
-  // Add template bundle logic
   const addTemplateBundle = async (template: typeof defaultBundles[0]) => {
     if (!agency) return;
     setAddingTemplate(template.name);
-
     try {
-      // 1. Check which services exist/missing
-      const { data: allAgencyModules } = await supabase
-        .from('service_modules')
-        .select('*')
-        .eq('agency_id', agency.id);
+      const { data: allAgencyModules } = await supabase.from('service_modules').select('*').eq('agency_id', agency.id);
       const existingNames = new Set((allAgencyModules || []).map((m: any) => m.name));
-
-      // 2. Find missing services and add them
       const missingNames = template.serviceNames.filter(n => !existingNames.has(n));
       const reactivated: string[] = [];
       const added: string[] = [];
-
-      // Get service group IDs
       const { data: groups } = await supabase.from('service_groups').select('id, name');
       const groupIdMap: Record<string, string> = {};
       (groups || []).forEach((g: any) => { groupIdMap[g.name] = g.id; });
 
       for (const name of missingNames) {
-        // Check if inactive
-        const { data: inactive } = await supabase
-          .from('service_modules')
-          .select('id')
-          .eq('agency_id', agency.id)
-          .eq('name', name)
-          .eq('is_active', false)
-          .maybeSingle();
-
+        const { data: inactive } = await supabase.from('service_modules').select('id').eq('agency_id', agency.id).eq('name', name).eq('is_active', false).maybeSingle();
         if (inactive) {
           await supabase.from('service_modules').update({ is_active: true }).eq('id', inactive.id);
           reactivated.push(name);
@@ -157,45 +130,27 @@ export default function Bundles() {
           if (found) {
             const groupId = groupIdMap[found.groupName];
             await supabase.from('service_modules').insert({
-              agency_id: agency.id,
-              group_id: groupId || null,
-              name: found.module.name,
-              description: found.module.description,
-              short_description: found.module.shortDesc,
+              agency_id: agency.id, group_id: groupId || null, name: found.module.name,
+              description: found.module.description, short_description: found.module.shortDesc,
               pricing_model: found.module.pricingModel,
               price_fixed: found.module.pricingModel === 'fixed' ? found.module.price : null,
               price_monthly: found.module.pricingModel === 'monthly' ? found.module.price : null,
               price_hourly: found.module.pricingModel === 'hourly' ? found.module.price : null,
-              service_type: found.module.serviceType,
-              deliverables: found.module.deliverables,
-              client_responsibilities: found.module.clientResponsibilities,
-              out_of_scope: found.module.outOfScope,
-              default_timeline: found.module.defaultTimeline,
-              suggested_kpis: found.module.suggestedKpis,
-              common_tools: found.module.commonTools,
-              is_active: true,
+              service_type: found.module.serviceType, deliverables: found.module.deliverables,
+              client_responsibilities: found.module.clientResponsibilities, out_of_scope: found.module.outOfScope,
+              default_timeline: found.module.defaultTimeline, suggested_kpis: found.module.suggestedKpis,
+              common_tools: found.module.commonTools, is_active: true,
             });
             added.push(name);
           }
         }
       }
 
-      // 3. Re-fetch agency modules to get IDs
-      const { data: updatedModules } = await supabase
-        .from('service_modules')
-        .select('id, name, price_fixed, price_monthly')
-        .eq('agency_id', agency.id)
-        .eq('is_active', true);
-
-      // 4. Calculate pricing using agency module prices
+      const { data: updatedModules } = await supabase.from('service_modules').select('id, name, price_fixed, price_monthly').eq('agency_id', agency.id).eq('is_active', true);
       const pricing = calculateBundlePricing(template.serviceNames, template.discountPercentage, updatedModules);
 
-      // 5. Create the bundle
       const { data: newBundle, error } = await supabase.from('bundles').insert({
-        agency_id: agency.id,
-        name: template.name,
-        tagline: template.tagline,
-        description: template.description,
+        agency_id: agency.id, name: template.name, tagline: template.tagline, description: template.description,
         bundle_price: pricing.bundleFixed + pricing.bundleMonthly,
         individual_total: pricing.totalFixed + pricing.totalMonthly,
         savings_amount: pricing.totalSavings,
@@ -205,18 +160,10 @@ export default function Bundles() {
 
       if (error) throw error;
 
-      // 6. Link modules
-      const moduleIds = template.serviceNames
-        .map(n => (updatedModules || []).find((m: any) => m.name === n)?.id)
-        .filter(Boolean);
+      const moduleIds = template.serviceNames.map(n => (updatedModules || []).find((m: any) => m.name === n)?.id).filter(Boolean);
+      if (moduleIds.length > 0) await supabase.from('bundle_modules').insert(moduleIds.map(mid => ({ bundle_id: newBundle.id, module_id: mid })));
 
-      if (moduleIds.length > 0) {
-        await supabase.from('bundle_modules').insert(
-          moduleIds.map(mid => ({ bundle_id: newBundle.id, module_id: mid }))
-        );
-      }
-
-      // 7. Toast
+      // Spec: detailed toast
       let msg = `${template.name} added to your bundles`;
       if (added.length > 0) msg += `. ${added.length} service${added.length > 1 ? 's were' : ' was'} also added to your library: ${added.join(', ')}`;
       if (reactivated.length > 0) msg += `. Reactivated: ${reactivated.join(', ')}`;
@@ -231,23 +178,32 @@ export default function Bundles() {
     setAddingTemplate(null);
   };
 
-  // Which templates are already added
   const existingBundleNames = new Set(bundles.map((b: any) => b.name));
   const agencyModuleNames = new Set(modules.map((m: any) => m.name));
 
+  // Contextual pro tip (Spec #7)
+  const proTipText = bundles.length === 0
+    ? "Agencies using bundles close 23% larger deals. Pick a template below or create your own — bundles display as premium packages in your proposals."
+    : "Tip: Bundles show as a highlighted package in your proposals. Clients see the savings upfront.";
+
   return (
     <AppShell>
+      {/* Header with toned-down button (Spec #1) */}
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Bundles</h1>
-        <button onClick={openCreate} className="flex items-center gap-2 rounded-lg bg-brand px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover">
-          <Plus className="h-4 w-4" />
+        <button
+          onClick={openCreate}
+          className="flex items-center gap-2 rounded-lg border border-[hsl(34,14%,91%)] bg-transparent px-4 py-2 text-[13px] font-medium text-foreground transition-colors hover:bg-[hsl(40,20%,97%)] hover:border-[hsl(34,14%,83%)]"
+        >
+          <Plus className="h-4 w-4 text-[hsl(24,8%,49%)]" />
           Create Bundle
         </button>
       </div>
 
+      {/* Pro tip (Spec #7) */}
       <div className="mb-5 rounded-xl border border-brand/20 bg-accent p-4">
         <p className="text-sm text-accent-foreground">
-          💡 <span className="font-medium">Pro tip:</span> Agencies using bundles close 23% larger deals on average. Package your services for bigger wins.
+          💡 <span className="font-medium">Pro tip:</span> {proTipText}
         </p>
       </div>
 
@@ -259,17 +215,25 @@ export default function Bundles() {
             {[1,2,3].map(i => <div key={i} className="h-48 animate-pulse rounded-xl border border-border bg-card" />)}
           </div>
         ) : bundles.length === 0 ? (
+          /* Improved empty state (Spec #2) */
           <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
-            <Package className="mx-auto h-8 w-8 text-muted-foreground" />
-            <p className="mt-3 text-sm font-medium text-foreground">No bundles yet</p>
-            <p className="mt-1 text-xs text-muted-foreground">Create your own or add from the templates below</p>
+            <Sparkles className="mx-auto h-8 w-8 text-brand/60" />
+            <p className="mt-3 text-[13px] font-medium text-[hsl(24,19%,24%)]">No bundles yet</p>
+            <p className="mt-1.5 text-[13px] text-[hsl(24,8%,49%)]">
+              Pick a template below to create your first bundle in one click,{' '}
+              <button onClick={openCreate} className="underline hover:text-foreground transition-colors">
+                or create a custom one from scratch
+              </button>.
+            </p>
+            <div className="mt-4 flex justify-center">
+              <ChevronDown className="h-5 w-5 text-[hsl(24,8%,49%)] animate-bounce" style={{ animationDuration: '2s' }} />
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-3">
             {bundles.map((bundle: any) => {
               const moduleIds = (bundle.bundle_modules || []).map((bm: any) => bm.module_id);
               const bundleModules = modules.filter((m: any) => moduleIds.includes(m.id));
-
               return (
                 <div key={bundle.id} className="flex flex-col rounded-xl border border-border bg-card p-6 transition-shadow hover:shadow-sm">
                   <div className="flex items-start justify-between">
@@ -277,18 +241,12 @@ export default function Bundles() {
                       <Package className="h-5 w-5 text-accent-foreground" />
                     </div>
                     <div className="flex gap-1">
-                      <button onClick={() => openEdit(bundle)} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground">
-                        <Pencil className="h-3.5 w-3.5" />
-                      </button>
-                      <button onClick={() => handleDelete(bundle.id)} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      <button onClick={() => openEdit(bundle)} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"><Pencil className="h-3.5 w-3.5" /></button>
+                      <button onClick={() => handleDelete(bundle.id)} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
                     </div>
                   </div>
-
                   <h3 className="mt-4 font-display text-base font-semibold text-foreground">{bundle.name}</h3>
                   {bundle.tagline && <p className="mt-1 text-sm text-muted-foreground">{bundle.tagline}</p>}
-
                   <div className="mt-4 flex flex-1 flex-wrap gap-1.5 content-start">
                     {bundleModules.map((m: any) => (
                       <span key={m.id} className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">{m.name}</span>
@@ -297,16 +255,16 @@ export default function Bundles() {
                       <span className="text-xs text-muted-foreground">{moduleIds.length} services</span>
                     )}
                   </div>
-
                   <div className="mt-5 border-t border-border pt-4">
                     <div className="flex items-baseline gap-2 flex-wrap">
                       {bundle.individual_total > bundle.bundle_price && (
                         <span className="text-sm text-muted-foreground line-through">{currencySymbol}{(bundle.individual_total || 0).toLocaleString()}</span>
                       )}
                       <span className="font-display text-xl font-bold tabular-nums text-foreground">{currencySymbol}{(bundle.bundle_price || 0).toLocaleString()}</span>
+                      {/* Spec #5: More prominent savings badge with dollar amount */}
                       {(bundle.savings_amount || 0) > 0 && bundle.individual_total > 0 && (
-                        <span className="ml-auto rounded-full bg-status-success/15 px-2.5 py-0.5 text-xs font-medium text-status-success">
-                          {Math.round((bundle.savings_amount / bundle.individual_total) * 100)}% off
+                        <span className="ml-auto rounded-full bg-[hsl(135,25%,94%)] px-2.5 py-1 text-[11px] font-semibold text-[hsl(140,22%,52%)] whitespace-nowrap">
+                          Save {currencySymbol}{bundle.savings_amount.toLocaleString()} ({Math.round((bundle.savings_amount / bundle.individual_total) * 100)}% off)
                         </span>
                       )}
                     </div>
@@ -332,13 +290,14 @@ export default function Bundles() {
             const missingServices = template.serviceNames.filter(n => !agencyModuleNames.has(n));
             const pricing = calculateBundlePricing(template.serviceNames, template.discountPercentage, modules);
             const isAdding = addingTemplate === template.name;
+            const isExpanded = expandedTemplate === template.name;
 
             return (
               <div key={template.name} className={cn(
                 'flex flex-col rounded-xl border bg-card p-6 transition-shadow',
                 alreadyAdded ? 'border-border opacity-60' : 'border-border hover:shadow-sm'
               )}>
-                {/* Header — fixed height zone */}
+                {/* Header */}
                 <div className="flex items-start gap-3 mb-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent">
                     <Package className="h-4 w-4 text-accent-foreground" />
@@ -349,7 +308,56 @@ export default function Bundles() {
                   </div>
                 </div>
 
-                {/* Services — grows to fill */}
+                {/* View details toggle (Spec #6) */}
+                <button
+                  onClick={() => setExpandedTemplate(isExpanded ? null : template.name)}
+                  className="mb-3 flex items-center gap-1 text-[12px] text-[hsl(24,8%,49%)] hover:text-foreground transition-colors self-start"
+                >
+                  {isExpanded ? 'Hide details' : 'View details'}
+                  {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                </button>
+
+                {/* Expanded detail (Spec #6) */}
+                {isExpanded && (
+                  <div className="mb-3 rounded-lg border border-[hsl(34,14%,91%)] bg-[hsl(40,20%,97%)] p-4 text-[12px] text-[hsl(24,19%,24%)] transition-all duration-200">
+                    <p className="leading-relaxed">{template.description}</p>
+                    <div className="mt-3">
+                      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[hsl(24,8%,49%)]">Included Services</p>
+                      <div className="space-y-1">
+                        {template.serviceNames.map(name => {
+                          const found = findDefaultModule(name);
+                          const agencyMod = modules.find((m: any) => m.name === name);
+                          const price = agencyMod
+                            ? (agencyMod.price_fixed || agencyMod.price_monthly || 0)
+                            : (found?.module.price || 0);
+                          const model = agencyMod
+                            ? agencyMod.pricing_model
+                            : (found?.module.pricingModel || 'fixed');
+                          return (
+                            <div key={name} className="flex items-center justify-between">
+                              <span className="text-[12px]">{name}</span>
+                              <span className="text-[12px] tabular-nums text-[hsl(24,8%,49%)]">
+                                {currencySymbol}{price.toLocaleString()} {model}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="mt-3 border-t border-[hsl(34,14%,91%)] pt-2 space-y-1">
+                        <div className="flex justify-between text-[12px]">
+                          <span className="text-[hsl(24,8%,49%)]">Individual total:</span>
+                          <span className="tabular-nums">{currencySymbol}{pricing.totalIndividual.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-[12px] font-semibold">
+                          <span>Bundle price:</span>
+                          <span className="tabular-nums">{currencySymbol}{pricing.bundleTotal.toLocaleString()} <span className="font-normal text-[hsl(140,22%,52%)]">(save {currencySymbol}{pricing.totalSavings.toLocaleString()})</span></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Service pills with missing distinction (Spec #3) */}
                 <div className="flex-1">
                   <div className="flex flex-wrap gap-1.5">
                     {template.serviceNames.map(name => {
@@ -358,38 +366,37 @@ export default function Bundles() {
                         <span key={name} className={cn(
                           'rounded-full px-2.5 py-0.5 text-[11px]',
                           isMissing
-                            ? 'border border-dashed border-muted-foreground/30 text-muted-foreground/70'
-                            : 'bg-muted text-muted-foreground'
+                            ? 'border border-dashed border-[hsl(34,14%,83%)] bg-[hsl(40,20%,97%)] text-[hsl(24,8%,49%)]'
+                            : 'border border-solid border-[hsl(34,14%,91%)] bg-[hsl(34,14%,95%)] text-[hsl(24,19%,24%)]'
                         )}>
-                          {name}
+                          {isMissing ? `+ ${name}` : name}
                         </span>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* Pricing — pinned above button */}
+                {/* Pricing with labels (Spec #4) + prominent savings (Spec #5) */}
                 <div className="border-t border-border pt-3 mb-4">
                   <span className="text-xs text-muted-foreground line-through">
                     {formatBundlePrice(pricing.totalFixed, pricing.totalMonthly, currencySymbol)}
                   </span>
                   <div className="mt-1 flex items-baseline gap-2 flex-wrap">
                     <span className="font-display text-base font-bold tabular-nums text-foreground">
-                      {formatBundlePrice(pricing.bundleFixed, pricing.bundleMonthly, currencySymbol)}
+                      {formatBundlePriceLabeled(pricing.bundleFixed, pricing.bundleMonthly, currencySymbol)}
                     </span>
                     {pricing.totalSavings > 0 && (
-                      <span className="ml-auto rounded-full bg-status-success/15 px-2 py-0.5 text-[11px] font-semibold text-status-success whitespace-nowrap">
-                        {template.discountPercentage}% off
+                      <span className="ml-auto rounded-full bg-[hsl(135,25%,94%)] px-2.5 py-1 text-[11px] font-semibold text-[hsl(140,22%,52%)] whitespace-nowrap">
+                        Save {currencySymbol}{pricing.totalSavings.toLocaleString()} ({template.discountPercentage}% off)
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* CTA — always at bottom */}
+                {/* CTA */}
                 {alreadyAdded ? (
                   <div className="flex h-10 items-center justify-center gap-2 text-sm text-muted-foreground">
-                    <Check className="h-4 w-4" />
-                    Already in your library
+                    <Check className="h-4 w-4" /> Already in your library
                   </div>
                 ) : (
                   <button
@@ -433,7 +440,6 @@ export default function Bundles() {
                 <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Description</label>
                 <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={2} placeholder="Optional longer description..." className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
               </div>
-
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Included Services * (min. 2)</label>
                 <div className="max-h-48 overflow-y-auto rounded-lg border border-border divide-y divide-border">
@@ -455,14 +461,13 @@ export default function Bundles() {
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">{form.selectedModuleIds.size} selected · Individual total: {currencySymbol}{individualTotal.toLocaleString()}</p>
               </div>
-
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Bundle Price *</label>
                 <input type="number" value={form.bundle_price} onChange={e => setForm(p => ({ ...p, bundle_price: e.target.value }))}
                   placeholder={individualTotal > 0 ? `Suggest: ${Math.round(individualTotal * 0.85)}` : '0'}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" />
                 {savingsAmount > 0 && (
-                  <p className="mt-1 text-xs text-status-success">
+                  <p className="mt-1 text-xs text-[hsl(140,22%,52%)]">
                     Clients save {currencySymbol}{savingsAmount.toLocaleString()} ({Math.round((savingsAmount / individualTotal) * 100)}% off)
                   </p>
                 )}
