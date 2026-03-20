@@ -35,7 +35,7 @@ export function Sidebar({ onClose }: SidebarProps) {
   const { userProfile, agency, signOut } = useAuth();
   const { data: proposals = [] } = useProposals();
 
-  const activeProposalCount = proposals.filter((p: any) => p.status === 'sent' || p.status === 'viewed').length;
+  const activeProposalCount = proposals.filter((p: any) => p.status === 'sent' && !p.viewed_at).length;
 
   const handleSignOut = async () => {
     await signOut();
