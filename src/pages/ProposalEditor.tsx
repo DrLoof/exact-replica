@@ -1954,7 +1954,7 @@ ${agencyName}`);
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl" onClick={e => e.stopPropagation()}>
         <h3 className="font-display text-lg font-bold text-foreground mb-4">Share Proposal</h3>
         <div className="space-y-3">
-          <button onClick={handleDownloadPDF} disabled={isGeneratingPDF} className="flex w-full items-center gap-4 rounded-xl border border-border p-4 transition-all hover:border-brand/30 hover:shadow-sm disabled:opacity-50">
+          <button onClick={onDownloadPDF} disabled={isGeneratingPDF} className="flex w-full items-center gap-4 rounded-xl border border-border p-4 transition-all hover:border-brand/30 hover:shadow-sm disabled:opacity-50">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
               {isGeneratingPDF ? <Loader2 className="h-5 w-5 text-accent-foreground animate-spin" /> : <Download className="h-5 w-5 text-accent-foreground" />}
             </div>
