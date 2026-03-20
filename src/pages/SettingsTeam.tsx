@@ -173,18 +173,47 @@ export default function SettingsTeam() {
     });
   };
 
+  const rehostPhoto = async (url: string, index: number): Promise<string> => {
+    if (!url || !agency) return url;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return url;
+      const blob = await res.blob();
+      const ext = url.split('.').pop()?.split('?')[0]?.match(/^(jpg|jpeg|png|webp|gif|svg)$/i)?.[0] || 'jpg';
+      const path = `${agency.id}/team/${Date.now()}-${index}.${ext}`;
+      const { error } = await supabase.storage.from('agency-logos').upload(path, blob, { upsert: true, contentType: blob.type || 'image/jpeg' });
+      if (error) return url;
+      const { data: urlData } = supabase.storage.from('agency-logos').getPublicUrl(path);
+      return urlData.publicUrl;
+    } catch {
+      return url; // fallback to original URL
+    }
+  };
+
   const importScraped = async () => {
     const toImport = scrapedMembers.filter((_, i) => selectedScraped.has(i));
     if (toImport.length === 0) return;
 
+    setSaving(true);
+
     // Deduplicate by name
     const existingNames = new Set(displayMembers.map(m => m.name.toLowerCase()));
     const newMembers = toImport.filter(m => !existingNames.has(m.name.toLowerCase()));
-    const updated = [...displayMembers, ...newMembers];
+
+    // Re-host photos to storage
+    const rehosted = await Promise.all(
+      newMembers.map(async (m, i) => ({
+        ...m,
+        photo: m.photo ? await rehostPhoto(m.photo, i) : '',
+      }))
+    );
+
+    const updated = [...displayMembers, ...rehosted];
     await persistMembers(updated);
-    toast.success(`Added ${newMembers.length} team member${newMembers.length !== 1 ? 's' : ''}`);
+    toast.success(`Added ${rehosted.length} team member${rehosted.length !== 1 ? 's' : ''}`);
     setShowScrapeModal(false);
     setScrapedMembers([]);
+    setSaving(false);
   };
 
   const inputCls =
