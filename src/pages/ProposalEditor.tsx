@@ -543,6 +543,25 @@ export default function ProposalEditor() {
 
   const PRESET_COLORS = ['#E8825C', '#2563EB', '#34D399', '#f9b564', '#8B5CF6', '#EC4899', '#14B8A6', '#F59E0B', '#EF4444', '#1E1B4B'];
 
+  const handleDownloadPDF = async () => {
+    if (!proposal || isGeneratingPDF) return;
+    setIsGeneratingPDF(true);
+    // Wait for render + images to load
+    await new Promise(resolve => setTimeout(resolve, 800));
+    try {
+      await document.fonts.ready;
+      const container = pdfContainerRef.current || document.getElementById('pdf-render-container');
+      if (!container) throw new Error('PDF render container not found');
+      await generateProposalPDF(container as HTMLElement, client?.company_name || '', proposal.reference_number);
+      toast.success('PDF downloaded');
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      toast.error('Failed to generate PDF. Please try again.');
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
   const currentTemplate = templates[templateId] || templates.classic;
   // Brand color is the universal default; custom picks override it across all templates
   const brandColor = agency?.brand_color || '#fc956e';
