@@ -28,7 +28,7 @@ export function useProposals() {
       if (!agency?.id) return [];
       const { data, error } = await supabase
         .from('proposals')
-        .select('*, clients(id, company_name, contact_name, contact_email, industry, website)')
+        .select('*, clients(id, company_name, contact_name, contact_email, industry, website), proposal_services(module_id)')
         .eq('agency_id', agency.id)
         .order('created_at', { ascending: false });
       if (error) throw error;
