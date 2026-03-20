@@ -1814,8 +1814,9 @@ export default function ProposalEditor() {
 }
 
 // Share Modal Component
-function ShareModal({ proposal, client, agency, onClose, onStatusUpdate }: {
+function ShareModal({ proposal, client, agency, onClose, onStatusUpdate, onDownloadPDF, isGeneratingPDF }: {
   proposal: ProposalData; client: any; agency: any; onClose: () => void; onStatusUpdate: (status: string) => void;
+  onDownloadPDF: () => void; isGeneratingPDF: boolean;
 }) {
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
