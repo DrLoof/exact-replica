@@ -572,7 +572,7 @@ export default function ProposalEditor() {
     if (s.price_override != null) return s.price_override;
     const mod = s.module;
     if (!mod) return 0;
-    return mod.price_fixed ?? mod.price_monthly ?? mod.price_hourly ?? 0;
+    return getModulePriceByModel(mod);
   };
 
   const pricingSuffix = (model: string | null | undefined) => {
