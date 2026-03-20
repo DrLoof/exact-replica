@@ -1157,14 +1157,14 @@ export default function ProposalEditor() {
                                   await supabase.from('proposal_services').update({ custom_deliverables: dels }).eq('id', svc.id);
                                   setServices(prev => prev.map(s => s.id === svc.id ? { ...s, custom_deliverables: dels } : s));
                                 }}
-                                onClientResponsibilitiesEdit={async (items) => {
+                                onClientResponsibilitiesEdit={(proposal.show_client_responsibilities ?? false) ? async (items) => {
                                   await supabase.from('proposal_services').update({ client_responsibilities: items } as any).eq('id', svc.id);
                                   setServices(prev => prev.map(s => s.id === svc.id ? { ...s, client_responsibilities: items } : s));
-                                }}
-                                onOutOfScopeEdit={async (items) => {
+                                } : undefined}
+                                onOutOfScopeEdit={(proposal.show_out_of_scope ?? false) ? async (items) => {
                                   await supabase.from('proposal_services').update({ out_of_scope: items } as any).eq('id', svc.id);
                                   setServices(prev => prev.map(s => s.id === svc.id ? { ...s, out_of_scope: items } : s));
-                                }}
+                                } : undefined}
                               />
                             </div>
                           ))}
