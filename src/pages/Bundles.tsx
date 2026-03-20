@@ -512,8 +512,16 @@ export default function Bundles() {
         </button>
       </div>
 
-      <div className="mb-5 rounded-xl border border-brand/20 bg-accent p-4">
-        <p className="text-sm text-accent-foreground">💡 <span className="font-medium">Pro tip:</span> {proTipText}</p>
+      <div className="relative mb-5 overflow-hidden rounded-[12px] p-5" style={{ background: '#2A2118' }}>
+        <div className="absolute left-0 right-0 top-0 h-[2px]" style={{ background: 'linear-gradient(90deg, #BE8E5E, transparent)' }} />
+        <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.1em] text-ink-faint">Insight</p>
+        <p className="text-[13px] leading-relaxed" style={{ color: '#B8B0A5' }}>
+          {bundles.length === 0 ? (
+            <>Agencies using <span className="font-semibold" style={{ color: '#FAF9F6' }}>service bundles</span> close <span className="font-semibold" style={{ color: '#BE8E5E' }}>23% larger deals</span> on average. Pick a template below or create your own.</>
+          ) : (
+            <>Bundles show as a <span className="font-semibold" style={{ color: '#FAF9F6' }}>highlighted package</span> in your proposals. Clients see the <span className="font-semibold" style={{ color: '#BE8E5E' }}>savings upfront</span>.</>
+          )}
+        </p>
       </div>
 
       {/* YOUR BUNDLES */}
