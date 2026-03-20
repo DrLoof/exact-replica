@@ -5,6 +5,19 @@ import { useTemplate } from "./TemplateProvider";
 import { usePDFMode } from "./TemplateProvider";
 import { EditableText } from "./EditableText";
 
+function formatDisplayDate(date?: string): string {
+  if (!date) return new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  // If ISO date like "2026-03-23", format it
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return date;
+  return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
+
+function hasRealSubtitle(subtitle?: string): boolean {
+  if (!subtitle) return false;
+  const trimmed = subtitle.trim();
+  return trimmed !== '' && !trimmed.startsWith('Click to');
+}
 
 interface HeroCoverProps {
   proposalTitle: string;
