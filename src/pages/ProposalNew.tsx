@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useClients, useServiceModules, useServiceGroups, useBundles, useTimelinePhases } from '@/hooks/useAgencyData';
+import { useClients, useServiceModules, useServiceGroups, useBundles, useTimelinePhases, usePackages } from '@/hooks/useAgencyData';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { SignupGate } from '@/components/onboarding/SignupGate';
