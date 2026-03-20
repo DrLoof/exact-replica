@@ -33,6 +33,8 @@ import {
   PortfolioCard,
 } from '@/components/proposal-template';
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
+import { ProposalPDFRenderer } from '@/components/proposal/ProposalPDFRenderer';
+import { generateProposalPDF } from '@/lib/generateProposalPDF';
 
 
 interface ProposalData {
@@ -149,6 +151,8 @@ export default function ProposalEditor() {
   const [localLogoUrl, setLocalLogoUrl] = useState<string | null>(null);
   const currencySymbol = agency?.currency_symbol || '$';
   const undoRef = useRef<{ field: string; value: any } | null>(null);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const pdfContainerRef = useRef<HTMLDivElement>(null);
 
   // Warn user before leaving if an editable field is focused (unsaved inline edit)
   useBeforeUnload(
@@ -538,6 +542,25 @@ export default function ProposalEditor() {
   };
 
   const PRESET_COLORS = ['#E8825C', '#2563EB', '#34D399', '#f9b564', '#8B5CF6', '#EC4899', '#14B8A6', '#F59E0B', '#EF4444', '#1E1B4B'];
+
+  const handleDownloadPDF = async () => {
+    if (!proposal || isGeneratingPDF) return;
+    setIsGeneratingPDF(true);
+    // Wait for render + images to load
+    await new Promise(resolve => setTimeout(resolve, 800));
+    try {
+      await document.fonts.ready;
+      const container = pdfContainerRef.current || document.getElementById('pdf-render-container');
+      if (!container) throw new Error('PDF render container not found');
+      await generateProposalPDF(container as HTMLElement, client?.company_name || '', proposal.reference_number);
+      toast.success('PDF downloaded');
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      toast.error('Failed to generate PDF. Please try again.');
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
 
   const currentTemplate = templates[templateId] || templates.classic;
   // Brand color is the universal default; custom picks override it across all templates
@@ -987,8 +1010,8 @@ export default function ProposalEditor() {
               <Share2 className="h-4 w-4" /> Share Proposal
             </button>
             <div className="flex items-center justify-between px-1">
-              <button onClick={() => window.print()} className="flex items-center gap-1.5 text-[12px] transition-colors hover:text-foreground" style={{ color: '#B8B0A5' }}>
-                <Download className="h-3.5 w-3.5" /> Download PDF
+              <button onClick={handleDownloadPDF} disabled={isGeneratingPDF} className="flex items-center gap-1.5 text-[12px] transition-colors hover:text-foreground disabled:opacity-50" style={{ color: '#B8B0A5' }}>
+                {isGeneratingPDF ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />} {isGeneratingPDF ? 'Generating...' : 'Download PDF'}
               </button>
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-green-500" />
@@ -1782,6 +1805,29 @@ export default function ProposalEditor() {
           agency={agency}
           onClose={() => setShowShareModal(false)}
           onStatusUpdate={(status) => setProposal(prev => prev ? { ...prev, status } : prev)}
+          onDownloadPDF={handleDownloadPDF}
+          isGeneratingPDF={isGeneratingPDF}
+        />
+      )}
+
+      {/* Hidden PDF Renderer */}
+      {isGeneratingPDF && (
+        <ProposalPDFRenderer
+          ref={pdfContainerRef}
+          proposal={proposal}
+          agency={agency}
+          client={client}
+          services={services}
+          differentiators={differentiators}
+          testimonials={testimonials}
+          termsClauses={termsClauses}
+          portfolioItems={portfolioItems}
+          proposalTeam={proposalTeam}
+          deletedSections={deletedSections}
+          sectionOrder={sectionOrder}
+          templateId={templateId}
+          customColors={customColors ? { primaryAccent: activePrimary, secondaryAccent: activeSecondary, ...customColors } : null}
+          currencySymbol={currencySymbol}
         />
       )}
     </div>
@@ -1789,8 +1835,9 @@ export default function ProposalEditor() {
 }
 
 // Share Modal Component
-function ShareModal({ proposal, client, agency, onClose, onStatusUpdate }: {
+function ShareModal({ proposal, client, agency, onClose, onStatusUpdate, onDownloadPDF, isGeneratingPDF }: {
   proposal: ProposalData; client: any; agency: any; onClose: () => void; onStatusUpdate: (status: string) => void;
+  onDownloadPDF: () => void; isGeneratingPDF: boolean;
 }) {
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -1928,13 +1975,13 @@ ${agencyName}`);
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl" onClick={e => e.stopPropagation()}>
         <h3 className="font-display text-lg font-bold text-foreground mb-4">Share Proposal</h3>
         <div className="space-y-3">
-          <button onClick={() => window.print()} className="flex w-full items-center gap-4 rounded-xl border border-border p-4 transition-all hover:border-brand/30 hover:shadow-sm">
+          <button onClick={onDownloadPDF} disabled={isGeneratingPDF} className="flex w-full items-center gap-4 rounded-xl border border-border p-4 transition-all hover:border-brand/30 hover:shadow-sm disabled:opacity-50">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-              <Download className="h-5 w-5 text-accent-foreground" />
+              {isGeneratingPDF ? <Loader2 className="h-5 w-5 text-accent-foreground animate-spin" /> : <Download className="h-5 w-5 text-accent-foreground" />}
             </div>
             <div className="text-left">
-              <p className="text-sm font-semibold text-foreground">Download PDF</p>
-              <p className="text-xs text-muted-foreground">Print or save as PDF</p>
+              <p className="text-sm font-semibold text-foreground">{isGeneratingPDF ? 'Generating PDF...' : 'Download PDF'}</p>
+              <p className="text-xs text-muted-foreground">{isGeneratingPDF ? 'Rendering proposal pages...' : 'Save as PDF document'}</p>
             </div>
           </button>
           <button onClick={openEmailComposer} disabled={generating} className="flex w-full items-center gap-4 rounded-xl border border-border p-4 transition-all hover:border-brand/30 hover:shadow-sm disabled:opacity-50">
