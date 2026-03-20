@@ -15,6 +15,7 @@ import PublicProposal from "./pages/PublicProposal";
 import Clients from "./pages/Clients";
 import Services from "./pages/Services";
 import Bundles from "./pages/Bundles";
+import Packages from "./pages/Packages";
 import Settings from "./pages/Settings";
 import SettingsAgency from "./pages/SettingsAgency";
 import SettingsBranding from "./pages/SettingsBranding";
