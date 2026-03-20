@@ -16,6 +16,7 @@ import {
   TextContent, PageWrapper, HighlightPanel, EditableText, TimelineStep, TeamMemberCard, PortfolioCard,
 } from '@/components/proposal-template';
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
+import { getModulePriceByModel } from '@/lib/pricing';
 
 function getDefaultAboutText(yearsExperience?: number | null): string {
   const yearsPart = yearsExperience ? `Over the past ${yearsExperience} years` : 'Over the past years';
@@ -225,7 +226,7 @@ export default function GuestProposalPreview() {
   })();
 
   const pricingItems = localServices.map((s: any) => {
-    const price = s.priceOverride ?? s.price_fixed ?? s.price_monthly ?? s.price_hourly ?? 0;
+    const price = s.priceOverride ?? getModulePriceByModel(s);
     const suffix = s.pricing_model === 'monthly' ? '/mo' : s.pricing_model === 'hourly' ? '/hr' : '';
     return {
       service: s.name,
@@ -956,7 +957,7 @@ export default function GuestProposalPreview() {
                     <SectionHeader number="02" title="Scope of Services" subtitle="What we'll deliver for you" />
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                       {localServices.map((svc: any, i: number) => {
-                        const price = svc.priceOverride ?? svc.price_fixed ?? svc.price_monthly ?? svc.price_hourly ?? 0;
+                        const price = svc.priceOverride ?? getModulePriceByModel(svc);
                         const suffix = svc.pricing_model === 'monthly' ? '/mo' : svc.pricing_model === 'hourly' ? '/hr' : '';
                         return (
                           <ServiceCard

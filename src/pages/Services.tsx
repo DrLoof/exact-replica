@@ -75,7 +75,8 @@ type FilterMode = 'all' | 'active' | 'inactive';
 function InlinePriceEditor({ mod, currencySymbol, onSave }: { mod: any; currencySymbol: string; onSave: (id: string, field: string, value: number) => Promise<void> }) {
   const [editing, setEditing] = useState(false);
   const [saved, setSaved] = useState(false);
-  const priceValue = mod.price_fixed || mod.price_monthly || mod.price_hourly || 0;
+  const priceField = priceFieldMap[mod.pricing_model] || 'price_fixed';
+  const priceValue = mod[priceField] ?? 0;
   const [draft, setDraft] = useState(priceValue.toString());
   const inputRef = useRef<HTMLInputElement>(null);
 

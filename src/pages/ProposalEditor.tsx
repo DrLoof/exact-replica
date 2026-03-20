@@ -35,6 +35,7 @@ import {
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 import { ProposalPDFRenderer } from '@/components/proposal/ProposalPDFRenderer';
 import { generateProposalPDF } from '@/lib/generateProposalPDF';
+import { getModulePriceByModel } from '@/lib/pricing';
 
 
 interface ProposalData {
@@ -336,7 +337,7 @@ export default function ProposalEditor() {
     const updated = [...services, mapped];
     setServices(updated);
     // Recalculate totals
-    const price = mod.price_fixed ?? mod.price_monthly ?? mod.price_hourly ?? 0;
+    const price = getModulePriceByModel(mod);
     const newFixed = (proposal.total_fixed || 0) + (mod.pricing_model === 'fixed' ? price : 0);
     const newMonthly = (proposal.total_monthly || 0) + (mod.pricing_model === 'monthly' ? price : 0);
     await supabase.from('proposals').update({ total_fixed: newFixed, total_monthly: newMonthly, grand_total: newFixed + newMonthly }).eq('id', proposal.id);
@@ -572,7 +573,7 @@ export default function ProposalEditor() {
     if (s.price_override != null) return s.price_override;
     const mod = s.module;
     if (!mod) return 0;
-    return mod.price_fixed ?? mod.price_monthly ?? mod.price_hourly ?? 0;
+    return getModulePriceByModel(mod);
   };
 
   const pricingSuffix = (model: string | null | undefined) => {
@@ -1780,7 +1781,7 @@ export default function ProposalEditor() {
                     </div>
                     <div className="text-right shrink-0 ml-3">
                       <p className="text-sm font-semibold tabular-nums text-foreground">
-                        {currencySymbol}{(mod.price_fixed ?? mod.price_monthly ?? mod.price_hourly ?? 0).toLocaleString()}
+                        {currencySymbol}{getModulePriceByModel(mod).toLocaleString()}
                         {mod.pricing_model === 'monthly' ? '/mo' : mod.pricing_model === 'hourly' ? '/hr' : ''}
                       </p>
                       <span className={cn('text-[10px] uppercase tracking-wider font-medium',

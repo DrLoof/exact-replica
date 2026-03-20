@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Check, ChevronDown, ChevronUp, Package, FolderOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { InlinePrice } from './InlinePrice';
+import { getModulePriceByModel } from '@/lib/pricing';
 
 interface ServiceZoneProps {
   modules: any[];
@@ -42,7 +43,7 @@ export function ServiceZone({
     })).filter((g: any) => g.modules.length > 0),
   [groups, modules]);
 
-  const getModulePrice = (m: any) => priceOverrides[m.id] ?? m.price_fixed ?? m.price_monthly ?? m.price_hourly ?? 0;
+  const getModulePrice = (m: any) => priceOverrides[m.id] ?? getModulePriceByModel(m);
   const priceSuffix: Record<string, string> = { fixed: '', monthly: '/mo', hourly: '/hr' };
 
   const getBundleModuleNames = (bundle: any) => {

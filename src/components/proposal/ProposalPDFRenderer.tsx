@@ -8,6 +8,7 @@ import {
 } from '@/components/proposal-template';
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
 import { calculateTimeline, getObjectivesStat, getKpiBarItems } from '@/lib/proposalStats';
+import { getModulePriceByModel } from '@/lib/pricing';
 
 interface ProposalPDFRendererProps {
   proposal: any;
@@ -50,7 +51,7 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
       currency: currencySymbol,
     };
 
-    const getPrice = (s: any) => s.price_override ?? s.module?.price_fixed ?? s.module?.price_monthly ?? s.module?.price_hourly ?? 0;
+    const getPrice = (s: any) => s.price_override ?? getModulePriceByModel(s.module || {});
     const formatPrice = (n: number) => `${currencySymbol}${n.toLocaleString()}`;
 
     const pricingItems = services.map((s: any) => {
