@@ -822,6 +822,7 @@ export default function ProposalNew() {
           modules={modules}
           groups={groups}
           bundles={bundles}
+          packages={packages}
           selectedModuleIds={selectedModuleIds}
           toggleModule={toggleModule}
           selectedBundleId={selectedBundleId}
