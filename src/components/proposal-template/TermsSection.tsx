@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { ChevronDown } from "lucide-react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
+import { usePDFMode } from "./TemplateProvider";
 import { EditableText } from "./EditableText";
 
 interface TermsSectionProps {
