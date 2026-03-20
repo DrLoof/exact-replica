@@ -1780,7 +1780,7 @@ export default function ProposalEditor() {
                     </div>
                     <div className="text-right shrink-0 ml-3">
                       <p className="text-sm font-semibold tabular-nums text-foreground">
-                        {currencySymbol}{(mod.price_fixed ?? mod.price_monthly ?? mod.price_hourly ?? 0).toLocaleString()}
+                        {currencySymbol}{getModulePriceByModel(mod).toLocaleString()}
                         {mod.pricing_model === 'monthly' ? '/mo' : mod.pricing_model === 'hourly' ? '/hr' : ''}
                       </p>
                       <span className={cn('text-[10px] uppercase tracking-wider font-medium',

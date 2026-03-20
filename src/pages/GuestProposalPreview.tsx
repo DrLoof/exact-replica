@@ -956,7 +956,7 @@ export default function GuestProposalPreview() {
                     <SectionHeader number="02" title="Scope of Services" subtitle="What we'll deliver for you" />
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                       {localServices.map((svc: any, i: number) => {
-                        const price = svc.priceOverride ?? svc.price_fixed ?? svc.price_monthly ?? svc.price_hourly ?? 0;
+                        const price = svc.priceOverride ?? getModulePriceByModel(svc);
                         const suffix = svc.pricing_model === 'monthly' ? '/mo' : svc.pricing_model === 'hourly' ? '/hr' : '';
                         return (
                           <ServiceCard

@@ -43,7 +43,7 @@ export function ServiceZone({
     })).filter((g: any) => g.modules.length > 0),
   [groups, modules]);
 
-  const getModulePrice = (m: any) => priceOverrides[m.id] ?? m.price_fixed ?? m.price_monthly ?? m.price_hourly ?? 0;
+  const getModulePrice = (m: any) => priceOverrides[m.id] ?? getModulePriceByModel(m);
   const priceSuffix: Record<string, string> = { fixed: '', monthly: '/mo', hourly: '/hr' };
 
   const getBundleModuleNames = (bundle: any) => {
