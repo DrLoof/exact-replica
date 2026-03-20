@@ -336,7 +336,7 @@ export default function ProposalEditor() {
     const updated = [...services, mapped];
     setServices(updated);
     // Recalculate totals
-    const price = mod.price_fixed ?? mod.price_monthly ?? mod.price_hourly ?? 0;
+    const price = getModulePriceByModel(mod);
     const newFixed = (proposal.total_fixed || 0) + (mod.pricing_model === 'fixed' ? price : 0);
     const newMonthly = (proposal.total_monthly || 0) + (mod.pricing_model === 'monthly' ? price : 0);
     await supabase.from('proposals').update({ total_fixed: newFixed, total_monthly: newMonthly, grand_total: newFixed + newMonthly }).eq('id', proposal.id);
