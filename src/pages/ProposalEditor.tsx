@@ -1705,6 +1705,19 @@ export default function ProposalEditor() {
                       }}
                       onHeadingEdit={(val) => updateField('title', val)}
                       onSubtitleEdit={(val) => updateField('subtitle', val)}
+                      onClosingHeadingEdit={async (val) => {
+                        setProposal((prev: any) => prev ? { ...prev, _closingHeading: val } : prev);
+                        await supabase.from('agencies').update({ tagline: val } as any).eq('id', agency.id);
+                      }}
+                      onClosingSubtitleEdit={async (val) => {
+                        setProposal((prev: any) => prev ? { ...prev, _closingSubtitle: val } : prev);
+                      }}
+                      onClosingEmailEdit={async (val) => {
+                        await supabase.from('agencies').update({ email: val }).eq('id', agency.id);
+                      }}
+                      onClosingPhoneEdit={async (val) => {
+                        await supabase.from('agencies').update({ phone: val }).eq('id', agency.id);
+                      }}
                     />
                   </PageWrapper>
                 </div>
