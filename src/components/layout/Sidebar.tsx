@@ -1,12 +1,15 @@
+import { useState, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, Users, Layers, Package, FolderOpen,
   Building2, Palette, Receipt, UserPlus, LogOut, Zap, X, Image,
+  Plus, Bell, Eye, Check, Clock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import logoOrange from '@/assets/logo_propopad_small.svg';
 import { useAuth } from '@/hooks/useAuth';
 import { useProposals } from '@/hooks/useAgencyData';
+import { supabase } from '@/integrations/supabase/client';
 
 const mainNav = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
