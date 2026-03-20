@@ -1,15 +1,14 @@
 import { useState } from 'react';
 import { Sidebar } from './Sidebar';
-import { Header } from './Header';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Menu, X } from 'lucide-react';
+import { Menu } from 'lucide-react';
 
 interface AppShellProps {
   children: React.ReactNode;
   hideHeader?: boolean;
 }
 
-export function AppShell({ children, hideHeader }: AppShellProps) {
+export function AppShell({ children }: AppShellProps) {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -35,14 +34,8 @@ export function AppShell({ children, hideHeader }: AppShellProps) {
       </div>
 
       <div className={`flex flex-1 flex-col ${isMobile ? '' : 'pl-[236px]'}`}>
-        {!hideHeader && (
-          <Header
-            onMenuToggle={isMobile ? () => setSidebarOpen(!sidebarOpen) : undefined}
-            showMenuButton={isMobile}
-          />
-        )}
-        {/* Mobile: show hamburger if header is hidden */}
-        {hideHeader && isMobile && (
+        {/* Mobile hamburger */}
+        {isMobile && (
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="fixed left-4 top-4 z-30 flex h-10 w-10 items-center justify-center rounded-lg bg-background shadow-md border border-border"
