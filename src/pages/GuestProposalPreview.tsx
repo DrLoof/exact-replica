@@ -750,7 +750,7 @@ export default function GuestProposalPreview() {
             <div className="flex items-center gap-3 px-2 relative" ref={colorPickerRef}>
               <div className="flex flex-col items-center gap-1">
                 <button
-                  onClick={() => setColorPickerOpen(colorPickerOpen === 'primaryAccent' ? null : 'primaryAccent')}
+                  onClick={() => { setColorPickerOpen(colorPickerOpen === 'primaryAccent' ? null : 'primaryAccent'); setHexInput(activePrimary.replace('#', '')); }}
                   className="w-6 h-6 rounded-full border-2 border-border hover:scale-110 transition-transform"
                   style={{ background: activePrimary }}
                   title="Primary accent"
