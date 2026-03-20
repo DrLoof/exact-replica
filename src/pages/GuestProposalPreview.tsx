@@ -759,7 +759,7 @@ export default function GuestProposalPreview() {
               </div>
               <div className="flex flex-col items-center gap-1">
                 <button
-                  onClick={() => setColorPickerOpen(colorPickerOpen === 'secondaryAccent' ? null : 'secondaryAccent')}
+                  onClick={() => { setColorPickerOpen(colorPickerOpen === 'secondaryAccent' ? null : 'secondaryAccent'); setHexInput(activeSecondary.replace('#', '')); }}
                   className="w-6 h-6 rounded-full border-2 border-border hover:scale-110 transition-transform"
                   style={{ background: activeSecondary }}
                   title="Secondary accent"
