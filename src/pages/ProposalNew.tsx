@@ -134,6 +134,7 @@ export default function ProposalNew() {
   const prefilledClientId = searchParams.get('client');
   const repeatMode = searchParams.get('repeat') === 'true';
   const initialBundleId = searchParams.get('bundle');
+  const initialPackageId = searchParams.get('package');
 
   useEffect(() => {
     if (initialBundleId && bundles.length > 0 && modules.length > 0) {
