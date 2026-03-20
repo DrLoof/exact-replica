@@ -167,8 +167,8 @@ export default function ProposalEditor() {
         setColorPickerOpen(null);
       }
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
   }, []);
 
   useEffect(() => {
