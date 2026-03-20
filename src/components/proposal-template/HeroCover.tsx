@@ -165,76 +165,83 @@ function ModernHeroCover({
   const accent = template.colors.primaryAccent;
   const secondary = template.colors.secondaryAccent;
   const dark = template.colors.primaryDark;
+  const muted = template.colors.textMuted;
   const displayDate = formatDisplayDate(date);
+  const agencyInitial = brand.agencyName?.charAt(0) || 'A';
 
   const Wrapper = isPDF ? 'div' : motion.div;
   const wrapperProps = (props: any) => isPDF ? {} : props;
 
+  // Render "&" in secondary color
   const renderTitle = (text: string) => {
     if (!text.includes("&")) return text;
     return text.split("&").map((part, i, arr) => (
       <React.Fragment key={i}>
         {part}
-        {i < arr.length - 1 && <span style={{ color: secondary }}>&amp;</span>}
+        {i < arr.length - 1 && <span style={{ color: secondary, fontStyle: 'italic' }}>&amp;</span>}
       </React.Fragment>
     ));
   };
 
+  // Derive a soft circle color from primaryDark
+  const circleColor = `${dark}18`;
+  const circleColorMedium = `${dark}12`;
+
   return (
     <div
       className="relative min-h-screen w-full overflow-hidden flex flex-col"
-      style={{ background: dark, fontFamily: "'Outfit', sans-serif" }}
+      style={{ background: '#F8F8F6', fontFamily: "'Outfit', sans-serif" }}
     >
-      {/* Bold geometric background */}
+      {/* Decorative circles */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Large accent ring, top-right */}
+        {/* Large circle top-right, partially off-screen */}
         <Wrapper
           {...wrapperProps({ initial: { scale: 0.8, opacity: 0 }, animate: { scale: 1, opacity: 1 }, transition: { duration: 1, ease: "easeOut" } })}
-          className="absolute -top-[15%] -right-[12%] w-[55%] aspect-square rounded-full"
-          style={{ border: `3px solid ${accent}30` }}
+          className="absolute rounded-full"
+          style={{ top: '-12%', right: '-8%', width: '48%', aspectRatio: '1', background: circleColor }}
         />
-        {/* Filled accent glow, bottom-left */}
+        {/* Medium circle right-center */}
         <Wrapper
-          {...wrapperProps({ initial: { scale: 0.5, opacity: 0 }, animate: { scale: 1, opacity: 1 }, transition: { delay: 0.2, duration: 0.8, ease: "easeOut" } })}
-          className="absolute -bottom-[20%] -left-[8%] w-[40%] aspect-square rounded-full"
-          style={{ background: accent, opacity: 0.08 }}
+          {...wrapperProps({ initial: { scale: 0.8, opacity: 0 }, animate: { scale: 1, opacity: 1 }, transition: { delay: 0.15, duration: 0.8, ease: "easeOut" } })}
+          className="absolute rounded-full"
+          style={{ top: '32%', right: '-4%', width: '32%', aspectRatio: '1', background: circleColorMedium }}
         />
-        {/* Small secondary dot */}
-        <div className="absolute top-[35%] right-[18%] w-4 h-4 rounded-full"
-          style={{ background: secondary, opacity: 0.5 }}
+        {/* Bottom-right circle */}
+        <Wrapper
+          {...wrapperProps({ initial: { scale: 0.8, opacity: 0 }, animate: { scale: 1, opacity: 1 }, transition: { delay: 0.3, duration: 0.8, ease: "easeOut" } })}
+          className="absolute rounded-full"
+          style={{ bottom: '-5%', right: '15%', width: '28%', aspectRatio: '1', background: circleColor }}
         />
-        {/* Accent gradient line */}
-        <div className="absolute top-[62%] left-0 h-px"
-          style={{ width: '35%', background: `linear-gradient(90deg, transparent, ${accent}40, transparent)` }}
-        />
-        {/* Grid dots pattern */}
-        {!isPDF && (
-          <div className="absolute top-[8%] right-[6%] grid grid-cols-4 gap-3 opacity-20">
-            {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ background: accent }} />
-            ))}
-          </div>
-        )}
+        {/* Small decorative dots */}
+        <div className="absolute rounded-full" style={{ top: '14%', left: '14%', width: 8, height: 8, background: `${dark}20` }} />
+        <div className="absolute rounded-full" style={{ top: '42%', left: '8%', width: 6, height: 6, background: `${dark}15` }} />
+      </div>
+
+      {/* Dot navigation indicators bottom-left */}
+      <div className="absolute bottom-10 left-10 z-10 flex items-center gap-2">
+        {[0,1,2,3].map(i => (
+          <div key={i} className="w-2.5 h-2.5 rounded-full" style={{ background: i === 0 ? accent : `${dark}20` }} />
+        ))}
       </div>
 
       {/* Top bar */}
       <Wrapper
         {...wrapperProps({ initial: { opacity: 0, y: -20 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.2, duration: 0.5 } })}
-        className="relative z-10 flex items-center justify-between px-8 pt-8 lg:px-14 lg:pt-12"
+        className="relative z-10 flex items-center justify-between px-10 pt-10 lg:px-14 lg:pt-12"
       >
         <div className="flex items-center gap-3" onClick={onLogoClick} style={{ cursor: onLogoClick ? 'pointer' : undefined }} title={onLogoClick ? 'Click to replace logo' : undefined}>
           {brand.logoUrl ? (
-            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain brightness-0 invert hover:opacity-80 transition-opacity" />
+            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain brightness-0 hover:opacity-80 transition-opacity" />
           ) : (
             <>
               <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-                style={{ background: accent }}>
+                style={{ background: dark }}>
                 <span className="text-white" style={{ fontSize: "16px", fontWeight: 800 }}>
-                  {brand.agencyName?.charAt(0) || 'A'}
+                  {agencyInitial}
                 </span>
               </div>
               <span className="tracking-wide uppercase"
-                style={{ fontSize: "14px", fontWeight: 700, color: "#FFFFFF" }}>
+                style={{ fontSize: "14px", fontWeight: 700, color: dark }}>
                 {brand.agencyName}
               </span>
             </>
@@ -242,20 +249,20 @@ function ModernHeroCover({
         </div>
         {proposalNumber && (
           <div className="px-4 py-1.5 rounded-full"
-            style={{ background: `${accent}20`, color: accent, fontSize: "12px", fontWeight: 600 }}>
+            style={{ border: `1.5px solid ${dark}25`, color: dark, fontSize: "12px", fontWeight: 600 }}>
             {proposalNumber}
           </div>
         )}
       </Wrapper>
 
       {/* Main content */}
-      <div className="relative z-10 flex-1 flex flex-col justify-center px-8 lg:px-14 max-w-3xl">
+      <div className="relative z-10 flex-1 flex flex-col justify-center px-10 lg:px-14 max-w-3xl">
         <Wrapper
           {...wrapperProps({ initial: { opacity: 0, y: 40 }, animate: { opacity: 1, y: 0 }, transition: { delay: 0.3, duration: 0.7, ease: "easeOut" } })}
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8"
-            style={{ background: `${accent}20`, color: accent, fontSize: "14px", fontWeight: 600 }}>
-            Proposal for {clientName}
+            style={{ background: `${accent}15`, color: accent, fontSize: "14px", fontWeight: 600 }}>
+            <span>✦</span> Proposal for {clientName}
           </div>
 
           {onTitleEdit ? (
@@ -268,14 +275,14 @@ function ModernHeroCover({
               style={{
                 fontFamily: "'Fraunces', serif",
                 fontSize: isPDF ? "56px" : "clamp(40px, 6vw, 72px)",
-                fontWeight: 800, lineHeight: 1.05, color: "#FFFFFF", letterSpacing: "-0.02em",
+                fontWeight: 800, lineHeight: 1.05, color: dark, letterSpacing: "-0.02em",
               }}
             />
           ) : (
             <h1 style={{
               fontFamily: "'Fraunces', serif",
               fontSize: isPDF ? "56px" : "clamp(40px, 6vw, 72px)",
-              fontWeight: 800, lineHeight: 1.05, color: "#FFFFFF", letterSpacing: "-0.02em",
+              fontWeight: 800, lineHeight: 1.05, color: dark, letterSpacing: "-0.02em",
             }}>
               {renderTitle(proposalTitle)}
             </h1>
@@ -289,11 +296,11 @@ function ModernHeroCover({
                 onSave={onSubtitleEdit}
                 as="p"
                 className="max-w-lg mt-6"
-                style={{ fontSize: "18px", fontWeight: 400, lineHeight: 1.7, color: "rgba(255,255,255,0.5)", fontFamily: "'Outfit', sans-serif" }}
+                style={{ fontSize: "17px", fontWeight: 400, lineHeight: 1.7, color: muted }}
               />
             ) : (
               <p className="max-w-lg mt-6"
-                style={{ fontSize: "18px", fontWeight: 400, lineHeight: 1.7, color: "rgba(255,255,255,0.5)" }}>
+                style={{ fontSize: "17px", fontWeight: 400, lineHeight: 1.7, color: muted }}>
                 {subtitle}
               </p>
             )
@@ -306,41 +313,41 @@ function ModernHeroCover({
           className="mt-14 flex flex-wrap items-center gap-4"
         >
           <div className="px-6 py-4 rounded-2xl"
-            style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)" }}>
+            style={{ background: '#FFFFFF', border: `1px solid ${dark}10` }}>
             <span className="block uppercase tracking-wider mb-1"
               style={{ fontSize: "10px", fontWeight: 600, color: accent }}>Prepared for</span>
             {onClientNameEdit ? (
               <EditableText value={clientName} placeholder="Client name" onSave={onClientNameEdit} as="span"
-                style={{ fontSize: "16px", fontWeight: 700, color: "#FFFFFF" }} />
+                style={{ fontSize: "16px", fontWeight: 700, color: dark }} />
             ) : (
-              <span style={{ fontSize: "16px", fontWeight: 700, color: "#FFFFFF" }}>{clientName}</span>
+              <span style={{ fontSize: "16px", fontWeight: 700, color: dark }}>{clientName}</span>
             )}
           </div>
           <div className="px-6 py-4 rounded-2xl"
-            style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)" }}>
+            style={{ background: '#FFFFFF', border: `1px solid ${dark}10` }}>
             <span className="block uppercase tracking-wider mb-1"
               style={{ fontSize: "10px", fontWeight: 600, color: accent }}>Date</span>
             {onDateEdit ? (
               <EditableText value={displayDate} placeholder="Date" onSave={onDateEdit} as="span"
-                style={{ fontSize: "16px", fontWeight: 700, color: "#FFFFFF" }} />
+                style={{ fontSize: "16px", fontWeight: 700, color: dark }} />
             ) : (
-              <span style={{ fontSize: "16px", fontWeight: 700, color: "#FFFFFF" }}>{displayDate}</span>
+              <span style={{ fontSize: "16px", fontWeight: 700, color: dark }}>{displayDate}</span>
             )}
           </div>
-          <div className="px-6 py-4 rounded-2xl flex items-center gap-2 cursor-pointer transition-transform hover:scale-105"
+          <div className="px-6 py-4 rounded-2xl flex flex-col cursor-pointer transition-transform hover:scale-105"
             style={{ background: accent, color: "white", boxShadow: `0 4px 20px ${accent}40` }}>
-            <span style={{ fontSize: "14px", fontWeight: 600 }}>Let's go</span>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>Let's go</span>
+            <span style={{ fontSize: "16px", marginTop: 2 }}>↘</span>
           </div>
         </Wrapper>
       </div>
 
-      {/* Bottom */}
+      {/* Page indicator bottom-right */}
       <Wrapper
         {...wrapperProps({ initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { delay: 0.8, duration: 0.5 } })}
-        className="relative z-10 px-8 lg:px-14 pb-8 flex items-center justify-end"
+        className="relative z-10 px-10 lg:px-14 pb-10 flex items-center justify-end"
       >
-        <span style={{ fontSize: "11px", fontWeight: 500, color: "rgba(255,255,255,0.3)" }}>
+        <span style={{ fontSize: "11px", fontWeight: 500, color: `${accent}80` }}>
           Page 01 of 09
         </span>
       </Wrapper>
