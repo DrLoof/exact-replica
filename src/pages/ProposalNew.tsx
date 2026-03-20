@@ -74,11 +74,13 @@ export default function ProposalNew() {
   const { data: dbModules = [] } = useServiceModules();
   const { data: dbGroups = [] } = useServiceGroups();
   const { data: dbBundles = [] } = useBundles();
+  const { data: dbPackages = [] } = usePackages();
   const { data: timelinePhases = [] } = useTimelinePhases();
 
   const modules = isGuestMode ? (guestData?.virtualModules || []) : dbModules;
   const groups = isGuestMode ? (guestData?.virtualGroups || []) : dbGroups;
   const bundles = isGuestMode ? [] : dbBundles;
+  const packages = isGuestMode ? [] : dbPackages;
   const currencySymbol = isGuestMode
     ? (guestOnboarding?.scrapeData?.detected_currency?.symbol || '$')
     : (agency?.currency_symbol || '$');
