@@ -1805,6 +1805,8 @@ export default function ProposalEditor() {
           agency={agency}
           onClose={() => setShowShareModal(false)}
           onStatusUpdate={(status) => setProposal(prev => prev ? { ...prev, status } : prev)}
+          onDownloadPDF={handleDownloadPDF}
+          isGeneratingPDF={isGeneratingPDF}
         />
       )}
     </div>
