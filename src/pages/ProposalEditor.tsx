@@ -732,7 +732,7 @@ export default function ProposalEditor() {
                         </span>
 
                         {/* Lock or eye toggle */}
-                        {isLocked ? (
+                        {isLocked && !isHidden ? (
                           <span style={{ color: isActive && !isHidden ? '#FFFFFF80' : '#D5CFC7' }}><Lock className="h-3 w-3" /></span>
                         ) : (
                           <button
