@@ -697,7 +697,7 @@ export default function GuestProposalPreview() {
 
                   {/* Lock or eye toggle — outside the highlight */}
                   <div className="w-6 flex items-center justify-center shrink-0">
-                    {isLocked ? (
+                    {isLocked && !isHidden ? (
                       <span style={{ color: '#D5CFC7' }}><Lock className="h-3 w-3" /></span>
                     ) : (
                       <button
