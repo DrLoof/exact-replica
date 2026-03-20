@@ -1129,7 +1129,7 @@ export default function ProposalEditor() {
                                 description={svc.module?.description || svc.module?.short_description || ''}
                                 deliverables={svc.custom_deliverables || svc.module?.deliverables || []}
                                 clientResponsibilities={
-                                  (proposal.show_client_responsibilities ?? true) && (svc.show_responsibilities !== false)
+                                  (proposal.show_client_responsibilities ?? false) && (svc.show_responsibilities !== false)
                                     ? (svc.client_responsibilities || svc.module?.client_responsibilities || [])
                                     : []
                                 }
