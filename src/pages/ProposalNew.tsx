@@ -726,6 +726,62 @@ export default function ProposalNew() {
           })));
         }
 
+        const guestPortfolioItems = Array.isArray(guestOnboarding.portfolioItems)
+          ? guestOnboarding.portfolioItems
+          : [];
+        if (guestPortfolioItems.length > 0) {
+          const { data: existingPortfolio } = await supabase
+            .from('portfolio_items')
+            .select('title')
+            .eq('agency_id', freshAgency.id);
+
+          const existingTitles = new Set(
+            (existingPortfolio || [])
+              .map((p: any) => (p.title || '').trim().toLowerCase())
+              .filter(Boolean)
+          );
+
+          const baseSortOrder = existingPortfolio?.length || 0;
+          const portfolioToInsert = guestPortfolioItems
+            .filter((item: any) => item?.title?.trim() && !existingTitles.has(item.title.trim().toLowerCase()))
+            .map((item: any, i: number) => {
+              const rawImages = Array.isArray(item.images)
+                ? item.images
+                : (Array.isArray(item.image_urls)
+                  ? item.image_urls.map((url: string, idx: number) => ({ url, alt_text: item.title || '', sort_order: idx }))
+                  : []);
+
+              const images = rawImages
+                .map((img: any, idx: number) => {
+                  const url = typeof img === 'string' ? img : img?.url;
+                  if (!url || typeof url !== 'string' || !url.startsWith('http')) return null;
+                  return {
+                    url,
+                    alt_text: typeof img === 'object' && img?.alt_text ? img.alt_text : (item.title || ''),
+                    sort_order: typeof img === 'object' && typeof img?.sort_order === 'number' ? img.sort_order : idx,
+                  };
+                })
+                .filter(Boolean)
+                .slice(0, 6);
+
+              return {
+                agency_id: freshAgency.id,
+                title: item.title.trim(),
+                category: item.category || 'Other',
+                description: item.description || null,
+                results: item.results || null,
+                images: images as any,
+                source_url: guestOnboarding?.scrapeData?.portfolio_url || null,
+                is_active: true,
+                sort_order: baseSortOrder + i,
+              };
+            });
+
+          if (portfolioToInsert.length > 0) {
+            await supabase.from('portfolio_items').insert(portfolioToInsert as any);
+          }
+        }
+
         const { data: existingTerms } = await supabase.from('terms_clauses').select('id').eq('agency_id', freshAgency.id);
         if (!existingTerms?.length) {
           await supabase.from('terms_clauses').insert([

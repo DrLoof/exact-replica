@@ -181,6 +181,7 @@ export function OnboardingWizard() {
         groupNameMap,
         addedBundles: [...addedBundles],
         teamMembers,
+        portfolioItems: portfolioItemsOnboarding,
       };
       localStorage.setItem('propopad_guest_onboarding', JSON.stringify(guestData));
       toast.success('Your agency profile is ready! Now create your first proposal.');

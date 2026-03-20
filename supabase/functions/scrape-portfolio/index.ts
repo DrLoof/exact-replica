@@ -29,10 +29,42 @@ function decodeHtmlEntities(s: string): string {
 
 function resolveUrl(u: string, baseUrl: string): string {
   if (!u || u.startsWith("data:")) return "";
-  if (u.startsWith("http")) return u;
   if (u.startsWith("//")) return "https:" + u;
-  if (u.startsWith("/")) return baseUrl + u;
-  return baseUrl + "/" + u;
+  try {
+    return new URL(u, baseUrl).toString();
+  } catch {
+    return "";
+  }
+}
+
+function looksLikePortfolioPage(html: string): boolean {
+  const lower = html.toLowerCase();
+  const keywordHits = ["case stud", "client success", "portfolio", "our work", "projects"].filter(k => lower.includes(k)).length;
+  const imageCount = (lower.match(/<img\s/gi) || []).length;
+  return keywordHits >= 1 && imageCount >= 5;
+}
+
+function normalizeForMatch(value: string): string {
+  return decodeHtmlEntities(value || "").toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function findMatchingImagesForTitle(title: string, pageImages: { url: string; alt: string }[]): string[] {
+  const normTitle = normalizeForMatch(title);
+  if (!normTitle) return [];
+
+  const tokens = normTitle.split(" ").filter(t => t.length >= 3);
+  if (tokens.length === 0) return [];
+
+  return pageImages
+    .map((img) => {
+      const haystack = `${normalizeForMatch(img.alt)} ${normalizeForMatch(img.url)}`;
+      const score = tokens.reduce((acc, token) => acc + (haystack.includes(token) ? 1 : 0), 0);
+      return { url: img.url, score };
+    })
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+    .map(item => item.url);
 }
 
 /** Extract images from HTML, handling lazy-loading attributes */
@@ -257,10 +289,40 @@ serve(async (req) => {
       });
     }
 
+    // If a homepage/non-portfolio URL was provided, try common portfolio paths automatically
+    try {
+      const currentPath = new URL(formattedUrl).pathname;
+      if ((currentPath === "/" || currentPath === "") && !looksLikePortfolioPage(html)) {
+        const origin = new URL(formattedUrl).origin;
+        const candidates = ["/client-success", "/portfolio", "/work", "/projects", "/case-studies", "/references", "/success-stories"];
+        for (const path of candidates) {
+          const candidateUrl = `${origin}${path}`;
+          try {
+            const resp = await fetch(candidateUrl, {
+              headers: { "User-Agent": "Mozilla/5.0 (compatible; Propopad/1.0)" },
+              redirect: "follow",
+            });
+            if (!resp.ok) continue;
+            const candidateHtml = await resp.text();
+            if (looksLikePortfolioPage(candidateHtml)) {
+              formattedUrl = candidateUrl;
+              html = candidateHtml;
+              console.log("Using detected portfolio URL:", formattedUrl);
+              break;
+            }
+          } catch {
+            // ignore candidate failures
+          }
+        }
+      }
+    } catch {
+      // no-op
+    }
+
     const baseUrl = new URL(formattedUrl).origin;
 
     // Extract images with lazy-loading support from listing page
-    const pageImages = extractImages(html, baseUrl);
+    const pageImages = extractImages(html, formattedUrl);
     console.log(`Extracted ${pageImages.length} images from listing page`);
 
     // Extract case study subpage links
@@ -272,7 +334,7 @@ serve(async (req) => {
     const subpageResults = new Map<string, SubpageData>();
     if (subpageEntries.length > 0) {
       const fetches = subpageEntries.map(async ([title, spUrl]) => {
-        const data = await fetchSubpageData(spUrl, baseUrl);
+        const data = await fetchSubpageData(spUrl, spUrl);
         if (data.text || data.heroImage) subpageResults.set(title, data);
       });
       await Promise.all(fetches);
@@ -347,6 +409,7 @@ For each project found, extract:
   1. If a "Hero image" URL is listed in the subpage content section below, USE IT FIRST — it's the best representation
   2. Then look for images from the listing page that match by alt text or URL containing the project/client name
   3. Include up to 3 images per project, hero image first
+  4. Avoid logos, icons, favicons, and decorative brand marks unless no better project image exists
 
 Rules:
 - Only extract REAL projects shown on the page, do NOT invent projects
@@ -412,7 +475,9 @@ Return format:
     // Clean up and validate projects, ensuring hero images from subpages are included
     const cleanProjects = projects.map((p: any, i: number) => {
       const title = decodeHtmlEntities(String(p.title || `Project ${i + 1}`)).trim();
-      let imageUrls: string[] = (p.image_urls || []).filter((u: string) => u && u.startsWith("http"));
+      let imageUrls: string[] = (p.image_urls || [])
+        .map((u: string) => resolveUrl(String(u || ""), formattedUrl))
+        .filter((u: string) => u && u.startsWith("http"));
       
       // If we have a hero image from the subpage for this project, ensure it's first
       const heroImg = subpageHeroImages[title];
@@ -431,6 +496,11 @@ Return format:
             break;
           }
         }
+      }
+
+      if (imageUrls.length === 0) {
+        const matched = findMatchingImagesForTitle(title, pageImages);
+        if (matched.length > 0) imageUrls = matched;
       }
 
       return {
