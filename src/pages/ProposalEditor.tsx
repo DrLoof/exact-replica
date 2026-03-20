@@ -1010,8 +1010,8 @@ export default function ProposalEditor() {
               <Share2 className="h-4 w-4" /> Share Proposal
             </button>
             <div className="flex items-center justify-between px-1">
-              <button onClick={() => window.print()} className="flex items-center gap-1.5 text-[12px] transition-colors hover:text-foreground" style={{ color: '#B8B0A5' }}>
-                <Download className="h-3.5 w-3.5" /> Download PDF
+              <button onClick={handleDownloadPDF} disabled={isGeneratingPDF} className="flex items-center gap-1.5 text-[12px] transition-colors hover:text-foreground disabled:opacity-50" style={{ color: '#B8B0A5' }}>
+                {isGeneratingPDF ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />} {isGeneratingPDF ? 'Generating...' : 'Download PDF'}
               </button>
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-green-500" />
