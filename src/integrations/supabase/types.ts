@@ -431,6 +431,92 @@ export type Database = {
           },
         ]
       }
+      package_modules: {
+        Row: {
+          display_order: number | null
+          id: string
+          module_id: string | null
+          package_id: string | null
+        }
+        Insert: {
+          display_order?: number | null
+          id?: string
+          module_id?: string | null
+          package_id?: string | null
+        }
+        Update: {
+          display_order?: number | null
+          id?: string
+          module_id?: string | null
+          package_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_modules_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "service_modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_modules_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      packages: {
+        Row: {
+          agency_id: string | null
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          last_used_at: string | null
+          name: string
+          updated_at: string | null
+          usage_count: number | null
+        }
+        Insert: {
+          agency_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          name: string
+          updated_at?: string | null
+          usage_count?: number | null
+        }
+        Update: {
+          agency_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          name?: string
+          updated_at?: string | null
+          usage_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "packages_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_templates: {
         Row: {
           agency_id: string | null
@@ -725,6 +811,7 @@ export type Database = {
           grand_total: number | null
           id: string
           notice_period: string | null
+          package_id: string | null
           payment_template_id: string | null
           phases: Json | null
           portfolio_section_title: string | null
@@ -771,6 +858,7 @@ export type Database = {
           grand_total?: number | null
           id?: string
           notice_period?: string | null
+          package_id?: string | null
           payment_template_id?: string | null
           phases?: Json | null
           portfolio_section_title?: string | null
@@ -817,6 +905,7 @@ export type Database = {
           grand_total?: number | null
           id?: string
           notice_period?: string | null
+          package_id?: string | null
           payment_template_id?: string | null
           phases?: Json | null
           portfolio_section_title?: string | null
@@ -863,6 +952,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
             referencedColumns: ["id"]
           },
           {
