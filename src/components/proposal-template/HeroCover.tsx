@@ -552,7 +552,7 @@ function ClassicHeroCoverInner({
               {proposalTitle}
             </h1>
           )}
-          {(subtitle || onSubtitleEdit) && (
+          {(onSubtitleEdit || hasRealSubtitle(subtitle)) && (
             onSubtitleEdit ? (
               <EditableText value={subtitle || ''} placeholder="Click to add a subtitle..." onSave={onSubtitleEdit} as="p"
                 className="max-w-lg mt-4" style={{ fontSize: "18px", fontWeight: 300, lineHeight: 1.6, color: "#666" }} />
