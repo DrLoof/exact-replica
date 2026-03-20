@@ -167,7 +167,7 @@ function ModernHeroCover({
   const dark = template.colors.primaryDark;
   const textBody = template.colors.textBody;
   const textFaint = template.colors.textFaint;
-  const displayDate = date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const displayDate = formatDisplayDate(date);
 
   const Wrapper = isPDF ? 'div' : motion.div;
   const wrapperProps = (props: any) => isPDF ? {} : props;
