@@ -878,7 +878,7 @@ export default function ProposalEditor() {
               <div className="mt-3 pt-3" style={{ borderTop: '1px solid #EEEAE3' }}>
                 <span className="block px-2 mb-2 text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#B8B0A5' }}>Scope Display</span>
                 <label className="flex items-center gap-2 px-2 py-1.5 cursor-pointer group">
-                  <input type="checkbox" checked={proposal.show_client_responsibilities ?? true}
+                  <input type="checkbox" checked={proposal.show_client_responsibilities ?? false}
                     onChange={(e) => updateField('show_client_responsibilities', e.target.checked)}
                     className="rounded border-border text-[#2A2118] focus:ring-[#2A2118] h-3.5 w-3.5 accent-[#2A2118]" />
                   <span className="text-xs group-hover:text-foreground transition-colors" style={{ color: '#7A7265' }}>Client Responsibilities</span>
