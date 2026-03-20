@@ -5,6 +5,19 @@ import { useTemplate } from "./TemplateProvider";
 import { usePDFMode } from "./TemplateProvider";
 import { EditableText } from "./EditableText";
 
+function formatDisplayDate(date?: string): string {
+  if (!date) return new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  // If ISO date like "2026-03-23", format it
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return date;
+  return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
+
+function hasRealSubtitle(subtitle?: string): boolean {
+  if (!subtitle) return false;
+  const trimmed = subtitle.trim();
+  return trimmed !== '' && !trimmed.startsWith('Click to');
+}
 
 interface HeroCoverProps {
   proposalTitle: string;
@@ -33,7 +46,7 @@ function ElegantHeroCover({
   const muted = template.colors.textMuted;
   const faint = template.colors.textFaint;
   const border = template.colors.border;
-  const displayDate = date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const displayDate = formatDisplayDate(date);
   const agencyInitial = brand.agencyName?.charAt(0) || 'A';
 
   const Wrapper = isPDF ? 'div' : motion.div;
@@ -92,7 +105,7 @@ function ElegantHeroCover({
               {proposalTitle}
             </h1>
           )}
-          {(subtitle || onSubtitleEdit) && (
+          {(onSubtitleEdit || hasRealSubtitle(subtitle)) && (
             onSubtitleEdit ? (
               <EditableText value={subtitle || ''} placeholder="Click to add a subtitle..." onSave={onSubtitleEdit} as="p"
                 className="max-w-lg mt-6"
@@ -154,7 +167,7 @@ function ModernHeroCover({
   const dark = template.colors.primaryDark;
   const textBody = template.colors.textBody;
   const textFaint = template.colors.textFaint;
-  const displayDate = date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const displayDate = formatDisplayDate(date);
 
   const Wrapper = isPDF ? 'div' : motion.div;
   const wrapperProps = (props: any) => isPDF ? {} : props;
@@ -262,7 +275,7 @@ function ModernHeroCover({
             </h1>
           )}
 
-          {(subtitle || onSubtitleEdit) && (
+          {(onSubtitleEdit || hasRealSubtitle(subtitle)) && (
             onSubtitleEdit ? (
               <EditableText
                 value={subtitle || ''}
@@ -338,7 +351,7 @@ function SoftHeroCover({
   const isPDF = usePDFMode();
   const accent = template.colors.primaryAccent;
   const dark = template.colors.primaryDark;
-  const displayDate = date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const displayDate = formatDisplayDate(date);
 
   const Wrapper = isPDF ? 'div' : motion.div;
   const wrapperProps = (props: any) => isPDF ? {} : props;
@@ -399,7 +412,7 @@ function SoftHeroCover({
               {proposalTitle}
             </h1>
           )}
-          {(subtitle || onSubtitleEdit) && (
+          {(onSubtitleEdit || hasRealSubtitle(subtitle)) && (
             onSubtitleEdit ? (
               <EditableText value={subtitle || ''} placeholder="Click to add a subtitle..." onSave={onSubtitleEdit} as="p"
                 className="max-w-lg mt-6"
@@ -539,7 +552,7 @@ function ClassicHeroCoverInner({
               {proposalTitle}
             </h1>
           )}
-          {(subtitle || onSubtitleEdit) && (
+          {(onSubtitleEdit || hasRealSubtitle(subtitle)) && (
             onSubtitleEdit ? (
               <EditableText value={subtitle || ''} placeholder="Click to add a subtitle..." onSave={onSubtitleEdit} as="p"
                 className="max-w-lg mt-4" style={{ fontSize: "18px", fontWeight: 300, lineHeight: 1.6, color: "#666" }} />
@@ -572,11 +585,11 @@ function ClassicHeroCoverInner({
               Date
             </span>
             {onDateEdit ? (
-              <EditableText value={date || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} placeholder="Date" onSave={onDateEdit} as="span"
+              <EditableText value={formatDisplayDate(date)} placeholder="Date" onSave={onDateEdit} as="span"
                 style={{ fontSize: "18px", fontWeight: 600, color: brand.darkColor }} />
             ) : (
               <span style={{ fontSize: "18px", fontWeight: 600, color: brand.darkColor }}>
-                {date || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                {formatDisplayDate(date)}
               </span>
             )}
           </div>
