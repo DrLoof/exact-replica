@@ -2,14 +2,17 @@ import { createContext, useContext, useEffect } from 'react';
 import { ProposalTemplate, templates } from '@/lib/proposalTemplates';
 
 const TemplateContext = createContext<ProposalTemplate>(templates.classic);
+const PDFModeContext = createContext<boolean>(false);
 
 export function TemplateProvider({ 
   templateId, 
   customColors,
+  isPDFMode = false,
   children 
 }: { 
   templateId: string; 
   customColors?: Record<string, string> | null;
+  isPDFMode?: boolean;
   children: React.ReactNode;
 }) {
   const baseTemplate = templates[templateId] || templates.classic;
@@ -33,12 +36,18 @@ export function TemplateProvider({
   }, [template]);
 
   return (
-    <TemplateContext.Provider value={template}>
-      {children}
-    </TemplateContext.Provider>
+    <PDFModeContext.Provider value={isPDFMode}>
+      <TemplateContext.Provider value={template}>
+        {children}
+      </TemplateContext.Provider>
+    </PDFModeContext.Provider>
   );
 }
 
 export function useTemplate() {
   return useContext(TemplateContext);
+}
+
+export function usePDFMode() {
+  return useContext(PDFModeContext);
 }
