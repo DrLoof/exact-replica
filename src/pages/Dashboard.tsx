@@ -75,11 +75,28 @@ export default function Dashboard() {
       };
     });
 
-  // Top services
-  const topModules = modules.slice(0, 4).map((m: any) => ({
-    name: m.name,
-    count: proposals.filter((p: any) => p.proposal_services?.some((ps: any) => ps.module_id === m.id)).length,
-  }));
+  // Top services — aggregate from proposal_services across all proposals
+  const topModules = (() => {
+    const countMap = new Map<string, { name: string; count: number }>();
+    for (const p of proposals) {
+      const services = (p as any).proposal_services || [];
+      for (const ps of services) {
+        const modId = ps.module_id;
+        if (!modId) continue;
+        const mod = modules.find((m: any) => m.id === modId);
+        if (!mod) continue;
+        const existing = countMap.get(modId);
+        if (existing) {
+          existing.count += 1;
+        } else {
+          countMap.set(modId, { name: mod.name, count: 1 });
+        }
+      }
+    }
+    return Array.from(countMap.values())
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 4);
+  })();
   const maxCount = Math.max(...topModules.map((m: any) => m.count), 1);
 
   const filteredClients = clientSearch
