@@ -223,6 +223,7 @@ export type Database = {
           bundle_price: number | null
           created_at: string
           description: string | null
+          display_order: number | null
           id: string
           individual_total: number | null
           is_active: boolean | null
@@ -236,6 +237,7 @@ export type Database = {
           bundle_price?: number | null
           created_at?: string
           description?: string | null
+          display_order?: number | null
           id?: string
           individual_total?: number | null
           is_active?: boolean | null
@@ -249,6 +251,7 @@ export type Database = {
           bundle_price?: number | null
           created_at?: string
           description?: string | null
+          display_order?: number | null
           id?: string
           individual_total?: number | null
           is_active?: boolean | null
