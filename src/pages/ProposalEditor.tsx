@@ -33,6 +33,8 @@ import {
   PortfolioCard,
 } from '@/components/proposal-template';
 import { TemplateProvider } from '@/components/proposal-template/TemplateProvider';
+import { ProposalPDFRenderer } from '@/components/proposal/ProposalPDFRenderer';
+import { generateProposalPDF } from '@/lib/generateProposalPDF';
 
 
 interface ProposalData {
