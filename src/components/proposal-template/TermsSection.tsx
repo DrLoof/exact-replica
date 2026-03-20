@@ -14,12 +14,37 @@ interface TermsSectionProps {
 export function TermsSection({ clauses, onClauseEdit }: TermsSectionProps) {
   const brand = useBrand();
   const template = useTemplate();
+  const isPDF = usePDFMode();
   const isModern = template.id === 'modern';
   const isElegant = template.id === 'elegant';
   const isSoft = template.id === 'soft';
   const accent = template.colors.primaryAccent;
   const dark = template.colors.primaryDark;
   const [openIndex, setOpenIndex] = useState<number | null>(isModern || isElegant || isSoft ? 0 : null);
+
+  // In PDF mode, render all clauses expanded as a simple list
+  if (isPDF) {
+    return (
+      <div className="space-y-4" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+        {clauses.map((clause, idx) => (
+          <div key={idx} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${template.colors.border}`, background: "white" }}>
+            <div className="flex items-center gap-3 px-5 py-4" style={{ background: `${accent}08` }}>
+              <span className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                style={{ fontSize: "11px", fontWeight: 700, backgroundColor: accent, color: "#FFFFFF" }}>
+                {idx + 1}
+              </span>
+              <span style={{ fontSize: "15px", fontWeight: 600, color: dark }}>{clause.title}</span>
+            </div>
+            <div className="px-5 pb-4 pt-2" style={{ paddingLeft: "52px" }}>
+              <p style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.7, color: template.colors.textBody }}>
+                {clause.content}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   if (isSoft) {
     const border = template.colors.border;
