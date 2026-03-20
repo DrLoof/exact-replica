@@ -274,12 +274,15 @@ export default function SettingsPortfolio() {
     for (let i = 0; i < selected.length; i++) {
       const project = selected[i];
 
-      // Download and re-upload images to storage
+      // Download and re-upload images to storage; fall back to original URL if CORS blocks
       const images: PortfolioImage[] = [];
       for (let j = 0; j < Math.min(project.image_urls.length, 6); j++) {
-        const uploadedUrl = await downloadAndUploadImage(project.image_urls[j]);
-        if (uploadedUrl) {
-          images.push({ url: uploadedUrl, alt_text: project.title, sort_order: images.length });
+        const originalUrl = project.image_urls[j];
+        const uploadedUrl = await downloadAndUploadImage(originalUrl);
+        // Use uploaded URL if available, otherwise keep the original external URL
+        const finalUrl = uploadedUrl || originalUrl;
+        if (finalUrl) {
+          images.push({ url: finalUrl, alt_text: project.title, sort_order: images.length });
         }
       }
 
