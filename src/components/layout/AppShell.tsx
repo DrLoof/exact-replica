@@ -50,7 +50,7 @@ export function AppShell({ children, hideHeader }: AppShellProps) {
             <Menu className="h-5 w-5 text-foreground" />
           </button>
         )}
-        <main className={`flex-1 ${isMobile ? 'px-4 py-4' : 'px-8 py-6'}`}>
+        <main className={`flex-1 ${isMobile ? 'px-4 py-4' : 'px-8 py-6'}`} style={{ backgroundImage: "url('/images/paper-background.png')", backgroundSize: "cover", backgroundRepeat: "repeat", backgroundAttachment: "fixed" }}>
           <div className="mx-auto max-w-[1200px]">
             {children}
           </div>
