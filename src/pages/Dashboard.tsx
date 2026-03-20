@@ -117,7 +117,7 @@ export default function Dashboard() {
   };
 
   return (
-    <AppShell>
+    <AppShell hideHeader>
       <div className="mx-auto max-w-[1080px]">
 
         {/* ─── Header ─── */}
