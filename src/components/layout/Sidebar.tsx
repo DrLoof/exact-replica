@@ -1,12 +1,14 @@
+import { useState } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, Users, Layers, Package, FolderOpen,
-  Building2, Palette, Receipt, UserPlus, LogOut, Zap, X, Image,
+  Building2, Palette, Receipt, UserPlus, LogOut, Zap, X, Image, MessageSquare,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import logoOrange from '@/assets/logo_propopad_small.svg';
 import { useAuth } from '@/hooks/useAuth';
 import { useProposals } from '@/hooks/useAgencyData';
+import { FeedbackModal } from '@/components/FeedbackModal';
 
 const mainNav = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
@@ -34,6 +36,7 @@ export function Sidebar({ onClose }: SidebarProps) {
   const navigate = useNavigate();
   const { userProfile, agency, signOut } = useAuth();
   const { data: proposals = [] } = useProposals();
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const activeProposalCount = proposals.filter((p: any) => p.status === 'sent' && !p.viewed_at).length;
 
@@ -181,7 +184,16 @@ export function Sidebar({ onClose }: SidebarProps) {
         <Link to="/terms" onClick={handleNav} className="text-[10px] hover:underline" style={{ color: '#B8B0A5' }}>Terms</Link>
         <span className="mx-1 text-[10px]" style={{ color: '#B8B0A5' }}>·</span>
         <Link to="/privacy" onClick={handleNav} className="text-[10px] hover:underline" style={{ color: '#B8B0A5' }}>Privacy</Link>
+        <span className="mx-1 text-[10px]" style={{ color: '#B8B0A5' }}>·</span>
+        <button onClick={() => setFeedbackOpen(true)} className="text-[10px] hover:underline" style={{ color: '#B8B0A5' }}>Feedback</button>
+        {userProfile?.is_admin && (
+          <>
+            <span className="mx-1 text-[10px]" style={{ color: '#B8B0A5' }}>·</span>
+            <Link to="/admin" onClick={handleNav} className="text-[10px] hover:underline" style={{ color: '#EF4444' }}>Admin</Link>
+          </>
+        )}
       </div>
+      <FeedbackModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
     </aside>
   );
 }
