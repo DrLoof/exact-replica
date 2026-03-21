@@ -103,7 +103,8 @@ export default function PublicProposal() {
     );
   }
 
-  const brandColor = agency?.brand_color || '#fc956e';
+  const customColors = proposal?.custom_colors as Record<string, string> | null;
+  const brandColor = customColors?.primaryAccent || agency?.brand_color || '#fc956e';
   const darkColor = agency?.dark_color || '#0A0A0A';
   const currencySymbol = agency?.currency_symbol || '$';
 
