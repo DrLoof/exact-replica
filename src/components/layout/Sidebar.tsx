@@ -184,6 +184,14 @@ export function Sidebar({ onClose }: SidebarProps) {
         <Link to="/terms" onClick={handleNav} className="text-[10px] hover:underline" style={{ color: '#B8B0A5' }}>Terms</Link>
         <span className="mx-1 text-[10px]" style={{ color: '#B8B0A5' }}>·</span>
         <Link to="/privacy" onClick={handleNav} className="text-[10px] hover:underline" style={{ color: '#B8B0A5' }}>Privacy</Link>
+        <span className="mx-1 text-[10px]" style={{ color: '#B8B0A5' }}>·</span>
+        <button onClick={() => setFeedbackOpen(true)} className="text-[10px] hover:underline" style={{ color: '#B8B0A5' }}>Feedback</button>
+        {userProfile?.is_admin && (
+          <>
+            <span className="mx-1 text-[10px]" style={{ color: '#B8B0A5' }}>·</span>
+            <Link to="/admin" onClick={handleNav} className="text-[10px] hover:underline" style={{ color: '#EF4444' }}>Admin</Link>
+          </>
+        )}
       </div>
     </aside>
   );
