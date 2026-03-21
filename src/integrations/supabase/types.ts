@@ -790,6 +790,71 @@ export type Database = {
           },
         ]
       }
+      proposal_signatures: {
+        Row: {
+          consent_text: string
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          proposal_hash: string | null
+          proposal_id: string | null
+          proposal_snapshot: Json | null
+          role: string | null
+          signature_font: string | null
+          signature_text: string
+          signed_at: string
+          signer_company: string
+          signer_email: string | null
+          signer_name: string
+          signer_title: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          consent_text: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          proposal_hash?: string | null
+          proposal_id?: string | null
+          proposal_snapshot?: Json | null
+          role?: string | null
+          signature_font?: string | null
+          signature_text: string
+          signed_at?: string
+          signer_company: string
+          signer_email?: string | null
+          signer_name: string
+          signer_title?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          consent_text?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          proposal_hash?: string | null
+          proposal_id?: string | null
+          proposal_snapshot?: Json | null
+          role?: string | null
+          signature_font?: string | null
+          signature_text?: string
+          signed_at?: string
+          signer_company?: string
+          signer_email?: string | null
+          signer_name?: string
+          signer_title?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_signatures_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proposals: {
         Row: {
           accepted_at: string | null
@@ -810,6 +875,7 @@ export type Database = {
           goals: Json | null
           grand_total: number | null
           id: string
+          is_locked: boolean | null
           notice_period: string | null
           package_id: string | null
           payment_template_id: string | null
@@ -825,6 +891,8 @@ export type Database = {
           sent_at: string | null
           show_client_responsibilities: boolean | null
           show_out_of_scope: boolean | null
+          signed_at: string | null
+          signed_pdf_url: string | null
           status: string | null
           subtitle: string | null
           team: Json | null
@@ -857,6 +925,7 @@ export type Database = {
           goals?: Json | null
           grand_total?: number | null
           id?: string
+          is_locked?: boolean | null
           notice_period?: string | null
           package_id?: string | null
           payment_template_id?: string | null
@@ -872,6 +941,8 @@ export type Database = {
           sent_at?: string | null
           show_client_responsibilities?: boolean | null
           show_out_of_scope?: boolean | null
+          signed_at?: string | null
+          signed_pdf_url?: string | null
           status?: string | null
           subtitle?: string | null
           team?: Json | null
@@ -904,6 +975,7 @@ export type Database = {
           goals?: Json | null
           grand_total?: number | null
           id?: string
+          is_locked?: boolean | null
           notice_period?: string | null
           package_id?: string | null
           payment_template_id?: string | null
@@ -919,6 +991,8 @@ export type Database = {
           sent_at?: string | null
           show_client_responsibilities?: boolean | null
           show_out_of_scope?: boolean | null
+          signed_at?: string | null
+          signed_pdf_url?: string | null
           status?: string | null
           subtitle?: string | null
           team?: Json | null

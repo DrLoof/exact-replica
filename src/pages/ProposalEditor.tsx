@@ -279,6 +279,7 @@ export default function ProposalEditor() {
 
   const removeService = async (serviceId: string) => {
     if (!proposal) return;
+    if ((proposal as any).is_locked) { toast.error('This proposal is signed and locked'); return; }
     const removedService = services.find(s => s.id === serviceId);
     if (!removedService) return;
 
@@ -352,6 +353,7 @@ export default function ProposalEditor() {
 
   const updateField = async (field: string, value: any) => {
     if (!proposal) return;
+    if ((proposal as any).is_locked) { toast.error('This proposal is signed and locked'); return; }
     // Store undo state
     undoRef.current = { field, value: (proposal as any)[field] };
     await supabase.from('proposals').update({ [field]: value }).eq('id', proposal.id);
@@ -633,21 +635,77 @@ export default function ProposalEditor() {
 
   const proposalDate = proposal.project_start_date || new Date(proposal.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
+  const isLocked = !!(proposal as any).is_locked;
+
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
+      {/* Locked banner */}
+      {isLocked && (
+        <div className="sticky top-0 z-40 flex items-center justify-center gap-3 bg-amber-50 border-b border-amber-200 px-4 py-2.5">
+          <Lock className="h-4 w-4 text-amber-600" />
+          <span className="text-sm font-medium text-amber-800">
+            This proposal has been signed and is locked for editing.
+          </span>
+          <button
+            onClick={async () => {
+              // Duplicate as new draft
+              if (!proposal || !agency) return;
+              const counter = (agency.proposal_counter || 0) + 1;
+              const prefix = agency.proposal_prefix || 'PRO';
+              const refNum = `${prefix}-${String(counter).padStart(4, '0')}`;
+              await supabase.from('agencies').update({ proposal_counter: counter }).eq('id', agency.id);
+              const { data: newProp } = await supabase.from('proposals').insert({
+                ...Object.fromEntries(Object.entries(proposal).filter(([k]) => !['id', 'created_at', 'updated_at', 'status', 'accepted_at', 'declined_at', 'sent_at', 'viewed_at', 'signed_at', 'is_locked', 'signed_pdf_url'].includes(k))),
+                reference_number: refNum,
+                status: 'draft',
+                is_locked: false,
+                signed_at: null,
+                signed_pdf_url: null,
+              } as any).select('id').single();
+              if (newProp) {
+                // Copy services
+                const svcInserts = services.map(s => ({
+                  proposal_id: newProp.id,
+                  module_id: s.module_id,
+                  display_order: s.display_order,
+                  is_addon: s.is_addon,
+                  price_override: s.price_override,
+                  custom_deliverables: s.custom_deliverables,
+                  bundle_id: s.bundle_id,
+                  client_responsibilities: s.client_responsibilities,
+                  out_of_scope: s.out_of_scope,
+                  show_responsibilities: s.show_responsibilities,
+                  show_out_of_scope: s.show_out_of_scope,
+                }));
+                if (svcInserts.length > 0) await supabase.from('proposal_services').insert(svcInserts as any);
+                toast.success('Revised proposal created');
+                navigate(`/proposals/${newProp.id}`);
+              }
+            }}
+            className="ml-4 px-3 py-1.5 text-xs font-semibold rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors"
+          >
+            Create Revised Proposal
+          </button>
+        </div>
+      )}
       {/* Top Bar */}
-      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-background/95 backdrop-blur px-6 py-3 print:hidden">
+      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-background/95 backdrop-blur px-6 py-3 print:hidden" style={isLocked ? { top: '44px' } : undefined}>
         <div className="flex items-center gap-4">
           <button onClick={() => navigate('/proposals')} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> Back
           </button>
-          <EditableText
-            value={proposal.title || 'Untitled Proposal'}
-            onSave={(val) => updateField('title', val)}
-            as="span"
-            className="text-sm font-medium text-foreground"
-          />
+          {isLocked ? (
+            <span className="text-sm font-medium text-foreground">{proposal.title || 'Untitled Proposal'}</span>
+          ) : (
+            <EditableText
+              value={proposal.title || 'Untitled Proposal'}
+              onSave={(val) => updateField('title', val)}
+              as="span"
+              className="text-sm font-medium text-foreground"
+            />
+          )}
           <span className={cn('rounded-full px-2.5 py-0.5 text-xs font-medium', sc.className)}>{sc.label}</span>
+          {isLocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
         </div>
         <div className="flex items-center gap-3">
           <span className="text-xs text-muted-foreground font-mono">{proposal.reference_number}</span>

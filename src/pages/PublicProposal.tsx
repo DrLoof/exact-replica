@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { AlertTriangle, Layers, CheckCircle2, XCircle } from 'lucide-react';
+import { AlertTriangle, Layers, CheckCircle2, XCircle, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import { SignProposalModal } from '@/components/proposal/SignProposalModal';
+import { DeclineProposalModal } from '@/components/proposal/DeclineProposalModal';
 import {
   BrandProvider, HeroCover, SectionHeader, TextContent, HighlightPanel,
   BundleCard, ServiceCard, PricingSummary, TimelineStep, TermsSection,
@@ -24,6 +26,9 @@ export default function PublicProposal() {
   const [termsClauses, setTermsClauses] = useState<any[]>([]);
   const [timelinePhases, setTimelinePhases] = useState<any[]>([]);
   const [paymentTemplates, setPaymentTemplates] = useState<any[]>([]);
+  const [signature, setSignature] = useState<any>(null);
+  const [showSignModal, setShowSignModal] = useState(false);
+  const [showDeclineModal, setShowDeclineModal] = useState(false);
 
   useEffect(() => {
     if (shareId) loadProposal();
@@ -78,6 +83,20 @@ export default function PublicProposal() {
     if (selectedPortfolioIds.length > 0 && prop.portfolio_section_visible && prop.agency_id) {
       const { data: piData } = await supabase.from('portfolio_items').select('*').eq('agency_id', prop.agency_id).eq('is_active', true).in('id', selectedPortfolioIds);
       setPortfolioItems((piData || []).map((d: any) => ({ ...d, images: d.images || [] })));
+    }
+
+    // Load existing signature if proposal is accepted/signed
+    if (prop.status === 'accepted' || (prop as any).is_locked) {
+      const { data: sigData } = await supabase
+        .from('proposal_signatures' as any)
+        .select('*')
+        .eq('proposal_id', prop.id)
+        .eq('role', 'client')
+        .order('signed_at', { ascending: false })
+        .limit(1);
+      if (sigData && sigData.length > 0) {
+        setSignature(sigData[0]);
+      }
     }
 
     setLoading(false);
@@ -523,35 +542,77 @@ export default function PublicProposal() {
               client={{
                 role: 'Client',
                 companyName: client?.company_name || 'Client',
-                personName: client?.contact_name || undefined,
-                title: client?.contact_title || undefined,
+                personName: signature ? signature.signer_name : (client?.contact_name || undefined),
+                title: signature ? signature.signer_title : (client?.contact_title || undefined),
               }}
             />
 
-            {proposal.status === 'accepted' && (
+            {/* Signed state */}
+            {signature && (
+              <div className="mt-8 text-center">
+                <div className="inline-flex items-center gap-3 rounded-xl border-2 p-5" style={{ borderColor: `${brandColor}40`, backgroundColor: `${brandColor}08` }}>
+                  <CheckCircle2 className="h-5 w-5" style={{ color: brandColor }} />
+                  <div className="text-left">
+                    <p className="text-sm font-semibold" style={{ color: '#2A2118', fontFamily: "'Space Grotesk', sans-serif" }}>
+                      Signed by {signature.signer_name}
+                    </p>
+                    <p className="text-xs" style={{ color: '#8A7F72' }}>
+                      {new Date(signature.signed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <span style={{ fontFamily: "'Caveat', cursive", fontSize: '28px', color: '#2A2118' }}>
+                    {signature.signature_text}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {!signature && proposal.status === 'accepted' && (
               <div className="mt-8 flex items-center justify-center gap-3 rounded-xl border-2 border-green-200 bg-green-50 p-6">
                 <CheckCircle2 className="h-6 w-6 text-green-600" />
                 <p className="text-lg font-semibold text-green-800" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>This proposal has been accepted</p>
               </div>
             )}
+
             {proposal.status === 'declined' && (
               <div className="mt-8 flex items-center justify-center gap-3 rounded-xl border-2 border-red-200 bg-red-50 p-6">
                 <XCircle className="h-6 w-6 text-red-600" />
-                <p className="text-lg font-semibold text-red-800" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>This proposal has been declined</p>
+                <p className="text-lg font-semibold text-red-800" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  Declined{(proposal as any).declined_at ? ` on ${new Date((proposal as any).declined_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}` : ''}
+                </p>
               </div>
             )}
           </div>
         </div>
-        {/* End document container */}
 
-        {/* Accept / Decline Actions — outside document container */}
         {(proposal.status === 'sent' || proposal.status === 'viewed') && (
           <div style={{ maxWidth: '900px', margin: '32px auto 0', textAlign: 'center' }}>
-            <ProposalActions proposalId={proposal.id} brandColor={brandColor} onStatusChange={(status) => setProposal((prev: any) => prev ? { ...prev, status } : prev)} />
+            <p className="text-center mb-4" style={{ fontSize: '16px', fontWeight: 600, color: '#2A2118', fontFamily: "'Space Grotesk', sans-serif" }}>
+              Ready to move forward?
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              <button
+                onClick={() => setShowSignModal(true)}
+                className="flex items-center gap-2 px-8 py-3.5 text-[15px] font-semibold text-white transition-all hover:scale-105"
+                style={{ backgroundColor: brandColor, borderRadius: '10px', border: 'none', cursor: 'pointer' }}
+              >
+                <CheckCircle2 className="h-5 w-5" />
+                Accept Proposal
+              </button>
+              <button
+                onClick={() => setShowDeclineModal(true)}
+                className="flex items-center gap-2 px-8 py-3.5 text-[15px] font-medium transition-all hover:border-red-300 hover:text-red-600"
+                style={{ background: 'transparent', color: '#8A7F72', borderRadius: '10px', border: '1px solid #EEEAE3', cursor: 'pointer' }}
+              >
+                <XCircle className="h-5 w-5" />
+                Decline
+              </button>
+            </div>
           </div>
         )}
 
-        {/* Powered by Propopad watermark */}
         <div className="text-center" style={{ marginTop: '24px' }}>
           <p style={{ fontSize: '11px', color: '#B8B0A5' }}>
             Powered by{' '}
@@ -562,74 +623,45 @@ export default function PublicProposal() {
           </p>
         </div>
 
-        {/* Tracking notice */}
         <p className="text-center" style={{ fontSize: '10px', color: '#C8C3BB', marginTop: '32px', marginBottom: '16px' }}>
           Viewing activity is tracked to help {agency?.name || 'the agency'} follow up.
         </p>
       </div>
+
+      {showSignModal && (
+        <SignProposalModal
+          proposalId={proposal.id}
+          proposalTitle={proposal.title || proposal.reference_number}
+          totalInvestment={totalStr}
+          validUntil={validUntil}
+          clientName={client?.company_name}
+          clientContactName={client?.contact_name}
+          clientContactTitle={client?.contact_title}
+          clientEmail={client?.contact_email}
+          brandColor={brandColor}
+          agencyName={agency?.name || 'the agency'}
+          onClose={() => setShowSignModal(false)}
+          onSigned={(sig) => {
+            setSignature(sig);
+            setProposal((prev: any) => prev ? { ...prev, status: 'accepted', is_locked: true, signed_at: sig.signed_at } : prev);
+            setShowSignModal(false);
+          }}
+        />
+      )}
+
+      {showDeclineModal && (
+        <DeclineProposalModal
+          proposalId={proposal.id}
+          agencyName={agency?.name || 'the agency'}
+          agencyEmail={agency?.email}
+          onClose={() => setShowDeclineModal(false)}
+          onDeclined={() => {
+            setProposal((prev: any) => prev ? { ...prev, status: 'declined', declined_at: new Date().toISOString() } : prev);
+            setShowDeclineModal(false);
+          }}
+        />
+      )}
     </BrandProvider>
     </TemplateProvider>
-  );
-}
-
-function ProposalActions({ proposalId, brandColor, onStatusChange }: { proposalId: string; brandColor: string; onStatusChange: (status: string) => void }) {
-  const [acting, setActing] = useState(false);
-  const [confirmed, setConfirmed] = useState<string | null>(null);
-
-  const handleAction = async (action: 'accepted' | 'declined') => {
-    if (confirmed && confirmed !== action) return;
-    if (!confirmed) {
-      setConfirmed(action);
-      return;
-    }
-    setActing(true);
-    const updates: any = { status: action };
-    if (action === 'accepted') updates.accepted_at = new Date().toISOString();
-    if (action === 'declined') updates.declined_at = new Date().toISOString();
-    await supabase.from('proposals').update(updates).eq('id', proposalId);
-    onStatusChange(action);
-    toast.success(action === 'accepted' ? 'Proposal accepted!' : 'Proposal declined');
-    setActing(false);
-  };
-
-  return (
-    <div>
-      <p className="text-center mb-4" style={{ fontSize: '16px', fontWeight: 600, color: '#2A2118' }}>
-        Ready to move forward?
-      </p>
-      <div className="flex items-center justify-center gap-3">
-        {(!confirmed || confirmed === 'accepted') && (
-          <button
-            onClick={() => handleAction('accepted')}
-            disabled={acting}
-            className="flex items-center gap-2 px-8 py-3.5 text-[15px] font-semibold text-white transition-all hover:scale-105 disabled:opacity-50"
-            style={{ backgroundColor: brandColor, borderRadius: '10px', border: 'none', cursor: 'pointer' }}
-          >
-            <CheckCircle2 className="h-5 w-5" />
-            {confirmed === 'accepted' ? (acting ? 'Confirming...' : 'Click again to confirm') : 'Accept Proposal'}
-          </button>
-        )}
-        {(!confirmed || confirmed === 'declined') && (
-          <button
-            onClick={() => handleAction('declined')}
-            disabled={acting}
-            className="flex items-center gap-2 px-8 py-3.5 text-[15px] font-medium transition-all hover:border-red-300 hover:text-red-600 disabled:opacity-50"
-            style={{ background: 'transparent', color: '#8A7F72', borderRadius: '10px', border: '1px solid #EEEAE3', cursor: 'pointer' }}
-          >
-            <XCircle className="h-5 w-5" />
-            {confirmed === 'declined' ? (acting ? 'Confirming...' : 'Click again to confirm') : 'Decline'}
-          </button>
-        )}
-        {confirmed && (
-          <button
-            onClick={() => setConfirmed(null)}
-            className="text-sm hover:text-[#666]"
-            style={{ color: '#999' }}
-          >
-            Cancel
-          </button>
-        )}
-      </div>
-    </div>
   );
 }
