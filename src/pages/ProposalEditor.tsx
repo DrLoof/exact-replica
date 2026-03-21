@@ -279,6 +279,7 @@ export default function ProposalEditor() {
 
   const removeService = async (serviceId: string) => {
     if (!proposal) return;
+    if ((proposal as any).is_locked) { toast.error('This proposal is signed and locked'); return; }
     const removedService = services.find(s => s.id === serviceId);
     if (!removedService) return;
 
