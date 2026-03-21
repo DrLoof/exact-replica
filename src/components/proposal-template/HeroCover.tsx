@@ -54,10 +54,12 @@ function ElegantHeroCover({
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden flex flex-col" style={{ background: "#FAFAF8" }}>
-      {/* Soft gradient blobs */}
+      {/* Soft gradient blobs — using brand colors */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-[20%] -right-[15%] w-[65%] h-[65%] rounded-full bg-[#EDE5FF] blur-[100px] opacity-70" />
-        <div className="absolute -bottom-[15%] -left-[10%] w-[50%] h-[50%] rounded-full bg-[#FFE4D6] blur-[100px] opacity-50" />
+        <div className="absolute -top-[20%] -right-[15%] w-[65%] h-[65%] rounded-full blur-[100px]"
+          style={{ background: accent, opacity: 0.15 }} />
+        <div className="absolute -bottom-[15%] -left-[10%] w-[50%] h-[50%] rounded-full blur-[100px]"
+          style={{ background: secondary, opacity: 0.12 }} />
         <div className="absolute top-[30%] right-[10%] w-[20%] h-[20%] rounded-full blur-[80px]"
           style={{ background: accent, opacity: 0.1 }} />
       </div>
