@@ -513,7 +513,7 @@ function ClassicHeroCoverInner({
         >
           <div onClick={onLogoClick} style={{ cursor: onLogoClick ? 'pointer' : undefined }} title={onLogoClick ? 'Click to replace logo' : undefined}>
           {brand.logoUrl ? (
-            <img src={brand.logoUrl} alt={brand.agencyName} className="h-32 w-auto object-contain brightness-0 hover:opacity-80 transition-opacity" />
+            <img src={brand.logoUrl} alt={brand.agencyName} className="h-12 w-auto object-contain brightness-0 hover:opacity-80 transition-opacity" />
           ) : (
             <span className="tracking-[0.15em] uppercase"
               style={{ fontSize: "18px", fontWeight: 700, color: brand.darkColor, letterSpacing: "0.08em" }}>
