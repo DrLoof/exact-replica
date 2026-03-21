@@ -187,25 +187,27 @@ function ModernHeroCover({
       className="relative min-h-screen w-full overflow-hidden flex flex-col"
       style={{ background: "#FAFAF8", fontFamily: "'Outfit', sans-serif" }}
     >
-      {/* Background circles — large, semi-transparent, defined edges */}
+      {/* Background circles — large, semi-transparent with soft edges */}
       {!isPDF && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-[8%] -right-[8%] w-[450px] h-[450px] rounded-full"
-            style={{ background: accent, opacity: 0.10, filter: 'blur(2px)' }} />
-          <div className="absolute top-[35%] -right-[5%] w-[350px] h-[350px] rounded-full"
-            style={{ background: accent, opacity: 0.08, filter: 'blur(2px)' }} />
-          <div className="absolute bottom-[5%] right-[15%] w-[250px] h-[250px] rounded-full"
-            style={{ background: secondary, opacity: 0.10, filter: 'blur(2px)' }} />
+          <div className="absolute -top-[12%] -right-[10%] rounded-full"
+            style={{ width: '550px', height: '550px', background: accent, opacity: 0.15, filter: 'blur(12px)' }} />
+          <div className="absolute top-[38%] -right-[6%] rounded-full"
+            style={{ width: '380px', height: '380px', background: accent, opacity: 0.12, filter: 'blur(12px)' }} />
+          <div className="absolute bottom-[2%] right-[12%] rounded-full"
+            style={{ width: '280px', height: '280px', background: secondary, opacity: 0.14, filter: 'blur(12px)' }} />
+          <div className="absolute bottom-[30%] left-[2%] rounded-full"
+            style={{ width: '160px', height: '160px', background: accent, opacity: 0.08, filter: 'blur(12px)' }} />
         </div>
       )}
 
       {/* Small decorative dots */}
       {!isPDF && (
         <>
-          <div className="absolute top-[15%] left-[12%] w-2 h-2 rounded-full pointer-events-none"
+          <div className="absolute top-[15%] left-[12%] w-2.5 h-2.5 rounded-full pointer-events-none"
+            style={{ background: accent, opacity: 0.35 }} />
+          <div className="absolute top-[58%] left-[4%] w-3 h-3 rounded-full pointer-events-none"
             style={{ background: accent, opacity: 0.3 }} />
-          <div className="absolute top-[58%] left-[6%] w-2.5 h-2.5 rounded-full pointer-events-none"
-            style={{ background: accent, opacity: 0.25, animation: 'pulse 3s ease-in-out infinite' }} />
         </>
       )}
 
