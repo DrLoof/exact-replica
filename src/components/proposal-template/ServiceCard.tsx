@@ -218,7 +218,7 @@ export function ServiceCard({
   const renderRemoveButton = () => onRemove && (
     <button
       onClick={onRemove}
-      className="absolute -top-2 -right-2 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100 print:hidden"
+      className="absolute -top-2 -right-2 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white opacity-0 shadow-md transition-opacity group-hover/svc:opacity-100 print:hidden"
       title="Remove service"
     >
       <X className="h-3 w-3" />
