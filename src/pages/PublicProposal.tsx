@@ -203,11 +203,10 @@ export default function PublicProposal() {
       <div className="min-h-screen md:py-10" style={{ background: '#F0EFEC' }}>
         {/* Document container */}
         <div
-          className="mx-auto overflow-hidden"
+          className="mx-auto md:rounded-lg overflow-hidden"
           style={{
             maxWidth: '900px',
             background: '#FAFAF8',
-            borderRadius: '8px',
             boxShadow: '0 2px 20px rgba(0,0,0,0.06)',
           }}
         >
