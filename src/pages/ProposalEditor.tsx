@@ -36,6 +36,8 @@ import { TemplateProvider } from '@/components/proposal-template/TemplateProvide
 import { ProposalPDFRenderer } from '@/components/proposal/ProposalPDFRenderer';
 import { generateProposalPDF } from '@/lib/generateProposalPDF';
 import { getModulePriceByModel } from '@/lib/pricing';
+import { InlineGoalsEditor, AddGoalsPrompt } from '@/components/proposal-template/InlineGoalsEditor';
+import type { SelectedGoal } from '@/components/proposal-new/ClientZone';
 
 
 interface ProposalData {
