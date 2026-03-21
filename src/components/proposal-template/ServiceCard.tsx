@@ -577,7 +577,7 @@ export function ServiceCard({
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.5, ease: "easeOut" }}
-        className="group relative rounded-3xl p-7 transition-transform duration-300 hover:-translate-y-1"
+        className="group/svc relative rounded-3xl p-7 transition-transform duration-300 hover:-translate-y-1"
         style={{
           background: template.colors.cardBackground, fontFamily: "'Outfit', sans-serif",
           border: `2px solid ${borderColor}`,
