@@ -26,6 +26,9 @@ export default function PublicProposal() {
   const [termsClauses, setTermsClauses] = useState<any[]>([]);
   const [timelinePhases, setTimelinePhases] = useState<any[]>([]);
   const [paymentTemplates, setPaymentTemplates] = useState<any[]>([]);
+  const [signature, setSignature] = useState<any>(null);
+  const [showSignModal, setShowSignModal] = useState(false);
+  const [showDeclineModal, setShowDeclineModal] = useState(false);
 
   useEffect(() => {
     if (shareId) loadProposal();
