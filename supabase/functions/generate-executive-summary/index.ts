@@ -66,6 +66,9 @@ RULES:
 - Write 3-5 sentences. One paragraph. No headers or bullets.
 - Write in plain, professional English. Direct and warm.
 - Sound like a confident agency owner, not a chatbot.
+- Write from the agency's perspective using first person plural ("we", "our", "us"). The proposal is written BY the agency TO the client.
+- Use "you" and "your" when referring to the client.
+- NEVER refer to the agency in third person. Never use "they", "their", or the agency name as a subject.
 - Do NOT use these words: leverage, synergy, holistic, elevate, cutting-edge, game-changer, spearhead, unlock, empower, innovative, robust, seamless.
 - Do NOT start with "Dear", "This proposal", or "We are pleased".
 - Start with the client's name or their situation.

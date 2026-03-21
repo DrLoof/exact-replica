@@ -883,11 +883,11 @@ Return this exact JSON structure:
     }
   ],
   "differentiators": {
-    "intro": "One paragraph about why clients should choose this agency, based on what the website actually says",
+    "intro": "One paragraph about why clients should choose this agency. Write from the agency's perspective using first person plural (we, our, us). Never refer to the agency in third person or by name as a subject. Example: 'We offer transparent pricing' NOT 'They offer transparent pricing'.",
     "cards": [
       {
         "title": "short title",
-        "description": "one sentence",
+        "description": "one sentence, written in first person plural (we/our/us). Example: 'We base every decision on data' NOT 'They base decisions on data'.",
         "stat_value": "value found on the site or empty string if not found",
         "stat_label": "label found on the site or empty string",
         "source": "scraped"
