@@ -156,6 +156,7 @@ export default function ProposalEditor() {
   const undoRef = useRef<{ field: string; value: any } | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const pdfContainerRef = useRef<HTMLDivElement>(null);
+  const [goalsEditorOpen, setGoalsEditorOpen] = useState(false);
 
   // Warn user before leaving if an editable field is focused (unsaved inline edit)
   useBeforeUnload(
