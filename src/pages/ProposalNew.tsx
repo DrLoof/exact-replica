@@ -433,7 +433,13 @@ export default function ProposalNew() {
       }));
 
       // Generate title
-      const generatedTitle = generateProposalTitle(clientDisplayName, selectedModsList.map((m: any) => m.name));
+      const selectedWithGroups = selectedModsList.map((m: any) => {
+        const group = groups.find((g: any) => g.id === m.group_id);
+        return { name: m.name, groupName: group?.name || '' };
+      });
+      const moduleGroupMap: Record<string, string> = {};
+      selectedModsList.forEach((m: any) => { if (m.group_id) moduleGroupMap[m.id] = m.group_id; });
+      const generatedTitle = generateProposalTitle(selectedWithGroups, clientDisplayName, groups, moduleGroupMap);
 
       // Generate executive summary
       let executiveSummary: string | null = null;
