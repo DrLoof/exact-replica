@@ -866,7 +866,7 @@ serve(async (req) => {
 Return this exact JSON structure:
 {
   "agency": {
-    "about_text": "2-3 sentence description of the agency",
+    "about_text": "2-3 sentence description of the agency written in first person plural (we, our, us). Never refer to the agency in third person or by name as a subject. Example: 'We are a digital marketing agency founded in 2018...' NOT 'Salty Communication is a digital marketing agency...'",
     "years_in_business": null or number,
     "team_size": null or string like "5-10",
     "client_count": null or string like "50+"
