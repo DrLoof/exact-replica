@@ -274,7 +274,7 @@ export function ServiceCard({
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.5, ease: "easeOut" }}
-        className="group relative rounded-2xl p-7 transition-all duration-300"
+        className="group/svc relative rounded-2xl p-7 transition-all duration-300"
         style={{
           background: "white", fontFamily: "'DM Sans', sans-serif",
           border: `1px solid ${border}`,
