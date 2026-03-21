@@ -187,17 +187,17 @@ function ModernHeroCover({
       className="relative min-h-screen w-full overflow-hidden flex flex-col"
       style={{ background: "#FAFAF8", fontFamily: "'Outfit', sans-serif" }}
     >
-      {/* Background blobs */}
+      {/* Background blobs — brand-tinted, clearly visible */}
       {!isPDF && (
-        <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute -top-[10%] -right-[10%] w-[500px] h-[500px] rounded-full"
-            style={{ background: accent, opacity: 0.08, filter: 'blur(80px)' }} />
+            style={{ background: accent, opacity: 0.18, filter: 'blur(80px)' }} />
           <div className="absolute bottom-[5%] right-[5%] w-[400px] h-[400px] rounded-full"
-            style={{ background: accent, opacity: 0.06, filter: 'blur(80px)' }} />
+            style={{ background: accent, opacity: 0.14, filter: 'blur(80px)' }} />
           <div className="absolute top-[40%] -left-[5%] w-[300px] h-[300px] rounded-full"
-            style={{ background: accent, opacity: 0.05, filter: 'blur(60px)' }} />
+            style={{ background: accent, opacity: 0.10, filter: 'blur(60px)' }} />
           <div className="absolute bottom-[15%] right-[25%] w-[200px] h-[200px] rounded-full"
-            style={{ background: secondary, opacity: 0.04, filter: 'blur(60px)' }} />
+            style={{ background: secondary, opacity: 0.08, filter: 'blur(60px)' }} />
         </div>
       )}
 
