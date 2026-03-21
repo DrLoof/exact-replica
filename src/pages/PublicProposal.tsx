@@ -220,7 +220,7 @@ export default function PublicProposal() {
           />
 
           {/* Section 2: Executive Summary */}
-          <div className="px-12 lg:px-16 py-12">
+          <div className="px-4 md:px-12 lg:px-16 py-12">
             <SectionHeader
               number="01"
               title="Executive Summary"
@@ -237,7 +237,7 @@ export default function PublicProposal() {
 
           {/* Section 3: Scope of Services */}
           {services.length > 0 && (
-            <div className="px-12 lg:px-16 py-12">
+            <div className="px-4 md:px-12 lg:px-16 py-12">
               <SectionHeader
                 number="02"
                 title="Scope of Services"
@@ -288,7 +288,7 @@ export default function PublicProposal() {
 
           {/* Section 4: Timeline */}
           {phases.length > 0 && (
-            <div className="px-12 lg:px-16 py-12">
+            <div className="px-4 md:px-12 lg:px-16 py-12">
               <SectionHeader
                 number="03"
                 title="Timeline"
@@ -362,7 +362,7 @@ export default function PublicProposal() {
 
           {/* Section 5: Investment */}
           {services.length > 0 && (
-            <div className="px-12 lg:px-16 py-12">
+            <div className="px-4 md:px-12 lg:px-16 py-12">
               <SectionHeader
                 number="04"
                 title="Investment"
@@ -382,7 +382,7 @@ export default function PublicProposal() {
 
           {/* Section 6: Why Us */}
           {differentiators.length > 0 && (
-            <div className="px-12 lg:px-16 py-12">
+            <div className="px-4 md:px-12 lg:px-16 py-12">
               <SectionHeader
                 number="05"
                 title={`Why ${agency?.name || 'Us'}`}
@@ -424,7 +424,7 @@ export default function PublicProposal() {
 
           {/* Section 7: Portfolio */}
           {portfolioItems.length > 0 && (proposal as any).portfolio_section_visible && (
-            <div className="px-12 lg:px-16 py-12">
+            <div className="px-4 md:px-12 lg:px-16 py-12">
               <SectionHeader
                 number="06"
                 title={(proposal as any).portfolio_section_title || 'Our Work'}
@@ -449,7 +449,7 @@ export default function PublicProposal() {
 
           {/* Section 8: Testimonials */}
           {testimonials.length > 0 && (
-            <div className="px-12 lg:px-16 py-12">
+            <div className="px-4 md:px-12 lg:px-16 py-12">
               <SectionHeader
                 number="07"
                 title="What Our Clients Say"
@@ -491,7 +491,7 @@ export default function PublicProposal() {
 
           {/* Section 9: Terms & Conditions */}
           {termsClauses.length > 0 && (
-            <div className="px-12 lg:px-16 py-12">
+            <div className="px-4 md:px-12 lg:px-16 py-12">
               <SectionHeader
                 number="08"
                 title="Terms & Conditions"
@@ -518,7 +518,7 @@ export default function PublicProposal() {
           )}
 
           {/* Section 10: Signature */}
-          <div className="px-12 lg:px-16 py-12">
+          <div className="px-4 md:px-12 lg:px-16 py-12">
             <SignatureBlock
               client={{
                 role: 'Client',
