@@ -36,6 +36,8 @@ import { TemplateProvider } from '@/components/proposal-template/TemplateProvide
 import { ProposalPDFRenderer } from '@/components/proposal/ProposalPDFRenderer';
 import { generateProposalPDF } from '@/lib/generateProposalPDF';
 import { getModulePriceByModel } from '@/lib/pricing';
+import { InlineGoalsEditor, AddGoalsPrompt } from '@/components/proposal-template/InlineGoalsEditor';
+import type { SelectedGoal } from '@/components/proposal-new/ClientZone';
 
 
 interface ProposalData {
@@ -154,6 +156,7 @@ export default function ProposalEditor() {
   const undoRef = useRef<{ field: string; value: any } | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const pdfContainerRef = useRef<HTMLDivElement>(null);
+  const [goalsEditorOpen, setGoalsEditorOpen] = useState(false);
 
   // Warn user before leaving if an editable field is focused (unsaved inline edit)
   useBeforeUnload(
@@ -457,6 +460,7 @@ export default function ProposalEditor() {
         .select('name, ai_context')
         .in('id', moduleIds);
       
+      const proposalGoals = (proposal as any).goals as SelectedGoal[] | null;
       const { data: summaryData } = await supabase.functions.invoke('generate-executive-summary', {
         body: {
           agencyName: agency.name,
@@ -466,6 +470,7 @@ export default function ProposalEditor() {
           clientChallenge: (proposal as any).client_challenge || null,
           clientGoal: (proposal as any).client_goal || null,
           clientContextNote: (proposal as any).client_context_note || null,
+          goals: proposalGoals || undefined,
         },
       });
       if (summaryData?.summary) {
@@ -1110,15 +1115,55 @@ export default function ProposalEditor() {
                         ]}
                       />
                       {(() => {
-                        const kpiItems = getKpiBarItems((proposal as any).goals);
-                        if (!kpiItems) return null;
+                        const proposalGoals = (proposal as any).goals as SelectedGoal[] | null;
+                        const kpiItems = getKpiBarItems(proposalGoals);
+
+                        // Goals editor open — show inline panel
+                        if (goalsEditorOpen) {
+                          return (
+                            <InlineGoalsEditor
+                              goals={proposalGoals || []}
+                              serviceNames={services.map(s => s.module?.name || '')}
+                              onSave={async (newGoals) => {
+                                await updateField('goals', newGoals.length > 0 ? newGoals : null);
+                                setGoalsEditorOpen(false);
+                                if (newGoals.length > 0) {
+                                  toast('Goals updated. Regenerate executive summary to reflect these?', {
+                                    action: {
+                                      label: 'Yes, regenerate',
+                                      onClick: () => regenerateExecutiveSummary(),
+                                    },
+                                    duration: 8000,
+                                  });
+                                }
+                              }}
+                              onCancel={() => setGoalsEditorOpen(false)}
+                            />
+                          );
+                        }
+
+                        // No goals — show add prompt (editor only)
+                        if (!kpiItems) {
+                          return <AddGoalsPrompt onClick={() => setGoalsEditorOpen(true)} />;
+                        }
+
+                        // Has goals — show KPI bar with edit affordance
                         const hasNumbers = kpiItems.some(k => /\d/.test(k.value));
                         return (
-                          <HighlightPanel variant="dark" items={kpiItems.map(k => ({
-                            label: k.label,
-                            value: k.value,
-                            accent: hasNumbers && /\d/.test(k.value),
-                          }))} />
+                          <div className="group/kpi relative">
+                            <HighlightPanel variant="dark" items={kpiItems.map(k => ({
+                              label: k.label,
+                              value: k.value,
+                              accent: hasNumbers && /\d/.test(k.value),
+                            }))} />
+                            <button
+                              onClick={() => setGoalsEditorOpen(true)}
+                              className="absolute top-3 right-4 text-white/0 group-hover/kpi:text-white/60 hover:!text-white/90 transition-colors print:hidden"
+                              style={{ fontSize: '11px', fontWeight: 500 }}
+                            >
+                              Edit goals
+                            </button>
+                          </div>
                         );
                       })()}
                     </div>
