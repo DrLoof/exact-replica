@@ -352,6 +352,7 @@ export default function ProposalEditor() {
 
   const updateField = async (field: string, value: any) => {
     if (!proposal) return;
+    if ((proposal as any).is_locked) { toast.error('This proposal is signed and locked'); return; }
     // Store undo state
     undoRef.current = { field, value: (proposal as any)[field] };
     await supabase.from('proposals').update({ [field]: value }).eq('id', proposal.id);
