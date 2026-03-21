@@ -1376,14 +1376,20 @@ export default function ProposalEditor() {
                         <button
                           onClick={async () => {
                             try {
-                              const serviceNames = services.map(s => ({ name: s.module?.name || 'Service' }));
-                              const durationMatch = (proposal.estimated_duration || '16 weeks').match(/(\d+)/);
-                              const totalWeeks = durationMatch ? parseInt(durationMatch[1]) : 16;
+                              const serviceData = services.map(s => ({
+                                name: s.module?.name || 'Service',
+                                timeline_type: (s.module as any)?.timeline_type || 'project',
+                                setup_weeks: (s.module as any)?.setup_weeks || 0,
+                                min_weeks: (s.module as any)?.min_weeks ?? 2,
+                                max_weeks: (s.module as any)?.max_weeks ?? 4,
+                                phase_category: (s.module as any)?.phase_category || 'build',
+                                can_parallel: (s.module as any)?.can_parallel !== false,
+                                depends_on: (s.module as any)?.depends_on || [],
+                              }));
                               const { data } = await supabase.functions.invoke('generate-timeline', {
                                 body: {
-                                  services: serviceNames,
+                                  services: serviceData,
                                   clientName: client?.company_name || 'Client',
-                                  totalWeeks,
                                 },
                               });
                               if (data?.phases) {

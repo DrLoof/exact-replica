@@ -336,12 +336,25 @@ export default function ProposalNew() {
 
   const estimatedDuration = useMemo(() => {
     if (selectedModulesList.length === 0) return null;
-    let totalWeeks = 0;
-    selectedModulesList.forEach((m: any) => {
-      const match = m.default_timeline?.match(/(\d+)/);
-      totalWeeks += match ? parseInt(match[1]) : 2;
-    });
-    return `~${totalWeeks} weeks`;
+    const projectMods = selectedModulesList.filter((m: any) => (m.timeline_type || 'project') === 'project');
+    const ongoingMods = selectedModulesList.filter((m: any) => m.timeline_type === 'ongoing' || m.timeline_type === 'deliverable');
+    
+    if (projectMods.length > 0) {
+      const discoveryWeeks = projectMods.length >= 5 ? 3 : projectMods.length >= 3 ? 2 : 1;
+      let categoryWeeks = 0;
+      for (const cat of ['strategy', 'creative', 'build']) {
+        const catServices = projectMods.filter((s: any) => s.phase_category === cat);
+        if (catServices.length > 0) {
+          categoryWeeks += Math.max(...catServices.map((s: any) => s.min_weeks ?? 2));
+        }
+      }
+      const launchWeeks = projectMods.length >= 4 ? 2 : 1;
+      const total = discoveryWeeks + categoryWeeks + launchWeeks;
+      return ongoingMods.length > 0 ? `~${total} weeks + ongoing` : `~${total} weeks`;
+    }
+    // Only ongoing
+    const maxSetup = ongoingMods.length > 0 ? Math.max(...ongoingMods.map((s: any) => s.setup_weeks || 0), 2) : 2;
+    return `~${maxSetup} weeks setup + ongoing`;
   }, [selectedModulesList]);
 
   // === Build / Save Logic ===
