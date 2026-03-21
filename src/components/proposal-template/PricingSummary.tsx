@@ -573,7 +573,7 @@ export function PricingSummary({
           <div className="px-8 py-4 flex items-center justify-between border-t border-[#EBEBEB]"
             style={{ backgroundColor: `${accent}08` }}>
             <div className="flex items-center gap-3">
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: brandColor }} />
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: accent }} />
               <span className="text-[#555]" style={{ fontSize: "14px", fontWeight: 500 }}>{bundleSavings.bundleName} bundle discount</span>
               <span className="text-[#BBB] line-through" style={{ fontSize: "13px", fontWeight: 400 }}>{bundleSavings.individualTotal}</span>
             </div>
