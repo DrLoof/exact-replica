@@ -422,6 +422,65 @@ export default function ProposalNew() {
 
       const clientDisplayName = selectedClient?.company_name || newClientName;
 
+      // === Title, exec summary, pricing (same as before) ===
+      const resolvedChallenges = clientChallenges.includes('other') && clientChallengeOther
+        ? [...clientChallenges.filter(c => c !== 'other'), clientChallengeOther]
+        : clientChallenges;
+
+      const resolvedGoals: any[] = selectedGoals.map(g => ({
+        ...g,
+        label: g.id === 'other' ? (goalOtherLabel || 'Other') : g.label,
+      }));
+
+      // Generate title
+      const generatedTitle = generateProposalTitle(clientDisplayName, selectedModsList.map((m: any) => m.name));
+
+      // Generate executive summary
+      let executiveSummary: string | null = null;
+      try {
+        const realSelectedModules = selectedModsList.map((m: any) => {
+          const rm = realModules?.find((rm: any) => rm.name === m.name);
+          return rm || m;
+        });
+        const { data: summaryData } = await supabase.functions.invoke('generate-executive-summary', {
+          body: {
+            agencyName: agency.name,
+            clientName: clientDisplayName,
+            serviceNames: realSelectedModules.map((m: any) => m.name),
+            serviceContexts: realSelectedModules.map((m: any) => m.ai_context).filter(Boolean),
+            clientChallenges: resolvedChallenges.length > 0 ? resolvedChallenges : null,
+            goals: resolvedGoals.length > 0 ? resolvedGoals : null,
+            clientContextNote: clientContextNote || null,
+          },
+        });
+        if (summaryData?.summary) executiveSummary = summaryData.summary;
+      } catch (e) {
+        console.warn('Executive summary generation failed', e);
+      }
+
+      // Generate timeline using smart structured fields
+      let generatedPhases: any[] = [];
+      try {
+        const { data: timelineData } = await supabase.functions.invoke('generate-timeline', {
+          body: {
+            services: serviceDataForTimeline,
+            clientName: clientDisplayName,
+          },
+        });
+        if (timelineData?.phases) {
+          generatedPhases = timelineData.phases;
+          // Update totalDurationWeeks from the edge function if available
+          if (timelineData.totalProjectWeeks) {
+            totalDurationWeeks = timelineData.totalProjectWeeks;
+          }
+        }
+      } catch (e) {
+        console.warn('Timeline generation failed', e);
+      }
+
+      const startDateObj = new Date(startDate);
+      const launchDate = new Date(startDateObj.getTime() + totalDurationWeeks * 7 * 86400000);
+
       const { data: proposal, error: pError } = await supabase.from('proposals').insert({
         agency_id: agency.id,
         client_id: clientId,
