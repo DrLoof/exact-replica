@@ -460,6 +460,7 @@ export default function ProposalEditor() {
         .select('name, ai_context')
         .in('id', moduleIds);
       
+      const proposalGoals = (proposal as any).goals as SelectedGoal[] | null;
       const { data: summaryData } = await supabase.functions.invoke('generate-executive-summary', {
         body: {
           agencyName: agency.name,
@@ -469,6 +470,7 @@ export default function ProposalEditor() {
           clientChallenge: (proposal as any).client_challenge || null,
           clientGoal: (proposal as any).client_goal || null,
           clientContextNote: (proposal as any).client_context_note || null,
+          goals: proposalGoals || undefined,
         },
       });
       if (summaryData?.summary) {
