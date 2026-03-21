@@ -711,7 +711,7 @@ export function ServiceCard({
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5, ease: "easeOut" }}
-      className="group relative bg-white border border-[#EBEBEB] rounded-2xl p-8 transition-all duration-300"
+      className="group/svc relative bg-white border border-[#EBEBEB] rounded-2xl p-8 transition-all duration-300"
       style={{ fontFamily: "'Space Grotesk', sans-serif" }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = `${brand.primaryColor}4D`;
