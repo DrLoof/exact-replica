@@ -521,7 +521,7 @@ export function PricingSummary({
               <div key={gIdx}>
                 <div className="px-8 py-3 bg-[#FAFAFA]/60 border-b border-[#F0F0F0] flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-1 h-6 rounded-full" style={{ backgroundColor: brandColor }} />
+                    <div className="w-1 h-6 rounded-full" style={{ backgroundColor: accent }} />
                     <div>
                       <span className="text-[#0A0A0A] block" style={{ fontSize: "13px", fontWeight: 700 }}>{group.label}</span>
                       <span className="text-[#BBB] block" style={{ fontSize: "11px", fontWeight: 400 }}>{group.sublabel}</span>
