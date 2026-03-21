@@ -190,54 +190,14 @@ function ModernHeroCover({
       {/* Background circles — crisp edges and no overlap */}
       {!isPDF && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div
-            className="absolute rounded-full"
-            style={{
-              top: '-12%',
-              right: '-8%',
-              width: '520px',
-              height: '520px',
-              background: accent,
-              opacity: 0.12,
-              filter: 'blur(1px)',
-            }}
-          />
-          <div
-            className="absolute rounded-full"
-            style={{
-              top: '44%',
-              right: '-6%',
-              width: '340px',
-              height: '340px',
-              background: accent,
-              opacity: 0.1,
-              filter: 'blur(1px)',
-            }}
-          />
-          <div
-            className="absolute rounded-full"
-            style={{
-              bottom: '-18%',
-              right: '-8%',
-              width: '280px',
-              height: '280px',
-              background: secondary,
-              opacity: 0.12,
-              filter: 'blur(1px)',
-            }}
-          />
-          <div
-            className="absolute rounded-full"
-            style={{
-              bottom: '-14%',
-              left: '2%',
-              width: '180px',
-              height: '180px',
-              background: accent,
-              opacity: 0.08,
-              filter: 'blur(1px)',
-            }}
-          />
+          <div className="absolute rounded-full"
+            style={{ top: '-12%', right: '-8%', width: '520px', height: '520px', background: accent, opacity: 0.12 }} />
+          <div className="absolute rounded-full"
+            style={{ top: '44%', right: '-6%', width: '340px', height: '340px', background: accent, opacity: 0.1 }} />
+          <div className="absolute rounded-full"
+            style={{ bottom: '-18%', right: '-8%', width: '280px', height: '280px', background: secondary, opacity: 0.12 }} />
+          <div className="absolute rounded-full"
+            style={{ bottom: '-14%', left: '2%', width: '180px', height: '180px', background: accent, opacity: 0.08 }} />
         </div>
       )}
 
