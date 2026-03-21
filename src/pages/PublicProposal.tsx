@@ -573,7 +573,7 @@ export default function PublicProposal() {
   );
 }
 
-function ProposalActions({ proposalId, onStatusChange }: { proposalId: string; onStatusChange: (status: string) => void }) {
+function ProposalActions({ proposalId, brandColor, onStatusChange }: { proposalId: string; brandColor: string; onStatusChange: (status: string) => void }) {
   const [acting, setActing] = useState(false);
   const [confirmed, setConfirmed] = useState<string | null>(null);
 
@@ -594,17 +594,17 @@ function ProposalActions({ proposalId, onStatusChange }: { proposalId: string; o
   };
 
   return (
-    <div className="mt-10 border-t border-[#EEE] pt-8">
-      <p className="text-center text-[15px] text-[#666] mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+    <div>
+      <p className="text-center mb-4" style={{ fontSize: '16px', fontWeight: 600, color: '#2A2118' }}>
         Ready to move forward?
       </p>
-      <div className="flex items-center justify-center gap-4">
+      <div className="flex items-center justify-center gap-3">
         {(!confirmed || confirmed === 'accepted') && (
           <button
             onClick={() => handleAction('accepted')}
             disabled={acting}
-            className="flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-semibold text-white transition-all hover:scale-105 disabled:opacity-50"
-            style={{ backgroundColor: '#22c55e', fontFamily: "'Space Grotesk', sans-serif" }}
+            className="flex items-center gap-2 px-8 py-3.5 text-[15px] font-semibold text-white transition-all hover:scale-105 disabled:opacity-50"
+            style={{ backgroundColor: brandColor, borderRadius: '10px', border: 'none', cursor: 'pointer' }}
           >
             <CheckCircle2 className="h-5 w-5" />
             {confirmed === 'accepted' ? (acting ? 'Confirming...' : 'Click again to confirm') : 'Accept Proposal'}
@@ -614,8 +614,8 @@ function ProposalActions({ proposalId, onStatusChange }: { proposalId: string; o
           <button
             onClick={() => handleAction('declined')}
             disabled={acting}
-            className="flex items-center gap-2 rounded-xl border-2 border-[#E5E5E5] px-8 py-3 text-sm font-semibold text-[#666] transition-all hover:border-red-300 hover:text-red-600 disabled:opacity-50"
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            className="flex items-center gap-2 px-8 py-3.5 text-[15px] font-medium transition-all hover:border-red-300 hover:text-red-600 disabled:opacity-50"
+            style={{ background: 'transparent', color: '#8A7F72', borderRadius: '10px', border: '1px solid #EEEAE3', cursor: 'pointer' }}
           >
             <XCircle className="h-5 w-5" />
             {confirmed === 'declined' ? (acting ? 'Confirming...' : 'Click again to confirm') : 'Decline'}
@@ -624,8 +624,8 @@ function ProposalActions({ proposalId, onStatusChange }: { proposalId: string; o
         {confirmed && (
           <button
             onClick={() => setConfirmed(null)}
-            className="text-sm text-[#999] hover:text-[#666]"
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            className="text-sm hover:text-[#666]"
+            style={{ color: '#999' }}
           >
             Cancel
           </button>
