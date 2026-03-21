@@ -336,12 +336,25 @@ export default function ProposalNew() {
 
   const estimatedDuration = useMemo(() => {
     if (selectedModulesList.length === 0) return null;
-    let totalWeeks = 0;
-    selectedModulesList.forEach((m: any) => {
-      const match = m.default_timeline?.match(/(\d+)/);
-      totalWeeks += match ? parseInt(match[1]) : 2;
-    });
-    return `~${totalWeeks} weeks`;
+    const projectMods = selectedModulesList.filter((m: any) => (m.timeline_type || 'project') === 'project');
+    const ongoingMods = selectedModulesList.filter((m: any) => m.timeline_type === 'ongoing' || m.timeline_type === 'deliverable');
+    
+    if (projectMods.length > 0) {
+      const discoveryWeeks = projectMods.length >= 5 ? 3 : projectMods.length >= 3 ? 2 : 1;
+      let categoryWeeks = 0;
+      for (const cat of ['strategy', 'creative', 'build']) {
+        const catServices = projectMods.filter((s: any) => s.phase_category === cat);
+        if (catServices.length > 0) {
+          categoryWeeks += Math.max(...catServices.map((s: any) => s.min_weeks ?? 2));
+        }
+      }
+      const launchWeeks = projectMods.length >= 4 ? 2 : 1;
+      const total = discoveryWeeks + categoryWeeks + launchWeeks;
+      return ongoingMods.length > 0 ? `~${total} weeks + ongoing` : `~${total} weeks`;
+    }
+    // Only ongoing
+    const maxSetup = ongoingMods.length > 0 ? Math.max(...ongoingMods.map((s: any) => s.setup_weeks || 0), 2) : 2;
+    return `~${maxSetup} weeks setup + ongoing`;
   }, [selectedModulesList]);
 
   // === Build / Save Logic ===
@@ -372,34 +385,77 @@ export default function ProposalNew() {
 
       const selectedModsList = Array.from(selectedModuleIds).map(id => modules.find((m: any) => m.id === id)).filter(Boolean);
 
+      // Build service data with structured timeline fields for smart generation
+      const serviceDataForTimeline = selectedModsList.map((m: any) => {
+        const rm = realModules?.find((rm: any) => rm.name === m.name);
+        const mod = rm || m;
+        return {
+          name: mod.name,
+          timeline_type: mod.timeline_type || 'project',
+          setup_weeks: mod.setup_weeks || 0,
+          min_weeks: mod.min_weeks ?? 2,
+          max_weeks: mod.max_weeks ?? 4,
+          phase_category: mod.phase_category || 'build',
+          can_parallel: mod.can_parallel !== false,
+          depends_on: mod.depends_on || [],
+        };
+      });
+
+      // Duration is now calculated by the edge function from structured fields
+      // But we still need a fallback for the proposal record
       let totalDurationWeeks = 0;
       if (endDate && startDate) {
         const diffMs = new Date(endDate).getTime() - new Date(startDate).getTime();
         totalDurationWeeks = Math.max(1, Math.round(diffMs / (7 * 86400000)));
       } else {
-        selectedModsList.forEach((m: any) => {
-          const match = m.default_timeline?.match(/(\d+)/);
-          totalDurationWeeks += match ? parseInt(match[1]) : 2;
-        });
+        // Estimate from structured fields (project services only)
+        const projectMods = serviceDataForTimeline.filter(s => s.timeline_type === 'project');
+        if (projectMods.length > 0) {
+          // Sum discovery + max per category (parallel) + launch
+          const discoveryWeeks = projectMods.length >= 5 ? 3 : projectMods.length >= 3 ? 2 : 1;
+          const categories = ['strategy', 'creative', 'build'];
+          let categoryWeeks = 0;
+          for (const cat of categories) {
+            const catServices = projectMods.filter(s => s.phase_category === cat);
+            if (catServices.length > 0) {
+              categoryWeeks += Math.max(...catServices.map(s => s.min_weeks));
+            }
+          }
+          const launchWeeks = projectMods.length >= 4 ? 2 : 1;
+          totalDurationWeeks = discoveryWeeks + categoryWeeks + launchWeeks;
+        } else {
+          // Only ongoing — use max setup time
+          const ongoingMods = serviceDataForTimeline.filter(s => s.timeline_type === 'ongoing');
+          totalDurationWeeks = ongoingMods.length > 0 ? Math.max(...ongoingMods.map(s => s.setup_weeks), 2) : 4;
+        }
       }
-      totalDurationWeeks = Math.max(totalDurationWeeks, 4);
-      const durationStr = `${totalDurationWeeks} weeks`;
+      totalDurationWeeks = Math.max(totalDurationWeeks, 2);
+      const hasOngoing = serviceDataForTimeline.some(s => s.timeline_type === 'ongoing' || s.timeline_type === 'deliverable');
+      const durationStr = hasOngoing ? `${totalDurationWeeks} weeks + ongoing` : `${totalDurationWeeks} weeks`;
 
       const clientDisplayName = selectedClient?.company_name || newClientName;
 
-      const selectedWithGroups = selectedModsList.map((mod: any) => {
-        const group = groups.find((g: any) => g.id === mod.group_id);
-        return { name: mod.name, groupName: group?.name || '' };
-      });
-      const generatedTitle = generateProposalTitle(selectedWithGroups, clientDisplayName, groups, {});
+      // === Title, exec summary, pricing (same as before) ===
+      const resolvedChallenges = clientChallenges.includes('other') && clientChallengeOther
+        ? [...clientChallenges.filter(c => c !== 'other'), clientChallengeOther]
+        : clientChallenges;
 
-      // Generate executive summary
-      let executiveSummary: string | null = null;
-      const resolvedChallenges = clientChallenges.map(c => c === 'Other' ? clientChallengeOther : c).filter(Boolean);
-      const resolvedGoals = selectedGoals.map(g => ({
+      const resolvedGoals: any[] = selectedGoals.map(g => ({
         ...g,
         label: g.id === 'other' ? (goalOtherLabel || 'Other') : g.label,
       }));
+
+      // Generate title
+      const selectedWithGroups = selectedModsList.map((m: any) => {
+        const group = groups.find((g: any) => g.id === m.group_id);
+        return { name: m.name, groupName: group?.name || '' };
+      });
+      const moduleGroupMap: Record<string, string> = {};
+      selectedModsList.forEach((m: any) => { if (m.group_id) moduleGroupMap[m.id] = m.group_id; });
+      const generatedTitle = generateProposalTitle(selectedWithGroups, clientDisplayName, groups, moduleGroupMap);
+
+      // Generate executive summary
+      let executiveSummary: string | null = null;
       try {
         const realSelectedModules = selectedModsList.map((m: any) => {
           const rm = realModules?.find((rm: any) => rm.name === m.name);
@@ -421,34 +477,24 @@ export default function ProposalNew() {
         console.warn('Executive summary generation failed', e);
       }
 
-      // Generate timeline
+      // Generate timeline using smart structured fields
       let generatedPhases: any[] = [];
       try {
         const { data: timelineData } = await supabase.functions.invoke('generate-timeline', {
           body: {
-            services: selectedModsList.map((m: any) => ({ name: m.name })),
+            services: serviceDataForTimeline,
             clientName: clientDisplayName,
-            totalWeeks: totalDurationWeeks,
-            customPhases: timelinePhases.length > 0 ? timelinePhases.map((p: any) => ({ name: p.name })) : null,
           },
         });
-        if (timelineData?.phases) generatedPhases = timelineData.phases;
+        if (timelineData?.phases) {
+          generatedPhases = timelineData.phases;
+          // Update totalDurationWeeks from the edge function if available
+          if (timelineData.totalProjectWeeks) {
+            totalDurationWeeks = timelineData.totalProjectWeeks;
+          }
+        }
       } catch (e) {
-        console.warn('Timeline generation failed, using defaults', e);
-      }
-
-      if (generatedPhases.length === 0) {
-        const defaultNames = ['Discovery & Research', 'Strategy & Architecture', 'Creative Development', 'Build & Produce', 'Launch & Optimize'];
-        const pcts = [0.12, 0.12, 0.31, 0.25, 0.20];
-        let weekStart = 1;
-        generatedPhases = defaultNames.map((name, i) => {
-          const weeks = Math.max(1, Math.round(pcts[i] * totalDurationWeeks));
-          const weekEnd = weekStart + weeks - 1;
-          const duration = weekStart === weekEnd ? `WEEK ${weekStart}` : `WEEKS ${weekStart}–${weekEnd}`;
-          const phase = { name, duration, description: '' };
-          weekStart = weekEnd + 1;
-          return phase;
-        });
+        console.warn('Timeline generation failed', e);
       }
 
       const startDateObj = new Date(startDate);

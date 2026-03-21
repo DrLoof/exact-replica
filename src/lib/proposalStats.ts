@@ -42,7 +42,35 @@ function parsePhaseDurationWeeks(duration: string): number {
 export function calculateTimeline(phases: any[]): string {
   if (!phases || phases.length === 0) return 'TBD';
 
-  // Check for "WEEKS X-Y" format (absolute week ranges) — take max end week
+  // New format: phases with is_ongoing and week_range
+  const hasNewFormat = phases.some(p => p.week_range || p.is_ongoing !== undefined);
+  if (hasNewFormat) {
+    const projectPhases = phases.filter(p => !p.is_ongoing);
+    const hasOngoing = phases.some(p => p.is_ongoing);
+    
+    if (projectPhases.length === 0 && hasOngoing) return 'Ongoing';
+    
+    let maxWeek = 0;
+    for (const p of projectPhases) {
+      if (p.week_end) maxWeek = Math.max(maxWeek, p.week_end);
+    }
+    
+    if (maxWeek === 0) {
+      // Fallback: try parsing week_range or duration
+      for (const p of projectPhases) {
+        const dur = p.week_range || p.duration || '';
+        const m = dur.match(/(\d+)/g);
+        if (m) maxWeek = Math.max(maxWeek, parseInt(m[m.length - 1]));
+      }
+    }
+    
+    if (maxWeek === 0) return hasOngoing ? 'Ongoing' : 'TBD';
+    const suffix = hasOngoing ? ' + Ongoing' : '';
+    if (maxWeek >= 12) return `${Math.round(maxWeek / 4)} Months${suffix}`;
+    return `${maxWeek} Weeks${suffix}`;
+  }
+
+  // Legacy format: "WEEKS X-Y" absolute week ranges
   let maxWeek = 0;
   let hasAbsoluteWeeks = false;
   for (const p of phases) {
