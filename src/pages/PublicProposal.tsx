@@ -103,7 +103,8 @@ export default function PublicProposal() {
     );
   }
 
-  const brandColor = agency?.brand_color || '#fc956e';
+  const customColors = proposal?.custom_colors as Record<string, string> | null;
+  const brandColor = customColors?.primaryAccent || agency?.brand_color || '#fc956e';
   const darkColor = agency?.dark_color || '#0A0A0A';
   const currencySymbol = agency?.currency_symbol || '$';
 
@@ -197,365 +198,381 @@ export default function PublicProposal() {
   ];
 
   return (
-    <TemplateProvider templateId={proposal?.template_id || 'classic'} customColors={proposal?.custom_colors || null}>
+    <TemplateProvider templateId={proposal?.template_id || 'classic'} customColors={customColors}>
     <BrandProvider brand={brandData}>
-      <div className="min-h-screen bg-white">
-        {/* Section 1: Cover */}
-        <HeroCover
-          proposalTitle={proposal.title || `Proposal for ${client?.company_name || 'Client'}`}
-          subtitle={proposal.subtitle || undefined}
-          clientName={client?.company_name || 'Client'}
-          date={proposalDate}
-          proposalNumber={proposal.reference_number}
-        />
-
-        {/* Section 2: Executive Summary */}
-        <PageWrapper pageNumber="02">
-          <SectionHeader
-            number="01"
-            title="Executive Summary"
-            subtitle="An overview of our recommended approach and expected outcomes."
+      <div className="min-h-screen md:py-10" style={{ background: '#F0EFEC' }}>
+        {/* Document container */}
+        <div
+          className="mx-auto md:rounded-lg overflow-hidden"
+          style={{
+            maxWidth: '900px',
+            background: '#FAFAF8',
+            boxShadow: '0 2px 20px rgba(0,0,0,0.06)',
+          }}
+        >
+          {/* Section 1: Cover */}
+          <HeroCover
+            proposalTitle={proposal.title || `Proposal for ${client?.company_name || 'Client'}`}
+            subtitle={proposal.subtitle || undefined}
+            clientName={client?.company_name || 'Client'}
+            date={proposalDate}
+            proposalNumber={proposal.reference_number}
           />
-          <div className="mb-10">
-            <TextContent>
-              {proposal.executive_summary ||
-                `We're excited to present this proposal for ${client?.company_name || 'your organization'}. Based on our understanding of your needs, we've put together a tailored package of services designed to deliver measurable results and support your growth objectives.`}
-            </TextContent>
+
+          {/* Section 2: Executive Summary */}
+          <div className="px-4 md:px-12 lg:px-16 py-12">
+            <SectionHeader
+              number="01"
+              title="Executive Summary"
+              subtitle="An overview of our recommended approach and expected outcomes."
+            />
+            <div className="mb-10">
+              <TextContent>
+                {proposal.executive_summary ||
+                  `We're excited to present this proposal for ${client?.company_name || 'your organization'}. Based on our understanding of your needs, we've put together a tailored package of services designed to deliver measurable results and support your growth objectives.`}
+              </TextContent>
+            </div>
+            <HighlightPanel items={summaryHighlights} variant="accent" />
           </div>
-          <HighlightPanel items={summaryHighlights} variant="accent" />
-        </PageWrapper>
 
-        {/* Section 3: Scope of Services */}
-        {services.length > 0 && (
-          <PageWrapper pageNumber="03">
-            <SectionHeader
-              number="02"
-              title="Scope of Services"
-              subtitle="Each service is designed to work independently or as part of the complete strategy."
-            />
+          {/* Section 3: Scope of Services */}
+          {services.length > 0 && (
+            <div className="px-4 md:px-12 lg:px-16 py-12">
+              <SectionHeader
+                number="02"
+                title="Scope of Services"
+                subtitle="Each service is designed to work independently or as part of the complete strategy."
+              />
 
-            {/* Bundle card if there are bundled services */}
-            {services.some((s: any) => s.bundle_id) && bundleSavings && (
-              <div className="mb-8">
-                <BundleCard
-                  name="Service Package"
-                  tagline="Combined services for maximum impact"
-                  includedServices={services.filter((s: any) => s.bundle_id).map((s: any) => s.module?.name || 'Service')}
-                  bundlePrice={bundleSavings.bundlePrice}
-                  individualPrice={bundleSavings.individualTotal}
-                  savings={bundleSavings.savings}
-                  brandColor={brandColor}
-                />
-              </div>
-            )}
-
-            {/* Service cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {services.map((svc: any, idx: number) => (
-                <ServiceCard
-                  key={svc.id}
-                  icon={<Layers size={22} />}
-                  name={svc.module?.name || 'Service'}
-                  price={formatPrice(getPrice(svc))}
-                  pricingModel={svc.module?.pricing_model || 'fixed'}
-                  description={svc.module?.description || svc.module?.short_description || ''}
-                  deliverables={svc.module?.deliverables || []}
-                  clientResponsibilities={
-                    (proposal.show_client_responsibilities ?? false) && (svc.show_responsibilities !== false)
-                      ? (svc.client_responsibilities || svc.module?.client_responsibilities || [])
-                      : []
-                  }
-                  outOfScope={
-                    (proposal.show_out_of_scope ?? false) && (svc.show_out_of_scope !== false)
-                      ? (svc.out_of_scope || svc.module?.out_of_scope || [])
-                      : []
-                  }
-                  isAddon={svc.is_addon || svc.module?.service_type === 'addon'}
-                  delay={idx * 0.08}
-                />
-              ))}
-            </div>
-          </PageWrapper>
-        )}
-
-        {/* Section 4: Timeline */}
-        {phases.length > 0 && (
-          <PageWrapper pageNumber="04">
-            <SectionHeader
-              number="03"
-              title="Timeline"
-              subtitle="A phased approach ensuring quality delivery at every stage."
-            />
-            {(() => {
-              const startDateStr = proposal.project_start_date
-                ? new Date(proposal.project_start_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-                : 'TBD';
-              const hasOngoing = phases.some((p: any) => p.is_ongoing);
-              const projectPhases = phases.filter((p: any) => !p.is_ongoing);
-              const ongoingPhase = phases.find((p: any) => p.is_ongoing);
-              
-              let tw = 0;
-              if (projectPhases.length > 0) {
-                const maxEnd = Math.max(...projectPhases.map((p: any) => p.week_end || 0));
-                if (maxEnd > 0) {
-                  tw = maxEnd;
-                } else {
-                  const durationMatch = (proposal.estimated_duration || '16 weeks').match(/(\d+)/);
-                  tw = durationMatch ? parseInt(durationMatch[1]) : phases.length * 3;
-                }
-              } else {
-                const durationMatch = (proposal.estimated_duration || '4 weeks').match(/(\d+)/);
-                tw = durationMatch ? parseInt(durationMatch[1]) : 4;
-              }
-              
-              const durationDisplay = tw >= 12 ? `${Math.round(tw / 4)} Months` : `${tw} Weeks`;
-              const isOnlyOngoing = projectPhases.length <= 1 && hasOngoing;
-              const launchLabel = isOnlyOngoing ? 'Services Begin' : 'Projected Launch';
-              const launchDate = proposal.project_start_date
-                ? new Date(new Date(proposal.project_start_date).getTime() + tw * 7 * 86400000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-                : 'TBD';
-              const ongoingServiceNames = ongoingPhase?.services?.join(', ');
-              
-              return (
-                <>
-                  <HighlightPanel
-                    items={[
-                      { label: 'Project Start', value: startDateStr },
-                      { label: 'Total Duration', value: durationDisplay },
-                      { label: launchLabel, value: launchDate, accent: true },
-                    ]}
-                    variant="accent"
+              {services.some((s: any) => s.bundle_id) && bundleSavings && (
+                <div className="mb-8">
+                  <BundleCard
+                    name="Service Package"
+                    tagline="Combined services for maximum impact"
+                    includedServices={services.filter((s: any) => s.bundle_id).map((s: any) => s.module?.name || 'Service')}
+                    bundlePrice={bundleSavings.bundlePrice}
+                    individualPrice={bundleSavings.individualTotal}
+                    savings={bundleSavings.savings}
+                    brandColor={brandColor}
                   />
-                  {hasOngoing && ongoingServiceNames && (
-                    <p className="text-center mt-3" style={{ fontSize: '13px', color: '#8A7F72' }}>
-                      Plus ongoing monthly management for {ongoingServiceNames}
-                    </p>
-                  )}
-                </>
-              );
-            })()}
-            <div className="mt-10">
-              {phases.map((phase: any, idx: number) => (
-                <TimelineStep
-                  key={idx}
-                  number={phase.phase_number || idx + 1}
-                  name={phase.name || phase.phase_name}
-                  duration={phase.week_range || phase.duration || phase.default_duration || '2 weeks'}
-                  description={phase.description}
-                  isLast={idx === phases.length - 1}
-                  isOngoing={phase.is_ongoing || false}
-                  isNextOngoing={idx < phases.length - 1 && phases[idx + 1]?.is_ongoing}
-                  delay={idx * 0.1}
-                />
-              ))}
-            </div>
-          </PageWrapper>
-        )}
-
-        {/* Section 5: Investment */}
-        {services.length > 0 && (
-          <PageWrapper pageNumber="05">
-            <SectionHeader
-              number="04"
-              title="Investment"
-              subtitle="Transparent pricing for every phase of the engagement."
-            />
-            <PricingSummary
-              items={pricingItems}
-              total={totalStr}
-              totalBreakdown={totalBreakdown}
-              paymentTerms={paymentTerms}
-              validUntil={validUntil}
-              bundleSavings={bundleSavings}
-              brandColor={brandColor}
-            />
-          </PageWrapper>
-        )}
-
-        {/* Section 6: Why Us */}
-        {differentiators.length > 0 && (
-          <PageWrapper pageNumber="06">
-            <SectionHeader
-              number="05"
-              title={`Why ${agency?.name || 'Us'}`}
-              subtitle="What sets us apart and drives results for our clients."
-            />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {differentiators.map((d: any, idx: number) => (
-                <WhyUsCard
-                  key={d.id}
-                  title={d.title}
-                  description={d.description || ''}
-                  statValue={d.stat_value}
-                  statLabel={d.stat_label}
-                  icon={d.icon}
-                  delay={idx * 0.08}
-                />
-              ))}
-            </div>
-
-            {/* Your Team */}
-            {(() => {
-              const proposalTeam = Array.isArray((proposal as any)?.team) ? (proposal as any).team : [];
-              if (proposalTeam.length === 0) return null;
-              return (
-                <div className="mt-12">
-                  <p className="mb-6 text-center" style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#999' }}>
-                    The Team Behind Your Project
-                  </p>
-                  <div className={`grid gap-6 justify-center ${proposalTeam.length <= 2 ? 'grid-cols-2 max-w-md mx-auto' : proposalTeam.length === 3 ? 'grid-cols-3 max-w-lg mx-auto' : 'grid-cols-2 sm:grid-cols-4'}`}>
-                    {proposalTeam.slice(0, 4).map((member: any, i: number) => (
-                      <TeamMemberCard key={member.member_id} name={member.name} title={member.title} photoUrl={member.photo_url} roleOnProject={member.role_on_project} delay={i * 0.1} />
-                    ))}
-                  </div>
                 </div>
-              );
-            })()}
-          </PageWrapper>
-        )}
+              )}
 
-        {/* Section 7: Portfolio */}
-        {portfolioItems.length > 0 && (proposal as any).portfolio_section_visible && (
-          <PageWrapper pageNumber="07">
-            <SectionHeader
-              number="06"
-              title={(proposal as any).portfolio_section_title || 'Our Work'}
-              subtitle="Selected projects from our portfolio"
-            />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {portfolioItems.map((item: any, idx: number) => (
-                <PortfolioCard
-                  key={item.id}
-                  title={item.title}
-                  category={item.category}
-                  description={item.description}
-                  results={item.results}
-                  imageUrl={item.images?.[0]?.url}
-                  imageAlt={item.images?.[0]?.alt_text}
-                  delay={idx * 0.1}
-                />
-              ))}
-            </div>
-          </PageWrapper>
-        )}
-
-        {/* Section 8: Testimonials */}
-        {testimonials.length > 0 && (
-          <PageWrapper pageNumber="08">
-            <SectionHeader
-              number="07"
-              title="What Our Clients Say"
-              subtitle="Real results from real partnerships."
-            />
-            {featuredTestimonial && (
-              <div className="mb-8">
-                <TestimonialCard
-                  clientName={featuredTestimonial.client_name}
-                  clientTitle={featuredTestimonial.client_title}
-                  clientCompany={featuredTestimonial.client_company}
-                  quote={featuredTestimonial.quote}
-                  metricValue={featuredTestimonial.metric_value}
-                  metricLabel={featuredTestimonial.metric_label}
-                  avatarUrl={featuredTestimonial.avatar_url}
-                  featured
-                />
-              </div>
-            )}
-            {otherTestimonials.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {otherTestimonials.map((t: any, idx: number) => (
-                  <TestimonialCard
-                    key={t.id}
-                    clientName={t.client_name}
-                    clientTitle={t.client_title}
-                    clientCompany={t.client_company}
-                    quote={t.quote}
-                    metricValue={t.metric_value}
-                    metricLabel={t.metric_label}
-                    avatarUrl={t.avatar_url}
+                {services.map((svc: any, idx: number) => (
+                  <ServiceCard
+                    key={svc.id}
+                    icon={<Layers size={22} />}
+                    name={svc.module?.name || 'Service'}
+                    price={formatPrice(getPrice(svc))}
+                    pricingModel={svc.module?.pricing_model || 'fixed'}
+                    description={svc.module?.description || svc.module?.short_description || ''}
+                    deliverables={svc.module?.deliverables || []}
+                    clientResponsibilities={
+                      (proposal.show_client_responsibilities ?? false) && (svc.show_responsibilities !== false)
+                        ? (svc.client_responsibilities || svc.module?.client_responsibilities || [])
+                        : []
+                    }
+                    outOfScope={
+                      (proposal.show_out_of_scope ?? false) && (svc.show_out_of_scope !== false)
+                        ? (svc.out_of_scope || svc.module?.out_of_scope || [])
+                        : []
+                    }
+                    isAddon={svc.is_addon || svc.module?.service_type === 'addon'}
+                    delay={idx * 0.08}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Section 4: Timeline */}
+          {phases.length > 0 && (
+            <div className="px-4 md:px-12 lg:px-16 py-12">
+              <SectionHeader
+                number="03"
+                title="Timeline"
+                subtitle="A phased approach ensuring quality delivery at every stage."
+              />
+              {(() => {
+                const startDateStr = proposal.project_start_date
+                  ? new Date(proposal.project_start_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                  : 'TBD';
+                const hasOngoing = phases.some((p: any) => p.is_ongoing);
+                const projectPhases = phases.filter((p: any) => !p.is_ongoing);
+                const ongoingPhase = phases.find((p: any) => p.is_ongoing);
+                
+                let tw = 0;
+                if (projectPhases.length > 0) {
+                  const maxEnd = Math.max(...projectPhases.map((p: any) => p.week_end || 0));
+                  if (maxEnd > 0) {
+                    tw = maxEnd;
+                  } else {
+                    const durationMatch = (proposal.estimated_duration || '16 weeks').match(/(\d+)/);
+                    tw = durationMatch ? parseInt(durationMatch[1]) : phases.length * 3;
+                  }
+                } else {
+                  const durationMatch = (proposal.estimated_duration || '4 weeks').match(/(\d+)/);
+                  tw = durationMatch ? parseInt(durationMatch[1]) : 4;
+                }
+                
+                const durationDisplay = tw >= 12 ? `${Math.round(tw / 4)} Months` : `${tw} Weeks`;
+                const isOnlyOngoing = projectPhases.length <= 1 && hasOngoing;
+                const launchLabel = isOnlyOngoing ? 'Services Begin' : 'Projected Launch';
+                const launchDate = proposal.project_start_date
+                  ? new Date(new Date(proposal.project_start_date).getTime() + tw * 7 * 86400000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                  : 'TBD';
+                const ongoingServiceNames = ongoingPhase?.services?.join(', ');
+                
+                return (
+                  <>
+                    <HighlightPanel
+                      items={[
+                        { label: 'Project Start', value: startDateStr },
+                        { label: 'Total Duration', value: durationDisplay },
+                        { label: launchLabel, value: launchDate, accent: true },
+                      ]}
+                      variant="accent"
+                    />
+                    {hasOngoing && ongoingServiceNames && (
+                      <p className="text-center mt-3" style={{ fontSize: '13px', color: '#8A7F72' }}>
+                        Plus ongoing monthly management for {ongoingServiceNames}
+                      </p>
+                    )}
+                  </>
+                );
+              })()}
+              <div className="mt-10">
+                {phases.map((phase: any, idx: number) => (
+                  <TimelineStep
+                    key={idx}
+                    number={phase.phase_number || idx + 1}
+                    name={phase.name || phase.phase_name}
+                    duration={phase.week_range || phase.duration || phase.default_duration || '2 weeks'}
+                    description={phase.description}
+                    isLast={idx === phases.length - 1}
+                    isOngoing={phase.is_ongoing || false}
+                    isNextOngoing={idx < phases.length - 1 && phases[idx + 1]?.is_ongoing}
                     delay={idx * 0.1}
                   />
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Section 5: Investment */}
+          {services.length > 0 && (
+            <div className="px-4 md:px-12 lg:px-16 py-12">
+              <SectionHeader
+                number="04"
+                title="Investment"
+                subtitle="Transparent pricing for every phase of the engagement."
+              />
+              <PricingSummary
+                items={pricingItems}
+                total={totalStr}
+                totalBreakdown={totalBreakdown}
+                paymentTerms={paymentTerms}
+                validUntil={validUntil}
+                bundleSavings={bundleSavings}
+                brandColor={brandColor}
+              />
+            </div>
+          )}
+
+          {/* Section 6: Why Us */}
+          {differentiators.length > 0 && (
+            <div className="px-4 md:px-12 lg:px-16 py-12">
+              <SectionHeader
+                number="05"
+                title={`Why ${agency?.name || 'Us'}`}
+                subtitle="What sets us apart and drives results for our clients."
+              />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {differentiators.map((d: any, idx: number) => (
+                  <WhyUsCard
+                    key={d.id}
+                    title={d.title}
+                    description={d.description || ''}
+                    statValue={d.stat_value}
+                    statLabel={d.stat_label}
+                    icon={d.icon}
+                    delay={idx * 0.08}
+                  />
+                ))}
+              </div>
+
+              {/* Your Team */}
+              {(() => {
+                const proposalTeam = Array.isArray((proposal as any)?.team) ? (proposal as any).team : [];
+                if (proposalTeam.length === 0) return null;
+                return (
+                  <div className="mt-12">
+                    <p className="mb-6 text-center" style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#999' }}>
+                      The Team Behind Your Project
+                    </p>
+                    <div className={`grid gap-6 justify-center ${proposalTeam.length <= 2 ? 'grid-cols-2 max-w-md mx-auto' : proposalTeam.length === 3 ? 'grid-cols-3 max-w-lg mx-auto' : 'grid-cols-2 sm:grid-cols-4'}`}>
+                      {proposalTeam.slice(0, 4).map((member: any, i: number) => (
+                        <TeamMemberCard key={member.member_id} name={member.name} title={member.title} photoUrl={member.photo_url} roleOnProject={member.role_on_project} delay={i * 0.1} />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+
+          {/* Section 7: Portfolio */}
+          {portfolioItems.length > 0 && (proposal as any).portfolio_section_visible && (
+            <div className="px-4 md:px-12 lg:px-16 py-12">
+              <SectionHeader
+                number="06"
+                title={(proposal as any).portfolio_section_title || 'Our Work'}
+                subtitle="Selected projects from our portfolio"
+              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {portfolioItems.map((item: any, idx: number) => (
+                  <PortfolioCard
+                    key={item.id}
+                    title={item.title}
+                    category={item.category}
+                    description={item.description}
+                    results={item.results}
+                    imageUrl={item.images?.[0]?.url}
+                    imageAlt={item.images?.[0]?.alt_text}
+                    delay={idx * 0.1}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Section 8: Testimonials */}
+          {testimonials.length > 0 && (
+            <div className="px-4 md:px-12 lg:px-16 py-12">
+              <SectionHeader
+                number="07"
+                title="What Our Clients Say"
+                subtitle="Real results from real partnerships."
+              />
+              {featuredTestimonial && (
+                <div className="mb-8">
+                  <TestimonialCard
+                    clientName={featuredTestimonial.client_name}
+                    clientTitle={featuredTestimonial.client_title}
+                    clientCompany={featuredTestimonial.client_company}
+                    quote={featuredTestimonial.quote}
+                    metricValue={featuredTestimonial.metric_value}
+                    metricLabel={featuredTestimonial.metric_label}
+                    avatarUrl={featuredTestimonial.avatar_url}
+                    featured
+                  />
+                </div>
+              )}
+              {otherTestimonials.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {otherTestimonials.map((t: any, idx: number) => (
+                    <TestimonialCard
+                      key={t.id}
+                      clientName={t.client_name}
+                      clientTitle={t.client_title}
+                      clientCompany={t.client_company}
+                      quote={t.quote}
+                      metricValue={t.metric_value}
+                      metricLabel={t.metric_label}
+                      avatarUrl={t.avatar_url}
+                      delay={idx * 0.1}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Section 9: Terms & Conditions */}
+          {termsClauses.length > 0 && (
+            <div className="px-4 md:px-12 lg:px-16 py-12">
+              <SectionHeader
+                number="08"
+                title="Terms & Conditions"
+                subtitle="The legal framework governing our engagement."
+              />
+              <HighlightPanel
+                items={[
+                  { label: 'Validity', value: `${proposal.validity_days || 30} days` },
+                  { label: 'Revisions', value: `${proposal.revision_rounds ?? 2} rounds` },
+                  { label: 'Notice Period', value: proposal.notice_period || '30 days' },
+                ]}
+                variant="dark"
+              />
+              <div className="mt-10">
+                <TermsSection clauses={[
+                  ...termsClauses.map((c: any) => ({ title: c.title, content: c.content })),
+                  ...(services.some((s: any) => s.module?.client_responsibilities?.length || s.module?.out_of_scope?.length) ? [{
+                    title: 'Scope & Responsibilities',
+                    content: 'The client is responsible for providing timely feedback, required access credentials, and content/assets as outlined in each service\'s scope. Work beyond the deliverables listed for each service is considered out of scope and may require a separate agreement.'
+                  }] : []),
+                ]} />
+              </div>
+            </div>
+          )}
+
+          {/* Section 10: Signature */}
+          <div className="px-4 md:px-12 lg:px-16 py-12">
+            <SignatureBlock
+              client={{
+                role: 'Client',
+                companyName: client?.company_name || 'Client',
+                personName: client?.contact_name || undefined,
+                title: client?.contact_title || undefined,
+              }}
+            />
+
+            {proposal.status === 'accepted' && (
+              <div className="mt-8 flex items-center justify-center gap-3 rounded-xl border-2 border-green-200 bg-green-50 p-6">
+                <CheckCircle2 className="h-6 w-6 text-green-600" />
+                <p className="text-lg font-semibold text-green-800" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>This proposal has been accepted</p>
+              </div>
             )}
-          </PageWrapper>
+            {proposal.status === 'declined' && (
+              <div className="mt-8 flex items-center justify-center gap-3 rounded-xl border-2 border-red-200 bg-red-50 p-6">
+                <XCircle className="h-6 w-6 text-red-600" />
+                <p className="text-lg font-semibold text-red-800" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>This proposal has been declined</p>
+              </div>
+            )}
+          </div>
+        </div>
+        {/* End document container */}
+
+        {/* Accept / Decline Actions — outside document container */}
+        {(proposal.status === 'sent' || proposal.status === 'viewed') && (
+          <div style={{ maxWidth: '900px', margin: '32px auto 0', textAlign: 'center' }}>
+            <ProposalActions proposalId={proposal.id} brandColor={brandColor} onStatusChange={(status) => setProposal((prev: any) => prev ? { ...prev, status } : prev)} />
+          </div>
         )}
 
-        {/* Section 9: Terms & Conditions */}
-        {termsClauses.length > 0 && (
-          <PageWrapper pageNumber="09">
-            <SectionHeader
-              number="08"
-              title="Terms & Conditions"
-              subtitle="The legal framework governing our engagement."
-            />
-            <HighlightPanel
-              items={[
-                { label: 'Validity', value: `${proposal.validity_days || 30} days` },
-                { label: 'Revisions', value: `${proposal.revision_rounds ?? 2} rounds` },
-                { label: 'Notice Period', value: proposal.notice_period || '30 days' },
-              ]}
-              variant="dark"
-            />
-            <div className="mt-10">
-              <TermsSection clauses={[
-                ...termsClauses.map((c: any) => ({ title: c.title, content: c.content })),
-                ...(services.some((s: any) => s.module?.client_responsibilities?.length || s.module?.out_of_scope?.length) ? [{
-                  title: 'Scope & Responsibilities',
-                  content: 'The client is responsible for providing timely feedback, required access credentials, and content/assets as outlined in each service\'s scope. Work beyond the deliverables listed for each service is considered out of scope and may require a separate agreement.'
-                }] : []),
-              ]} />
-            </div>
-          </PageWrapper>
-        )}
-
-        {/* Section 10: Signature + Accept/Decline */}
-        <PageWrapper pageNumber="10">
-          <SignatureBlock
-            client={{
-              role: 'Client',
-              companyName: client?.company_name || 'Client',
-              personName: client?.contact_name || undefined,
-              title: client?.contact_title || undefined,
-            }}
-          />
-
-          {/* Accept / Decline Actions */}
-          {(proposal.status === 'sent' || proposal.status === 'viewed') && (
-            <ProposalActions proposalId={proposal.id} onStatusChange={(status) => setProposal((prev: any) => prev ? { ...prev, status } : prev)} />
-          )}
-          {proposal.status === 'accepted' && (
-            <div className="mt-8 flex items-center justify-center gap-3 rounded-xl border-2 border-green-200 bg-green-50 p-6">
-              <CheckCircle2 className="h-6 w-6 text-green-600" />
-              <p className="text-lg font-semibold text-green-800" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>This proposal has been accepted</p>
-            </div>
-          )}
-          {proposal.status === 'declined' && (
-            <div className="mt-8 flex items-center justify-center gap-3 rounded-xl border-2 border-red-200 bg-red-50 p-6">
-              <XCircle className="h-6 w-6 text-red-600" />
-              <p className="text-lg font-semibold text-red-800" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>This proposal has been declined</p>
-            </div>
-          )}
-        </PageWrapper>
-
-        {/* Analytics notice */}
-        <p className="mt-16 text-center text-[10px]" style={{ color: '#B8B0A5' }}>
-          Viewing activity is tracked to help {agency?.name || 'the agency'} follow up.
-        </p>
-
-        {/* Footer */}
-        <div className="text-center py-6 bg-white">
-          <p className="text-[#CCC]" style={{ fontSize: "12px", fontFamily: "'Space Grotesk', sans-serif" }}>
-            Powered by <span style={{ fontWeight: 600 }}>Propopad</span>
+        {/* Powered by Propopad watermark */}
+        <div className="text-center" style={{ marginTop: '24px' }}>
+          <p style={{ fontSize: '11px', color: '#B8B0A5' }}>
+            Powered by{' '}
+            <a href="https://propopad.com?ref=proposal" target="_blank" rel="noopener noreferrer" style={{ color: '#B8B0A5', textDecoration: 'underline' }}>
+              Propopad
+            </a>
+            {' '}— Proposal software for agencies
           </p>
         </div>
+
+        {/* Tracking notice */}
+        <p className="text-center" style={{ fontSize: '10px', color: '#C8C3BB', marginTop: '32px', marginBottom: '16px' }}>
+          Viewing activity is tracked to help {agency?.name || 'the agency'} follow up.
+        </p>
       </div>
     </BrandProvider>
     </TemplateProvider>
   );
 }
 
-function ProposalActions({ proposalId, onStatusChange }: { proposalId: string; onStatusChange: (status: string) => void }) {
+function ProposalActions({ proposalId, brandColor, onStatusChange }: { proposalId: string; brandColor: string; onStatusChange: (status: string) => void }) {
   const [acting, setActing] = useState(false);
   const [confirmed, setConfirmed] = useState<string | null>(null);
 
@@ -576,17 +593,17 @@ function ProposalActions({ proposalId, onStatusChange }: { proposalId: string; o
   };
 
   return (
-    <div className="mt-10 border-t border-[#EEE] pt-8">
-      <p className="text-center text-[15px] text-[#666] mb-6" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+    <div>
+      <p className="text-center mb-4" style={{ fontSize: '16px', fontWeight: 600, color: '#2A2118' }}>
         Ready to move forward?
       </p>
-      <div className="flex items-center justify-center gap-4">
+      <div className="flex items-center justify-center gap-3">
         {(!confirmed || confirmed === 'accepted') && (
           <button
             onClick={() => handleAction('accepted')}
             disabled={acting}
-            className="flex items-center gap-2 rounded-xl px-8 py-3 text-sm font-semibold text-white transition-all hover:scale-105 disabled:opacity-50"
-            style={{ backgroundColor: '#22c55e', fontFamily: "'Space Grotesk', sans-serif" }}
+            className="flex items-center gap-2 px-8 py-3.5 text-[15px] font-semibold text-white transition-all hover:scale-105 disabled:opacity-50"
+            style={{ backgroundColor: brandColor, borderRadius: '10px', border: 'none', cursor: 'pointer' }}
           >
             <CheckCircle2 className="h-5 w-5" />
             {confirmed === 'accepted' ? (acting ? 'Confirming...' : 'Click again to confirm') : 'Accept Proposal'}
@@ -596,8 +613,8 @@ function ProposalActions({ proposalId, onStatusChange }: { proposalId: string; o
           <button
             onClick={() => handleAction('declined')}
             disabled={acting}
-            className="flex items-center gap-2 rounded-xl border-2 border-[#E5E5E5] px-8 py-3 text-sm font-semibold text-[#666] transition-all hover:border-red-300 hover:text-red-600 disabled:opacity-50"
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            className="flex items-center gap-2 px-8 py-3.5 text-[15px] font-medium transition-all hover:border-red-300 hover:text-red-600 disabled:opacity-50"
+            style={{ background: 'transparent', color: '#8A7F72', borderRadius: '10px', border: '1px solid #EEEAE3', cursor: 'pointer' }}
           >
             <XCircle className="h-5 w-5" />
             {confirmed === 'declined' ? (acting ? 'Confirming...' : 'Click again to confirm') : 'Decline'}
@@ -606,8 +623,8 @@ function ProposalActions({ proposalId, onStatusChange }: { proposalId: string; o
         {confirmed && (
           <button
             onClick={() => setConfirmed(null)}
-            className="text-sm text-[#999] hover:text-[#666]"
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            className="text-sm hover:text-[#666]"
+            style={{ color: '#999' }}
           >
             Cancel
           </button>
