@@ -577,7 +577,7 @@ export function PricingSummary({
               <span className="text-[#555]" style={{ fontSize: "14px", fontWeight: 500 }}>{bundleSavings.bundleName} bundle discount</span>
               <span className="text-[#BBB] line-through" style={{ fontSize: "13px", fontWeight: 400 }}>{bundleSavings.individualTotal}</span>
             </div>
-            <span style={{ fontSize: "14px", fontWeight: 700, color: brandColor }}>{bundleSavings.savings}</span>
+            <span style={{ fontSize: "14px", fontWeight: 700, color: accent }}>{bundleSavings.savings}</span>
           </div>
         )}
 
