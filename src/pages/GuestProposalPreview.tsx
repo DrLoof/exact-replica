@@ -993,11 +993,13 @@ export default function GuestProposalPreview() {
                       {phases.map((phase: any, i: number) => (
                         <TimelineStep
                           key={i}
-                          number={i + 1}
-                          name={phase.name}
-                          duration={phase.duration || phase.default_duration || ''}
+                          number={phase.phase_number || i + 1}
+                          name={phase.name || phase.phase_name}
+                          duration={phase.week_range || phase.duration || phase.default_duration || ''}
                           description={phase.description}
                           isLast={i === phases.length - 1}
+                          isOngoing={phase.is_ongoing || false}
+                          isNextOngoing={i < phases.length - 1 && phases[i + 1]?.is_ongoing}
                           delay={i * 0.15}
                           onNameEdit={(val) => handlePhaseEdit(i, 'name', val)}
                           onDurationEdit={(val) => handlePhaseEdit(i, 'duration', val)}
