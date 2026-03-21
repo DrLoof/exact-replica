@@ -571,7 +571,7 @@ export function PricingSummary({
         {/* Bundle savings */}
         {bundleSavings && (
           <div className="px-8 py-4 flex items-center justify-between border-t border-[#EBEBEB]"
-            style={{ backgroundColor: `${brandColor}08` }}>
+            style={{ backgroundColor: `${accent}08` }}>
             <div className="flex items-center gap-3">
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: brandColor }} />
               <span className="text-[#555]" style={{ fontSize: "14px", fontWeight: 500 }}>{bundleSavings.bundleName} bundle discount</span>
