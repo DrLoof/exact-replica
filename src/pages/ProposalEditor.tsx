@@ -1265,21 +1265,51 @@ export default function ProposalEditor() {
                       const startDateStr = proposal.project_start_date
                         ? new Date(proposal.project_start_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
                         : 'TBD';
-                      const durationStr = proposal.estimated_duration || `~${Math.max(services.length * 2, 4)} weeks`;
-                      const durationMatch = durationStr.match(/(\d+)/);
-                      const totalWeeks = durationMatch ? parseInt(durationMatch[1]) : 16;
+                      const phasesArr = (proposal.phases as any[]) || [];
+                      const hasOngoing = phasesArr.some((p: any) => p.is_ongoing);
+                      const projectPhases = phasesArr.filter((p: any) => !p.is_ongoing);
+                      const ongoingPhase = phasesArr.find((p: any) => p.is_ongoing);
+                      
+                      // Calculate project weeks from phases
+                      let totalWeeks = 0;
+                      if (projectPhases.length > 0) {
+                        const maxEnd = Math.max(...projectPhases.map((p: any) => p.week_end || 0));
+                        if (maxEnd > 0) {
+                          totalWeeks = maxEnd;
+                        } else {
+                          const durationMatch = (proposal.estimated_duration || '16 weeks').match(/(\d+)/);
+                          totalWeeks = durationMatch ? parseInt(durationMatch[1]) : 16;
+                        }
+                      } else {
+                        const durationMatch = (proposal.estimated_duration || '4 weeks').match(/(\d+)/);
+                        totalWeeks = durationMatch ? parseInt(durationMatch[1]) : 4;
+                      }
+                      
+                      const durationDisplay = totalWeeks >= 12 ? `${Math.round(totalWeeks / 4)} Months` : `${totalWeeks} Weeks`;
+                      const isOnlyOngoing = projectPhases.length <= 1 && hasOngoing;
+                      const launchLabel = isOnlyOngoing ? 'Services Begin' : 'Projected Launch';
                       const launchDate = proposal.project_start_date
                         ? new Date(new Date(proposal.project_start_date).getTime() + totalWeeks * 7 * 86400000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
                         : 'TBD';
+                      
+                      const ongoingServiceNames = ongoingPhase?.services?.join(', ');
+                      
                       return (
-                        <HighlightPanel
-                          items={[
-                            { label: 'Project Start', value: startDateStr },
-                            { label: 'Total Duration', value: `${totalWeeks} Weeks` },
-                            { label: 'Projected Launch', value: launchDate, accent: true },
-                          ]}
-                          variant="accent"
-                        />
+                        <>
+                          <HighlightPanel
+                            items={[
+                              { label: 'Project Start', value: startDateStr },
+                              { label: 'Total Duration', value: durationDisplay },
+                              { label: launchLabel, value: launchDate, accent: true },
+                            ]}
+                            variant="accent"
+                          />
+                          {hasOngoing && ongoingServiceNames && (
+                            <p className="text-center mt-3 print:mt-2" style={{ fontSize: '13px', color: '#8A7F72' }}>
+                              Plus ongoing monthly management for {ongoingServiceNames}
+                            </p>
+                          )}
+                        </>
                       );
                     })()}
 
@@ -1289,11 +1319,13 @@ export default function ProposalEditor() {
                         {(proposal.phases as any[]).map((phase: any, i: number) => (
                           <TimelineStep
                             key={i}
-                            number={i + 1}
-                            name={phase.name || `Phase ${i + 1}`}
-                            duration={phase.duration || 'TBD'}
+                            number={phase.phase_number || i + 1}
+                            name={phase.name || phase.phase_name || `Phase ${i + 1}`}
+                            duration={phase.week_range || phase.duration || 'TBD'}
                             description={phase.description}
                             isLast={i === (proposal.phases as any[]).length - 1}
+                            isOngoing={phase.is_ongoing || false}
+                            isNextOngoing={i < (proposal.phases as any[]).length - 1 && (proposal.phases as any[])[i + 1]?.is_ongoing}
                             delay={i * 0.1}
                             onNameEdit={(val) => {
                               const updated = [...(proposal.phases as any[])];
@@ -1302,7 +1334,7 @@ export default function ProposalEditor() {
                             }}
                             onDurationEdit={(val) => {
                               const updated = [...(proposal.phases as any[])];
-                              updated[i] = { ...updated[i], duration: val };
+                              updated[i] = { ...updated[i], duration: val, week_range: val };
                               updateField('phases', updated);
                             }}
                             onDescriptionEdit={(val) => {
