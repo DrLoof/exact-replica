@@ -521,7 +521,7 @@ export function PricingSummary({
               <div key={gIdx}>
                 <div className="px-8 py-3 bg-[#FAFAFA]/60 border-b border-[#F0F0F0] flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-1 h-6 rounded-full" style={{ backgroundColor: brandColor }} />
+                    <div className="w-1 h-6 rounded-full" style={{ backgroundColor: accent }} />
                     <div>
                       <span className="text-[#0A0A0A] block" style={{ fontSize: "13px", fontWeight: 700 }}>{group.label}</span>
                       <span className="text-[#BBB] block" style={{ fontSize: "11px", fontWeight: 400 }}>{group.sublabel}</span>
@@ -537,7 +537,7 @@ export function PricingSummary({
                         <span className="text-[#0A0A0A] block" style={{ fontSize: "16px", fontWeight: 600 }}>
                           {item.service}
                           {item.isAddon && <span className="ml-2 text-[#999] uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600 }}>Add-on</span>}
-                          {item.isBundled && <span className="ml-2 uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600, color: brandColor }}>Bundled</span>}
+                          {item.isBundled && <span className="ml-2 uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600, color: accent }}>Bundled</span>}
                         </span>
                         {item.note && <span className="text-[#BBB] block mt-0.5" style={{ fontSize: "13px", fontWeight: 400 }}>{item.note}</span>}
                       </div>
@@ -571,13 +571,13 @@ export function PricingSummary({
         {/* Bundle savings */}
         {bundleSavings && (
           <div className="px-8 py-4 flex items-center justify-between border-t border-[#EBEBEB]"
-            style={{ backgroundColor: `${brandColor}08` }}>
+            style={{ backgroundColor: `${accent}08` }}>
             <div className="flex items-center gap-3">
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: brandColor }} />
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: accent }} />
               <span className="text-[#555]" style={{ fontSize: "14px", fontWeight: 500 }}>{bundleSavings.bundleName} bundle discount</span>
               <span className="text-[#BBB] line-through" style={{ fontSize: "13px", fontWeight: 400 }}>{bundleSavings.individualTotal}</span>
             </div>
-            <span style={{ fontSize: "14px", fontWeight: 700, color: brandColor }}>{bundleSavings.savings}</span>
+            <span style={{ fontSize: "14px", fontWeight: 700, color: accent }}>{bundleSavings.savings}</span>
           </div>
         )}
 
@@ -603,7 +603,7 @@ export function PricingSummary({
               return (
                 <div key={idx} className="flex items-start gap-3">
                   <span className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-                    style={{ fontSize: "11px", fontWeight: 700, backgroundColor: `${brandColor}15`, color: brandColor }}>
+                    style={{ fontSize: "11px", fontWeight: 700, backgroundColor: `${accent}15`, color: accent }}>
                     {idx + 1}
                   </span>
                   <div className="flex-1 flex items-start justify-between gap-4">
@@ -622,7 +622,7 @@ export function PricingSummary({
         <div className="mt-6 text-center">
           <span className="text-[#BBB]" style={{ fontSize: "13px", fontWeight: 400 }}>
             This proposal is valid until{" "}
-            <span style={{ fontWeight: 600, color: brandColor }}>{validUntil}</span>
+            <span style={{ fontWeight: 600, color: accent }}>{validUntil}</span>
           </span>
         </div>
       )}
