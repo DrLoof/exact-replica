@@ -603,7 +603,7 @@ export function PricingSummary({
               return (
                 <div key={idx} className="flex items-start gap-3">
                   <span className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
-                    style={{ fontSize: "11px", fontWeight: 700, backgroundColor: `${brandColor}15`, color: brandColor }}>
+                    style={{ fontSize: "11px", fontWeight: 700, backgroundColor: `${accent}15`, color: accent }}>
                     {idx + 1}
                   </span>
                   <div className="flex-1 flex items-start justify-between gap-4">
