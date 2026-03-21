@@ -2126,8 +2126,8 @@ function SectionWrapper({ idx, onDelete, label, children }: {
   idx: number; onDelete: (idx: number) => void; label: string; children: React.ReactNode;
 }) {
   return (
-    <div id={`section-${idx}`} className="group relative">
-      <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center gap-3 rounded-full bg-card border border-border px-4 py-1.5 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 z-20 print:hidden">
+    <div id={`section-${idx}`} className="group/section relative">
+      <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center gap-3 rounded-full bg-card border border-border px-4 py-1.5 opacity-0 shadow-sm transition-opacity group-hover/section:opacity-100 z-20 print:hidden">
         <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{label}</span>
         <div className="w-px h-4 bg-border" />
         <button onClick={() => onDelete(idx)} className="text-muted-foreground hover:text-destructive" title="Remove page">

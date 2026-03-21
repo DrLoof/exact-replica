@@ -218,7 +218,7 @@ export function ServiceCard({
   const renderRemoveButton = () => onRemove && (
     <button
       onClick={onRemove}
-      className="absolute -top-2 -right-2 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white opacity-0 shadow-md transition-opacity group-hover:opacity-100 print:hidden"
+      className="absolute -top-2 -right-2 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white opacity-0 shadow-md transition-opacity group-hover/svc:opacity-100 print:hidden"
       title="Remove service"
     >
       <X className="h-3 w-3" />
@@ -274,7 +274,7 @@ export function ServiceCard({
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.5, ease: "easeOut" }}
-        className="group relative rounded-2xl p-7 transition-all duration-300"
+        className="group/svc relative rounded-2xl p-7 transition-all duration-300"
         style={{
           background: "white", fontFamily: "'DM Sans', sans-serif",
           border: `1px solid ${border}`,
@@ -295,7 +295,7 @@ export function ServiceCard({
             Add-on
           </span>
         )}
-        <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-105"
+        <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover/svc:scale-105"
           style={{ background: bg, color: accent }}>
           {icon}
         </div>
@@ -421,7 +421,7 @@ export function ServiceCard({
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.5, ease: "easeOut" }}
-        className="group relative rounded-3xl p-8 transition-all duration-300"
+        className="group/svc relative rounded-3xl p-8 transition-all duration-300"
         style={{
           background: "white", fontFamily: "'DM Sans', sans-serif",
           border: `1px solid ${border}`,
@@ -577,7 +577,7 @@ export function ServiceCard({
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay, duration: 0.5, ease: "easeOut" }}
-        className="group relative rounded-3xl p-7 transition-transform duration-300 hover:-translate-y-1"
+        className="group/svc relative rounded-3xl p-7 transition-transform duration-300 hover:-translate-y-1"
         style={{
           background: template.colors.cardBackground, fontFamily: "'Outfit', sans-serif",
           border: `2px solid ${borderColor}`,
@@ -711,7 +711,7 @@ export function ServiceCard({
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5, ease: "easeOut" }}
-      className="group relative bg-white border border-[#EBEBEB] rounded-2xl p-8 transition-all duration-300"
+      className="group/svc relative bg-white border border-[#EBEBEB] rounded-2xl p-8 transition-all duration-300"
       style={{ fontFamily: "'Space Grotesk', sans-serif" }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = `${brand.primaryColor}4D`;
