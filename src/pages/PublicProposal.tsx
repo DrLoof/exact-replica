@@ -200,7 +200,7 @@ export default function PublicProposal() {
   return (
     <TemplateProvider templateId={proposal?.template_id || 'classic'} customColors={customColors}>
     <BrandProvider brand={brandData}>
-      <div className="min-h-screen" style={{ background: '#F0EFEC', padding: '40px 0' }}>
+      <div className="min-h-screen md:py-10" style={{ background: '#F0EFEC' }}>
         {/* Document container */}
         <div
           className="mx-auto overflow-hidden"
