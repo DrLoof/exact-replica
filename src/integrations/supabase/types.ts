@@ -128,6 +128,44 @@ export type Database = {
         }
         Relationships: []
       }
+      api_calls: {
+        Row: {
+          agency_id: string | null
+          created_at: string | null
+          duration_ms: number | null
+          error_message: string | null
+          function_name: string
+          id: string
+          status: string
+        }
+        Insert: {
+          agency_id?: string | null
+          created_at?: string | null
+          duration_ms?: number | null
+          error_message?: string | null
+          function_name: string
+          id?: string
+          status: string
+        }
+        Update: {
+          agency_id?: string | null
+          created_at?: string | null
+          duration_ms?: number | null
+          error_message?: string | null
+          function_name?: string
+          id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_calls_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bundle_modules: {
         Row: {
           bundle_id: string | null
@@ -369,6 +407,63 @@ export type Database = {
             columns: ["agency_id"]
             isOneToOne: false
             referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback: {
+        Row: {
+          admin_notes: string | null
+          agency_id: string | null
+          can_contact: boolean | null
+          created_at: string | null
+          id: string
+          message: string | null
+          page_url: string | null
+          rating: number | null
+          status: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          agency_id?: string | null
+          can_contact?: boolean | null
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          page_url?: string | null
+          rating?: number | null
+          status?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          agency_id?: string | null
+          can_contact?: boolean | null
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          page_url?: string | null
+          rating?: number | null
+          status?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -1322,6 +1417,7 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          is_admin: boolean | null
           role: string | null
         }
         Insert: {
@@ -1331,6 +1427,7 @@ export type Database = {
           email: string
           full_name?: string | null
           id: string
+          is_admin?: boolean | null
           role?: string | null
         }
         Update: {
@@ -1340,6 +1437,7 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+          is_admin?: boolean | null
           role?: string | null
         }
         Relationships: [
