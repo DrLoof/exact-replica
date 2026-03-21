@@ -537,7 +537,7 @@ export function PricingSummary({
                         <span className="text-[#0A0A0A] block" style={{ fontSize: "16px", fontWeight: 600 }}>
                           {item.service}
                           {item.isAddon && <span className="ml-2 text-[#999] uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600 }}>Add-on</span>}
-                          {item.isBundled && <span className="ml-2 uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600, color: brandColor }}>Bundled</span>}
+                          {item.isBundled && <span className="ml-2 uppercase tracking-wider" style={{ fontSize: "10px", fontWeight: 600, color: accent }}>Bundled</span>}
                         </span>
                         {item.note && <span className="text-[#BBB] block mt-0.5" style={{ fontSize: "13px", fontWeight: 400 }}>{item.note}</span>}
                       </div>
