@@ -193,6 +193,7 @@ export function Sidebar({ onClose }: SidebarProps) {
           </>
         )}
       </div>
+      <FeedbackModal open={feedbackOpen} onOpenChange={setFeedbackOpen} />
     </aside>
   );
 }

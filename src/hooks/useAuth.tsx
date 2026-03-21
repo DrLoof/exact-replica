@@ -17,7 +17,7 @@ interface UserProfile {
 interface AuthContextType {
   session: Session | null;
   user: User | null;
-  userProfile: any | null;
+  userProfile: UserProfile | null;
   agency: any | null;
   loading: boolean;
   signOut: () => Promise<void>;
