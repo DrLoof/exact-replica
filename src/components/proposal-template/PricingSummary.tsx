@@ -622,7 +622,7 @@ export function PricingSummary({
         <div className="mt-6 text-center">
           <span className="text-[#BBB]" style={{ fontSize: "13px", fontWeight: 400 }}>
             This proposal is valid until{" "}
-            <span style={{ fontWeight: 600, color: brandColor }}>{validUntil}</span>
+            <span style={{ fontWeight: 600, color: accent }}>{validUntil}</span>
           </span>
         </div>
       )}
