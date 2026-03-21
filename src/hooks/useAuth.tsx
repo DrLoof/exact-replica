@@ -3,6 +3,17 @@ import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 
+interface UserProfile {
+  id: string;
+  email: string;
+  full_name: string | null;
+  agency_id: string | null;
+  role: string | null;
+  avatar_url: string | null;
+  is_admin?: boolean;
+  [key: string]: any;
+}
+
 interface AuthContextType {
   session: Session | null;
   user: User | null;
