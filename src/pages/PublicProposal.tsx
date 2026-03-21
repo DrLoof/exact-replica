@@ -85,6 +85,20 @@ export default function PublicProposal() {
       setPortfolioItems((piData || []).map((d: any) => ({ ...d, images: d.images || [] })));
     }
 
+    // Load existing signature if proposal is accepted/signed
+    if (prop.status === 'accepted' || (prop as any).is_locked) {
+      const { data: sigData } = await supabase
+        .from('proposal_signatures' as any)
+        .select('*')
+        .eq('proposal_id', prop.id)
+        .eq('role', 'client')
+        .order('signed_at', { ascending: false })
+        .limit(1);
+      if (sigData && sigData.length > 0) {
+        setSignature(sigData[0]);
+      }
+    }
+
     setLoading(false);
   };
 
