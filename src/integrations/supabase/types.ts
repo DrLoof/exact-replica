@@ -1001,11 +1001,13 @@ export type Database = {
         Row: {
           agency_id: string | null
           ai_context: string | null
+          can_parallel: boolean | null
           client_responsibilities: string[] | null
           common_tools: string[] | null
           created_at: string
           default_timeline: string | null
           deliverables: string[] | null
+          depends_on: string[] | null
           description: string | null
           display_order: number | null
           estimated_hours: number | null
@@ -1014,24 +1016,31 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_default: boolean | null
+          max_weeks: number | null
+          min_weeks: number | null
           name: string
           out_of_scope: string[] | null
+          phase_category: string | null
           price_fixed: number | null
           price_hourly: number | null
           price_monthly: number | null
           pricing_model: string | null
           service_type: string | null
+          setup_weeks: number | null
           short_description: string | null
           suggested_kpis: string[] | null
+          timeline_type: string | null
         }
         Insert: {
           agency_id?: string | null
           ai_context?: string | null
+          can_parallel?: boolean | null
           client_responsibilities?: string[] | null
           common_tools?: string[] | null
           created_at?: string
           default_timeline?: string | null
           deliverables?: string[] | null
+          depends_on?: string[] | null
           description?: string | null
           display_order?: number | null
           estimated_hours?: number | null
@@ -1040,24 +1049,31 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_default?: boolean | null
+          max_weeks?: number | null
+          min_weeks?: number | null
           name: string
           out_of_scope?: string[] | null
+          phase_category?: string | null
           price_fixed?: number | null
           price_hourly?: number | null
           price_monthly?: number | null
           pricing_model?: string | null
           service_type?: string | null
+          setup_weeks?: number | null
           short_description?: string | null
           suggested_kpis?: string[] | null
+          timeline_type?: string | null
         }
         Update: {
           agency_id?: string | null
           ai_context?: string | null
+          can_parallel?: boolean | null
           client_responsibilities?: string[] | null
           common_tools?: string[] | null
           created_at?: string
           default_timeline?: string | null
           deliverables?: string[] | null
+          depends_on?: string[] | null
           description?: string | null
           display_order?: number | null
           estimated_hours?: number | null
@@ -1066,15 +1082,20 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_default?: boolean | null
+          max_weeks?: number | null
+          min_weeks?: number | null
           name?: string
           out_of_scope?: string[] | null
+          phase_category?: string | null
           price_fixed?: number | null
           price_hourly?: number | null
           price_monthly?: number | null
           pricing_model?: string | null
           service_type?: string | null
+          setup_weeks?: number | null
           short_description?: string | null
           suggested_kpis?: string[] | null
+          timeline_type?: string | null
         }
         Relationships: [
           {

@@ -1,0 +1,8 @@
+
+ALTER TABLE service_modules ADD COLUMN IF NOT EXISTS timeline_type TEXT DEFAULT 'project';
+ALTER TABLE service_modules ADD COLUMN IF NOT EXISTS setup_weeks INTEGER DEFAULT 0;
+ALTER TABLE service_modules ADD COLUMN IF NOT EXISTS min_weeks INTEGER DEFAULT 2;
+ALTER TABLE service_modules ADD COLUMN IF NOT EXISTS max_weeks INTEGER DEFAULT 4;
+ALTER TABLE service_modules ADD COLUMN IF NOT EXISTS phase_category TEXT DEFAULT 'build';
+ALTER TABLE service_modules ADD COLUMN IF NOT EXISTS can_parallel BOOLEAN DEFAULT true;
+ALTER TABLE service_modules ADD COLUMN IF NOT EXISTS depends_on TEXT[] DEFAULT '{}';
