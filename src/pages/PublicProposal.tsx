@@ -5,7 +5,6 @@ import { AlertTriangle, Layers, CheckCircle2, XCircle, Download } from 'lucide-r
 import { toast } from 'sonner';
 import { SignProposalModal } from '@/components/proposal/SignProposalModal';
 import { DeclineProposalModal } from '@/components/proposal/DeclineProposalModal';
-import { toast } from 'sonner';
 import {
   BrandProvider, HeroCover, SectionHeader, TextContent, HighlightPanel,
   BundleCard, ServiceCard, PricingSummary, TimelineStep, TermsSection,
