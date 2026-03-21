@@ -11,6 +11,8 @@ interface TimelineStepProps {
   description?: string;
   isLast?: boolean;
   delay?: number;
+  isOngoing?: boolean;
+  isNextOngoing?: boolean;
   onNameEdit?: (value: string) => void;
   onDurationEdit?: (value: string) => void;
   onDescriptionEdit?: (value: string) => void;
@@ -18,6 +20,7 @@ interface TimelineStepProps {
 
 export function TimelineStep({
   number, name, duration, description, isLast = false, delay = 0,
+  isOngoing = false, isNextOngoing = false,
   onNameEdit, onDurationEdit, onDescriptionEdit,
 }: TimelineStepProps) {
   const brand = useBrand();
@@ -28,6 +31,32 @@ export function TimelineStep({
   const accent = template.colors.primaryAccent;
   const secondary = template.colors.secondaryAccent;
   const dark = template.colors.primaryDark;
+
+  // For ongoing phases, use secondary accent colors
+  const pillAccent = isOngoing ? secondary : accent;
+  const circleAccent = isOngoing ? secondary : accent;
+
+  // Render the number/symbol inside the circle
+  const renderCircleContent = () => {
+    if (isOngoing) {
+      return <span style={{ fontSize: '18px', lineHeight: 1 }}>∞</span>;
+    }
+    return <span>{String(number).padStart(2, "0")}</span>;
+  };
+
+  // Connecting line style — dashed if next phase is ongoing
+  const getLineStyle = (solidColor: string) => {
+    if (isNextOngoing) {
+      return {
+        background: `repeating-linear-gradient(to bottom, ${solidColor} 0, ${solidColor} 4px, transparent 4px, transparent 8px)`,
+      };
+    }
+    return { background: solidColor };
+  };
+
+  // Don't allow editing duration on ongoing phases
+  const effectiveDurationEdit = isOngoing ? undefined : onDurationEdit;
+  const displayDuration = isOngoing ? 'ONGOING' : duration;
 
   if (isSoft) {
     const bg = template.colors.background;
@@ -44,14 +73,15 @@ export function TimelineStep({
       >
         <div className="flex flex-col items-center shrink-0">
           <div className="w-14 h-14 rounded-xl flex items-center justify-center relative z-10"
-            style={{ background: bg, border: `1px solid ${accent}33`, color: accent }}>
-            <span style={{ fontSize: "18px", fontWeight: 600 }}>
-              {String(number).padStart(2, "0")}
-            </span>
+            style={{ background: bg, border: `1px solid ${circleAccent}33`, color: circleAccent, fontSize: isOngoing ? undefined : '18px', fontWeight: 600 }}>
+            {renderCircleContent()}
           </div>
           {!isLast && (
             <div className="w-px flex-1 min-h-[50px]"
-              style={{ background: `linear-gradient(to bottom, ${accent}4D, ${border})` }} />
+              style={isNextOngoing
+                ? getLineStyle(`${accent}4D`)
+                : { background: `linear-gradient(to bottom, ${accent}4D, ${border})` }
+              } />
           )}
         </div>
         <div className={`pb-10 ${isLast ? "pb-0" : ""}`}>
@@ -62,14 +92,14 @@ export function TimelineStep({
             ) : (
               <h3 style={{ fontSize: "19px", fontWeight: 600, lineHeight: 1.2, color: dark }}>{name}</h3>
             )}
-            {onDurationEdit ? (
-              <EditableText value={duration} placeholder="Duration..." onSave={onDurationEdit} as="span"
+            {effectiveDurationEdit ? (
+              <EditableText value={displayDuration} placeholder="Duration..." onSave={effectiveDurationEdit} as="span"
                 className="inline-block px-3 py-1 rounded-full"
-                style={{ background: `${accent}1A`, color: accent, fontSize: "11px", fontWeight: 600 }} />
+                style={{ background: `${pillAccent}1A`, color: pillAccent, fontSize: "11px", fontWeight: 600 }} />
             ) : (
               <span className="inline-block px-3 py-1 rounded-full"
-                style={{ background: `${accent}1A`, color: accent, fontSize: "11px", fontWeight: 600 }}>
-                {duration}
+                style={{ background: `${pillAccent}1A`, color: pillAccent, fontSize: "11px", fontWeight: 600 }}>
+                {displayDuration}
               </span>
             )}
           </div>
@@ -87,7 +117,7 @@ export function TimelineStep({
   }
 
   if (isElegant) {
-    const accentTint = `${accent}0F`;
+    const accentTint = `${circleAccent}0F`;
     const border = template.colors.border;
     const muted = template.colors.textMuted;
 
@@ -101,14 +131,17 @@ export function TimelineStep({
       >
         <div className="flex flex-col items-center shrink-0">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center relative z-10"
-            style={{ background: accentTint, border: `1px solid ${accent}26`, color: accent }}>
-            <span style={{ fontSize: "18px", fontWeight: 500, fontFamily: "'Fraunces', serif" }}>
-              {String(number).padStart(2, "0")}
+            style={{ background: accentTint, border: `1px solid ${circleAccent}26`, color: circleAccent }}>
+            <span style={{ fontSize: isOngoing ? "18px" : "18px", fontWeight: 500, fontFamily: isOngoing ? undefined : "'Fraunces', serif" }}>
+              {isOngoing ? '∞' : String(number).padStart(2, "0")}
             </span>
           </div>
           {!isLast && (
             <div className="w-px flex-1 min-h-[50px]"
-              style={{ background: `linear-gradient(to bottom, ${accent}40, ${border})` }} />
+              style={isNextOngoing
+                ? getLineStyle(`${accent}40`)
+                : { background: `linear-gradient(to bottom, ${accent}40, ${border})` }
+              } />
           )}
         </div>
         <div className={`pb-10 ${isLast ? "pb-0" : ""}`}>
@@ -121,14 +154,14 @@ export function TimelineStep({
                 {name}
               </h3>
             )}
-            {onDurationEdit ? (
-              <EditableText value={duration} placeholder="Duration..." onSave={onDurationEdit} as="span"
+            {effectiveDurationEdit ? (
+              <EditableText value={displayDuration} placeholder="Duration..." onSave={effectiveDurationEdit} as="span"
                 className="inline-block px-3 py-1 rounded-full"
-                style={{ background: `${secondary}26`, color: secondary, fontSize: "11px", fontWeight: 600 }} />
+                style={{ background: `${pillAccent}26`, color: pillAccent, fontSize: "11px", fontWeight: 600 }} />
             ) : (
               <span className="inline-block px-3 py-1 rounded-full"
-                style={{ background: `${secondary}26`, color: secondary, fontSize: "11px", fontWeight: 600 }}>
-                {duration}
+                style={{ background: `${pillAccent}26`, color: pillAccent, fontSize: "11px", fontWeight: 600 }}>
+                {displayDuration}
               </span>
             )}
           </div>
@@ -159,15 +192,18 @@ export function TimelineStep({
       >
         <div className="flex flex-col items-center shrink-0">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center relative z-10"
-            style={{ background: accent, boxShadow: `4px 4px 0px ${dark}` }}>
+            style={{ background: circleAccent, boxShadow: `4px 4px 0px ${dark}` }}>
             <span className="text-white"
-              style={{ fontSize: "20px", fontWeight: 800, fontFamily: "'Fraunces', serif" }}>
-              {String(number).padStart(2, "0")}
+              style={{ fontSize: isOngoing ? "18px" : "20px", fontWeight: 800, fontFamily: isOngoing ? undefined : "'Fraunces', serif" }}>
+              {isOngoing ? '∞' : String(number).padStart(2, "0")}
             </span>
           </div>
           {!isLast && (
             <div className="w-0.5 flex-1 min-h-[50px]"
-              style={{ background: `repeating-linear-gradient(to bottom, ${accent}40 0, ${accent}40 6px, transparent 6px, transparent 12px)` }} />
+              style={isNextOngoing
+                ? getLineStyle(`${accent}40`)
+                : { background: `repeating-linear-gradient(to bottom, ${accent}40 0, ${accent}40 6px, transparent 6px, transparent 12px)` }
+              } />
           )}
         </div>
         <div className={`pb-10 ${isLast ? "pb-0" : ""}`}>
@@ -180,14 +216,14 @@ export function TimelineStep({
                 {name}
               </h3>
             )}
-            {onDurationEdit ? (
-              <EditableText value={duration} placeholder="Duration..." onSave={onDurationEdit} as="span"
+            {effectiveDurationEdit ? (
+              <EditableText value={displayDuration} placeholder="Duration..." onSave={effectiveDurationEdit} as="span"
                 className="inline-block px-3 py-1 rounded-full"
-                style={{ background: `${accent}12`, color: accent, fontSize: "12px", fontWeight: 600 }} />
+                style={{ background: `${pillAccent}12`, color: pillAccent, fontSize: "12px", fontWeight: 600 }} />
             ) : (
               <span className="inline-block px-3 py-1 rounded-full"
-                style={{ background: `${accent}12`, color: accent, fontSize: "12px", fontWeight: 600 }}>
-                {duration}
+                style={{ background: `${pillAccent}12`, color: pillAccent, fontSize: "12px", fontWeight: 600 }}>
+                {displayDuration}
               </span>
             )}
           </div>
@@ -207,6 +243,7 @@ export function TimelineStep({
     );
   }
 
+  // Classic template
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -217,13 +254,17 @@ export function TimelineStep({
     >
       <div className="flex flex-col items-center shrink-0">
         <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-          style={{ backgroundColor: "#1E1E2E" }}>
-          <span className="text-white" style={{ fontSize: "16px", fontWeight: 700 }}>
-            {String(number).padStart(2, "0")}
+          style={{ backgroundColor: isOngoing ? secondary : "#1E1E2E" }}>
+          <span className="text-white" style={{ fontSize: isOngoing ? "18px" : "16px", fontWeight: 700 }}>
+            {isOngoing ? '∞' : String(number).padStart(2, "0")}
           </span>
         </div>
         {!isLast && (
-          <div className="w-0.5 flex-1 min-h-[48px]" style={{ backgroundColor: "#E5E7EB" }} />
+          <div className="w-0.5 flex-1 min-h-[48px]"
+            style={isNextOngoing
+              ? getLineStyle('#9CA3AF')
+              : { backgroundColor: "#E5E7EB" }
+            } />
         )}
       </div>
       <div className={`pb-10 pt-1 ${isLast ? "" : ""}`}>
@@ -234,14 +275,14 @@ export function TimelineStep({
           ) : (
             <h3 className="tracking-tight" style={{ fontSize: "18px", fontWeight: 700, color: "#1E1E2E" }}>{name}</h3>
           )}
-          {onDurationEdit ? (
-            <EditableText value={duration} placeholder="Duration..." onSave={onDurationEdit} as="span"
+          {effectiveDurationEdit ? (
+            <EditableText value={displayDuration} placeholder="Duration..." onSave={effectiveDurationEdit} as="span"
               className="inline-block rounded-full px-3 py-0.5 border uppercase tracking-wider"
-              style={{ fontSize: "11px", fontWeight: 700, borderColor: accent, color: accent, backgroundColor: "transparent" }} />
+              style={{ fontSize: "11px", fontWeight: 700, borderColor: pillAccent, color: pillAccent, backgroundColor: isOngoing ? `${pillAccent}14` : "transparent" }} />
           ) : (
             <span className="inline-block rounded-full px-3 py-0.5 border uppercase tracking-wider"
-              style={{ fontSize: "11px", fontWeight: 700, borderColor: accent, color: accent, backgroundColor: "transparent" }}>
-              {duration}
+              style={{ fontSize: "11px", fontWeight: 700, borderColor: pillAccent, color: pillAccent, backgroundColor: isOngoing ? `${pillAccent}14` : "transparent" }}>
+              {displayDuration}
             </span>
           )}
         </div>
