@@ -366,7 +366,7 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
               ref={ref}
               id="pdf-render-container"
               style={{
-                width: '794px',
+                width: '1024px',
                 background: 'white',
                 position: 'absolute',
                 left: '-9999px',

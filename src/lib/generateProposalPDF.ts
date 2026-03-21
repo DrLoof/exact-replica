@@ -39,8 +39,8 @@ export async function generateProposalPDF(
       useCORS: true,
       allowTaint: false,
       backgroundColor: null,
-      width: 794,
-      windowWidth: 794,
+      width: 1024,
+      windowWidth: 1024,
       height: section.scrollHeight,
       windowHeight: section.scrollHeight,
     });
