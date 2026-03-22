@@ -17,7 +17,8 @@ export function useUser() {
     };
   }
 
-  const role = userProfile.role || 'member';
+  // Default to 'owner' if role is not set (legacy users who created the agency)
+  const role = userProfile.role || 'owner';
 
   return {
     id: userProfile.id,
