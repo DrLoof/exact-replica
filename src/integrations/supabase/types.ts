@@ -346,6 +346,8 @@ export type Database = {
           contact_title: string | null
           created_at: string
           created_by: string | null
+          hubspot_company_id: string | null
+          hubspot_contact_id: string | null
           id: string
           industry: string | null
           logo_url: string | null
@@ -363,6 +365,8 @@ export type Database = {
           contact_title?: string | null
           created_at?: string
           created_by?: string | null
+          hubspot_company_id?: string | null
+          hubspot_contact_id?: string | null
           id?: string
           industry?: string | null
           logo_url?: string | null
@@ -380,6 +384,8 @@ export type Database = {
           contact_title?: string | null
           created_at?: string
           created_by?: string | null
+          hubspot_company_id?: string | null
+          hubspot_contact_id?: string | null
           id?: string
           industry?: string | null
           logo_url?: string | null
@@ -1210,6 +1216,7 @@ export type Database = {
           executive_summary_tone: string | null
           goals: Json | null
           grand_total: number | null
+          hubspot_deal_id: string | null
           id: string
           is_locked: boolean | null
           notice_period: string | null
@@ -1261,6 +1268,7 @@ export type Database = {
           executive_summary_tone?: string | null
           goals?: Json | null
           grand_total?: number | null
+          hubspot_deal_id?: string | null
           id?: string
           is_locked?: boolean | null
           notice_period?: string | null
@@ -1312,6 +1320,7 @@ export type Database = {
           executive_summary_tone?: string | null
           goals?: Json | null
           grand_total?: number | null
+          hubspot_deal_id?: string | null
           id?: string
           is_locked?: boolean | null
           notice_period?: string | null
