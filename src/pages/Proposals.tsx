@@ -107,6 +107,8 @@ export default function Proposals() {
     await supabase.from('proposals').update(updates).eq('id', proposalId);
     queryClient.invalidateQueries({ queryKey: ['proposals'] });
     toast.success(`Status updated to ${statusConfig[newStatus]?.label || newStatus}`);
+    // Fire-and-forget HubSpot sync
+    syncProposalToHubSpot(proposalId);
   };
 
   const timeAgo = (date: string) => {

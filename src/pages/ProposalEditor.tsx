@@ -2032,6 +2032,7 @@ function ShareModal({ proposal, client, agency, onClose, onStatusUpdate, onDownl
       if (proposal.status === 'draft') {
         await supabase.from('proposals').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', proposal.id);
         onStatusUpdate('sent');
+        syncProposalToHubSpot(proposal.id);
       }
       setGenerating(false);
       return url;
