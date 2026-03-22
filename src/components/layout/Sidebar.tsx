@@ -7,26 +7,27 @@ import {
 import { cn } from '@/lib/utils';
 import logoOrange from '@/assets/logo_propopad_small.svg';
 import { useAuth } from '@/hooks/useAuth';
+import { useUser } from '@/hooks/useUser';
 import { useProposals } from '@/hooks/useAgencyData';
 import { FeedbackModal } from '@/components/FeedbackModal';
 import { usePlan } from '@/hooks/usePlan';
 
 const mainNav = [
-  { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-  { label: 'Proposals', icon: FileText, path: '/proposals', showCount: true },
-  { label: 'Clients', icon: Users, path: '/clients' },
-  { label: 'Services', icon: Layers, path: '/services' },
-  { label: 'Packages', icon: FolderOpen, path: '/packages' },
-  { label: 'Bundles', icon: Package, path: '/bundles' },
+  { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard', roles: ['owner', 'admin', 'member'] },
+  { label: 'Proposals', icon: FileText, path: '/proposals', showCount: true, roles: ['owner', 'admin', 'member'] },
+  { label: 'Clients', icon: Users, path: '/clients', roles: ['owner', 'admin', 'member'] },
+  { label: 'Services', icon: Layers, path: '/services', roles: ['owner', 'admin', 'member'] },
+  { label: 'Packages', icon: FolderOpen, path: '/packages', roles: ['owner', 'admin', 'member'] },
+  { label: 'Bundles', icon: Package, path: '/bundles', roles: ['owner', 'admin', 'member'] },
 ];
 
 const settingsNav = [
-  { label: 'Agency Profile', icon: Building2, path: '/settings/agency' },
-  { label: 'Branding', icon: Palette, path: '/settings/branding' },
-  { label: 'Pricing & Terms', icon: Receipt, path: '/settings/pricing' },
-  { label: 'Billing', icon: CreditCard, path: '/settings/billing' },
-  { label: 'Portfolio', icon: Image, path: '/settings/portfolio' },
-  { label: 'Team', icon: UserPlus, path: '/settings/team' },
+  { label: 'Agency Profile', icon: Building2, path: '/settings/agency', roles: ['owner', 'admin'] },
+  { label: 'Branding', icon: Palette, path: '/settings/branding', roles: ['owner', 'admin'] },
+  { label: 'Pricing & Terms', icon: Receipt, path: '/settings/pricing', roles: ['owner', 'admin'] },
+  { label: 'Billing', icon: CreditCard, path: '/settings/billing', roles: ['owner'] },
+  { label: 'Portfolio', icon: Image, path: '/settings/portfolio', roles: ['owner', 'admin'] },
+  { label: 'Team', icon: UserPlus, path: '/settings/team', roles: ['owner', 'admin', 'member'] },
 ];
 
 const planBadgeStyles: Record<string, { color: string; bg: string }> = {
@@ -44,10 +45,12 @@ export function Sidebar({ onClose }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { userProfile, agency, signOut } = useAuth();
+  const { role, isAdmin } = useUser();
   const { data: proposals = [] } = useProposals();
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const { plan: storedPlan, effectivePlan: plan, isTrialing, trialDaysLeft, trialEnded, proposalsThisMonth, proposalLimit } = usePlan();
 
+  const userRole = role || 'member';
   const activeProposalCount = proposals.filter((p: any) => p.status === 'sent' && !p.viewed_at).length;
 
   const handleSignOut = async () => {
@@ -77,6 +80,10 @@ export function Sidebar({ onClose }: SidebarProps) {
   const badgeSuffix = isTrialing
     ? `${trialDaysLeft}d left`
     : `${proposals.length} proposal${proposals.length !== 1 ? 's' : ''}`;
+
+  // Filter nav items by role
+  const filteredMain = mainNav.filter(item => item.roles.includes(userRole));
+  const filteredSettings = settingsNav.filter(item => item.roles.includes(userRole));
 
   return (
     <aside className="fixed left-0 top-0 z-30 flex h-screen w-[236px] flex-col bg-ivory" style={{ borderRight: '1px solid hsl(var(--parchment))' }}>
@@ -146,7 +153,7 @@ export function Sidebar({ onClose }: SidebarProps) {
       <nav className="flex-1 px-3 py-2 overflow-y-auto">
         <p className="label-overline mb-2 px-3">Main</p>
         <ul className="space-y-0.5">
-          {mainNav.map((item) => {
+          {filteredMain.map((item) => {
             const active = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
             return (
               <li key={item.path}>
@@ -178,29 +185,33 @@ export function Sidebar({ onClose }: SidebarProps) {
           })}
         </ul>
 
-        <p className="label-overline mb-2 mt-6 px-3">Settings</p>
-        <ul className="space-y-0.5">
-          {settingsNav.map((item) => {
-            const active = location.pathname === item.path;
-            return (
-              <li key={item.path}>
-                <Link
-                  to={item.path}
-                  onClick={handleNav}
-                  className={cn(
-                    'relative flex items-center gap-3 rounded-[8px] px-3 py-2 text-sm transition-all duration-200',
-                    active
-                      ? 'font-semibold text-ink shadow-card bg-paper'
-                      : 'text-ink-muted hover:bg-parchment-soft hover:text-ink'
-                  )}
-                >
-                  <item.icon className="h-[18px] w-[18px]" />
-                  {item.label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        {filteredSettings.length > 0 && (
+          <>
+            <p className="label-overline mb-2 mt-6 px-3">Settings</p>
+            <ul className="space-y-0.5">
+              {filteredSettings.map((item) => {
+                const active = location.pathname === item.path;
+                return (
+                  <li key={item.path}>
+                    <Link
+                      to={item.path}
+                      onClick={handleNav}
+                      className={cn(
+                        'relative flex items-center gap-3 rounded-[8px] px-3 py-2 text-sm transition-all duration-200',
+                        active
+                          ? 'font-semibold text-ink shadow-card bg-paper'
+                          : 'text-ink-muted hover:bg-parchment-soft hover:text-ink'
+                      )}
+                    >
+                      <item.icon className="h-[18px] w-[18px]" />
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
       </nav>
 
       {/* Dynamic Upgrade CTA based on plan */}
