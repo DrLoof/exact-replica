@@ -54,6 +54,16 @@ export default function Dashboard() {
   const [showClientPicker, setShowClientPicker] = useState(false);
   const [clientSearch, setClientSearch] = useState('');
 
+  // One-time CRM connect prompt
+  const [showCrmPrompt, setShowCrmPrompt] = useState(false);
+  useEffect(() => {
+    const dismissed = localStorage.getItem('propopad_crm_prompt_dismissed');
+    if (!dismissed) setShowCrmPrompt(true);
+  }, []);
+  const dismissCrmPrompt = () => {
+    setShowCrmPrompt(false);
+    localStorage.setItem('propopad_crm_prompt_dismissed', '1');
+  };
   const recentProposals = proposals.slice(0, 5);
 
   // ── BUG FIX 1: Pipeline includes draft + sent + viewed ──
