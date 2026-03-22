@@ -255,9 +255,15 @@ export default function Proposals() {
             {search || activeFilter !== 'all' ? 'Try adjusting your filters' : 'Create your first proposal to get started'}
           </p>
           {!search && activeFilter === 'all' && (
-            <Link to="/proposals/new" className="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-hover">
+            <button
+              onClick={() => {
+                if (!canCreateProposal) { setShowUpgrade(true); return; }
+                navigate('/proposals/new');
+              }}
+              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-hover"
+            >
               <Plus className="h-4 w-4" /> New Proposal
-            </Link>
+            </button>
           )}
         </div>
       ) : (
