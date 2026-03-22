@@ -223,7 +223,7 @@ export default function PublicProposal() {
   ];
 
   return (
-    <TemplateProvider templateId={proposal?.template_id || 'classic'} customColors={customColors}>
+    <TemplateProvider templateId={proposal?.template_id || 'classic'} customColors={{ primaryAccent: activePrimary, secondaryAccent: activeSecondary, ...(customColors || {}) }}>
     <BrandProvider brand={brandData}>
       <div className="min-h-screen md:py-10" style={{ background: '#F0EFEC' }}>
         {/* Document container */}
