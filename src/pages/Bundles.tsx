@@ -282,6 +282,8 @@ export default function Bundles() {
   const [addingTemplate, setAddingTemplate] = useState<string | null>(null);
   const [expandedTemplate, setExpandedTemplate] = useState<string | null>(null);
   const [editingServicesBundle, setEditingServicesBundle] = useState<any>(null);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const { canAddBundle } = usePlan();
 
   // Usage stats query (Spec #4)
   const { data: usageStats = {} } = useQuery({
