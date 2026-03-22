@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { PlanProvider } from "@/hooks/usePlan";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Home from "./pages/Home";
 import GuestProposalPreview from "./pages/GuestProposalPreview";
@@ -24,6 +25,7 @@ import SettingsTestimonials from "./pages/SettingsTestimonials";
 import SettingsDifferentiators from "./pages/SettingsDifferentiators";
 import SettingsPortfolio from "./pages/SettingsPortfolio";
 import SettingsTeam from "./pages/SettingsTeam";
+import SettingsBilling from "./pages/SettingsBilling";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Onboarding from "./pages/Onboarding";
@@ -42,35 +44,38 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/p/:shareId" element={<PublicProposal />} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/proposals" element={<ProtectedRoute><Proposals /></ProtectedRoute>} />
-            <Route path="/proposals/preview" element={<GuestProposalPreview />} />
-            <Route path="/proposals/new" element={<ProposalNew />} />
-            <Route path="/proposals/:id" element={<ProtectedRoute><ProposalEditor /></ProtectedRoute>} />
-            <Route path="/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
-            <Route path="/services" element={<ProtectedRoute><Services /></ProtectedRoute>} />
-            <Route path="/packages" element={<ProtectedRoute><Packages /></ProtectedRoute>} />
-            <Route path="/bundles" element={<ProtectedRoute><Bundles /></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-            <Route path="/settings/agency" element={<ProtectedRoute><SettingsAgency /></ProtectedRoute>} />
-            <Route path="/settings/branding" element={<ProtectedRoute><SettingsBranding /></ProtectedRoute>} />
-            <Route path="/settings/pricing" element={<ProtectedRoute><SettingsPricing /></ProtectedRoute>} />
-            <Route path="/settings/testimonials" element={<ProtectedRoute><SettingsTestimonials /></ProtectedRoute>} />
-            <Route path="/settings/differentiators" element={<ProtectedRoute><SettingsDifferentiators /></ProtectedRoute>} />
-            <Route path="/settings/portfolio" element={<ProtectedRoute><SettingsPortfolio /></ProtectedRoute>} />
-            <Route path="/settings/team" element={<ProtectedRoute><SettingsTeam /></ProtectedRoute>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <CookieConsent />
+          <PlanProvider>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/p/:shareId" element={<PublicProposal />} />
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/proposals" element={<ProtectedRoute><Proposals /></ProtectedRoute>} />
+              <Route path="/proposals/preview" element={<GuestProposalPreview />} />
+              <Route path="/proposals/new" element={<ProposalNew />} />
+              <Route path="/proposals/:id" element={<ProtectedRoute><ProposalEditor /></ProtectedRoute>} />
+              <Route path="/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
+              <Route path="/services" element={<ProtectedRoute><Services /></ProtectedRoute>} />
+              <Route path="/packages" element={<ProtectedRoute><Packages /></ProtectedRoute>} />
+              <Route path="/bundles" element={<ProtectedRoute><Bundles /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              <Route path="/settings/agency" element={<ProtectedRoute><SettingsAgency /></ProtectedRoute>} />
+              <Route path="/settings/branding" element={<ProtectedRoute><SettingsBranding /></ProtectedRoute>} />
+              <Route path="/settings/pricing" element={<ProtectedRoute><SettingsPricing /></ProtectedRoute>} />
+              <Route path="/settings/billing" element={<ProtectedRoute><SettingsBilling /></ProtectedRoute>} />
+              <Route path="/settings/testimonials" element={<ProtectedRoute><SettingsTestimonials /></ProtectedRoute>} />
+              <Route path="/settings/differentiators" element={<ProtectedRoute><SettingsDifferentiators /></ProtectedRoute>} />
+              <Route path="/settings/portfolio" element={<ProtectedRoute><SettingsPortfolio /></ProtectedRoute>} />
+              <Route path="/settings/team" element={<ProtectedRoute><SettingsTeam /></ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <CookieConsent />
+          </PlanProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
