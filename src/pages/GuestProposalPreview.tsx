@@ -564,12 +564,20 @@ export default function GuestProposalPreview() {
       const { data: proposal } = await supabase.from('proposals').insert({
         agency_id: agencyId, client_id: clientId, reference_number: refNum,
         title: proposalTitle || `Proposal for ${clientName}`,
+        subtitle: guestProposal.subtitle || null,
         executive_summary: executiveSummary || null,
         status: 'draft', total_fixed: totalFixed, total_monthly: totalMonthly,
         grand_total: totalFixed + totalMonthly, created_by: profile!.id,
         project_start_date: guestProposal.startDate,
         phases: localPhases.length > 0 ? localPhases : null,
         validity_days: 30, revision_rounds: 2, notice_period: '30 days',
+        template_id: templateId || 'classic',
+        custom_colors: customColors || null,
+        goals: guestProposal.goals || [],
+        client_challenge: guestProposal.clientChallenge || null,
+        client_goal: guestProposal.clientGoal || null,
+        client_context_note: guestProposal.clientContextNote || null,
+        estimated_duration: guestProposal.estimatedDuration || null,
       }).select('id').single();
 
       if (proposal) {
