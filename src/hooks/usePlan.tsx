@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, ReactNode } from 'react';
+import { createContext, useContext, useMemo, useEffect, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -20,6 +20,7 @@ export interface Plan {
 
 interface PlanContextValue {
   plan: Plan | null;
+  effectivePlan: Plan | null;
   allPlans: Plan[];
   isTrialing: boolean;
   trialDaysLeft: number;
@@ -49,6 +50,7 @@ const PlanContext = createContext<PlanContextValue | null>(null);
 export function PlanProvider({ children }: { children: ReactNode }) {
   const authCtx = useAuth();
   const agency = authCtx?.agency;
+
   const { data: allPlans = [] } = useQuery({
     queryKey: ['plans'],
     queryFn: async () => {
@@ -65,7 +67,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
   const agencyPlanId = (agency as any)?.plan_id || 'free';
   const trialEndsAt = (agency as any)?.trial_ends_at;
 
-  const plan = useMemo(
+  const storedPlan = useMemo(
     () => allPlans.find((p) => p.id === agencyPlanId) || allPlans.find((p) => p.id === 'free') || null,
     [allPlans, agencyPlanId]
   );
@@ -86,6 +88,26 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     return new Date(trialEndsAt) <= new Date() && agencyPlanId === 'free';
   }, [trialEndsAt, agencyPlanId]);
 
+  // During trial, override to Pro plan
+  const proPlan = useMemo(() => allPlans.find((p) => p.id === 'pro') || null, [allPlans]);
+  const effectivePlan = isTrialing ? (proPlan || storedPlan) : storedPlan;
+
+  // Auto-downgrade on trial expiry
+  useEffect(() => {
+    if (!agency?.id || !trialEndsAt) return;
+    const isExpired = new Date(trialEndsAt) <= new Date();
+    if (isExpired && agencyPlanId === 'pro') {
+      // Downgrade to free
+      supabase.from('agencies').update({ plan_id: 'free' }).eq('id', agency.id).then(() => {
+        // Also update subscription
+        supabase.from('subscriptions')
+          .update({ plan_id: 'free', status: 'active' })
+          .eq('agency_id', agency.id)
+          .eq('status', 'trialing');
+      });
+    }
+  }, [agency?.id, trialEndsAt, agencyPlanId]);
+
   // Count proposals created this month
   const { data: proposalsThisMonth = 0 } = useQuery({
     queryKey: ['proposals_this_month', agency?.id],
@@ -105,38 +127,37 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     enabled: !!agency?.id,
   });
 
-  const proposalLimit = plan?.max_proposals ?? null;
+  const proposalLimit = effectivePlan?.max_proposals ?? null;
   const canCreateProposal = proposalLimit === null || proposalsThisMonth < proposalLimit;
 
   const canAddClient = (currentCount: number) => {
-    if (!plan?.max_clients) return true;
-    return currentCount < plan.max_clients;
+    if (!effectivePlan?.max_clients) return true;
+    return currentCount < effectivePlan.max_clients;
   };
 
   const canAddBundle = (currentCount: number) => {
-    if (plan?.max_bundles === null || plan?.max_bundles === undefined) return true;
-    return currentCount < plan.max_bundles;
+    if (effectivePlan?.max_bundles === null || effectivePlan?.max_bundles === undefined) return true;
+    return currentCount < effectivePlan.max_bundles;
   };
 
   const canAddPackage = (currentCount: number) => {
-    if (plan?.max_packages === null || plan?.max_packages === undefined) return true;
-    return currentCount < plan.max_packages;
+    if (effectivePlan?.max_packages === null || effectivePlan?.max_packages === undefined) return true;
+    return currentCount < effectivePlan.max_packages;
   };
 
   const canAddUser = (currentCount: number) => {
-    if (!plan?.max_users) return true;
-    return currentCount < plan.max_users;
+    if (!effectivePlan?.max_users) return true;
+    return currentCount < effectivePlan.max_users;
   };
 
   const hasFeature = (feature: string): boolean => {
-    if (!plan) return false;
-    const val = plan.features?.[feature];
-    return !!val;
+    if (!effectivePlan) return false;
+    return !!effectivePlan.features?.[feature];
   };
 
   const canUseTemplate = (templateId: string): boolean => {
-    if (!plan) return false;
-    const allowed = plan.features?.templates as string[] | undefined;
+    if (!effectivePlan) return false;
+    const allowed = effectivePlan.features?.templates as string[] | undefined;
     if (!allowed) return false;
     if (allowed.includes('all') || allowed.includes('all_plus_custom')) return true;
     if (allowed.includes(templateId)) return true;
@@ -178,14 +199,15 @@ export function PlanProvider({ children }: { children: ReactNode }) {
   };
 
   const value: PlanContextValue = {
-    plan,
+    plan: storedPlan,
+    effectivePlan,
     allPlans,
     isTrialing,
     trialDaysLeft,
     trialEnded,
     proposalsThisMonth,
     proposalLimit,
-    isLoading: !plan,
+    isLoading: !effectivePlan,
     canCreateProposal,
     canAddClient,
     canAddBundle,
