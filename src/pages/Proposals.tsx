@@ -9,6 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { FollowUpModal } from '@/components/proposals/FollowUpModal';
+import { usePlan } from '@/hooks/usePlan';
+import { UpgradeModal } from '@/components/UpgradeModal';
 
 const statusConfig: Record<string, { label: string; className: string }> = {
   draft: { label: 'Draft', className: 'bg-status-draft/15 text-status-draft' },
