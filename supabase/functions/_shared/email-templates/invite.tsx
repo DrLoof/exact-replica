@@ -39,7 +39,7 @@ export const InviteEmail = ({
         />
         <Heading style={h1}>You've been invited</Heading>
         <Text style={text}>
-          You've been invited to join a team on Propopad — the proposal platform for agencies. Click below to accept and create your account.
+          You've been invited to join a team on Propopad - the proposal platform for agencies. Click below to accept and create your account.
         </Text>
         <Button style={button} href={confirmationUrl}>
           Accept Invitation
