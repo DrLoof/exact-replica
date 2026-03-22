@@ -365,6 +365,12 @@ export default function Proposals() {
           onClose={() => setFollowUpProposal(null)}
         />
       )}
+      <UpgradeModal
+        open={showUpgrade}
+        onOpenChange={setShowUpgrade}
+        customReason={`You've used all ${proposalLimit} proposal${proposalLimit !== 1 ? 's' : ''} this month. Upgrade to create more.`}
+        feature="pdf_export"
+      />
     </AppShell>
   );
 }
