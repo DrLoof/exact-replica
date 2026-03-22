@@ -26,6 +26,8 @@ import SettingsDifferentiators from "./pages/SettingsDifferentiators";
 import SettingsPortfolio from "./pages/SettingsPortfolio";
 import SettingsTeam from "./pages/SettingsTeam";
 import SettingsBilling from "./pages/SettingsBilling";
+import SettingsIntegrations from "./pages/SettingsIntegrations";
+import HubSpotCallback from "./pages/HubSpotCallback";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import AcceptInvite from "./pages/AcceptInvite";
@@ -70,6 +72,8 @@ const App = () => (
               <Route path="/settings/branding" element={<ProtectedRoute><SettingsBranding /></ProtectedRoute>} />
               <Route path="/settings/pricing" element={<ProtectedRoute><SettingsPricing /></ProtectedRoute>} />
               <Route path="/settings/billing" element={<ProtectedRoute><SettingsBilling /></ProtectedRoute>} />
+              <Route path="/settings/integrations" element={<ProtectedRoute><SettingsIntegrations /></ProtectedRoute>} />
+              <Route path="/settings/integrations/hubspot/callback" element={<ProtectedRoute><HubSpotCallback /></ProtectedRoute>} />
               <Route path="/settings/testimonials" element={<ProtectedRoute><SettingsTestimonials /></ProtectedRoute>} />
               <Route path="/settings/differentiators" element={<ProtectedRoute><SettingsDifferentiators /></ProtectedRoute>} />
               <Route path="/settings/portfolio" element={<ProtectedRoute><SettingsPortfolio /></ProtectedRoute>} />
