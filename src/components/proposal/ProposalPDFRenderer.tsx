@@ -205,7 +205,7 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
         case 3: // Timeline
           if (phases.length === 0) return null;
           return (
-            <div className="pdf-section" data-section="timeline">
+            <div className="pdf-section" data-section="timeline" data-flow-group="main_content">
               <PageWrapper pageNumber="04">
                 <SectionHeader number="03" title="Timeline" subtitle="How we'll get there" />
                 {(() => {
