@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { usePlan } from '@/hooks/usePlan';
 import { UpgradeModal } from '@/components/UpgradeModal';
+import { ImportContactsModal } from '@/components/integrations/ImportContactsModal';
 import { toast } from 'sonner';
 import { Plug, ExternalLink, RefreshCw, Check, AlertTriangle, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -42,6 +43,7 @@ export default function SettingsIntegrations() {
   const [importing, setImporting] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [stages, setStages] = useState<HubSpotPipelineStage[]>([]);
   const [settings, setSettings] = useState<any>({
     sync_proposals: true,
@@ -140,17 +142,8 @@ export default function SettingsIntegrations() {
     setSyncing(false);
   };
 
-  const handleImportContacts = async () => {
-    setImporting(true);
-    const { error } = await supabase.functions.invoke('hubspot-import-contacts', {
-      body: { agencyId: agency!.id },
-    });
-    if (error) {
-      toast.error('Import failed');
-    } else {
-      toast.success('Contacts imported');
-    }
-    setImporting(false);
+  const handleImportContacts = () => {
+    setImportModalOpen(true);
   };
 
   const handleSettingsChange = async (key: string, value: any) => {
@@ -405,6 +398,12 @@ export default function SettingsIntegrations() {
         onOpenChange={setUpgradeOpen}
         feature="CRM Integrations"
         customReason="CRM integrations are available on Pro and Business plans."
+      />
+
+      <ImportContactsModal
+        open={importModalOpen}
+        onOpenChange={setImportModalOpen}
+        onImported={fetchIntegration}
       />
     </AppShell>
   );

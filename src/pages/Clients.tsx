@@ -5,6 +5,7 @@ import {
   Plus, Search, MoreVertical, Users, X, LayoutGrid, List, Loader2,
   Globe, ArrowLeft, Pencil, Trash2, FileText, ScanSearch, ExternalLink,
 } from 'lucide-react';
+import { HubSpotBadge } from '@/components/integrations/HubSpotBadge';
 import { cn } from '@/lib/utils';
 import { useClients, useProposals } from '@/hooks/useAgencyData';
 import { useAuth } from '@/hooks/useAuth';
@@ -420,7 +421,10 @@ export default function Clients() {
                       </div>
                     )}
                     <div className="min-w-0">
-                      <p className="text-[15px] font-semibold text-[hsl(24,19%,24%)]">{client.company_name}</p>
+                      <p className="text-[15px] font-semibold text-[hsl(24,19%,24%)] flex items-center gap-1.5">
+                        {client.company_name}
+                        <HubSpotBadge hubspotId={client.hubspot_contact_id} type="contact" />
+                      </p>
                       {client.industry && <p className="text-[12px] text-[hsl(24,8%,49%)]">{client.industry}</p>}
                     </div>
                   </div>
@@ -499,7 +503,10 @@ export default function Clients() {
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline gap-2 flex-wrap">
-                    <span className="text-[14px] font-semibold text-[hsl(24,19%,24%)]">{client.company_name}</span>
+                    <span className="text-[14px] font-semibold text-[hsl(24,19%,24%)] flex items-center gap-1.5">
+                      {client.company_name}
+                      <HubSpotBadge hubspotId={client.hubspot_contact_id} type="contact" />
+                    </span>
                     {client.website && <span className="text-[12px] text-[hsl(24,8%,49%)]">{client.website.replace(/^https?:\/\//, '')}</span>}
                   </div>
                   <div className="flex items-center gap-3 mt-0.5 text-[12px] text-[hsl(24,8%,49%)]">

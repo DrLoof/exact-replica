@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AppShell } from '@/components/layout/AppShell';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Search, MoreHorizontal, FileText, Copy, Trash2, Send, Eye, LayoutList, Columns3 } from 'lucide-react';
+import { HubSpotBadge } from '@/components/integrations/HubSpotBadge';
 import { cn } from '@/lib/utils';
 import { useProposals } from '@/hooks/useAgencyData';
 import { useAuth } from '@/hooks/useAuth';
@@ -290,7 +291,10 @@ export default function Proposals() {
                           {p.client?.company_name?.charAt(0) || '?'}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-foreground">{p.client?.company_name || 'Unknown'}</p>
+                          <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                            {p.client?.company_name || 'Unknown'}
+                            <HubSpotBadge hubspotId={p.hubspot_deal_id} type="deal" />
+                          </p>
                           <p className="text-xs text-muted-foreground">{p.title || 'Untitled'}</p>
                         </div>
                       </Link>
