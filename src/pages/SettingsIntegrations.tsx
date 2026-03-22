@@ -142,17 +142,8 @@ export default function SettingsIntegrations() {
     setSyncing(false);
   };
 
-  const handleImportContacts = async () => {
-    setImporting(true);
-    const { error } = await supabase.functions.invoke('hubspot-import-contacts', {
-      body: { agencyId: agency!.id },
-    });
-    if (error) {
-      toast.error('Import failed');
-    } else {
-      toast.success('Contacts imported');
-    }
-    setImporting(false);
+  const handleImportContacts = () => {
+    setImportModalOpen(true);
   };
 
   const handleSettingsChange = async (key: string, value: any) => {
