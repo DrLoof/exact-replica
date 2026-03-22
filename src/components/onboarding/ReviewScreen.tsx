@@ -148,18 +148,29 @@ export function ReviewScreen({
   const getModulePrice = (mod: any) => priceOverrides[mod.key] ?? mod.price;
 
   // Suggested bundles based on selected services
-  const selectedModuleNames = new Set(selectedModules.map(m => m.name));
+  const selectedModuleNamesList = useMemo(() => selectedModules.map(m => m.name), [selectedModules]);
   const suggestedBundles = useMemo(() => {
+    const nameSet = new Set(selectedModuleNamesList);
     const scored = defaultBundles.map(b => {
-      const matchCount = b.serviceNames.filter(n => selectedModuleNames.has(n)).length;
+      const matchCount = b.serviceNames.filter(n => nameSet.has(n)).length;
       const missingCount = b.serviceNames.length - matchCount;
       return { ...b, matchCount, missingCount };
     });
     const full = scored.filter(b => b.missingCount === 0).sort((a, b) => b.serviceNames.length - a.serviceNames.length);
     const fullNames = new Set(full.map(b => b.name));
     const partial = scored.filter(b => b.missingCount > 0 && b.missingCount <= 2 && b.matchCount >= 2 && !fullNames.has(b.name)).sort((a, b) => a.missingCount - b.missingCount || b.matchCount - a.matchCount);
-    return [...full, ...partial].slice(0, 4);
-  }, [selectedModuleNames.size]);
+    // Deduplicate by name as safety measure
+    const seen = new Set<string>();
+    const result: typeof scored = [];
+    for (const b of [...full, ...partial]) {
+      if (!seen.has(b.name)) {
+        seen.add(b.name);
+        result.push(b);
+      }
+      if (result.length >= 4) break;
+    }
+    return result;
+  }, [selectedModuleNamesList]);
 
   const pricingLabel: Record<string, string> = { fixed: '', monthly: '/mo', hourly: '/hr' };
 
@@ -518,7 +529,8 @@ export function ReviewScreen({
             {suggestedBundles.map(bundle => {
               const isAdded = addedBundles.has(bundle.name);
               const pricing = calculateBundlePricing(bundle.serviceNames, bundle.discountPercentage);
-              const missingNames = bundle.serviceNames.filter(n => !selectedModuleNames.has(n));
+              const selectedNameSet = new Set(selectedModuleNamesList);
+              const missingNames = bundle.serviceNames.filter(n => !selectedNameSet.has(n));
               const isFullMatch = missingNames.length === 0;
 
               return (
