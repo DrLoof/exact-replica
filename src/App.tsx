@@ -28,6 +28,7 @@ import SettingsTeam from "./pages/SettingsTeam";
 import SettingsBilling from "./pages/SettingsBilling";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import AcceptInvite from "./pages/AcceptInvite";
 import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
