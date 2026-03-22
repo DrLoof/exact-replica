@@ -3,6 +3,7 @@ import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Menu, X } from 'lucide-react';
+import { TrialBanner } from '@/components/TrialBanner';
 
 interface AppShellProps {
   children: React.ReactNode;
