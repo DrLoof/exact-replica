@@ -13,6 +13,8 @@ import { usePackages, useServiceModules, useServiceGroups, useProposals } from '
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { usePlan } from '@/hooks/usePlan';
+import { UpgradeModal } from '@/components/UpgradeModal';
 
 export default function Packages() {
   const navigate = useNavigate();
