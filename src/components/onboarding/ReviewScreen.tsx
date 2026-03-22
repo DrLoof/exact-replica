@@ -1,6 +1,5 @@
 import { useState, useRef, useMemo, useEffect } from 'react';
 import { Check, Pencil, X, Plus, Upload, Loader2, Quote, Target, BarChart3, Users, Trophy, Zap, Layers, Package, ArrowRight, ChevronDown, CheckCircle2, Globe, Image, Briefcase, Download } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { getDefaultModulesForGroup } from '@/lib/defaultModules';
