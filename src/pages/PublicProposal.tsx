@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { AlertTriangle, Layers, CheckCircle2, XCircle, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import { templates } from '@/lib/proposalTemplates';
 import { SignProposalModal } from '@/components/proposal/SignProposalModal';
 import { DeclineProposalModal } from '@/components/proposal/DeclineProposalModal';
 import {
@@ -125,14 +126,17 @@ export default function PublicProposal() {
   }
 
   const customColors = proposal?.custom_colors as Record<string, string> | null;
-  const brandColor = customColors?.primaryAccent || agency?.brand_color || '#fc956e';
+  const brandColor = agency?.brand_color || '#fc956e';
+  const activePrimary = customColors?.primaryAccent || brandColor;
+  const currentTemplate = templates[proposal?.template_id || 'classic'] || templates.classic;
+  const activeSecondary = customColors?.secondaryAccent || currentTemplate.colors.secondaryAccent;
   const darkColor = agency?.dark_color || '#0A0A0A';
   const currencySymbol = agency?.currency_symbol || '$';
 
   const brandData = {
     agencyName: agency?.name?.toUpperCase() || 'AGENCY',
     agencyFullName: agency?.name || 'Your Agency',
-    primaryColor: brandColor,
+    primaryColor: activePrimary,
     darkColor,
     logoUrl: agency?.logo_url || null,
     logoInitial: (agency?.name || 'A').charAt(0).toUpperCase(),
@@ -219,7 +223,7 @@ export default function PublicProposal() {
   ];
 
   return (
-    <TemplateProvider templateId={proposal?.template_id || 'classic'} customColors={customColors}>
+    <TemplateProvider templateId={proposal?.template_id || 'classic'} customColors={{ primaryAccent: activePrimary, secondaryAccent: activeSecondary, ...(customColors || {}) }}>
     <BrandProvider brand={brandData}>
       <div className="min-h-screen md:py-10" style={{ background: '#F0EFEC' }}>
         {/* Document container */}
