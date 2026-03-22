@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { Plus, X, ChevronDown } from "lucide-react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
+import { usePDFMode } from "./TemplateProvider";
 import { EditableText } from "./EditableText";
 
 const GENERIC_RESPONSIBILITIES = [
