@@ -38,6 +38,8 @@ import { generateProposalPDF } from '@/lib/generateProposalPDF';
 import { getModulePriceByModel } from '@/lib/pricing';
 import { InlineGoalsEditor, AddGoalsPrompt } from '@/components/proposal-template/InlineGoalsEditor';
 import type { SelectedGoal } from '@/components/proposal-new/ClientZone';
+import { usePlan } from '@/hooks/usePlan';
+import { UpgradeModal } from '@/components/UpgradeModal';
 
 
 interface ProposalData {
