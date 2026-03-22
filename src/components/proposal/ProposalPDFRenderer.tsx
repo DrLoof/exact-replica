@@ -98,9 +98,15 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
 
     const proposalDate = proposal.project_start_date || new Date(proposal.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
+    // Calculate timeline display for stat bar
+    const calculatedTimeline = calculateTimeline(phases) || proposal.estimated_duration;
+    const timelineDisplay = calculatedTimeline
+      ? (typeof calculatedTimeline === 'string' ? calculatedTimeline : `${calculatedTimeline} weeks est.`)
+      : null;
+
     const summaryHighlights = [
       { label: 'Investment', value: totalStr, accent: true },
-      { label: 'Timeline', value: calculateTimeline(phases) || proposal.estimated_duration || `${services.length * 2} weeks est.` },
+      ...(timelineDisplay ? [{ label: 'Timeline', value: timelineDisplay }] : []),
       { label: 'Objectives', value: getObjectivesStat(proposal.goals, proposal.client_goal, services.length) },
     ];
 
