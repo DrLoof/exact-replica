@@ -157,7 +157,7 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
         case 2: // Scope of Services
           if (services.length === 0) return null;
           return (
-            <div className="pdf-section" data-section="scope">
+            <div className="pdf-section" data-section="scope" data-flow-group="main_content">
               <PageWrapper pageNumber="03">
                 <SectionHeader number="02" title="Scope of Services" subtitle="What we'll deliver for you" />
                 {services.some((s: any) => s.bundle_id) && bundleSavings && (
