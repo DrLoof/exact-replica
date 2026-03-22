@@ -125,7 +125,10 @@ export default function PublicProposal() {
   }
 
   const customColors = proposal?.custom_colors as Record<string, string> | null;
-  const brandColor = customColors?.primaryAccent || agency?.brand_color || '#fc956e';
+  const brandColor = agency?.brand_color || '#fc956e';
+  const activePrimary = customColors?.primaryAccent || brandColor;
+  const currentTemplate = templates[proposal?.template_id || 'classic'] || templates.classic;
+  const activeSecondary = customColors?.secondaryAccent || currentTemplate.colors.secondaryAccent;
   const darkColor = agency?.dark_color || '#0A0A0A';
   const currencySymbol = agency?.currency_symbol || '$';
 
