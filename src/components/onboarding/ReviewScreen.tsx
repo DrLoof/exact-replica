@@ -99,7 +99,7 @@ export function ReviewScreen({
   }, []);
 
   // All available services grouped
-  const allGroupNames = Object.values(groupNameMap);
+  const allGroupNames = [...new Set(Object.values(groupNameMap))];
   const allModules = allGroupNames.flatMap(gn =>
     getDefaultModulesForGroup(gn).map((m, i) => ({
       ...m,
