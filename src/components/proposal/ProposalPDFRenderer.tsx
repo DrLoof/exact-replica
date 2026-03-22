@@ -377,7 +377,7 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
 
         case 9: // Signature
           return (
-            <div className="pdf-section" data-section="signature">
+            <div className="pdf-section" data-section="signature" data-flow-group="signature">
               <PageWrapper pageNumber="10">
                 <SignatureBlock
                   client={{
