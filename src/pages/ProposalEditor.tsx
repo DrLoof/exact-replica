@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { syncProposalToHubSpot } from '@/lib/hubspotSync';
 import { useParams, useNavigate, Link, useBeforeUnload } from 'react-router-dom';
 import {
   ArrowLeft, Eye, EyeOff, Share2, Download, Send, LinkIcon,
@@ -1070,6 +1071,28 @@ export default function ProposalEditor() {
                   )}
                 </div>
               </div>
+
+              {/* HUBSPOT zone */}
+              {(proposal as any).hubspot_deal_id && (
+                <div className="mt-3 pt-3" style={{ borderTop: '1px solid #EEEAE3' }}>
+                  <span className="block px-2 mb-2 text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: '#B8B0A5' }}>HubSpot</span>
+                  <div className="px-2 space-y-1.5">
+                    <p className="text-[12px] text-foreground truncate">Deal: {proposal.title || 'Untitled'}</p>
+                    <p className="text-[11px]" style={{ color: '#B8B0A5' }}>
+                      Status: {(proposal.status || 'draft').charAt(0).toUpperCase() + (proposal.status || 'draft').slice(1)}
+                    </p>
+                    <a
+                      href={`https://app.hubspot.com/contacts/${''}/deal/${(proposal as any).hubspot_deal_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[11px] font-medium hover:underline"
+                      style={{ color: '#FF7A59' }}
+                    >
+                      <ExternalLink className="h-3 w-3" /> View in HubSpot
+                    </a>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -2031,6 +2054,7 @@ function ShareModal({ proposal, client, agency, onClose, onStatusUpdate, onDownl
       if (proposal.status === 'draft') {
         await supabase.from('proposals').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', proposal.id);
         onStatusUpdate('sent');
+        syncProposalToHubSpot(proposal.id);
       }
       setGenerating(false);
       return url;

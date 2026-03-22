@@ -5,6 +5,7 @@ import {
   Plus, Search, MoreVertical, Users, X, LayoutGrid, List, Loader2,
   Globe, ArrowLeft, Pencil, Trash2, FileText, ScanSearch, ExternalLink,
 } from 'lucide-react';
+import { exportClientToHubSpot } from '@/lib/hubspotSync';
 import { HubSpotBadge } from '@/components/integrations/HubSpotBadge';
 import { cn } from '@/lib/utils';
 import { useClients, useProposals } from '@/hooks/useAgencyData';
@@ -227,15 +228,17 @@ export default function Clients() {
   const handleAdd = async () => {
     if (!newClient.company_name || !agency?.id) return;
     setSaving(true);
-    const { error } = await supabase.from('clients').insert({
+    const { data: inserted, error } = await supabase.from('clients').insert({
       agency_id: agency.id, company_name: newClient.company_name,
       contact_name: newClient.contact_name || null, contact_email: newClient.contact_email || null,
       contact_title: newClient.contact_title || null, website: newClient.website || null,
       industry: newClient.industry || null, phone: newClient.phone || null,
-    });
+    }).select('id').single();
     setSaving(false);
     if (error) { toast.error('Failed to add client'); return; }
     toast.success('Client added');
+    // Fire-and-forget HubSpot export
+    if (inserted?.id) exportClientToHubSpot(inserted.id, agency.id);
     setNewClient({ company_name: '', contact_name: '', contact_email: '', contact_title: '', website: '', industry: '', phone: '' });
     setShowAdd(false);
     invalidate();

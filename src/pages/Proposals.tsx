@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { syncProposalToHubSpot } from '@/lib/hubspotSync';
 import { AppShell } from '@/components/layout/AppShell';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Search, MoreHorizontal, FileText, Copy, Trash2, Send, Eye, LayoutList, Columns3 } from 'lucide-react';
@@ -106,6 +107,8 @@ export default function Proposals() {
     await supabase.from('proposals').update(updates).eq('id', proposalId);
     queryClient.invalidateQueries({ queryKey: ['proposals'] });
     toast.success(`Status updated to ${statusConfig[newStatus]?.label || newStatus}`);
+    // Fire-and-forget HubSpot sync
+    syncProposalToHubSpot(proposalId);
   };
 
   const timeAgo = (date: string) => {

@@ -51,6 +51,8 @@ export default function PublicProposal() {
 
     if (prop.status === 'sent') {
       await supabase.from('proposals').update({ status: 'viewed', viewed_at: new Date().toISOString() }).eq('id', prop.id);
+      // Fire-and-forget HubSpot sync for viewed status
+      supabase.functions.invoke('hubspot-sync-proposal', { body: { proposalId: prop.id } }).catch(() => {});
     }
     await supabase.from('proposal_analytics').insert({
       proposal_id: prop.id,

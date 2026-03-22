@@ -152,6 +152,18 @@ serve(async (req) => {
       })
       .eq("id", proposalId);
 
+    // Fire-and-forget HubSpot sync for accepted status
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    fetch(`${supabaseUrl}/functions/v1/hubspot-sync-proposal`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${serviceKey}`,
+      },
+      body: JSON.stringify({ proposalId }),
+    }).catch(() => {});
+
     // Create in-app notification for the agency
     if (proposal.agency_id) {
       await supabase.from("notifications").insert({
