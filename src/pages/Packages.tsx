@@ -85,6 +85,7 @@ export default function Packages() {
   };
 
   const openCreate = () => {
+    if (!canAddPackage(packages.length)) { setShowUpgrade(true); return; }
     setEditingPackage(null);
     setName('');
     setDescription('');

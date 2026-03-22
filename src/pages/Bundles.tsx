@@ -804,6 +804,7 @@ export default function Bundles() {
           </div>
         </div>
       )}
+      <UpgradeModal open={showUpgrade} onOpenChange={setShowUpgrade} customReason="Upgrade to create more bundles." />
     </AppShell>
   );
 }
