@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  FileText, Plus, ChevronRight, Bell, Package, FolderOpen,
+  FileText, Plus, ChevronRight, Bell, Package, FolderOpen, X,
 } from 'lucide-react';
 import { AppShell } from '@/components/layout/AppShell';
 import { Link, useNavigate } from 'react-router-dom';
@@ -54,6 +54,16 @@ export default function Dashboard() {
   const [showClientPicker, setShowClientPicker] = useState(false);
   const [clientSearch, setClientSearch] = useState('');
 
+  // One-time CRM connect prompt
+  const [showCrmPrompt, setShowCrmPrompt] = useState(false);
+  useEffect(() => {
+    const dismissed = localStorage.getItem('propopad_crm_prompt_dismissed');
+    if (!dismissed) setShowCrmPrompt(true);
+  }, []);
+  const dismissCrmPrompt = () => {
+    setShowCrmPrompt(false);
+    localStorage.setItem('propopad_crm_prompt_dismissed', '1');
+  };
   const recentProposals = proposals.slice(0, 5);
 
   // ── BUG FIX 1: Pipeline includes draft + sent + viewed ──
@@ -202,6 +212,37 @@ export default function Dashboard() {
             </Link>
           </div>
         </div>
+
+        {/* ─── CRM Connect Prompt (one-time) ─── */}
+        {showCrmPrompt && (
+          <div className="mb-6 flex items-center justify-between rounded-[12px] border border-parchment bg-paper px-5 py-4 shadow-card">
+            <div className="flex items-center gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px]" style={{ backgroundColor: '#FF7A59' }}>
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="white">
+                  <path d="M17.69 13.13c-.57 0-1.08.23-1.46.6l-2.72-1.69c.1-.33.16-.69.16-1.06 0-.31-.04-.6-.13-.88l2.73-1.72c.37.35.87.56 1.42.56 1.14 0 2.07-.93 2.07-2.07S18.83 4.8 17.69 4.8s-2.07.93-2.07 2.07c0 .18.02.35.07.51l-2.74 1.73c-.62-.72-1.54-1.18-2.57-1.18-1.87 0-3.39 1.52-3.39 3.39 0 .67.2 1.29.53 1.82L5.8 14.79c-.23-.1-.48-.15-.74-.15-.97 0-1.76.79-1.76 1.76s.79 1.76 1.76 1.76 1.76-.79 1.76-1.76c0-.22-.04-.43-.12-.62l1.73-1.67c.62.49 1.4.78 2.24.78.96 0 1.83-.38 2.47-1l2.7 1.68c-.06.18-.09.37-.09.57 0 1.14.93 2.07 2.07 2.07s2.07-.93 2.07-2.07-.93-2.07-2.07-2.07h-.13z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-[14px] font-semibold text-ink">Connect your CRM</p>
+                <p className="text-[12px] text-ink-muted">Import your clients from HubSpot to get started faster.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/settings/integrations"
+                className="rounded-[8px] bg-ink px-4 py-2 text-[12px] font-medium text-ivory transition-all hover:bg-ink-soft"
+              >
+                Connect HubSpot →
+              </Link>
+              <button
+                onClick={dismissCrmPrompt}
+                className="rounded-[8px] px-3 py-2 text-[12px] font-medium text-ink-muted transition-colors hover:bg-parchment-soft hover:text-ink"
+              >
+                Skip
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* ─── Metrics — Single Paper Card with Compartments ─── */}
         <div className="mb-8 rounded-[12px] bg-paper shadow-card">

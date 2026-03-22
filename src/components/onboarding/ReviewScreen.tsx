@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo, useEffect } from 'react';
-import { Check, Pencil, X, Plus, Upload, Loader2, Quote, Target, BarChart3, Users, Trophy, Zap, Layers, Package, ArrowRight, ChevronDown, CheckCircle2, Globe, Image, Briefcase, Download } from 'lucide-react';
+import { Check, Pencil, X, Plus, Upload, Loader2, Quote, Target, BarChart3, Users, Trophy, Zap, Layers, Package, ArrowRight, ChevronDown, CheckCircle2, Globe, Image, Briefcase } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { getDefaultModulesForGroup } from '@/lib/defaultModules';
@@ -1090,8 +1090,7 @@ export function ReviewScreen({
         </section>
       )}
 
-      {/* HubSpot Import Section */}
-      <HubSpotOnboardingImport />
+
 
       <div ref={inlineCtaRef} className="mt-10 text-center pb-6">
         <button
@@ -1284,109 +1283,5 @@ function PortfolioSection({ portfolioItems, onPortfolioItemsChange, detectedPort
   );
 }
 
-function HubSpotOnboardingImport() {
-  const [hubspotConnected, setHubspotConnected] = useState(false);
-  const [contactCount, setContactCount] = useState(0);
-  const [importing, setImporting] = useState(false);
-  const [imported, setImported] = useState(false);
 
-  useEffect(() => {
-    checkHubSpot();
-  }, []);
 
-  const checkHubSpot = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { data: profile } = await supabase.from('users').select('agency_id').eq('id', user.id).single();
-    if (!profile?.agency_id) return;
-    const { data: integration } = await supabase
-      .from('integrations')
-      .select('id, status')
-      .eq('agency_id', profile.agency_id)
-      .eq('provider', 'hubspot')
-      .eq('status', 'active')
-      .maybeSingle();
-
-    if (integration) {
-      setHubspotConnected(true);
-      // Fetch contact count
-      try {
-        const { data } = await supabase.functions.invoke('hubspot-import-contacts', {
-          body: { agencyId: profile.agency_id, action: 'fetch' },
-        });
-        if (data?.contacts) {
-          const importable = data.contacts.filter((c: any) => c.importable);
-          setContactCount(importable.length);
-        }
-      } catch {}
-    }
-  };
-
-  const handleImport = async () => {
-    setImporting(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setImporting(false); return; }
-    const { data: profile } = await supabase.from('users').select('agency_id').eq('id', user.id).single();
-    if (!profile?.agency_id) { setImporting(false); return; }
-
-    try {
-      const { data: fetchData } = await supabase.functions.invoke('hubspot-import-contacts', {
-        body: { agencyId: profile.agency_id, action: 'fetch' },
-      });
-      const importable = (fetchData?.contacts || []).filter((c: any) => c.importable);
-      if (importable.length > 0) {
-        const { data } = await supabase.functions.invoke('hubspot-import-contacts', {
-          body: { agencyId: profile.agency_id, action: 'import', selectedContacts: importable },
-        });
-        if (data?.success) {
-          toast.success(`Imported ${data.imported} contacts, updated ${data.updated}`);
-          setImported(true);
-        }
-      }
-    } catch {
-      toast.error('Import failed');
-    }
-    setImporting(false);
-  };
-
-  if (!hubspotConnected || contactCount === 0) return null;
-
-  return (
-    <section className="mt-8 rounded-2xl border border-border bg-card p-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: '#FF7A59' }}>
-            <svg viewBox="0 0 24 24" className="h-4 w-4 text-white" fill="currentColor">
-              <path d="M17.69 13.13c-.57 0-1.08.23-1.46.6l-2.72-1.69c.1-.33.16-.69.16-1.06 0-.31-.04-.6-.13-.88l2.73-1.72c.37.35.87.56 1.42.56 1.14 0 2.07-.93 2.07-2.07S18.83 4.8 17.69 4.8s-2.07.93-2.07 2.07c0 .18.02.35.07.51l-2.74 1.73c-.62-.72-1.54-1.18-2.57-1.18-1.87 0-3.39 1.52-3.39 3.39 0 .67.2 1.29.53 1.82L5.8 14.79c-.23-.1-.48-.15-.74-.15-.97 0-1.76.79-1.76 1.76s.79 1.76 1.76 1.76 1.76-.79 1.76-1.76c0-.22-.04-.43-.12-.62l1.73-1.67c.62.49 1.4.78 2.24.78.96 0 1.83-.38 2.47-1l2.7 1.68c-.06.18-.09.37-.09.57 0 1.14.93 2.07 2.07 2.07s2.07-.93 2.07-2.07-.93-2.07-2.07-2.07h-.13z" />
-            </svg>
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">Your Clients</h3>
-            <p className="text-[12px] text-muted-foreground">From HubSpot</p>
-          </div>
-        </div>
-      </div>
-      <p className="mt-3 text-[13px] text-muted-foreground">
-        We found {contactCount} contacts in your HubSpot account. Import them so they're ready when you create proposals.
-      </p>
-      <div className="mt-4 flex gap-2">
-        {imported ? (
-          <span className="flex items-center gap-2 text-sm font-medium text-status-accepted">
-            <CheckCircle2 className="h-4 w-4" /> Contacts imported
-          </span>
-        ) : (
-          <>
-            <button
-              onClick={handleImport}
-              disabled={importing}
-              className="flex items-center gap-2 rounded-lg bg-ink px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
-            >
-              {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-              {importing ? 'Importing...' : `Import ${contactCount} contacts`}
-            </button>
-          </>
-        )}
-      </div>
-    </section>
-  );
-}
