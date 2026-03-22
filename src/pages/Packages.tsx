@@ -30,6 +30,8 @@ export default function Packages() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [selectedModules, setSelectedModules] = useState<Set<string>>(new Set());
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const { canAddPackage } = usePlan();
 
   const currencySymbol = agency?.currency_symbol || '$';
 
