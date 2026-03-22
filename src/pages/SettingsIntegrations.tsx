@@ -43,6 +43,7 @@ export default function SettingsIntegrations() {
   const [importing, setImporting] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [stages, setStages] = useState<HubSpotPipelineStage[]>([]);
   const [settings, setSettings] = useState<any>({
     sync_proposals: true,
