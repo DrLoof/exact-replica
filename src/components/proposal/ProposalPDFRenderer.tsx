@@ -295,7 +295,7 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
         case 5: // Why Us
           if (differentiators.length === 0 && proposalTeam.length === 0) return null;
           return (
-            <div className="pdf-section" data-section="why-us">
+            <div className="pdf-section" data-section="why-us" data-flow-group="main_content">
               <PageWrapper pageNumber="06">
                 <SectionHeader number="05" title={`Why ${agency?.name || 'Us'}`} subtitle="What sets us apart" />
                 {agency?.about_text && (
