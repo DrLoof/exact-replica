@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AppShell } from '@/components/layout/AppShell';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Search, MoreHorizontal, FileText, Copy, Trash2, Send, Eye, LayoutList, Columns3 } from 'lucide-react';
+import { HubSpotBadge } from '@/components/integrations/HubSpotBadge';
 import { cn } from '@/lib/utils';
 import { useProposals } from '@/hooks/useAgencyData';
 import { useAuth } from '@/hooks/useAuth';
