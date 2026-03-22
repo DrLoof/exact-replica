@@ -421,7 +421,10 @@ export default function Clients() {
                       </div>
                     )}
                     <div className="min-w-0">
-                      <p className="text-[15px] font-semibold text-[hsl(24,19%,24%)]">{client.company_name}</p>
+                      <p className="text-[15px] font-semibold text-[hsl(24,19%,24%)] flex items-center gap-1.5">
+                        {client.company_name}
+                        <HubSpotBadge hubspotId={client.hubspot_contact_id} type="contact" />
+                      </p>
                       {client.industry && <p className="text-[12px] text-[hsl(24,8%,49%)]">{client.industry}</p>}
                     </div>
                   </div>
