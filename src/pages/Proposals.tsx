@@ -34,7 +34,9 @@ export default function Proposals() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'pipeline'>('list');
   const [followUpProposal, setFollowUpProposal] = useState<any>(null);
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const currencySymbol = agency?.currency_symbol || '$';
+  const { canCreateProposal, proposalsThisMonth, proposalLimit } = usePlan();
 
   const filtered = proposals.filter((p: any) => {
     const matchesSearch = !search ||
