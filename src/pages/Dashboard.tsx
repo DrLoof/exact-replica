@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-  FileText, Plus, ChevronRight, Bell, Package, FolderOpen,
+  FileText, Plus, ChevronRight, Bell, Package, FolderOpen, X,
 } from 'lucide-react';
 import { AppShell } from '@/components/layout/AppShell';
 import { Link, useNavigate } from 'react-router-dom';
