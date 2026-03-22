@@ -1987,6 +1987,7 @@ export default function ProposalEditor() {
           currencySymbol={currencySymbol}
         />
       )}
+      <UpgradeModal open={showPdfUpgrade} onOpenChange={setShowPdfUpgrade} feature="pdf_export" />
     </div>
   );
 }
