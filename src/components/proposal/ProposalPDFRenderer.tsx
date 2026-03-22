@@ -357,7 +357,7 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
         case 8: // Terms
           if (termsClauses.length === 0) return null;
           return (
-            <div className="pdf-section" data-section="terms">
+            <div className="pdf-section" data-section="terms" data-flow-group="terms">
               <PageWrapper pageNumber="09">
                 <SectionHeader number="08" title="Terms & Conditions" subtitle="The fine print" />
                 <HighlightPanel
