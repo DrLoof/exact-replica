@@ -14,6 +14,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { usePlan } from '@/hooks/usePlan';
+import { UpgradeModal } from '@/components/UpgradeModal';
 
 /* ─── Status dot colors ─── */
 const statusDot: Record<string, string> = {
@@ -205,6 +207,8 @@ export default function Clients() {
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [scanningId, setScanningId] = useState<string | null>(null);
   const [editClient, setEditClient] = useState<any>(null);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const { canAddClient } = usePlan();
 
   useEffect(() => { localStorage.setItem('clients_view', viewMode); }, [viewMode]);
 
@@ -310,7 +314,10 @@ export default function Clients() {
             <span className="text-[13px] text-[hsl(24,8%,49%)]">{clients.length} client{clients.length !== 1 ? 's' : ''}</span>
           )}
         </div>
-        <button onClick={() => setShowAdd(true)}
+        <button onClick={() => {
+            if (!canAddClient(clients.length)) { setShowUpgrade(true); return; }
+            setShowAdd(true);
+          }}
           className="flex items-center gap-2 rounded-lg border border-[hsl(34,14%,91%)] bg-transparent px-4 py-2 text-[13px] font-medium text-[hsl(24,19%,24%)] transition-colors hover:bg-[hsl(40,20%,97%)] hover:border-[hsl(34,14%,83%)]">
           <Plus className="h-4 w-4 text-[hsl(24,8%,49%)]" /> Add Client
         </button>
@@ -549,6 +556,7 @@ export default function Clients() {
           </div>
         </div>
       )}
+      <UpgradeModal open={showUpgrade} onOpenChange={setShowUpgrade} customReason="Upgrade to add more clients to your account." />
     </AppShell>
   );
 }

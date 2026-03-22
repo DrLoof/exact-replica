@@ -38,6 +38,8 @@ import { generateProposalPDF } from '@/lib/generateProposalPDF';
 import { getModulePriceByModel } from '@/lib/pricing';
 import { InlineGoalsEditor, AddGoalsPrompt } from '@/components/proposal-template/InlineGoalsEditor';
 import type { SelectedGoal } from '@/components/proposal-new/ClientZone';
+import { usePlan } from '@/hooks/usePlan';
+import { UpgradeModal } from '@/components/UpgradeModal';
 
 
 interface ProposalData {
@@ -157,6 +159,8 @@ export default function ProposalEditor() {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const pdfContainerRef = useRef<HTMLDivElement>(null);
   const [goalsEditorOpen, setGoalsEditorOpen] = useState(false);
+  const [showPdfUpgrade, setShowPdfUpgrade] = useState(false);
+  const { hasFeature } = usePlan();
 
   // Warn user before leaving if an editable field is focused (unsaved inline edit)
   useBeforeUnload(
@@ -553,6 +557,10 @@ export default function ProposalEditor() {
 
   const handleDownloadPDF = async () => {
     if (!proposal || isGeneratingPDF) return;
+    if (!hasFeature('pdf_export')) {
+      setShowPdfUpgrade(true);
+      return;
+    }
     setIsGeneratingPDF(true);
     // Wait for render + images to load
     await new Promise(resolve => setTimeout(resolve, 800));
@@ -1979,6 +1987,7 @@ export default function ProposalEditor() {
           currencySymbol={currencySymbol}
         />
       )}
+      <UpgradeModal open={showPdfUpgrade} onOpenChange={setShowPdfUpgrade} feature="pdf_export" />
     </div>
   );
 }

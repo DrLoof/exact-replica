@@ -9,6 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { FollowUpModal } from '@/components/proposals/FollowUpModal';
+import { usePlan } from '@/hooks/usePlan';
+import { UpgradeModal } from '@/components/UpgradeModal';
 
 const statusConfig: Record<string, { label: string; className: string }> = {
   draft: { label: 'Draft', className: 'bg-status-draft/15 text-status-draft' },
@@ -32,7 +34,9 @@ export default function Proposals() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'pipeline'>('list');
   const [followUpProposal, setFollowUpProposal] = useState<any>(null);
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const currencySymbol = agency?.currency_symbol || '$';
+  const { canCreateProposal, proposalsThisMonth, proposalLimit } = usePlan();
 
   const filtered = proposals.filter((p: any) => {
     const matchesSearch = !search ||
@@ -133,9 +137,15 @@ export default function Proposals() {
               <Columns3 className="h-3.5 w-3.5" /> Pipeline
             </button>
           </div>
-          <Link to="/proposals/new" className="flex items-center gap-2 rounded-lg bg-brand px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover">
+          <button
+            onClick={() => {
+              if (!canCreateProposal) { setShowUpgrade(true); return; }
+              navigate('/proposals/new');
+            }}
+            className="flex items-center gap-2 rounded-lg bg-brand px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover"
+          >
             <Plus className="h-4 w-4" /> New Proposal
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -245,9 +255,15 @@ export default function Proposals() {
             {search || activeFilter !== 'all' ? 'Try adjusting your filters' : 'Create your first proposal to get started'}
           </p>
           {!search && activeFilter === 'all' && (
-            <Link to="/proposals/new" className="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-hover">
+            <button
+              onClick={() => {
+                if (!canCreateProposal) { setShowUpgrade(true); return; }
+                navigate('/proposals/new');
+              }}
+              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-brand-hover"
+            >
               <Plus className="h-4 w-4" /> New Proposal
-            </Link>
+            </button>
           )}
         </div>
       ) : (
@@ -349,6 +365,12 @@ export default function Proposals() {
           onClose={() => setFollowUpProposal(null)}
         />
       )}
+      <UpgradeModal
+        open={showUpgrade}
+        onOpenChange={setShowUpgrade}
+        customReason={`You've used all ${proposalLimit} proposal${proposalLimit !== 1 ? 's' : ''} this month. Upgrade to create more.`}
+        feature="pdf_export"
+      />
     </AppShell>
   );
 }

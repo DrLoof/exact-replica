@@ -13,6 +13,8 @@ import { usePackages, useServiceModules, useServiceGroups, useProposals } from '
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { usePlan } from '@/hooks/usePlan';
+import { UpgradeModal } from '@/components/UpgradeModal';
 
 export default function Packages() {
   const navigate = useNavigate();
@@ -28,6 +30,8 @@ export default function Packages() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [selectedModules, setSelectedModules] = useState<Set<string>>(new Set());
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const { canAddPackage } = usePlan();
 
   const currencySymbol = agency?.currency_symbol || '$';
 
@@ -81,6 +85,7 @@ export default function Packages() {
   };
 
   const openCreate = () => {
+    if (!canAddPackage(packages.length)) { setShowUpgrade(true); return; }
     setEditingPackage(null);
     setName('');
     setDescription('');
@@ -387,6 +392,7 @@ export default function Packages() {
           </DialogContent>
         </Dialog>
       </div>
+      <UpgradeModal open={showUpgrade} onOpenChange={setShowUpgrade} customReason="Upgrade to create more packages." />
     </AppShell>
   );
 }

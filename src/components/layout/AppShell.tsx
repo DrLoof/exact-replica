@@ -3,6 +3,7 @@ import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Menu, X } from 'lucide-react';
+import { TrialBanner } from '@/components/TrialBanner';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -35,6 +36,7 @@ export function AppShell({ children, hideHeader }: AppShellProps) {
       </div>
 
       <div className={`flex flex-1 flex-col ${isMobile ? '' : 'pl-[236px]'}`}>
+        <TrialBanner />
         {!hideHeader && (
           <Header
             onMenuToggle={isMobile ? () => setSidebarOpen(!sidebarOpen) : undefined}

@@ -18,6 +18,8 @@ import {
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { usePlan } from '@/hooks/usePlan';
+import { UpgradeModal } from '@/components/UpgradeModal';
 
 interface BundleForm {
   id?: string;
@@ -280,6 +282,8 @@ export default function Bundles() {
   const [addingTemplate, setAddingTemplate] = useState<string | null>(null);
   const [expandedTemplate, setExpandedTemplate] = useState<string | null>(null);
   const [editingServicesBundle, setEditingServicesBundle] = useState<any>(null);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const { canAddBundle } = usePlan();
 
   // Usage stats query (Spec #4)
   const { data: usageStats = {} } = useQuery({
@@ -381,7 +385,10 @@ export default function Bundles() {
     invalidate();
   };
 
-  const openCreate = () => { setForm(emptyForm); setShowModal(true); };
+  const openCreate = () => {
+    if (!canAddBundle(bundles.length)) { setShowUpgrade(true); return; }
+    setForm(emptyForm); setShowModal(true);
+  };
 
   const toggleModule = (id: string) => {
     setForm(prev => {
@@ -797,6 +804,7 @@ export default function Bundles() {
           </div>
         </div>
       )}
+      <UpgradeModal open={showUpgrade} onOpenChange={setShowUpgrade} customReason="Upgrade to create more bundles." />
     </AppShell>
   );
 }
