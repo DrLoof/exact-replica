@@ -342,7 +342,7 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
         case 7: // Testimonials
           if (testimonials.length === 0) return null;
           return (
-            <div className="pdf-section" data-section="testimonials">
+            <div className="pdf-section" data-section="testimonials" data-flow-group="main_content">
               <PageWrapper pageNumber="08">
                 <SectionHeader number="07" title="What Our Clients Say" subtitle="Real results from real partnerships." />
                 <div className="space-y-6">
