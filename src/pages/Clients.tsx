@@ -5,6 +5,7 @@ import {
   Plus, Search, MoreVertical, Users, X, LayoutGrid, List, Loader2,
   Globe, ArrowLeft, Pencil, Trash2, FileText, ScanSearch, ExternalLink,
 } from 'lucide-react';
+import { exportClientToHubSpot } from '@/lib/hubspotSync';
 import { HubSpotBadge } from '@/components/integrations/HubSpotBadge';
 import { cn } from '@/lib/utils';
 import { useClients, useProposals } from '@/hooks/useAgencyData';
