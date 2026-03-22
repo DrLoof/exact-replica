@@ -44,7 +44,7 @@ export function TextContent({
         color: bodyColor,
       }}
     >
-      {dropCap ? (
+      {dropCap && !isPDF ? (
         <div>
           <span
             className="float-left mr-3 mt-1"
