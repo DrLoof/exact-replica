@@ -529,7 +529,8 @@ export function ReviewScreen({
             {suggestedBundles.map(bundle => {
               const isAdded = addedBundles.has(bundle.name);
               const pricing = calculateBundlePricing(bundle.serviceNames, bundle.discountPercentage);
-              const missingNames = bundle.serviceNames.filter(n => !selectedModuleNames.has(n));
+              const selectedNameSet = new Set(selectedModuleNamesList);
+              const missingNames = bundle.serviceNames.filter(n => !selectedNameSet.has(n));
               const isFullMatch = missingNames.length === 0;
 
               return (
