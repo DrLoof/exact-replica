@@ -11,8 +11,8 @@ export function HubSpotBadge({ hubspotId, type, hubId, lastSynced }: HubSpotBadg
   if (!hubspotId) return null;
 
   const hubSpotUrl = type === 'contact'
-    ? `https://app.hubspot.com/contacts/${hubId || ''}/contact/${hubspotId}`
-    : `https://app.hubspot.com/contacts/${hubId || ''}/deal/${hubspotId}`;
+    ? `https://app-eu1.hubspot.com/contacts/${hubId || ''}/contact/${hubspotId}`
+    : `https://app-eu1.hubspot.com/contacts/${hubId || ''}/deal/${hubspotId}`;
 
   return (
     <Tooltip>

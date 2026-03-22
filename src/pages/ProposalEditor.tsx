@@ -1082,7 +1082,7 @@ export default function ProposalEditor() {
                       Status: {(proposal.status || 'draft').charAt(0).toUpperCase() + (proposal.status || 'draft').slice(1)}
                     </p>
                     <a
-                      href={`https://app.hubspot.com/contacts/${''}/deal/${(proposal as any).hubspot_deal_id}`}
+                      href={`https://app-eu1.hubspot.com/contacts/${''}/deal/${(proposal as any).hubspot_deal_id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-[11px] font-medium hover:underline"
