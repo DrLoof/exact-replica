@@ -207,6 +207,8 @@ export default function Clients() {
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [scanningId, setScanningId] = useState<string | null>(null);
   const [editClient, setEditClient] = useState<any>(null);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const { canAddClient } = usePlan();
 
   useEffect(() => { localStorage.setItem('clients_view', viewMode); }, [viewMode]);
 
