@@ -113,15 +113,18 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
     const renderSection = (sectionIdx: number) => {
       switch (sectionIdx) {
         case 0: // Cover
+          const isSubtitlePlaceholder = !proposal.subtitle || proposal.subtitle.trim() === '' || proposal.subtitle.startsWith('Click to');
           return (
-            <div className="pdf-section" data-section="cover">
-              <HeroCover
-                proposalTitle={proposal.title || `Proposal for ${client?.company_name || 'Client'}`}
-                subtitle={proposal.subtitle || undefined}
-                clientName={client?.company_name || 'Client'}
-                date={proposalDate}
-                proposalNumber={proposal.reference_number}
-              />
+            <div className="pdf-section" data-section="cover" data-flow-group="cover">
+              <div style={{ paddingTop: '8px' }}>
+                <HeroCover
+                  proposalTitle={proposal.title || `Proposal for ${client?.company_name || 'Client'}`}
+                  subtitle={isSubtitlePlaceholder ? undefined : proposal.subtitle}
+                  clientName={client?.company_name || 'Client'}
+                  date={proposalDate}
+                  proposalNumber={proposal.reference_number}
+                />
+              </div>
             </div>
           );
 
