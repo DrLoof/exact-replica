@@ -98,36 +98,47 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
 
     const proposalDate = proposal.project_start_date || new Date(proposal.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
+    // Calculate timeline display for stat bar
+    const calculatedTimeline = calculateTimeline(phases) || proposal.estimated_duration;
+    const timelineDisplay = calculatedTimeline
+      ? (typeof calculatedTimeline === 'string' ? calculatedTimeline : `${calculatedTimeline} weeks est.`)
+      : null;
+
     const summaryHighlights = [
       { label: 'Investment', value: totalStr, accent: true },
-      { label: 'Timeline', value: calculateTimeline(phases) || proposal.estimated_duration || `${services.length * 2} weeks est.` },
+      ...(timelineDisplay ? [{ label: 'Timeline', value: timelineDisplay }] : []),
       { label: 'Objectives', value: getObjectivesStat(proposal.goals, proposal.client_goal, services.length) },
     ];
 
     const renderSection = (sectionIdx: number) => {
       switch (sectionIdx) {
         case 0: // Cover
+          const isSubtitlePlaceholder = !proposal.subtitle || proposal.subtitle.trim() === '' || proposal.subtitle.startsWith('Click to');
           return (
-            <div className="pdf-section" data-section="cover">
-              <HeroCover
-                proposalTitle={proposal.title || `Proposal for ${client?.company_name || 'Client'}`}
-                subtitle={proposal.subtitle || undefined}
-                clientName={client?.company_name || 'Client'}
-                date={proposalDate}
-                proposalNumber={proposal.reference_number}
-              />
+            <div className="pdf-section" data-section="cover" data-flow-group="cover">
+              <div style={{ paddingTop: '8px' }}>
+                <HeroCover
+                  proposalTitle={proposal.title || `Proposal for ${client?.company_name || 'Client'}`}
+                  subtitle={isSubtitlePlaceholder ? undefined : proposal.subtitle}
+                  clientName={client?.company_name || 'Client'}
+                  date={proposalDate}
+                  proposalNumber={proposal.reference_number}
+                />
+              </div>
             </div>
           );
 
         case 1: // Executive Summary
           if (!proposal.executive_summary) return null;
           return (
-            <div className="pdf-section" data-section="executive-summary">
+            <div className="pdf-section" data-section="executive-summary" data-flow-group="summary">
               <PageWrapper pageNumber="02">
                 <SectionHeader number="01" title="Executive Summary" subtitle="Our understanding and approach" />
                 <TextContent dropCap>{proposal.executive_summary}</TextContent>
                 <div className="mt-12 space-y-4">
-                  <HighlightPanel items={summaryHighlights} />
+                  <div style={{ display: 'grid', gridTemplateColumns: summaryHighlights.length === 2 ? '1fr 1fr' : '1fr 1fr 1fr', width: '100%' }}>
+                    <HighlightPanel items={summaryHighlights} />
+                  </div>
                   {(() => {
                     const kpiItems = getKpiBarItems(proposal.goals);
                     if (!kpiItems) return null;
@@ -146,7 +157,7 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
         case 2: // Scope of Services
           if (services.length === 0) return null;
           return (
-            <div className="pdf-section" data-section="scope">
+            <div className="pdf-section" data-section="scope" data-flow-group="main_content">
               <PageWrapper pageNumber="03">
                 <SectionHeader number="02" title="Scope of Services" subtitle="What we'll deliver for you" />
                 {services.some((s: any) => s.bundle_id) && bundleSavings && (
@@ -194,7 +205,7 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
         case 3: // Timeline
           if (phases.length === 0) return null;
           return (
-            <div className="pdf-section" data-section="timeline">
+            <div className="pdf-section" data-section="timeline" data-flow-group="main_content">
               <PageWrapper pageNumber="04">
                 <SectionHeader number="03" title="Timeline" subtitle="How we'll get there" />
                 {(() => {
@@ -266,7 +277,7 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
         case 4: // Investment
           if (services.length === 0) return null;
           return (
-            <div className="pdf-section" data-section="investment">
+            <div className="pdf-section" data-section="investment" data-flow-group="investment">
               <PageWrapper pageNumber="05">
                 <SectionHeader number="04" title="Investment" subtitle="Transparent pricing for every deliverable" />
                 <PricingSummary
@@ -284,7 +295,7 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
         case 5: // Why Us
           if (differentiators.length === 0 && proposalTeam.length === 0) return null;
           return (
-            <div className="pdf-section" data-section="why-us">
+            <div className="pdf-section" data-section="why-us" data-flow-group="main_content">
               <PageWrapper pageNumber="06">
                 <SectionHeader number="05" title={`Why ${agency?.name || 'Us'}`} subtitle="What sets us apart" />
                 {agency?.about_text && (
@@ -316,7 +327,7 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
         case 6: // Portfolio
           if (portfolioItems.length === 0 || !(proposal as any).portfolio_section_visible) return null;
           return (
-            <div className="pdf-section" data-section="portfolio">
+            <div className="pdf-section" data-section="portfolio" data-flow-group="main_content">
               <PageWrapper pageNumber="07">
                 <SectionHeader number="06" title={(proposal as any).portfolio_section_title || 'Our Work'} subtitle="Selected projects from our portfolio" />
                 <div className="grid grid-cols-2 gap-6">
@@ -331,7 +342,7 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
         case 7: // Testimonials
           if (testimonials.length === 0) return null;
           return (
-            <div className="pdf-section" data-section="testimonials">
+            <div className="pdf-section" data-section="testimonials" data-flow-group="main_content">
               <PageWrapper pageNumber="08">
                 <SectionHeader number="07" title="What Our Clients Say" subtitle="Real results from real partnerships." />
                 <div className="space-y-6">
@@ -346,7 +357,7 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
         case 8: // Terms
           if (termsClauses.length === 0) return null;
           return (
-            <div className="pdf-section" data-section="terms">
+            <div className="pdf-section" data-section="terms" data-flow-group="terms">
               <PageWrapper pageNumber="09">
                 <SectionHeader number="08" title="Terms & Conditions" subtitle="The fine print" />
                 <HighlightPanel
@@ -366,7 +377,7 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
 
         case 9: // Signature
           return (
-            <div className="pdf-section" data-section="signature">
+            <div className="pdf-section" data-section="signature" data-flow-group="signature">
               <PageWrapper pageNumber="10">
                 <SignatureBlock
                   client={{

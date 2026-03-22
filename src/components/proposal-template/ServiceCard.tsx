@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { Plus, X, ChevronDown } from "lucide-react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
+import { usePDFMode } from "./TemplateProvider";
 import { EditableText } from "./EditableText";
 
 const GENERIC_RESPONSIBILITIES = [
@@ -58,9 +59,11 @@ function CollapsibleList({
   items: string[];
   renderItem: (item: string, idx: number) => React.ReactNode;
 }) {
+  const isPDF = usePDFMode();
   const [expanded, setExpanded] = useState(false);
-  const visible = expanded ? items : items.slice(0, MAX_COLLAPSED);
-  const hasMore = items.length > MAX_COLLAPSED;
+  const showAll = isPDF || expanded;
+  const visible = showAll ? items : items.slice(0, MAX_COLLAPSED);
+  const hasMore = !isPDF && items.length > MAX_COLLAPSED;
 
   return (
     <>

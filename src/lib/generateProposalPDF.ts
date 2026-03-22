@@ -25,25 +25,83 @@ export async function generateProposalPDF(
     )
   );
 
-  const sectionElements = container.querySelectorAll('.pdf-section');
+  // Group sections by their flow-group attribute
+  const sectionElements = Array.from(container.querySelectorAll('.pdf-section')) as HTMLElement[];
+  
+  // Sections that always force a page break before them
+  const forceBreakGroups = new Set(['cover', 'summary', 'investment', 'terms', 'signature']);
+  
+  // Build flow groups: consecutive sections with the same non-forced group merge into one capture
+  interface FlowGroup {
+    elements: HTMLElement[];
+    groupId: string;
+    forceBreak: boolean;
+  }
+  
+  const flowGroups: FlowGroup[] = [];
+  let currentGroup: FlowGroup | null = null;
+  
+  for (const section of sectionElements) {
+    const groupId = section.getAttribute('data-flow-group') || section.getAttribute('data-section') || 'unknown';
+    const shouldForce = forceBreakGroups.has(groupId);
+    
+    if (shouldForce || !currentGroup || currentGroup.groupId !== groupId) {
+      // Start a new flow group
+      currentGroup = { elements: [section], groupId, forceBreak: shouldForce };
+      flowGroups.push(currentGroup);
+    } else {
+      // Append to current flow group (natural flow)
+      currentGroup.elements.push(section);
+    }
+  }
+
   let isFirstPage = true;
 
-  for (let i = 0; i < sectionElements.length; i++) {
-    const section = sectionElements[i] as HTMLElement;
+  for (let gi = 0; gi < flowGroups.length; gi++) {
+    const group = flowGroups[gi];
+    
+    // For flow groups with multiple elements, create a temporary wrapper to capture them together
+    let captureTarget: HTMLElement;
+    let tempWrapper: HTMLElement | null = null;
+    
+    if (group.elements.length === 1) {
+      captureTarget = group.elements[0];
+    } else {
+      // Create a wrapper div that contains all elements in this flow group
+      tempWrapper = document.createElement('div');
+      tempWrapper.style.width = '1024px';
+      tempWrapper.style.background = 'white';
+      
+      // Clone elements into the wrapper
+      for (const el of group.elements) {
+        const clone = el.cloneNode(true) as HTMLElement;
+        tempWrapper.appendChild(clone);
+      }
+      
+      // Temporarily add to DOM for rendering
+      container.appendChild(tempWrapper);
+      captureTarget = tempWrapper;
+    }
 
-    // Give extra time for the first (cover) section, less for others
-    await new Promise(resolve => setTimeout(resolve, i === 0 ? 400 : 200));
+    // Give extra time for the first (cover) section
+    const isFirstSection = gi === 0;
+    await new Promise(resolve => setTimeout(resolve, isFirstSection ? 400 : 200));
 
-    const canvas = await html2canvas(section, {
-      scale: i === 0 ? 3 : 2, // Higher scale for cover to reduce gradient artifacts
+    const canvas = await html2canvas(captureTarget, {
+      scale: isFirstSection ? 3 : 2,
       useCORS: true,
       allowTaint: false,
       backgroundColor: null,
       width: 1024,
       windowWidth: 1024,
-      height: section.scrollHeight,
-      windowHeight: section.scrollHeight,
+      height: captureTarget.scrollHeight,
+      windowHeight: captureTarget.scrollHeight,
     });
+
+    // Clean up temp wrapper
+    if (tempWrapper) {
+      container.removeChild(tempWrapper);
+    }
 
     const imgWidth = pageWidth;
     const imgHeight = (canvas.height * pageWidth) / canvas.width;
@@ -61,8 +119,8 @@ export async function generateProposalPDF(
       let pageIndex = 0;
 
       while (remaining > 0) {
-        // Skip nearly-blank last pages (less than 15% of page height)
-        if (remaining < pageHeight * 0.15 && pageIndex > 0) {
+        // Skip nearly-blank last pages (less than 12% of page height)
+        if (remaining < pageHeight * 0.12 && pageIndex > 0) {
           break;
         }
 

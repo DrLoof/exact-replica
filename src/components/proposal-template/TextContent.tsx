@@ -2,6 +2,7 @@ import React, { type ReactNode } from "react";
 import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
+import { usePDFMode } from "./TemplateProvider";
 
 interface TextContentProps {
   children: ReactNode;
@@ -14,6 +15,7 @@ export function TextContent({
 }: TextContentProps) {
   const brand = useBrand();
   const template = useTemplate();
+  const isPDF = usePDFMode();
   const isModern = template.id === 'modern';
   const secondaryColor = template.colors.secondaryAccent;
   const isElegant = template.id === 'elegant';
@@ -42,7 +44,7 @@ export function TextContent({
         color: bodyColor,
       }}
     >
-      {dropCap ? (
+      {dropCap && !isPDF ? (
         <div>
           <span
             className="float-left mr-3 mt-1"
