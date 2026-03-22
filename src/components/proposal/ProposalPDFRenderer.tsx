@@ -277,7 +277,7 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
         case 4: // Investment
           if (services.length === 0) return null;
           return (
-            <div className="pdf-section" data-section="investment">
+            <div className="pdf-section" data-section="investment" data-flow-group="investment">
               <PageWrapper pageNumber="05">
                 <SectionHeader number="04" title="Investment" subtitle="Transparent pricing for every deliverable" />
                 <PricingSummary
