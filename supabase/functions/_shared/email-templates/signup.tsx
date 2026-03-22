@@ -34,7 +34,7 @@ export const SignupEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Img
-          src="https://fegjortfpzptkztemmgl.supabase.co/storage/v1/object/public/email-assets/logo.svg"
+          src="https://fegjortfpzptkztemmgl.supabase.co/storage/v1/object/public/agency-logos/email/propopad-logo.svg"
           width="40"
           height="40"
           alt="Propopad"
