@@ -39,7 +39,7 @@ const competitors = [
 
 /* ─── Propopad plan for team size ─── */
 function propopadPlanForTeam(teamSize: number, plans: Plan[], cycle: 'monthly' | 'annual'): { price: number; planName: string } {
-  // Find cheapest plan that supports this team size
+  if (!plans || plans.length === 0) return { price: 0, planName: 'Free' };
   const sorted = [...plans].sort((a, b) => a.display_order - b.display_order);
   for (const p of sorted) {
     if (p.max_users === null || p.max_users >= teamSize) {
