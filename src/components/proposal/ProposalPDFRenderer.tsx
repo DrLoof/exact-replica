@@ -327,7 +327,7 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
         case 6: // Portfolio
           if (portfolioItems.length === 0 || !(proposal as any).portfolio_section_visible) return null;
           return (
-            <div className="pdf-section" data-section="portfolio">
+            <div className="pdf-section" data-section="portfolio" data-flow-group="main_content">
               <PageWrapper pageNumber="07">
                 <SectionHeader number="06" title={(proposal as any).portfolio_section_title || 'Our Work'} subtitle="Selected projects from our portfolio" />
                 <div className="grid grid-cols-2 gap-6">
