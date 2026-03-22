@@ -556,6 +556,7 @@ export default function Clients() {
           </div>
         </div>
       )}
+      <UpgradeModal open={showUpgrade} onOpenChange={setShowUpgrade} customReason="Upgrade to add more clients to your account." />
     </AppShell>
   );
 }
