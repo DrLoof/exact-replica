@@ -159,6 +159,8 @@ export default function ProposalEditor() {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const pdfContainerRef = useRef<HTMLDivElement>(null);
   const [goalsEditorOpen, setGoalsEditorOpen] = useState(false);
+  const [showPdfUpgrade, setShowPdfUpgrade] = useState(false);
+  const { hasFeature } = usePlan();
 
   // Warn user before leaving if an editable field is focused (unsaved inline edit)
   useBeforeUnload(
