@@ -14,6 +14,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { usePlan } from '@/hooks/usePlan';
+import { UpgradeModal } from '@/components/UpgradeModal';
 
 /* ─── Status dot colors ─── */
 const statusDot: Record<string, string> = {
