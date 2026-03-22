@@ -555,6 +555,10 @@ export default function ProposalEditor() {
 
   const handleDownloadPDF = async () => {
     if (!proposal || isGeneratingPDF) return;
+    if (!hasFeature('pdf_export')) {
+      setShowPdfUpgrade(true);
+      return;
+    }
     setIsGeneratingPDF(true);
     // Wait for render + images to load
     await new Promise(resolve => setTimeout(resolve, 800));
