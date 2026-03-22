@@ -107,7 +107,7 @@ export default function SettingsIntegrations() {
       return;
     }
     // Redirect to HubSpot OAuth
-    const clientId = import.meta.env.VITE_HUBSPOT_CLIENT_ID;
+    const clientId = 'c099ffda-2b15-46ea-a080-a63c09f4713c';
     const redirectUri = `${window.location.origin}/settings/integrations/hubspot/callback`;
     const scopes = 'crm.objects.contacts.read crm.objects.contacts.write crm.objects.deals.read crm.objects.deals.write crm.objects.companies.read crm.objects.companies.write';
     window.location.href = `https://app.hubspot.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}`;
