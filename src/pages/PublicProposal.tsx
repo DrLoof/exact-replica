@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { AlertTriangle, Layers, CheckCircle2, XCircle, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import { templates } from '@/lib/proposalTemplates';
 import { SignProposalModal } from '@/components/proposal/SignProposalModal';
 import { DeclineProposalModal } from '@/components/proposal/DeclineProposalModal';
 import {
