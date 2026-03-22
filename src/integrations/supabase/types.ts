@@ -38,6 +38,7 @@ export type Database = {
           onboarding_complete: boolean | null
           onboarding_step: number | null
           phone: string | null
+          plan_id: string | null
           proposal_counter: number | null
           proposal_prefix: string | null
           scrape_status: string | null
@@ -45,9 +46,11 @@ export type Database = {
           scraped_at: string | null
           scraped_data: Json | null
           secondary_color: string | null
+          selected_premium_template: string | null
           state: string | null
           tagline: string | null
           team_members: Json | null
+          trial_ends_at: string | null
           website: string | null
           years_experience: number | null
           zip: string | null
@@ -75,6 +78,7 @@ export type Database = {
           onboarding_complete?: boolean | null
           onboarding_step?: number | null
           phone?: string | null
+          plan_id?: string | null
           proposal_counter?: number | null
           proposal_prefix?: string | null
           scrape_status?: string | null
@@ -82,9 +86,11 @@ export type Database = {
           scraped_at?: string | null
           scraped_data?: Json | null
           secondary_color?: string | null
+          selected_premium_template?: string | null
           state?: string | null
           tagline?: string | null
           team_members?: Json | null
+          trial_ends_at?: string | null
           website?: string | null
           years_experience?: number | null
           zip?: string | null
@@ -112,6 +118,7 @@ export type Database = {
           onboarding_complete?: boolean | null
           onboarding_step?: number | null
           phone?: string | null
+          plan_id?: string | null
           proposal_counter?: number | null
           proposal_prefix?: string | null
           scrape_status?: string | null
@@ -119,14 +126,24 @@ export type Database = {
           scraped_at?: string | null
           scraped_data?: Json | null
           secondary_color?: string | null
+          selected_premium_template?: string | null
           state?: string | null
           tagline?: string | null
           team_members?: Json | null
+          trial_ends_at?: string | null
           website?: string | null
           years_experience?: number | null
           zip?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "agencies_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       api_calls: {
         Row: {
@@ -643,6 +660,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      plans: {
+        Row: {
+          annual_price: number
+          created_at: string | null
+          display_order: number | null
+          features: Json
+          id: string
+          is_active: boolean | null
+          max_bundles: number | null
+          max_clients: number | null
+          max_packages: number | null
+          max_proposals: number | null
+          max_users: number | null
+          monthly_price: number
+          name: string
+        }
+        Insert: {
+          annual_price: number
+          created_at?: string | null
+          display_order?: number | null
+          features: Json
+          id: string
+          is_active?: boolean | null
+          max_bundles?: number | null
+          max_clients?: number | null
+          max_packages?: number | null
+          max_proposals?: number | null
+          max_users?: number | null
+          monthly_price: number
+          name: string
+        }
+        Update: {
+          annual_price?: number
+          created_at?: string | null
+          display_order?: number | null
+          features?: Json
+          id?: string
+          is_active?: boolean | null
+          max_bundles?: number | null
+          max_clients?: number | null
+          max_packages?: number | null
+          max_proposals?: number | null
+          max_users?: number | null
+          monthly_price?: number
+          name?: string
+        }
+        Relationships: []
       }
       portfolio_items: {
         Row: {
@@ -1279,6 +1344,69 @@ export type Database = {
             columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "service_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          agency_id: string | null
+          billing_cycle: string
+          canceled_at: string | null
+          created_at: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          plan_id: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          trial_ends_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          agency_id?: string | null
+          billing_cycle?: string
+          canceled_at?: string | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          agency_id?: string | null
+          billing_cycle?: string
+          canceled_at?: string | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          plan_id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
             referencedColumns: ["id"]
           },
         ]
