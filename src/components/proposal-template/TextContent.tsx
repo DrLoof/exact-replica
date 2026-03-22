@@ -2,6 +2,7 @@ import React, { type ReactNode } from "react";
 import { motion } from "motion/react";
 import { useBrand } from "./BrandTheme";
 import { useTemplate } from "./TemplateProvider";
+import { usePDFMode } from "./TemplateProvider";
 
 interface TextContentProps {
   children: ReactNode;
