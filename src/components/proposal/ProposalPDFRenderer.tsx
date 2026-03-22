@@ -131,12 +131,14 @@ export const ProposalPDFRenderer = React.forwardRef<HTMLDivElement, ProposalPDFR
         case 1: // Executive Summary
           if (!proposal.executive_summary) return null;
           return (
-            <div className="pdf-section" data-section="executive-summary">
+            <div className="pdf-section" data-section="executive-summary" data-flow-group="summary">
               <PageWrapper pageNumber="02">
                 <SectionHeader number="01" title="Executive Summary" subtitle="Our understanding and approach" />
                 <TextContent dropCap>{proposal.executive_summary}</TextContent>
                 <div className="mt-12 space-y-4">
-                  <HighlightPanel items={summaryHighlights} />
+                  <div style={{ display: 'grid', gridTemplateColumns: summaryHighlights.length === 2 ? '1fr 1fr' : '1fr 1fr 1fr', width: '100%' }}>
+                    <HighlightPanel items={summaryHighlights} />
+                  </div>
                   {(() => {
                     const kpiItems = getKpiBarItems(proposal.goals);
                     if (!kpiItems) return null;
