@@ -291,7 +291,10 @@ export default function Proposals() {
                           {p.client?.company_name?.charAt(0) || '?'}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-foreground">{p.client?.company_name || 'Unknown'}</p>
+                          <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                            {p.client?.company_name || 'Unknown'}
+                            <HubSpotBadge hubspotId={p.hubspot_deal_id} type="deal" />
+                          </p>
                           <p className="text-xs text-muted-foreground">{p.title || 'Untitled'}</p>
                         </div>
                       </Link>
