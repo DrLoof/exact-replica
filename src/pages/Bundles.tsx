@@ -385,7 +385,10 @@ export default function Bundles() {
     invalidate();
   };
 
-  const openCreate = () => { setForm(emptyForm); setShowModal(true); };
+  const openCreate = () => {
+    if (!canAddBundle(bundles.length)) { setShowUpgrade(true); return; }
+    setForm(emptyForm); setShowModal(true);
+  };
 
   const toggleModule = (id: string) => {
     setForm(prev => {
