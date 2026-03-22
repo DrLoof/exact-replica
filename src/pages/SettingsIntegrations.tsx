@@ -399,6 +399,12 @@ export default function SettingsIntegrations() {
         feature="CRM Integrations"
         customReason="CRM integrations are available on Pro and Business plans."
       />
+
+      <ImportContactsModal
+        open={importModalOpen}
+        onOpenChange={setImportModalOpen}
+        onImported={fetchIntegration}
+      />
     </AppShell>
   );
 }
