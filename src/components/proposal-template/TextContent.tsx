@@ -15,6 +15,7 @@ export function TextContent({
 }: TextContentProps) {
   const brand = useBrand();
   const template = useTemplate();
+  const isPDF = usePDFMode();
   const isModern = template.id === 'modern';
   const secondaryColor = template.colors.secondaryAccent;
   const isElegant = template.id === 'elegant';
