@@ -36,6 +36,7 @@ export function AppShell({ children, hideHeader }: AppShellProps) {
       </div>
 
       <div className={`flex flex-1 flex-col ${isMobile ? '' : 'pl-[236px]'}`}>
+        <TrialBanner />
         {!hideHeader && (
           <Header
             onMenuToggle={isMobile ? () => setSidebarOpen(!sidebarOpen) : undefined}

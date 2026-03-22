@@ -137,9 +137,15 @@ export default function Proposals() {
               <Columns3 className="h-3.5 w-3.5" /> Pipeline
             </button>
           </div>
-          <Link to="/proposals/new" className="flex items-center gap-2 rounded-lg bg-brand px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover">
+          <button
+            onClick={() => {
+              if (!canCreateProposal) { setShowUpgrade(true); return; }
+              navigate('/proposals/new');
+            }}
+            className="flex items-center gap-2 rounded-lg bg-brand px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-brand-hover"
+          >
             <Plus className="h-4 w-4" /> New Proposal
-          </Link>
+          </button>
         </div>
       </div>
 
