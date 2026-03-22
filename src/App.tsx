@@ -26,6 +26,8 @@ import SettingsDifferentiators from "./pages/SettingsDifferentiators";
 import SettingsPortfolio from "./pages/SettingsPortfolio";
 import SettingsTeam from "./pages/SettingsTeam";
 import SettingsBilling from "./pages/SettingsBilling";
+import SettingsIntegrations from "./pages/SettingsIntegrations";
+import HubSpotCallback from "./pages/HubSpotCallback";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import AcceptInvite from "./pages/AcceptInvite";
