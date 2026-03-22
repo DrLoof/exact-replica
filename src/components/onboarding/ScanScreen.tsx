@@ -242,7 +242,7 @@ export function ScanScreen({ onScrapeComplete, onManualSetup }: ScanScreenProps)
               const clientId = 'c099ffda-2b15-46ea-a080-a63c09f4713c';
               const redirectUri = `${window.location.origin}/settings/integrations/hubspot/callback`;
               const scopes = 'crm.objects.contacts.read crm.objects.contacts.write crm.objects.deals.read crm.objects.deals.write crm.objects.companies.read crm.objects.companies.write';
-              window.location.href = `https://app.hubspot.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}`;
+              window.location.href = `https://app-eu1.hubspot.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}`;
             }}
             className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-6 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
           >
