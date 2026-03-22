@@ -29,6 +29,13 @@ const settingsNav = [
   { label: 'Team', icon: UserPlus, path: '/settings/team' },
 ];
 
+const planBadgeStyles: Record<string, { color: string; bg: string }> = {
+  free: { color: '#B8B0A5', bg: '#F4F1EB' },
+  starter: { color: '#7A8FA8', bg: '#F0F3F7' },
+  pro: { color: '#BE8E5E', bg: '#FBF5EE' },
+  business: { color: '#2A2118', bg: '#F4F1EB' },
+};
+
 interface SidebarProps {
   onClose?: () => void;
 }
@@ -39,7 +46,7 @@ export function Sidebar({ onClose }: SidebarProps) {
   const { userProfile, agency, signOut } = useAuth();
   const { data: proposals = [] } = useProposals();
   const [feedbackOpen, setFeedbackOpen] = useState(false);
-  const { plan: storedPlan, effectivePlan: plan, isTrialing, trialDaysLeft, proposalsThisMonth, proposalLimit } = usePlan();
+  const { plan: storedPlan, effectivePlan: plan, isTrialing, trialDaysLeft, trialEnded, proposalsThisMonth, proposalLimit } = usePlan();
 
   const activeProposalCount = proposals.filter((p: any) => p.status === 'sent' && !p.viewed_at).length;
 
@@ -63,6 +70,14 @@ export function Sidebar({ onClose }: SidebarProps) {
   const usagePercent = proposalLimit ? (proposalsThisMonth / proposalLimit) * 100 : 0;
   const counterColor = usagePercent >= 100 ? 'text-red-500' : usagePercent >= 80 ? 'text-amber-500' : 'text-ink-faint';
 
+  // Plan badge
+  const displayPlanId = storedPlan?.id || 'free';
+  const badgeStyle = planBadgeStyles[displayPlanId] || planBadgeStyles.free;
+  const badgeLabel = isTrialing ? `${plan?.name || 'Pro'} trial` : (storedPlan?.name || 'Free');
+  const badgeSuffix = isTrialing
+    ? `${trialDaysLeft}d left`
+    : `${proposals.length} proposal${proposals.length !== 1 ? 's' : ''}`;
+
   return (
     <aside className="fixed left-0 top-0 z-30 flex h-screen w-[236px] flex-col bg-ivory" style={{ borderRight: '1px solid hsl(var(--parchment))' }}>
       {/* Logo + close button for mobile */}
@@ -78,7 +93,7 @@ export function Sidebar({ onClose }: SidebarProps) {
         )}
       </div>
 
-      {/* Agency block */}
+      {/* Agency block with plan badge */}
       {agency?.name && (
         <div className="mx-3 mb-3 rounded-[10px] bg-paper p-2.5 shadow-card">
           <div className="flex items-center gap-2.5">
@@ -93,11 +108,15 @@ export function Sidebar({ onClose }: SidebarProps) {
             )}
             <div className="min-w-0 flex-1">
               <p className="truncate text-[12px] font-semibold text-ink">{agency.name}</p>
-              <p className="text-[10px] text-ink-faint">
-                {plan?.name || 'Free'}
-                {isTrialing && ` · Trial (${trialDaysLeft}d left)`}
-                {!isTrialing && ` · ${proposals.length} proposals`}
-              </p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span
+                  className="inline-block rounded-full px-1.5 py-[1px] text-[10px] font-semibold uppercase leading-tight"
+                  style={{ color: isTrialing ? '#BE8E5E' : badgeStyle.color, backgroundColor: isTrialing ? '#FBF5EE' : badgeStyle.bg }}
+                >
+                  {badgeLabel}
+                </span>
+                <span className="text-[10px] text-ink-faint">· {badgeSuffix}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -185,19 +204,41 @@ export function Sidebar({ onClose }: SidebarProps) {
       </nav>
 
       {/* Dynamic Upgrade CTA based on plan */}
-      {plan?.id !== 'business' && (
+      {isTrialing && (
+        <div
+          className="relative mx-3 mb-3 overflow-hidden rounded-[10px] p-4 shadow-card"
+          style={{ backgroundColor: trialDaysLeft <= 3 ? '#FFF8F0' : '#FAF9F6' }}
+        >
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <Zap className="h-3.5 w-3.5" style={{ color: '#BE8E5E' }} />
+            <p className="text-[10px] font-bold uppercase" style={{ letterSpacing: '0.1em', color: '#BE8E5E' }}>
+              Pro Trial
+            </p>
+          </div>
+          <p className="text-[14px] font-semibold" style={{ color: '#2A2118' }}>
+            {trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''} remaining
+          </p>
+          <Link to="/settings/billing" onClick={handleNav}>
+            <button className="mt-3 w-full rounded-[8px] border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-[#F4F1EB]" style={{ borderColor: '#EEEAE3', color: '#2A2118' }}>
+              Upgrade now →
+            </button>
+          </Link>
+        </div>
+      )}
+
+      {!isTrialing && plan?.id !== 'business' && (
         <div className="relative mx-3 mb-3 overflow-hidden rounded-[10px] bg-paper p-4 shadow-card">
           <div className="absolute left-0 right-0 top-0 h-[2px]" style={{ background: 'linear-gradient(90deg, #BE8E5E, transparent)' }} />
           {(!plan || plan.id === 'free') && (
             <>
               <div className="flex items-center gap-1.5 mb-1.5">
-                <Zap className="h-3.5 w-3.5 text-brass" />
-                <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-brass">Upgrade</p>
+                <Zap className="h-3.5 w-3.5" style={{ color: '#BE8E5E' }} />
+                <p className="text-[11px] font-bold uppercase" style={{ letterSpacing: '0.08em', color: '#BE8E5E' }}>Upgrade</p>
               </div>
-              <p className="text-[12px] text-ink-muted">Unlock PDF, e-signatures, and premium templates</p>
+              <p className="text-[12px]" style={{ color: '#4A3F32' }}>Unlock PDF, e-signatures, and premium templates</p>
               <Link to="/settings/billing" onClick={handleNav}>
-                <button className="mt-3 w-full rounded-[8px] bg-ink px-3 py-1.5 text-xs font-medium text-ivory transition-colors hover:bg-ink-soft">
-                  Start at $19/mo →
+                <button className="mt-3 w-full rounded-[8px] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:opacity-90" style={{ backgroundColor: '#2A2118' }}>
+                  From $19/mo →
                 </button>
               </Link>
             </>
@@ -205,12 +246,12 @@ export function Sidebar({ onClose }: SidebarProps) {
           {plan?.id === 'starter' && (
             <>
               <div className="flex items-center gap-1.5 mb-1.5">
-                <Zap className="h-3.5 w-3.5 text-brass" />
-                <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-brass">Go Pro</p>
+                <Zap className="h-3.5 w-3.5" style={{ color: '#BE8E5E' }} />
+                <p className="text-[11px] font-bold uppercase" style={{ letterSpacing: '0.08em', color: '#BE8E5E' }}>Go Pro</p>
               </div>
-              <p className="text-[12px] text-ink-muted">Unlock all templates, analytics, and interactive proposals</p>
+              <p className="text-[12px]" style={{ color: '#4A3F32' }}>Unlock all templates, analytics & interactive proposals</p>
               <Link to="/settings/billing" onClick={handleNav}>
-                <button className="mt-3 w-full rounded-[8px] bg-ink px-3 py-1.5 text-xs font-medium text-ivory transition-colors hover:bg-ink-soft">
+                <button className="mt-3 w-full rounded-[8px] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:opacity-90" style={{ backgroundColor: '#2A2118' }}>
                   Upgrade — $39/mo →
                 </button>
               </Link>
@@ -218,12 +259,14 @@ export function Sidebar({ onClose }: SidebarProps) {
           )}
           {plan?.id === 'pro' && (
             <>
-              <p className="text-[12px] font-semibold text-ink">Pro plan</p>
-              <p className="text-[11px] text-ink-muted mt-0.5">
-                {plan.max_users} users · {plan.max_proposals} proposals/mo
+              <p className="text-[12px] font-semibold" style={{ color: '#2A2118' }}>
+                Pro plan · {plan.max_users} users
+              </p>
+              <p className="text-[11px] mt-0.5" style={{ color: '#8A7F72' }}>
+                {proposalsThisMonth}/{plan.max_proposals} proposals this month
               </p>
               <Link to="/settings/billing" onClick={handleNav}>
-                <button className="mt-3 w-full rounded-[8px] border border-parchment px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-parchment-soft">
+                <button className="mt-3 w-full rounded-[8px] border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-[#F4F1EB]" style={{ borderColor: '#EEEAE3', color: '#2A2118' }}>
                   Manage plan
                 </button>
               </Link>
@@ -232,9 +275,9 @@ export function Sidebar({ onClose }: SidebarProps) {
         </div>
       )}
 
-      {plan?.id === 'business' && (
+      {!isTrialing && plan?.id === 'business' && (
         <div className="mx-3 mb-3 px-3 py-2">
-          <p className="text-[11px] text-ink-faint">Business plan</p>
+          <p className="text-[11px]" style={{ color: '#B8B0A5' }}>Business plan · Unlimited</p>
         </div>
       )}
 
