@@ -136,7 +136,7 @@ export default function PublicProposal() {
   const brandData = {
     agencyName: agency?.name?.toUpperCase() || 'AGENCY',
     agencyFullName: agency?.name || 'Your Agency',
-    primaryColor: brandColor,
+    primaryColor: activePrimary,
     darkColor,
     logoUrl: agency?.logo_url || null,
     logoInitial: (agency?.name || 'A').charAt(0).toUpperCase(),
