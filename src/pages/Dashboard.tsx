@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   FileText, Plus, ChevronRight, Bell, Package, FolderOpen,
 } from 'lucide-react';
