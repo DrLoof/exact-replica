@@ -1,9 +1,81 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import * as React from "npm:react@18.3.1";
+import { renderAsync } from "npm:@react-email/components@0.0.22";
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { InviteEmail } from "../_shared/email-templates/invite.tsx";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const SITE_NAME = "Propopad";
+const SENDER_DOMAIN = "notify.propopad.com";
+const FROM_DOMAIN = "propopad.com";
+
+async function sendInviteEmail(
+  supabase: any,
+  email: string,
+  token: string,
+  agencyName: string
+) {
+  // Build the accept-invite URL
+  const siteUrl = Deno.env.get("SUPABASE_URL")!.replace(".supabase.co", "").replace("https://", "");
+  const appUrl = "https://pixel-perfect-clone-5890.lovable.app";
+  const confirmationUrl = `${appUrl}/accept-invite?token=${token}`;
+
+  const templateProps = {
+    siteName: SITE_NAME,
+    siteUrl: appUrl,
+    confirmationUrl,
+  };
+
+  const html = await renderAsync(React.createElement(InviteEmail, templateProps));
+  const text = await renderAsync(React.createElement(InviteEmail, templateProps), {
+    plainText: true,
+  });
+
+  const messageId = crypto.randomUUID();
+
+  // Log pending
+  await supabase.from("email_send_log").insert({
+    message_id: messageId,
+    template_name: "team_invite",
+    recipient_email: email,
+    status: "pending",
+    metadata: { agency_name: agencyName },
+  });
+
+  // Enqueue for async sending
+  const { error: enqueueError } = await supabase.rpc("enqueue_email", {
+    queue_name: "transactional_emails",
+    payload: {
+      message_id: messageId,
+      to: email,
+      from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+      sender_domain: SENDER_DOMAIN,
+      subject: `You've been invited to join ${agencyName} on Propopad`,
+      html,
+      text,
+      purpose: "transactional",
+      idempotency_key: `team-invite-${token}-${Date.now()}`,
+      label: "team_invite",
+      queued_at: new Date().toISOString(),
+    },
+  });
+
+  if (enqueueError) {
+    console.error("Failed to enqueue invite email", { error: enqueueError, email });
+    await supabase.from("email_send_log").insert({
+      message_id: messageId,
+      template_name: "team_invite",
+      recipient_email: email,
+      status: "failed",
+      error_message: "Failed to enqueue email",
+    });
+  } else {
+    console.log("Invite email enqueued", { email, messageId });
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -105,6 +177,9 @@ Deno.serve(async (req) => {
 
       if (insertErr) throw insertErr;
 
+      // Send invite email
+      await sendInviteEmail(supabase, email, token, agency?.name || "your team");
+
       return new Response(
         JSON.stringify({ invite, agency_name: agency?.name }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -182,11 +257,37 @@ Deno.serve(async (req) => {
     // ACTION: resend-invite
     if (action === "resend-invite") {
       const { invite_id } = body;
+
+      // Fetch the invite to get email and token
+      const { data: invite } = await supabase
+        .from("team_invites")
+        .select("email, token, agency_id")
+        .eq("id", invite_id)
+        .eq("status", "pending")
+        .single();
+
+      if (!invite) {
+        return new Response(
+          JSON.stringify({ error: "Invite not found or already accepted." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       // Reset expiry
       await supabase
         .from("team_invites")
         .update({ expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() })
         .eq("id", invite_id);
+
+      // Get agency name for email
+      const { data: agency } = await supabase
+        .from("agencies")
+        .select("name")
+        .eq("id", invite.agency_id)
+        .single();
+
+      // Re-send the invite email
+      await sendInviteEmail(supabase, invite.email, invite.token, agency?.name || "your team");
 
       return new Response(
         JSON.stringify({ success: true }),
@@ -212,7 +313,6 @@ Deno.serve(async (req) => {
     if (action === "remove-member") {
       const { user_id, agency_id } = body;
       
-      // Check that user is not the owner
       const { data: targetUser } = await supabase
         .from("users")
         .select("role")
@@ -226,7 +326,6 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Set agency_id to null
       await supabase
         .from("users")
         .update({ agency_id: null, role: null })
@@ -243,7 +342,6 @@ Deno.serve(async (req) => {
       const { user_id, new_role, requester_id } = body;
 
       if (new_role === "owner") {
-        // Transfer ownership: demote current owner to admin
         const { data: currentOwner } = await supabase
           .from("users")
           .select("id")
@@ -258,19 +356,16 @@ Deno.serve(async (req) => {
           );
         }
 
-        // Demote current owner
         await supabase
           .from("users")
           .update({ role: "admin" })
           .eq("id", requester_id);
 
-        // Promote new owner
         await supabase
           .from("users")
           .update({ role: "owner" })
           .eq("id", user_id);
       } else {
-        // Can't change owner's role
         const { data: target } = await supabase
           .from("users")
           .select("role")
