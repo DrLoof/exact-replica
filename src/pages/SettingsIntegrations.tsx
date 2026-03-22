@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { usePlan } from '@/hooks/usePlan';
 import { UpgradeModal } from '@/components/UpgradeModal';
+import { ImportContactsModal } from '@/components/integrations/ImportContactsModal';
 import { toast } from 'sonner';
 import { Plug, ExternalLink, RefreshCw, Check, AlertTriangle, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
