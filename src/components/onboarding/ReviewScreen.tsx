@@ -1090,8 +1090,7 @@ export function ReviewScreen({
         </section>
       )}
 
-      {/* HubSpot Import Section */}
-      <HubSpotOnboardingImport />
+
 
       <div ref={inlineCtaRef} className="mt-10 text-center pb-6">
         <button
