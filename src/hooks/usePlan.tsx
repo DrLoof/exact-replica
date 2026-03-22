@@ -47,8 +47,8 @@ interface PlanContextValue {
 const PlanContext = createContext<PlanContextValue | null>(null);
 
 export function PlanProvider({ children }: { children: ReactNode }) {
-  const { agency } = useAuth();
-
+  const authCtx = useAuth();
+  const agency = authCtx?.agency;
   const { data: allPlans = [] } = useQuery({
     queryKey: ['plans'],
     queryFn: async () => {
